@@ -1,7 +1,6 @@
 package top.saymzx.scrcpy
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -17,7 +16,9 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.view.WindowManager.LayoutParams
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.tananaev.adblib.AdbConnection
 import com.tananaev.adblib.AdbCrypto
 import java.io.DataInputStream
@@ -83,21 +84,15 @@ class Configs : ViewModel() {
   var screenReceiver: MainActivity.ScreenReceiver? = null
 }
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
 
-  private val configs = Configs()
+  private lateinit var configs: Configs
 
   // 创建界面
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-
-    // 注册广播用以关闭程序
-    val filter = IntentFilter()
-    filter.addAction(Intent.ACTION_SCREEN_OFF)
-    filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED)
-    configs.screenReceiver = ScreenReceiver()
-    registerReceiver(configs.screenReceiver, filter)
+    configs = ViewModelProvider(this)[Configs::class.java]
 
     if (configs.status == 0) {
       // 软件初始化
@@ -143,7 +138,8 @@ class MainActivity : Activity() {
       width = configs.localWidth
       height = configs.localHeight
       gravity = Gravity.START or Gravity.TOP
-      x = 0
+      // 此处右移48是因为wm overscan 0,0,0,-48命令隐藏了横屏导航栏
+      x = 48
       y = 0
     }
     // 将悬浮窗控件添加到WindowManager
@@ -151,6 +147,13 @@ class MainActivity : Activity() {
 
     // 监控触控操作
     configs.surfaceView.setOnTouchListener { _, event -> surfaceOnTouchEvent(event) }
+
+    // 注册广播用以关闭程序
+    val filter = IntentFilter()
+    filter.addAction(Intent.ACTION_SCREEN_OFF)
+    filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED)
+    configs.screenReceiver = ScreenReceiver()
+    registerReceiver(configs.screenReceiver, filter)
 
     return surface
   }
@@ -308,7 +311,7 @@ class MainActivity : Activity() {
     // 连接server
     var videSocket: Socket? = null
     var controlSocket: Socket? = null
-    for (i in 1..5) {
+    for (i in 1..10) {
       try {
         if (videSocket == null) videSocket = Socket(configs.remoteIp, configs.remoteSocketPort)
         controlSocket = Socket(configs.remoteIp, configs.remoteSocketPort)
@@ -351,7 +354,11 @@ class MainActivity : Activity() {
     // 开始解码
     while (true) {
       // 找到一个空的输入缓冲区
-      inIndex = configs.decodec.dequeueInputBuffer(-1)
+      inIndex = configs.decodec.dequeueInputBuffer(0)
+      if (inIndex < 0) {
+        Thread.sleep(10)
+        continue
+      }
       // 向缓冲区输入数据帧
       val buffer = readPacket()
       configs.decodec.getInputBuffer(inIndex)!!.put(buffer)
@@ -370,8 +377,11 @@ class MainActivity : Activity() {
     val bufferInfo = BufferInfo()
     while (true) {
       // 找到已完成的输出缓冲区
-      inIndex = configs.decodec.dequeueOutputBuffer(bufferInfo, 100)
-      if (inIndex < 0) continue
+      inIndex = configs.decodec.dequeueOutputBuffer(bufferInfo, 0)
+      if (inIndex < 0) {
+        Thread.sleep(10)
+        continue
+      }
       // 清空已完成的缓冲区
       val fomat = configs.decodec.getOutputFormat(inIndex)
       configs.remoteWidth = fomat.getInteger("width")
@@ -451,13 +461,12 @@ class MainActivity : Activity() {
   // 屏幕广播处理
   inner class ScreenReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
-
       when (p1?.action) {
         Intent.ACTION_CONFIGURATION_CHANGED -> {
-          unregisterReceiver(configs.screenReceiver)
           configs.floatLayoutParams.apply {
             width = configs.localWidth
             height = configs.localHeight
+            x = if (configs.floatLayoutParams.x == 48) 0 else 48
           }
           windowManager.updateViewLayout(configs.surfaceView, configs.floatLayoutParams)
         }
