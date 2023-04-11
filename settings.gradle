@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Scrcpy"
 include ':app'
+include ':server'
