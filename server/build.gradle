@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.genymobile.scrcpy'
+    compileSdkVersion 33
+    defaultConfig {
+        applicationId "com.genymobile.scrcpy"
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 20000
+        versionName "2.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildToolsVersion '30.0.3'
+
+    task copyRelease(dependsOn: 'deleteServer', type: Copy){
+        from file('build/outputs/apk/release/server-release-unsigned.apk')
+        into file('../app/src/main/assets')
+        rename('server-release-unsigned.apk', 'scrcpy-server.jar')
+    }
+
+    task deleteServer(type: Delete){
+        delete "../app/src/main/assets/scrcpy-server.jar"
+    }
+
+
+    task copyDebug (dependsOn: 'deleteServer', type: Copy){
+        from file("build/outputs/apk/debug/server-debug.apk")
+        into file("../app/src/main/assets/")
+        rename('server-debug.apk', 'scrcpy-server.jar')
+    }
+
+    afterEvaluate {
+        packageRelease.finalizedBy(copyRelease)
+    }
+
+    afterEvaluate {
+        packageDebug.finalizedBy(copyDebug)
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.13.2'
+}
+
+apply from: "$project.rootDir/config/android-checkstyle.gradle"
