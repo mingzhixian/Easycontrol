@@ -283,11 +283,7 @@ public class Controller implements AsyncProcessor {
                 if (!InputManager.setActionButton(pressEvent, actionButton)) {
                     return false;
                 }
-                if (!device.injectEvent(pressEvent, Device.INJECT_MODE_ASYNC)) {
-                    return false;
-                }
-
-                return true;
+                return device.injectEvent(pressEvent, Device.INJECT_MODE_ASYNC);
             }
 
             if (action == MotionEvent.ACTION_UP) {
@@ -305,9 +301,7 @@ public class Controller implements AsyncProcessor {
                     // Last button released: ACTION_UP
                     MotionEvent upEvent = MotionEvent.obtain(lastTouchDown, now, MotionEvent.ACTION_UP, pointerCount, pointerProperties,
                             pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source, 0);
-                    if (!device.injectEvent(upEvent, Device.INJECT_MODE_ASYNC)) {
-                        return false;
-                    }
+                    return device.injectEvent(upEvent, Device.INJECT_MODE_ASYNC);
                 }
 
                 return true;
