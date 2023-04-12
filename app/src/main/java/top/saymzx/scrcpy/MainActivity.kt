@@ -494,6 +494,7 @@ class MainActivity : AppCompatActivity() {
     stream.write(" ps aux | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9" + '\n')
     // 修改分辨率
     stream.write(" wm size " + configs.localWidth + "x" + configs.localHeight + '\n')
+    stream.write(" cmd overlay disable com.android.internal.systemui.navbar.gestural " + '\n')
     stream.write(" cmd overlay enable com.android.internal.systemui.navbar.threebutton " + '\n')
     // 启动新的scrcpy server
     stream.write(" CLASSPATH=./scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 2.0 " + '\n')
@@ -564,6 +565,7 @@ class MainActivity : AppCompatActivity() {
               // 发送文件
               val stream = connection.open("shell:")
               stream.write(" wm size reset " + '\n')
+              stream.write(" cmd overlay disable com.android.internal.systemui.navbar.threebutton " + '\n')
               stream.write(" cmd overlay enable com.android.internal.systemui.navbar.gestural " + '\n')
               stream.close()
               configs.status = 4
