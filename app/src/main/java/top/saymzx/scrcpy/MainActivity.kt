@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.*
 import android.content.Intent.*
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.media.*
 import android.media.MediaCodec.BufferInfo
 import android.net.Uri
@@ -15,10 +14,10 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.view.WindowManager.LayoutParams
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.tananaev.adblib.AdbConnection
@@ -33,17 +32,12 @@ import kotlin.math.abs
 
 
 class Configs : ViewModel() {
-  //  可配置项：
-  // 被控端IP地址(默认此地址，根据/sdcard/Download/scrcpy.txt中内容修改)
-  var remoteIp = "192.168.3.205"
+  // 被控端IP地址
+  var remoteIp = ""
 
   // 被控端ADB端口
   val remotePort = 5555
 
-  // 主控端（平板准备）:adb shell settings put global policy_control immersive.full=*
-  // 主控端（平板准备）:adb shell wm overscan 0,0,0,-48
-
-  // 不可配置项：
   // 被控端socket端口
   val remoteSocketPort = 6006
 
@@ -61,7 +55,7 @@ class Configs : ViewModel() {
   // 音频解码器
   lateinit var audioDecodec: MediaCodec
 
-  // 状态标识(0初始，1发送server后，2连接server后，3投屏中)
+  // 状态标识(0初始，1发送server后，2连接server后，3投屏中，4结束)
   var status = 0
 
   // 视频流
@@ -138,47 +132,47 @@ class MainActivity : AppCompatActivity() {
   // 自动恢复界面
   override fun onPause() {
     super.onPause()
-    val intent = Intent(this, Page2::class.java)
-    intent.addCategory(CATEGORY_LAUNCHER)
-    intent.flags =
-      FLAG_ACTIVITY_BROUGHT_TO_FRONT or FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-    startActivity(intent)
-  }
-
-  // 设置按键监听
-  private fun setButtonListen() {
-    // 注册广播用以关闭程序
-    val filter = IntentFilter()
-    filter.addAction(ACTION_SCREEN_OFF)
-    filter.addAction(ACTION_CONFIGURATION_CHANGED)
-    configs.screenReceiver = ScreenReceiver()
-    registerReceiver(configs.screenReceiver, filter)
+    if (!this::configs.isInitialized || (this::configs.isInitialized && configs.status == 0)) {
+      finishAndRemoveTask()
+      Runtime.getRuntime().exit(0)
+    } else {
+      val intent = Intent(this, Page2::class.java)
+      intent.addCategory(CATEGORY_LAUNCHER)
+      intent.flags =
+        FLAG_ACTIVITY_BROUGHT_TO_FRONT or FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+      startActivity(intent)
+    }
   }
 
   // 初始化检测
   private fun init(): Boolean {
     // viewModel
     configs = ViewModelProvider(this)[Configs::class.java]
+    // 注册广播用以关闭程序
+    val filter = IntentFilter()
+    filter.addAction(ACTION_SCREEN_OFF)
+    filter.addAction(ACTION_CONFIGURATION_CHANGED)
+    configs.screenReceiver = ScreenReceiver()
+    registerReceiver(configs.screenReceiver, filter)
     // 读取配置
-    // 检查读权限
-    if (ContextCompat.checkSelfPermission(
-        application,
-        android.Manifest.permission.READ_EXTERNAL_STORAGE
-      ) != PackageManager.PERMISSION_GRANTED
-    ) {
-      ActivityCompat.requestPermissions(
-        this,
-        arrayOf<String>(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-        1
-      )
+    val configFile = File(this.applicationContext.filesDir, "configs")
+    if (!configFile.isFile) {
+      val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+      builder.setTitle("请输入被控端IP地址") //设置对话框标题
+      val edit = EditText(this)
+      builder.setView(edit)
+      builder.setPositiveButton("确认", object : DialogInterface.OnClickListener {
+        override fun onClick(dialog: DialogInterface?, which: Int) {
+          configFile.writeText(edit.text.toString())
+        }
+      })
+      builder.setCancelable(false)
+      val dialog = builder.create()
+      dialog.setCanceledOnTouchOutside(false)
+      dialog.show()
       return false
     }
-    val configFile = File("/sdcard/Download/scrcpy.txt", "r")
-    if (configFile.exists()) {
-      configs.remoteIp = configFile.readText().replace("\\s|\\n|\\r|\\t".toRegex(), "")
-    }
-    // 设置按键监听
-    setButtonListen()
+    configs.remoteIp = configFile.readText().replace("\\s|\\n|\\r|\\t".toRegex(), "")
     // 获取主控端分辨率
     val metric = DisplayMetrics()
     windowManager.defaultDisplay.getRealMetrics(metric)
@@ -558,22 +552,24 @@ class MainActivity : AppCompatActivity() {
         }
         ACTION_SCREEN_OFF -> {
           // 恢复被控端屏幕
-          Thread {
-            val connection = AdbConnection.create(
-              Socket(configs.remoteIp, configs.remotePort),
-              AdbCrypto.loadAdbKeyPair({ data: ByteArray? ->
-                DatatypeConverter.printBase64Binary(data)
-              }, configs.private, configs.public)
-            )
-            connection.connect()
-            // 发送文件
-            val stream = connection.open("shell:")
-            stream.write(" wm size reset " + '\n')
-            stream.write(" cmd overlay enable com.android.internal.systemui.navbar.gestural " + '\n')
-            stream.close()
-            configs.status = 4
-          }.start()
-          while (configs.status != 4) Thread.sleep(50)
+          if (configs.status != 0) {
+            Thread {
+              val connection = AdbConnection.create(
+                Socket(configs.remoteIp, configs.remotePort),
+                AdbCrypto.loadAdbKeyPair({ data: ByteArray? ->
+                  DatatypeConverter.printBase64Binary(data)
+                }, configs.private, configs.public)
+              )
+              connection.connect()
+              // 发送文件
+              val stream = connection.open("shell:")
+              stream.write(" wm size reset " + '\n')
+              stream.write(" cmd overlay enable com.android.internal.systemui.navbar.gestural " + '\n')
+              stream.close()
+              configs.status = 4
+            }.start()
+            while (configs.status != 4) Thread.sleep(50)
+          }
           unregisterReceiver(configs.screenReceiver)
           finishAndRemoveTask()
           Runtime.getRuntime().exit(0)
