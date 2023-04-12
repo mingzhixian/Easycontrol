@@ -97,6 +97,9 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
+    // 主控端（平板准备）:adb shell settings put global policy_control immersive.full=*
+    // 主控端（平板准备）:adb shell wm overscan -48,0,0,-48
+
     // 初始化
     if (init()) {
       if (configs.status == 0) {
@@ -154,6 +157,14 @@ class MainActivity : AppCompatActivity() {
     filter.addAction(ACTION_CONFIGURATION_CHANGED)
     configs.screenReceiver = ScreenReceiver()
     registerReceiver(configs.screenReceiver, filter)
+    // 检查悬浮窗权限
+    if (!Settings.canDrawOverlays(this)) {
+      Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT).show()
+      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+      intent.data = Uri.parse("package:$packageName")
+      startActivity(intent)
+      return false
+    }
     // 读取配置
     val configFile = File(this.applicationContext.filesDir, "configs")
     if (!configFile.isFile) {
@@ -164,6 +175,8 @@ class MainActivity : AppCompatActivity() {
       builder.setPositiveButton("确认", object : DialogInterface.OnClickListener {
         override fun onClick(dialog: DialogInterface?, which: Int) {
           configFile.writeText(edit.text.toString())
+          finish()
+          startActivity(intent)
         }
       })
       builder.setCancelable(false)
@@ -178,14 +191,6 @@ class MainActivity : AppCompatActivity() {
     windowManager.defaultDisplay.getRealMetrics(metric)
     configs.localWidth = metric.widthPixels
     configs.localHeight = metric.heightPixels
-    // 检查悬浮窗权限
-    if (!Settings.canDrawOverlays(this)) {
-      Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT).show()
-      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-      intent.data = Uri.parse("package:$packageName")
-      startActivity(intent)
-      return false
-    }
     return true
   }
 
@@ -202,8 +207,8 @@ class MainActivity : AppCompatActivity() {
         LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_LAYOUT_IN_SCREEN or LayoutParams.FLAG_NOT_FOCUSABLE or LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or LayoutParams.FLAG_KEEP_SCREEN_ON      //位置大小设置
       width = configs.localWidth
       height = configs.localHeight
-      gravity = Gravity.START or Gravity.TOP
-      x = 0
+      gravity = Gravity.START and Gravity.TOP
+      x = 48
       y = 0
     }
     // 将悬浮窗控件添加到WindowManager
@@ -306,16 +311,18 @@ class MainActivity : AppCompatActivity() {
         }
         // 清空已完成的缓冲区
         val fomat = configs.videoDecodec.getOutputFormat(outIndex)
-        val width = fomat.getInteger("width")
-        val height = fomat.getInteger("height")
+        configs.remoteWidth = fomat.getInteger("width")
+        configs.remoteHeight = fomat.getInteger("height")
         // 检测是否旋转
-        if (width > height && configs.localWidth < configs.localHeight) {
-          configs.remoteWidth = height
-          configs.remoteHeight = width
+        if (configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) {
+          configs.localWidth = configs.localWidth + configs.localHeight - configs.localWidth.also {
+            configs.localHeight = it
+          }
           requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        } else if (width < height && configs.localWidth > configs.localHeight) {
-          configs.remoteWidth = height
-          configs.remoteHeight = width
+        } else if (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight) {
+          configs.localWidth = configs.localWidth + configs.localHeight - configs.localWidth.also {
+            configs.localHeight = it
+          }
           requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
         configs.videoDecodec.releaseOutputBuffer(outIndex, true)
@@ -374,10 +381,11 @@ class MainActivity : AppCompatActivity() {
     val p = event.getPointerId(i)
     val x = event.getX(i)
     val y = event.getY(i)
-    when (event.actionMasked) {
+    val action = event.actionMasked
+    when (action) {
       MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
         createTouchPacket(
-          event.actionMasked.toByte(),
+          action.toByte(),
           p,
           ((x / configs.localWidth) * configs.remoteWidth).toInt(),
           ((y / configs.localHeight) * configs.remoteHeight).toInt()
@@ -394,7 +402,7 @@ class MainActivity : AppCompatActivity() {
       }
       MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
         createTouchPacket(
-          event.actionMasked.toByte(),
+          action.toByte(),
           p,
           ((x / configs.localWidth) * configs.remoteWidth).toInt(),
           ((y / configs.localHeight) * configs.remoteHeight).toInt()
@@ -404,7 +412,7 @@ class MainActivity : AppCompatActivity() {
         try {
           val xy = configs.pointerList[p]
           // 适配一些机器将点击视作小范围移动
-          if ((abs(xy[0] - x) > 4 && abs(xy[1] - y) > 4) || y < 6) createTouchPacket(
+          if ((abs(xy[0] - x) > 3 && abs(xy[1] - y) > 3)) createTouchPacket(
             2,
             p,
             ((x / configs.localWidth) * configs.remoteWidth).toInt(),
@@ -546,8 +554,7 @@ class MainActivity : AppCompatActivity() {
           configs.floatLayoutParams.apply {
             width = configs.localWidth
             height = configs.localHeight
-            //x = if (configs.floatLayoutParams.x == 48) 0 else 48
-            x = 0
+            x = if (configs.floatLayoutParams.x == 48) 0 else 48
           }
           windowManager.updateViewLayout(configs.surfaceView, configs.floatLayoutParams)
         }
