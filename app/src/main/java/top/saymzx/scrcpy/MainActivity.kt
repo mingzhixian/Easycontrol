@@ -55,8 +55,8 @@ class Configs : ViewModel() {
   // 音频解码器
   lateinit var audioDecodec: MediaCodec
 
-  // 状态标识(0初始，1发送server后，2连接server后，3投屏中，4结束)
-  var status = 0
+  // 状态标识(-1停，0初始，1发送server后，2连接server后，3投屏中，4结束)
+  var status = -1
 
   // 视频流
   lateinit var videoStream: DataInputStream
@@ -101,34 +101,33 @@ class MainActivity : AppCompatActivity() {
     // 主控端（平板准备）:adb shell wm overscan -48,0,0,-48
 
     // 初始化
-    if (init()) {
-      if (configs.status == 0) {
-        Thread {
-          // 发送server
-          sendServer()
-          // 显示悬浮窗
-          this.runOnUiThread { setSurface() }
-          // 连接server
-          connectServer {
-            // 配置音频解码器
-            setAudioDecodec()
-            // 配置视频解码器
-            setVideoDecodec()
-            // 开启处理线程
-            Thread { decodecInput("video") }.start()
-            Thread { decodecInput("audio") }.start()
-            Thread { decodecOutput("video") }.start()
-            Thread { decodecOutput("audio") }.start()
-            Thread { controlOutput() }.start()
-            // 监控触控操作
-            configs.surfaceView.setOnTouchListener { _, event -> surfaceOnTouchEvent(event) }
-            // 设置被控端熄屏
-            setPowerOff()
-            // 开始投屏
-            configs.status = 3
-          }
-        }.start()
-      }
+    init()
+    if (configs.status == 0) {
+      Thread {
+        // 发送server
+        sendServer()
+        // 显示悬浮窗
+        this.runOnUiThread { setSurface() }
+        // 连接server
+        connectServer {
+          // 配置音频解码器
+          setAudioDecodec()
+          // 配置视频解码器
+          setVideoDecodec()
+          // 开启处理线程
+          Thread { decodecInput("video") }.start()
+          Thread { decodecInput("audio") }.start()
+          Thread { decodecOutput("video") }.start()
+          Thread { decodecOutput("audio") }.start()
+          Thread { controlOutput() }.start()
+          // 监控触控操作
+          configs.surfaceView.setOnTouchListener { _, event -> surfaceOnTouchEvent(event) }
+          // 设置被控端熄屏
+          setPowerOff()
+          // 开始投屏
+          configs.status = 3
+        }
+      }.start()
     }
   }
 
@@ -148,7 +147,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   // 初始化检测
-  private fun init(): Boolean {
+  private fun init() {
     // viewModel
     configs = ViewModelProvider(this)[Configs::class.java]
     // 注册广播用以关闭程序
@@ -157,14 +156,6 @@ class MainActivity : AppCompatActivity() {
     filter.addAction(ACTION_CONFIGURATION_CHANGED)
     configs.screenReceiver = ScreenReceiver()
     registerReceiver(configs.screenReceiver, filter)
-    // 检查悬浮窗权限
-    if (!Settings.canDrawOverlays(this)) {
-      Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT).show()
-      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-      intent.data = Uri.parse("package:$packageName")
-      startActivity(intent)
-      return false
-    }
     // 读取配置
     val configFile = File(this.applicationContext.filesDir, "configs")
     if (!configFile.isFile) {
@@ -183,15 +174,23 @@ class MainActivity : AppCompatActivity() {
       val dialog = builder.create()
       dialog.setCanceledOnTouchOutside(false)
       dialog.show()
-      return false
+      return
     }
     configs.remoteIp = configFile.readText().replace("\\s|\\n|\\r|\\t".toRegex(), "")
+    // 检查悬浮窗权限
+    if (!Settings.canDrawOverlays(this)) {
+      Toast.makeText(this, "当前无权限，请授权", Toast.LENGTH_SHORT).show()
+      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+      intent.data = Uri.parse("package:$packageName")
+      startActivity(intent)
+      return
+    }
     // 获取主控端分辨率
     val metric = DisplayMetrics()
     windowManager.defaultDisplay.getRealMetrics(metric)
     configs.localWidth = metric.widthPixels
     configs.localHeight = metric.heightPixels
-    return true
+    if (configs.status == -1) configs.status = 0
   }
 
   // 设置悬浮窗
@@ -207,7 +206,6 @@ class MainActivity : AppCompatActivity() {
         LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_LAYOUT_IN_SCREEN or LayoutParams.FLAG_NOT_FOCUSABLE or LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or LayoutParams.FLAG_KEEP_SCREEN_ON      //位置大小设置
       width = configs.localWidth
       height = configs.localHeight
-      gravity = Gravity.START and Gravity.TOP
       x = 48
       y = 0
     }
