@@ -167,6 +167,12 @@ public final class Server {
             throw new IllegalArgumentException("Missing client version");
         }
 
+        String clientVersion = args[0];
+        if (!clientVersion.equals(BuildConfig.VERSION_NAME)) {
+            throw new IllegalArgumentException(
+                    "The server version (" + BuildConfig.VERSION_NAME + ") does not match the client " + "(" + clientVersion + ")");
+        }
+
         Options options = new Options();
 
         for (int i = 1; i < args.length; ++i) {
