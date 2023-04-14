@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:padding="40sp"
+        android:background="#3d3c36"
+        android:text="请稍等，第一次连接请在被控端允许永久调试"
+        android:textAlignment="center"
+        android:textColor="#CED3CA"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:layout_weight="1"
+        tools:ignore="HardcodedText" />
+</LinearLayout>
