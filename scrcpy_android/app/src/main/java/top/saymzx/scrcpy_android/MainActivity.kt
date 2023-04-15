@@ -6,6 +6,7 @@ import android.content.Intent.*
 import android.content.pm.ActivityInfo
 import android.media.*
 import android.media.MediaCodec.BufferInfo
+import android.media.audiofx.LoudnessEnhancer
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
@@ -13,6 +14,7 @@ import android.util.Base64
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
+import android.view.MotionEvent.*
 import android.view.WindowManager.LayoutParams
 import android.widget.EditText
 import android.widget.Toast
@@ -24,6 +26,7 @@ import com.tananaev.adblib.AdbConnection
 import com.tananaev.adblib.AdbCrypto
 import com.tananaev.adblib.AdbStream
 import java.io.*
+import java.net.InetSocketAddress
 import java.net.Socket
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
@@ -50,10 +53,8 @@ class Configs : ViewModel() {
   var localWidth = 0
   var localHeight = 0
 
-  // 视频解码器
+  // 解码器
   lateinit var videoDecodec: MediaCodec
-
-  // 音频解码器
   lateinit var audioDecodec: MediaCodec
 
   // 状态标识(-1停，0初始，1发送server后，2连接server后，3投屏中，4结束)
@@ -65,6 +66,12 @@ class Configs : ViewModel() {
   lateinit var audioStream: DataInputStream
   lateinit var controlStream: DataOutputStream
 
+  // 控制队列
+  val controls = LinkedList<ByteArray>() as Queue<ByteArray>
+
+  // 触摸xy记录（为了适配有些设备过于敏感，将点击识别为小范围移动）
+  val pointerList = ArrayList<Int>(20)
+
   // 悬浮窗
   lateinit var floatLayoutParams: LayoutParams
 
@@ -74,11 +81,8 @@ class Configs : ViewModel() {
   // 音频播放器
   lateinit var audioTrack: AudioTrack
 
-  // 控制队列
-  val controls = LinkedList<ByteBuffer>() as Queue<ByteBuffer>
-
-  // 触摸xy记录（为了适配有些设备过于敏感，将点击识别为小范围移动）
-  val pointerList = ArrayList<IntArray>()
+  // 音频放大器
+  lateinit var loudnessEnhancer: LoudnessEnhancer
 
   // 屏幕广播（熄屏与旋转）
   var screenReceiver: MainActivity.ScreenReceiver? = null
@@ -90,14 +94,13 @@ class MainActivity : AppCompatActivity() {
   private lateinit var configs: Configs
 
   // 创建界面
-  @SuppressLint("ClickableViewAccessibility")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
     // 推荐主控端使用全面屏手势，以减少冲突，如是旧平板则可使用以下代码，减少三大金刚键的影响
     // 主控端（平板准备）:adb shell settings put global policy_control immersive.full=*
-    // 主控端（平板准备）:adb shell wm overscan -48,0,0,-48
+    // 主控端（平板准备）:adb shell wm overscan 0,0,0,-48
 
     // 初始化
     init()
@@ -109,10 +112,10 @@ class MainActivity : AppCompatActivity() {
         this.runOnUiThread { setSurface() }
         // 连接server
         connectServer {
-          // 配置音频解码器
-          setAudioDecodec()
           // 配置视频解码器
           setVideoDecodec()
+          // 配置音频解码器
+          setAudioDecodec()
           // 开启处理线程
           Thread { decodecInput("video") }.start()
           Thread { decodecInput("audio") }.start()
@@ -121,7 +124,7 @@ class MainActivity : AppCompatActivity() {
           Thread { controlOutput() }.start()
           Thread { notOffScreen() }.start()
           // 监控触控操作
-          configs.surfaceView.setOnTouchListener { _, event -> surfaceOnTouchEvent(event) }
+          setTouchHandle()
           // 设置被控端熄屏
           setPowerOff()
           // 开始投屏
@@ -190,7 +193,9 @@ class MainActivity : AppCompatActivity() {
       intent = Intent(this, this::class.java)
       intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
       this.startActivity(intent)
-      Process.killProcess(Process.myPid())
+      Toast.makeText(this, "重新打开软件进行投屏", Toast.LENGTH_SHORT).show()
+      finishAndRemoveTask()
+      Runtime.getRuntime().exit(0)
     }
     // 获取主控端分辨率
     val metric = DisplayMetrics()
@@ -208,7 +213,7 @@ class MainActivity : AppCompatActivity() {
     configs.floatLayoutParams = LayoutParams().apply {
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) LayoutParams.TYPE_APPLICATION_OVERLAY
-        else LayoutParams.TYPE_PHONE
+        else LayoutParams.TYPE_SYSTEM_ALERT
       flags =
         LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_LAYOUT_IN_SCREEN or LayoutParams.FLAG_NOT_FOCUSABLE or LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or LayoutParams.FLAG_KEEP_SCREEN_ON      //位置大小设置
       width = configs.localWidth
@@ -221,15 +226,14 @@ class MainActivity : AppCompatActivity() {
     windowManager.addView(configs.surfaceView, configs.floatLayoutParams)
   }
 
-  // 视频解码
+  // 视频解码器
   private fun setVideoDecodec() {
     // CodecMeta
     configs.videoStream.readInt()
     configs.remoteWidth = configs.videoStream.readInt()
     configs.remoteHeight = configs.videoStream.readInt()
-    // 创建解码器（使用h264格式，兼容性广，并且比h265等编码更快）
+    // 创建解码器
     configs.videoDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-    // 配置输出画面至软件界面
     val mediaFormat = MediaFormat.createVideoFormat(
       MediaFormat.MIMETYPE_VIDEO_AVC, configs.remoteWidth, configs.remoteHeight
     )
@@ -237,13 +241,13 @@ class MainActivity : AppCompatActivity() {
     mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(readFrame(configs.videoStream)))
     mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(readFrame(configs.videoStream)))
     // 配置解码器
-    while (!configs.surfaceView.holder.surface.isValid) Thread.sleep(100)
+    while (!configs.surfaceView.holder.surface.isValid) Thread.sleep(10)
     configs.videoDecodec.configure(mediaFormat, configs.surfaceView.holder.surface, null, 0)
     // 启动解码器
     configs.videoDecodec.start()
   }
 
-  // 音频解码
+  // 音频解码器
   private fun setAudioDecodec() {
     // CodecMeta
     configs.audioStream.readInt()
@@ -276,7 +280,14 @@ class MainActivity : AppCompatActivity() {
     ).setAudioFormat(
       AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate)
         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
-    ).setBufferSizeInBytes(minBufferSize * 4).build()
+    ).setBufferSizeInBytes(minBufferSize * 8).build()
+    // 声音增强
+    try {
+      configs.loudnessEnhancer = LoudnessEnhancer(configs.audioTrack.audioSessionId)
+      configs.loudnessEnhancer.setTargetGain(4000)
+      configs.loudnessEnhancer.enabled = true
+    } catch (_: IllegalArgumentException) {
+    }
     configs.audioTrack.play()
   }
 
@@ -288,14 +299,12 @@ class MainActivity : AppCompatActivity() {
     val decodec = if (mode == "video") configs.videoDecodec else configs.audioDecodec
     // 开始解码
     while (true) {
-      // 找到一个空的输入缓冲区
-      inIndex = decodec.dequeueInputBuffer(0)
-      if (inIndex < 0) {
-        Thread.sleep(10)
-        continue
-      }
       // 向缓冲区输入数据帧
       val buffer = readFrame(stream)
+      // 找到一个空的输入缓冲区
+      do {
+        inIndex = decodec.dequeueInputBuffer(0)
+      } while (inIndex < 0)
       decodec.getInputBuffer(inIndex)!!.put(buffer)
       // 提交解码器解码
       decodec.queueInputBuffer(inIndex, 0, buffer.size, 0, 0)
@@ -312,78 +321,70 @@ class MainActivity : AppCompatActivity() {
         // 找到已完成的输出缓冲区
         outIndex = configs.videoDecodec.dequeueOutputBuffer(bufferInfo, 0)
         if (outIndex < 0) {
-          Thread.sleep(10)
+          Thread.sleep(8)
           continue
         }
-        // 清空已完成的缓冲区
         val fomat = configs.videoDecodec.getOutputFormat(outIndex)
-        configs.remoteWidth = fomat.getInteger("width")
-        configs.remoteHeight = fomat.getInteger("height")
-        // 检测是否旋转
-        if (configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) {
-          configs.localWidth = configs.localWidth + configs.localHeight - configs.localWidth.also {
-            configs.localHeight = it
-          }
-          requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        } else if (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight) {
-          configs.localWidth = configs.localWidth + configs.localHeight - configs.localWidth.also {
-            configs.localHeight = it
-          }
-          requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        }
         configs.videoDecodec.releaseOutputBuffer(outIndex, true)
+        val width = fomat.getInteger("width")
+        val height = fomat.getInteger("height")
+        // 检测是否旋转
+        if (configs.localWidth < configs.localHeight) {
+          if (width > height) {
+            configs.remoteWidth = width
+            configs.remoteHeight = height
+            val tmp = configs.localWidth
+            configs.localWidth = configs.localHeight
+            configs.localHeight = tmp
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+          }
+        } else {
+          if (width < height) {
+            configs.remoteWidth = width
+            configs.remoteHeight = height
+            val tmp = configs.localWidth
+            configs.localWidth = configs.localHeight
+            configs.localHeight = tmp
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+          }
+        }
       }
     } else {
       while (true) {
         // 找到已完成的输出缓冲区
         outIndex = configs.audioDecodec.dequeueOutputBuffer(bufferInfo, 0)
         if (outIndex < 0) {
-          Thread.sleep(10)
+          Thread.sleep(8)
           continue
         }
-        val outBuffer = configs.audioDecodec.getOutputBuffer(outIndex)!!
-
-        // 调整音量
-        val shortArray = ShortArray(bufferInfo.size / 2)
-        for (i in shortArray.indices) {
-          shortArray[i] = (outBuffer.short * 7).toShort()
-        }
-        configs.audioTrack.write(shortArray, 0, shortArray.size)
+        configs.audioTrack.write(
+          configs.audioDecodec.getOutputBuffer(outIndex)!!,
+          bufferInfo.size,
+          AudioTrack.WRITE_NON_BLOCKING
+        )
         configs.audioDecodec.releaseOutputBuffer(outIndex, false)
       }
     }
   }
 
-  // 控制报文
+  // 控制报文输出
   private fun controlOutput() {
     while (configs.status != 3) Thread.sleep(200)
-    var byteBuffer: ByteBuffer?
     while (true) {
-      byteBuffer = configs.controls.poll()
-      if (byteBuffer == null) {
-        Thread.sleep(2)
-        continue
-      }
-      val array = ByteArray(byteBuffer.remaining())
-      byteBuffer.get(array)
-      configs.controlStream.write(array)
+      if (configs.controls.isNotEmpty()) configs.controlStream.write(configs.controls.poll())
+      else Thread.sleep(1)
     }
   }
 
   // 防止被控端熄屏
   private fun notOffScreen() {
     while (configs.status != 3) Thread.sleep(200)
-    // 读取旧数据
-    configs.adbStream.write(" dumpsys deviceidle | grep mScreenOn " + '\n')
-    while (true) {
-      if (String(configs.adbStream.read()).contains("mScreenOn=")) break
-    }
     while (true) {
       configs.adbStream.write(" dumpsys deviceidle | grep mScreenOn " + '\n')
-      for (i in 1..10) {
+      while (true) {
         val str = String(configs.adbStream.read())
-        if (str.contains("true")) break
-        else if (str.contains("false")) {
+        if (str.contains("mScreenOn=true")) break
+        else if (str.contains("mScreenOn=false")) {
           configs.adbStream.write(" input keyevent 26 " + '\n')
           break
         }
@@ -399,69 +400,64 @@ class MainActivity : AppCompatActivity() {
     byteBuffer.put(10)
     byteBuffer.put(0)
     byteBuffer.flip()
-    configs.controls.offer(byteBuffer)
+    configs.controls.offer(byteBuffer.array())
   }
 
   // 触摸事件
-  private fun surfaceOnTouchEvent(event: MotionEvent?): Boolean {
-    // 获取本次动作的手指ID以及xy坐标
-    val i = event!!.actionIndex
-    val p = event.getPointerId(i)
-    val x = event.getX(i)
-    val y = event.getY(i)
-    when (val action = event.actionMasked) {
-      MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-        createTouchPacket(
-          action.toByte(),
-          p,
-          ((x / configs.localWidth) * configs.remoteWidth).toInt(),
-          ((y / configs.localHeight) * configs.remoteHeight).toInt()
-        )
-        // 记录按下xy信息
-        val xy = try {
-          configs.pointerList[p]
-        } catch (_: IndexOutOfBoundsException) {
-          configs.pointerList.add(p, IntArray(2))
-          configs.pointerList[p]
-        }
-        xy[0] = x.toInt()
-        xy[1] = y.toInt()
-      }
-      MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
-        createTouchPacket(
-          action.toByte(),
-          p,
-          ((x / configs.localWidth) * configs.remoteWidth).toInt(),
-          ((y / configs.localHeight) * configs.remoteHeight).toInt()
-        )
-      }
-      MotionEvent.ACTION_MOVE -> {
-        try {
-          val xy = configs.pointerList[p]
-          // 适配一些机器将点击视作小范围移动
-          if ((abs(xy[0] - x) > 3 && abs(xy[1] - y) > 3)) createTouchPacket(
-            2,
+  @SuppressLint("ClickableViewAccessibility")
+  private fun setTouchHandle() {
+    for (i in 1..20) configs.pointerList.add(0)
+    configs.surfaceView.setOnTouchListener { _, event ->
+      // 获取本次动作的手指ID以及xy坐标
+      val i = event.actionIndex
+      val p = event.getPointerId(i)
+      val x = event.getX(i).toInt()
+      val y = event.getY(i).toInt()
+
+      when (val action = event.action) {
+        ACTION_DOWN -> {
+          packControl(
+            action,
             p,
-            ((x / configs.localWidth) * configs.remoteWidth).toInt(),
-            ((y / configs.localHeight) * configs.remoteHeight).toInt()
+            x * configs.remoteWidth / configs.localWidth,
+            y * configs.remoteHeight / configs.localHeight
           )
-        } catch (_: IndexOutOfBoundsException) {
+          // 记录按下xy信息
+          configs.pointerList[p] = x
+          configs.pointerList[p + 10] = y
+        }
+        ACTION_UP -> {
+          packControl(
+            action,
+            p,
+            x * configs.remoteWidth / configs.localWidth,
+            y * configs.remoteHeight / configs.localHeight
+          )
+        }
+        ACTION_MOVE -> {
+          // 适配一些机器将点击视作小范围移动
+          if ((abs(configs.pointerList[p] - x) > 3 && abs(configs.pointerList[p + 10] - y) > 3)) packControl(
+            action,
+            p,
+            x * configs.remoteWidth / configs.localWidth,
+            y * configs.remoteHeight / configs.localHeight
+          )
         }
       }
+      return@setOnTouchListener true
     }
-    return true
   }
 
-  // 创建触摸控制包
-  private fun createTouchPacket(action: Byte, pointerId: Int, x: Int, y: Int) {
+  // 组装触控报文
+  private fun packControl(action: Int, p: Int, x: Int, y: Int) {
     val byteBuffer = ByteBuffer.allocate(32)
     byteBuffer.clear()
     // 触摸事件
     byteBuffer.put(2)
     // 触摸类型
-    byteBuffer.put(action)
+    byteBuffer.put(action.toByte())
     // pointerId
-    byteBuffer.putLong(pointerId.toLong())
+    byteBuffer.putLong(p.toLong())
     // 坐标位置
     byteBuffer.putInt(x)
     byteBuffer.putInt(y)
@@ -473,7 +469,7 @@ class MainActivity : AppCompatActivity() {
     byteBuffer.putInt(0)
     byteBuffer.putInt(0)
     byteBuffer.flip()
-    configs.controls.offer(byteBuffer)
+    configs.controls.offer(byteBuffer.array())
   }
 
   // 发送server
@@ -498,13 +494,22 @@ class MainActivity : AppCompatActivity() {
       crypto.saveAdbKeyPair(private, public)
     }
     // 连接ADB
-    val socket = Socket(configs.remoteIp, configs.remotePort)
+    val socket = Socket()
+    try {
+      socket.connect(InetSocketAddress(configs.remoteIp, configs.remotePort), 1000)
+    } catch (_: IOException) {
+      runOnUiThread { Toast.makeText(this, "连接失败，请检查IP地址以及是否开启ADB网络调试", Toast.LENGTH_SHORT).show() }
+      Thread.sleep(1000)
+      finishAndRemoveTask()
+      Runtime.getRuntime().exit(0)
+    }
     val connection = AdbConnection.create(socket, crypto)
     connection.connect()
     // 发送文件
     configs.adbStream = connection.open("shell:")
     configs.adbStream.write(" cd /data/local/tmp " + '\n')
     configs.adbStream.write(" rm serverBase64 " + '\n')
+    configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9" + '\n')
     var serverBase64part: String
     val len: Int = serverFileBase64.size
     var sourceOffset = 0
@@ -525,13 +530,11 @@ class MainActivity : AppCompatActivity() {
     }
     configs.adbStream.write(" base64 -d < serverBase64 > scrcpy-server.jar && rm serverBase64" + '\n')
     Thread.sleep(100)
-    // 删除旧的scrcpy server
-    configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9" + '\n')
     // 修改分辨率
     configs.adbStream.write(" wm size " + configs.localWidth + "x" + configs.localHeight + '\n')
     configs.adbStream.write(" cmd overlay disable com.android.internal.systemui.navbar.gestural " + '\n')
     configs.adbStream.write(" cmd overlay enable com.android.internal.systemui.navbar.threebutton " + '\n')
-    // 启动新的scrcpy server
+    // 启动scrcpy server
     configs.adbStream.write(" CLASSPATH=./scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 2.0 > /dev/null 2>&1 & " + '\n')
     // 修改状态
     Log.d("scrcpy", "发送server完成")
@@ -591,19 +594,15 @@ class MainActivity : AppCompatActivity() {
               configs.adbStream.write(" wm size reset " + '\n')
               configs.adbStream.write(" cmd overlay disable com.android.internal.systemui.navbar.threebutton " + '\n')
               configs.adbStream.write(" cmd overlay enable com.android.internal.systemui.navbar.gestural " + '\n')
-              configs.adbStream.close()
-              configs.audioStream.close()
-              configs.videoStream.close()
-              configs.controlStream.close()
               configs.status = 4
             }.start()
             while (configs.status != 4) Thread.sleep(50)
           }
-          unregisterReceiver(configs.screenReceiver)
           finishAndRemoveTask()
           Runtime.getRuntime().exit(0)
         }
       }
     }
   }
+
 }
