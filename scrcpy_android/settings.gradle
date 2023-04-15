@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Scrcpy"
+rootProject.name = "scrcpy_android"
 include ':app'
 include ':server'
