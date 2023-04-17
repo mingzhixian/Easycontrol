@@ -30,7 +30,7 @@ public class Options {
   private boolean powerOffScreenOnClose = true; // 修改
   private boolean clipboardAutosync = false; // 修改
   private boolean downsizeOnError = true;
-  private boolean cleanup = true;
+  private boolean cleanup = true; // 未修改此处，但修改了是否清除文件
   private boolean powerOn = true;
 
   private boolean listEncoders;
