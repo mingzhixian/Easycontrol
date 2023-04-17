@@ -258,59 +258,10 @@ public class Controller implements AsyncProcessor {
       }
     }
 
-    /* If the input device is a mouse (on API >= 23):
-     *   - the first button pressed must first generate ACTION_DOWN;
-     *   - all button pressed (including the first one) must generate ACTION_BUTTON_PRESS;
-     *   - all button released (including the last one) must generate ACTION_BUTTON_RELEASE;
-     *   - the last button released must in addition generate ACTION_UP.
-     *
-     * Otherwise, Chrome does not work properly: <https://github.com/Genymobile/scrcpy/issues/3635>
-     */
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && source == InputDevice.SOURCE_MOUSE) {
-      if (action == MotionEvent.ACTION_DOWN) {
-        if (actionButton == buttons) {
-          // First button pressed: ACTION_DOWN
-          MotionEvent downEvent = MotionEvent.obtain(lastTouchDown, now, MotionEvent.ACTION_DOWN, pointerCount, pointerProperties,
-              pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source, 0);
-          if (!device.injectEvent(downEvent, Device.INJECT_MODE_ASYNC)) {
-            return false;
-          }
-        }
-
-        // Any button pressed: ACTION_BUTTON_PRESS
-        MotionEvent pressEvent = MotionEvent.obtain(lastTouchDown, now, MotionEvent.ACTION_BUTTON_PRESS, pointerCount, pointerProperties,
-            pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source, 0);
-        if (!InputManager.setActionButton(pressEvent, actionButton)) {
-          return false;
-        }
-        return device.injectEvent(pressEvent, Device.INJECT_MODE_ASYNC);
-      }
-
-      if (action == MotionEvent.ACTION_UP) {
-        // Any button released: ACTION_BUTTON_RELEASE
-        MotionEvent releaseEvent = MotionEvent.obtain(lastTouchDown, now, MotionEvent.ACTION_BUTTON_RELEASE, pointerCount, pointerProperties,
-            pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source, 0);
-        if (!InputManager.setActionButton(releaseEvent, actionButton)) {
-          return false;
-        }
-        if (!device.injectEvent(releaseEvent, Device.INJECT_MODE_ASYNC)) {
-          return false;
-        }
-
-        if (buttons == 0) {
-          // Last button released: ACTION_UP
-          MotionEvent upEvent = MotionEvent.obtain(lastTouchDown, now, MotionEvent.ACTION_UP, pointerCount, pointerProperties,
-              pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source, 0);
-          return device.injectEvent(upEvent, Device.INJECT_MODE_ASYNC);
-        }
-
-        return true;
-      }
-    }
-
     MotionEvent event = MotionEvent
         .obtain(lastTouchDown, now, action, pointerCount, pointerProperties, pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source,
             0);
+
     return device.injectEvent(event, Device.INJECT_MODE_ASYNC);
   }
 
