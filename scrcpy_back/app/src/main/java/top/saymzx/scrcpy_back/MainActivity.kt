@@ -42,11 +42,10 @@ class MainActivity : Activity() {
         val socket = Socket(remoteIp, remotePort)
         val connection = AdbConnection.create(socket, crypto)
         connection.connect()
-        // 发送文件
         val stream = connection.open("shell:")
-        stream.write(" cmd overlay enable com.android.internal.systemui.navbar.gestural " + '\n')
         stream.write(" ps aux | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9" + '\n')
         stream.write(" wm size reset " + '\n')
+        Thread.sleep(100)
         stream.close()
         finishAndRemoveTask()
         Runtime.getRuntime().exit(0)
