@@ -72,10 +72,14 @@ class Configs : ViewModel() {
   val controls = LinkedList<ByteArray>() as Queue<ByteArray>
 
   // 悬浮窗
-  lateinit var floatLayoutParams: LayoutParams
+  lateinit var surfaceLayoutParams: LayoutParams
 
   @SuppressLint("StaticFieldLeak")
   lateinit var surfaceView: SurfaceView
+
+  lateinit var navLayoutParams: LayoutParams
+
+  lateinit var navView: View
 
   // 音频播放器
   lateinit var audioTrack: AudioTrack
@@ -237,7 +241,7 @@ class MainActivity : AppCompatActivity() {
     // 创建显示悬浮窗
     configs.surfaceView = SurfaceView(this)
 
-    configs.floatLayoutParams = LayoutParams().apply {
+    configs.surfaceLayoutParams = LayoutParams().apply {
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) LayoutParams.TYPE_APPLICATION_OVERLAY
         else LayoutParams.TYPE_PHONE
@@ -250,7 +254,7 @@ class MainActivity : AppCompatActivity() {
       y = 0
     }
     // 将悬浮窗控件添加到WindowManager
-    windowManager.addView(configs.surfaceView, configs.floatLayoutParams)
+    windowManager.addView(configs.surfaceView, configs.surfaceLayoutParams)
   }
 
   // 视频解码器
@@ -369,36 +373,25 @@ class MainActivity : AppCompatActivity() {
           configs.remoteWidth = fomat.getInteger("width")
           configs.remoteHeight = fomat.getInteger("height")
           // 检测是否旋转
-          if (configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) {
-            configs.localWidth =
-              configs.localWidth + configs.localHeight - configs.localWidth.also {
-                configs.localHeight = it
-              }
-            configs.floatLayoutParams.apply {
+          if ((configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) || (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight)) {
+            // surface
+            var tmp = configs.localWidth
+            configs.localWidth = configs.localHeight
+            configs.localHeight = tmp
+            configs.surfaceLayoutParams.apply {
               width = configs.localWidth
               height = configs.localHeight
             }
+            // 导航球
+            tmp = configs.navLayoutParams.x
+            configs.navLayoutParams.x = configs.localWidth - configs.navLayoutParams.y
+            configs.navLayoutParams.y = tmp
             runOnUiThread {
-              windowManager.updateViewLayout(
-                configs.surfaceView, configs.floatLayoutParams
-              )
+              windowManager.updateViewLayout(configs.surfaceView, configs.surfaceLayoutParams)
+              windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
             }
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-          } else if (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight) {
-            configs.localWidth =
-              configs.localWidth + configs.localHeight - configs.localWidth.also {
-                configs.localHeight = it
-              }
-            configs.floatLayoutParams.apply {
-              width = configs.localWidth
-              height = configs.localHeight
-            }
-            runOnUiThread {
-              windowManager.updateViewLayout(
-                configs.surfaceView, configs.floatLayoutParams
-              )
-            }
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            requestedOrientation =
+              if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
           }
         } else {
           Thread.sleep(8)
@@ -460,8 +453,8 @@ class MainActivity : AppCompatActivity() {
   @SuppressLint("ClickableViewAccessibility", "InflateParams")
   private fun setFloatNav() {
     // 创建显示悬浮窗
-    val view = LayoutInflater.from(this).inflate(R.layout.float_nav, null)
-    val floatLayoutParams = LayoutParams().apply {
+    configs.navView = LayoutInflater.from(this).inflate(R.layout.float_nav, null)
+    configs.navLayoutParams = LayoutParams().apply {
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) LayoutParams.TYPE_APPLICATION_OVERLAY
         else LayoutParams.TYPE_PHONE
@@ -496,7 +489,7 @@ class MainActivity : AppCompatActivity() {
       }
 
     })
-    view.setOnTouchListener { _, event ->
+    configs.navView.setOnTouchListener { _, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           xy = event.rawX.toInt() + event.rawY.toInt()
@@ -512,9 +505,9 @@ class MainActivity : AppCompatActivity() {
           } else {
             event.action = ACTION_CANCEL
             gestureDetector.onTouchEvent(event)
-            floatLayoutParams.x = x - 85
-            floatLayoutParams.y = y - 85
-            windowManager.updateViewLayout(view, floatLayoutParams)
+            configs.navLayoutParams.x = x - 85
+            configs.navLayoutParams.y = y - 85
+            windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
             return@setOnTouchListener true
           }
         }
@@ -525,7 +518,7 @@ class MainActivity : AppCompatActivity() {
       }
     }
     // 将悬浮窗控件添加到WindowManager
-    windowManager.addView(view, floatLayoutParams)
+    windowManager.addView(configs.navView, configs.navLayoutParams)
   }
 
   // 组装导航报文
