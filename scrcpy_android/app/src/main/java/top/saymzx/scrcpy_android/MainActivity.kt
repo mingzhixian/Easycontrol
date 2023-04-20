@@ -363,36 +363,20 @@ class MainActivity : AppCompatActivity() {
     var outIndex: Int
     val bufferInfo = BufferInfo()
     if (mode == "video") {
+      var decodeNum = 0
       while (true) {
         // 找到已完成的输出缓冲区
         outIndex = configs.videoDecodec.dequeueOutputBuffer(bufferInfo, 0)
         if (outIndex >= 0) {
+          // 每120帧(两秒)检查一次是否旋转，防止未收到旋转信息
+          decodeNum++
+          if (decodeNum > 119) {
+            decodeNum = 0
+            ifRotation(configs.videoDecodec.getOutputFormat(outIndex))
+          }
           configs.videoDecodec.releaseOutputBuffer(outIndex, true)
         } else if (outIndex == INFO_OUTPUT_FORMAT_CHANGED) {
-          val fomat = configs.videoDecodec.outputFormat
-          configs.remoteWidth = fomat.getInteger("width")
-          configs.remoteHeight = fomat.getInteger("height")
-          // 检测是否旋转
-          if ((configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) || (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight)) {
-            // surface
-            var tmp = configs.localWidth
-            configs.localWidth = configs.localHeight
-            configs.localHeight = tmp
-            configs.surfaceLayoutParams.apply {
-              width = configs.localWidth
-              height = configs.localHeight
-            }
-            // 导航球
-            tmp = configs.navLayoutParams.x
-            configs.navLayoutParams.x = configs.localWidth - configs.navLayoutParams.y
-            configs.navLayoutParams.y = tmp
-            runOnUiThread {
-              windowManager.updateViewLayout(configs.surfaceView, configs.surfaceLayoutParams)
-              windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
-            }
-            requestedOrientation =
-              if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-          }
+          ifRotation(configs.videoDecodec.outputFormat)
         } else {
           Thread.sleep(8)
           continue
@@ -446,6 +430,39 @@ class MainActivity : AppCompatActivity() {
         }
       }
       Thread.sleep(2000)
+    }
+  }
+
+  // 判断是否旋转
+  private fun ifRotation(format: MediaFormat) {
+    configs.remoteWidth = format.getInteger("width")
+    configs.remoteHeight = format.getInteger("height")
+    // 检测是否旋转
+    if ((configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) || (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight)) {
+      // surface
+      var tmp = configs.localWidth
+      configs.localWidth = configs.localHeight
+      configs.localHeight = tmp
+      configs.surfaceLayoutParams.apply {
+        width = configs.localWidth
+        height = configs.localHeight
+      }
+      // 导航球，旋转不改变位置
+      if (configs.remoteWidth > configs.remoteHeight) {
+        tmp = configs.navLayoutParams.y
+        configs.navLayoutParams.y = configs.localHeight - configs.navLayoutParams.x - 170
+        configs.navLayoutParams.x = tmp
+      } else {
+        tmp = configs.navLayoutParams.x
+        configs.navLayoutParams.x = configs.localWidth - configs.navLayoutParams.y - 170
+        configs.navLayoutParams.y = tmp
+      }
+      runOnUiThread {
+        windowManager.updateViewLayout(configs.surfaceView, configs.surfaceLayoutParams)
+        windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
+      }
+      requestedOrientation =
+        if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
 
