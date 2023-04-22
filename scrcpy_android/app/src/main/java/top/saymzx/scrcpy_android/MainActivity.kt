@@ -124,10 +124,10 @@ class MainActivity : AppCompatActivity() {
         configs.localWidth = metric.widthPixels
         configs.localHeight = metric.heightPixels
         // 防止打开时为横屏导致分辨率反了
-        if(configs.localWidth>configs.localHeight){
-          val tmp=configs.localWidth
-          configs.localWidth=configs.localHeight
-          configs.localHeight=tmp
+        if (configs.localWidth > configs.localHeight) {
+          val tmp = configs.localWidth
+          configs.localWidth = configs.localHeight
+          configs.localHeight = tmp
         }
         // 读取配置
         readConfigs {
@@ -459,11 +459,13 @@ class MainActivity : AppCompatActivity() {
       // 导航球，旋转不改变位置
       if (configs.remoteWidth > configs.remoteHeight) {
         tmp = configs.navLayoutParams.y
-        configs.navLayoutParams.y = configs.localHeight - configs.navLayoutParams.x - 170
+        configs.navLayoutParams.y =
+          configs.localHeight - configs.navLayoutParams.x - configs.navLayoutParams.width
         configs.navLayoutParams.x = tmp
       } else {
         tmp = configs.navLayoutParams.x
-        configs.navLayoutParams.x = configs.localWidth - configs.navLayoutParams.y - 170
+        configs.navLayoutParams.x =
+          configs.localWidth - configs.navLayoutParams.y - configs.navLayoutParams.height
         configs.navLayoutParams.y = tmp
       }
       runOnUiThread {
@@ -486,8 +488,8 @@ class MainActivity : AppCompatActivity() {
         else LayoutParams.TYPE_PHONE
       flags =
         LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_LAYOUT_IN_SCREEN or LayoutParams.FLAG_NOT_FOCUSABLE    //位置大小设置
-      width = 170
-      height = 170
+      width = (60 * resources.displayMetrics.density + 0.5f).toInt()
+      height = (60 * resources.displayMetrics.density + 0.5f).toInt()
       gravity = Gravity.START or Gravity.TOP
       format = PixelFormat.RGBA_8888
       x = 0
@@ -531,8 +533,8 @@ class MainActivity : AppCompatActivity() {
           } else {
             event.action = ACTION_CANCEL
             gestureDetector.onTouchEvent(event)
-            configs.navLayoutParams.x = x - 85
-            configs.navLayoutParams.y = y - 85
+            configs.navLayoutParams.x = x - configs.navLayoutParams.width / 2
+            configs.navLayoutParams.y = y - configs.navLayoutParams.height / 2
             windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
             return@setOnTouchListener true
           }
