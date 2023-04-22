@@ -11,8 +11,8 @@ android {
         applicationId "top.saymzx.scrcpy_android"
         minSdk 23
         targetSdk 33
-        versionCode 61
-        versionName "6.1"
+        versionCode 62
+        versionName "6.2"
         resConfigs "zh"
         ndk {
             abiFilter "arm64-v8a"
