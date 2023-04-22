@@ -79,6 +79,7 @@ class Configs : ViewModel() {
 
   lateinit var navLayoutParams: LayoutParams
 
+  @SuppressLint("StaticFieldLeak")
   lateinit var navView: View
 
   // 音频播放器
@@ -113,6 +114,8 @@ class MainActivity : AppCompatActivity() {
       val filter = IntentFilter()
       filter.addAction(ACTION_SCREEN_OFF)
       registerReceiver(ScreenReceiver(), filter)
+      // 第一次打开显示为竖屏
+      requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
       // 检查权限
       checkPermission {
         // 获取主控端分辨率
@@ -120,6 +123,12 @@ class MainActivity : AppCompatActivity() {
         windowManager.defaultDisplay.getRealMetrics(metric)
         configs.localWidth = metric.widthPixels
         configs.localHeight = metric.heightPixels
+        // 防止打开时为横屏导致分辨率反了
+        if(configs.localWidth>configs.localHeight){
+          val tmp=configs.localWidth
+          configs.localWidth=configs.localHeight
+          configs.localHeight=tmp
+        }
         // 读取配置
         readConfigs {
           if (configs.status == 0) {
@@ -462,7 +471,7 @@ class MainActivity : AppCompatActivity() {
         windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
       }
       requestedOrientation =
-        if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
   }
 
