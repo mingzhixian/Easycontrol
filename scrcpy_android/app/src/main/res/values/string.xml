@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="videoCodecItems">
+        <item>h264</item>
+        <item>h265</item>
+    </string-array>
+    <string-array name="resolutionItems">
+        <item>1920</item>
+        <item>2560</item>
+        <item>1600</item>
+        <item>1280</item>
+        <item>1024</item>
+        <item>800</item>
+    </string-array>
+</resources>
