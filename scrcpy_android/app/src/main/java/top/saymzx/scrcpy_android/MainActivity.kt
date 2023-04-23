@@ -19,12 +19,13 @@ import android.view.*
 import android.view.KeyEvent.*
 import android.view.MotionEvent.*
 import android.view.WindowManager.LayoutParams
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.tananaev.adblib.AdbConnection
 import com.tananaev.adblib.AdbCrypto
 import com.tananaev.adblib.AdbStream
@@ -37,7 +38,11 @@ import java.util.*
 import javax.xml.bind.DatatypeConverter
 import kotlin.math.abs
 
+
 class Configs : ViewModel() {
+  // 是否已经初始化数据
+  var isInit = false
+
   // 被控端IP地址
   var remoteIp = ""
 
@@ -49,7 +54,7 @@ class Configs : ViewModel() {
 
   // 被控端屏幕大小（缩放后的，即视频流大小）
   var remoteWidth = 0
-  var remoteHeight = 0
+  var remoteHeight = 1920
 
   // 主控端屏幕大小
   var localWidth = 0
@@ -59,8 +64,11 @@ class Configs : ViewModel() {
   lateinit var videoDecodec: MediaCodec
   lateinit var audioDecodec: MediaCodec
 
-  // 状态标识(-1初始，0准备中，1发送server后，2连接server后，3投屏中)
-  var status = -1
+  // 视频编解码器类型
+  var videoCodecMime = "h264"
+
+  // 状态标识(-7为关闭状态，小于0为关闭中，0为准备中，1为投屏中)
+  var status = -7
 
   // 连接流
   lateinit var adbStream: AdbStream
@@ -88,416 +96,103 @@ class Configs : ViewModel() {
   // 音频放大器
   lateinit var loudnessEnhancer: LoudnessEnhancer
 
-}
+  // context
+  @SuppressLint("StaticFieldLeak")
+  lateinit var main: MainActivity
 
-class MainActivity : AppCompatActivity() {
-
-  private lateinit var configs: Configs
-
-  // 创建界面
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-
-    // 推荐主控端使用全面屏手势，以减少冲突，如是旧平板则可使用以下代码，减少三大金刚键的影响
-    // 主控端（平板准备）:adb shell settings put global policy_control immersive.full=*
-    // 主控端（平板准备）:adb shell wm overscan 0,0,0,-48
-
-    // viewModel
-    configs = ViewModelProvider(this)[Configs::class.java]
-    // 全屏显示
-    window.decorView.systemUiVisibility =
-      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-
-    if (configs.status == -1) {
-      // 注册广播用以关闭程序
-      val filter = IntentFilter()
-      filter.addAction(ACTION_SCREEN_OFF)
-      registerReceiver(ScreenReceiver(), filter)
-      // 第一次打开显示为竖屏
-      requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-      // 检查权限
-      checkPermission {
-        // 获取主控端分辨率
-        val metric = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(metric)
-        configs.localWidth = metric.widthPixels
-        configs.localHeight = metric.heightPixels
-        // 防止打开时为横屏导致分辨率反了
-        if (configs.localWidth > configs.localHeight) {
-          val tmp = configs.localWidth
-          configs.localWidth = configs.localHeight
-          configs.localHeight = tmp
-        }
-        // 读取配置
-        readConfigs {
-          if (configs.status == 0) {
-            Thread {
-              // 发送server
-              sendServer()
-              // 显示悬浮窗
-              this.runOnUiThread { setSurface() }
-              // 连接server
-              connectServer {
-                // 配置视频解码器
-                setVideoDecodec()
-                val videoInputThread = Thread { decodecInput("video") }
-                videoInputThread.priority = 10
-                videoInputThread.start()
-                val videoOutputThread = Thread { decodecOutput("video") }
-                videoOutputThread.priority = 10
-                videoOutputThread.start()
-                // 配置音频解码器
-                if (setAudioDecodec()) {
-                  val audioInputThread = Thread { decodecInput("audio") }
-                  audioInputThread.priority = 8
-                  audioInputThread.start()
-                  val audioOutputThread = Thread { decodecOutput("audio") }
-                  audioOutputThread.priority = 8
-                  audioOutputThread.start()
-                }
-                val controlOutputThread = Thread { controlOutput() }
-                controlOutputThread.priority = 5
-                controlOutputThread.start()
-                val notOffScreenThread = Thread { notOffScreen() }
-                notOffScreenThread.priority = 1
-                notOffScreenThread.start()
-                // 开始投屏
-                configs.status = 3
-                // 监控触控操作
-                setTouchHandle()
-                // 设置被控端熄屏
-                setPowerOff()
-                // 设置导航悬浮窗
-                runOnUiThread { setFloatNav() }
-              }
-            }.start()
-          }
-        }
-      }
-    }
+  // 初始化
+  fun init() {
+    // 获取主控端分辨率
+    val metric = DisplayMetrics()
+    main.windowManager.defaultDisplay.getRealMetrics(metric)
+    localWidth = metric.widthPixels
+    localHeight = metric.heightPixels
+    // 初始化显示悬浮窗
+    setSurface()
+    // 初始化导航悬浮窗
+    setFloatNav()
+    // 初始化音频播放器
+    setAudioTrack()
   }
 
-  // 自动恢复界面
-  override fun onPause() {
-    super.onPause()
-    if (this::configs.isInitialized && configs.status >= 0) {
-      val intent = Intent(this, Page2::class.java)
-      intent.addCategory(CATEGORY_LAUNCHER)
-      intent.flags =
-        FLAG_ACTIVITY_BROUGHT_TO_FRONT or FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-      startActivity(intent)
-    }
-  }
-
-  // 权限检查
-  private fun checkPermission(callback: () -> Unit) {
-    // 检查悬浮窗权限
-    if (!Settings.canDrawOverlays(this)) {
-      val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-      builder.setTitle("当前无权限，请授权")
-      builder.setPositiveButton(
-        "已授权"
-      ) { dialog, _ ->
-        if (Settings.canDrawOverlays(this)) {
-          dialog.cancel()
-          callback()
-        } else {
-          dialog.cancel()
-          checkPermission(callback)
-        }
-      }
-      builder.setCancelable(false)
-      val dialog = builder.create()
-      dialog.setCanceledOnTouchOutside(false)
-      dialog.show()
-      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-      intent.data = Uri.parse("package:$packageName")
-      startActivity(intent)
-    } else callback()
-  }
-
-  // 读取配置
-  private fun readConfigs(callback: () -> Unit) {
-    val configFile = File(this.applicationContext.filesDir, "configs")
-    if (!configFile.isFile) {
-      val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-      builder.setTitle("请输入被控端IP地址")
-      val edit = EditText(this)
-      builder.setView(edit)
-      builder.setPositiveButton(
-        "确认"
-      ) { dialog, _ ->
-        configFile.writeText(edit.text.toString())
-        configs.remoteIp = edit.text.toString().replace("\\s|\\n|\\r|\\t".toRegex(), "")
-        configs.status = 0
-        dialog.cancel()
-        callback()
-      }
-      builder.setCancelable(false)
-      val dialog = builder.create()
-      dialog.setCanceledOnTouchOutside(false)
-      dialog.show()
-    } else {
-      configs.remoteIp = configFile.readText().replace("\\s|\\n|\\r|\\t".toRegex(), "")
-      configs.status = 0
-      callback()
-    }
-  }
-
-  // 设置悬浮窗
+  // 初始化显示悬浮窗
+  @SuppressLint("ClickableViewAccessibility")
   private fun setSurface() {
     // 创建显示悬浮窗
-    configs.surfaceView = SurfaceView(this)
-
-    configs.surfaceLayoutParams = LayoutParams().apply {
+    surfaceView = SurfaceView(main)
+    surfaceLayoutParams = LayoutParams().apply {
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) LayoutParams.TYPE_APPLICATION_OVERLAY
         else LayoutParams.TYPE_PHONE
       flags =
         LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_LAYOUT_IN_SCREEN or LayoutParams.FLAG_NOT_FOCUSABLE or LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or LayoutParams.FLAG_KEEP_SCREEN_ON      //位置大小设置
-      width = configs.localWidth
-      height = configs.localHeight
       gravity = Gravity.START or Gravity.TOP
       x = 0
       y = 0
     }
-    // 将悬浮窗控件添加到WindowManager
-    windowManager.addView(configs.surfaceView, configs.surfaceLayoutParams)
-  }
-
-  // 视频解码器
-  private fun setVideoDecodec() {
-    // CodecMeta
-    configs.videoStream.readInt()
-    configs.remoteWidth = configs.videoStream.readInt()
-    configs.remoteHeight = configs.videoStream.readInt()
-    // 创建解码器
-    configs.videoDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-    val mediaFormat = MediaFormat.createVideoFormat(
-      MediaFormat.MIMETYPE_VIDEO_AVC, configs.remoteWidth, configs.remoteHeight
-    )
-    // 获取视频标识头
-    val csd0 = readFrame(configs.videoStream)
-    val csd1 = readFrame(configs.videoStream)
-    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0))
-    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1))
-    // 配置解码器
-    while (!configs.surfaceView.holder.surface.isValid) Thread.sleep(10)
-    configs.videoDecodec.configure(mediaFormat, configs.surfaceView.holder.surface, null, 0)
-    // 启动解码器
-    configs.videoDecodec.start()
-    // 解析首帧，解决开始黑屏问题
-    var inIndex: Int
-    do {
-      inIndex = configs.videoDecodec.dequeueInputBuffer(0)
-    } while (inIndex < 0)
-    configs.videoDecodec.getInputBuffer(inIndex)!!.put(csd0)
-    configs.videoDecodec.queueInputBuffer(inIndex, 0, csd0.size, 0, 0)
-    do {
-      inIndex = configs.videoDecodec.dequeueInputBuffer(0)
-    } while (inIndex < 0)
-    configs.videoDecodec.getInputBuffer(inIndex)!!.put(csd1)
-    configs.videoDecodec.queueInputBuffer(inIndex, 0, csd1.size, 0, 0)
-  }
-
-  // 音频解码器
-  private fun setAudioDecodec(): Boolean {
-    // 是否停止
-    if (configs.audioStream.readInt() == 0) return false
-    // 创建音频解码器
-    configs.audioDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_OPUS)
-    val sampleRate = 44100
-    val channelCount = 2
-    val bitRate = 128000
-    val mediaFormat =
-      MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_OPUS, sampleRate, channelCount)
-    mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate)
-    // 获取音频标识头
-    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(readFrame(configs.audioStream)))
-    // csd1和csd2暂时没用到，所以默认全是用0
-    val csd12bytes = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
-    val csd12ByteBuffer = ByteBuffer.wrap(csd12bytes, 0, csd12bytes.size)
-    mediaFormat.setByteBuffer("csd-1", csd12ByteBuffer)
-    mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer)
-    // 配置解码器
-    configs.audioDecodec.configure(mediaFormat, null, null, 0)
-    // 启动解码器
-    configs.audioDecodec.start()
-    // 初始化音频播放器
-    val minBufferSize = AudioTrack.getMinBufferSize(
-      sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT
-    )
-    configs.audioTrack = AudioTrack.Builder().setAudioAttributes(
-      AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
-        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
-    ).setAudioFormat(
-      AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate)
-        .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
-    ).setBufferSizeInBytes(minBufferSize * 8).build()
-    // 声音增强
-    try {
-      configs.loudnessEnhancer = LoudnessEnhancer(configs.audioTrack.audioSessionId)
-      configs.loudnessEnhancer.setTargetGain(4000)
-      configs.loudnessEnhancer.enabled = true
-    } catch (_: IllegalArgumentException) {
-    }
-    configs.audioTrack.play()
-    return true
-  }
-
-  // 输入
-  private fun decodecInput(mode: String) {
-    while (configs.status != 3) Thread.sleep(200)
-    var inIndex: Int
-    val stream = if (mode == "video") configs.videoStream else configs.audioStream
-    val decodec = if (mode == "video") configs.videoDecodec else configs.audioDecodec
-    // 开始解码
-    while (true) {
-      // 向缓冲区输入数据帧
-      val buffer = readFrame(stream)
-      // 找到一个空的输入缓冲区
-      do {
-        inIndex = decodec.dequeueInputBuffer(0)
-      } while (inIndex < 0)
-      decodec.getInputBuffer(inIndex)!!.put(buffer)
-      // 提交解码器解码
-      decodec.queueInputBuffer(inIndex, 0, buffer.size, 0, 0)
-    }
-  }
-
-  // 输出
-  private fun decodecOutput(mode: String) {
-    while (configs.status != 3) Thread.sleep(200)
-    var outIndex: Int
-    val bufferInfo = BufferInfo()
-    if (mode == "video") {
-      var decodeNum = 0
-      while (true) {
-        // 找到已完成的输出缓冲区
-        outIndex = configs.videoDecodec.dequeueOutputBuffer(bufferInfo, 0)
-        if (outIndex >= 0) {
-          // 每120帧(两秒)检查一次是否旋转，防止未收到旋转信息
-          decodeNum++
-          if (decodeNum > 119) {
-            decodeNum = 0
-            ifRotation(configs.videoDecodec.getOutputFormat(outIndex))
-          }
-          configs.videoDecodec.releaseOutputBuffer(outIndex, true)
-        } else if (outIndex == INFO_OUTPUT_FORMAT_CHANGED) {
-          ifRotation(configs.videoDecodec.outputFormat)
-        } else {
-          Thread.sleep(8)
-          continue
-        }
-      }
-    } else {
-      while (true) {
-        // 找到已完成的输出缓冲区
-        outIndex = configs.audioDecodec.dequeueOutputBuffer(bufferInfo, 0)
-        if (outIndex < 0) {
-          Thread.sleep(4)
-          continue
-        }
-        configs.audioTrack.write(
-          configs.audioDecodec.getOutputBuffer(outIndex)!!,
-          bufferInfo.size,
-          AudioTrack.WRITE_NON_BLOCKING
-        )
-        configs.audioDecodec.releaseOutputBuffer(outIndex, false)
-      }
-    }
-  }
-
-  // 控制报文输出
-  private fun controlOutput() {
-    while (configs.status != 3) Thread.sleep(200)
-
-    while (true) {
-      if (configs.controls.isEmpty()) {
-        Thread.sleep(2)
-        continue
-      }
+    // 触摸xy记录（为了适配有些设备过于敏感，将点击识别为小范围移动）
+    val pointerList = ArrayList<Int>(10)
+    for (i in 1..10) pointerList.add(0)
+    surfaceView.setOnTouchListener { _, event ->
       try {
-        configs.controlStream.write(configs.controls.poll())
-      } catch (_: NullPointerException) {
-      }
-    }
-  }
-
-  // 防止被控端熄屏
-  private fun notOffScreen() {
-    while (configs.status != 3) Thread.sleep(200)
-    while (true) {
-      configs.adbStream.write(" dumpsys deviceidle | grep mScreenOn \n")
-      while (true) {
-        val str = String(configs.adbStream.read())
-        if (str.contains("mScreenOn=true")) break
-        else if (str.contains("mScreenOn=false")) {
-          configs.adbStream.write(" input keyevent 26 \n")
-          break
+        when (event.actionMasked) {
+          MotionEvent.ACTION_DOWN, ACTION_POINTER_DOWN -> {
+            val i = event.actionIndex
+            val x = event.getX(i).toInt()
+            val y = event.getY(i).toInt()
+            val xx = x * remoteWidth / localWidth
+            val yy = y * remoteHeight / localHeight
+            val p = event.getPointerId(i)
+            packTouchControl(MotionEvent.ACTION_DOWN, p, xx, yy)
+            // 记录xy信息
+            pointerList[p] = x + y
+          }
+          MotionEvent.ACTION_UP, ACTION_POINTER_UP, ACTION_CANCEL -> {
+            val i = event.actionIndex
+            val x = event.getX(i).toInt()
+            val y = event.getY(i).toInt()
+            val xx = x * remoteWidth / localWidth
+            val yy = y * remoteHeight / localHeight
+            val p = event.getPointerId(i)
+            packTouchControl(MotionEvent.ACTION_UP, p, xx, yy)
+          }
+          ACTION_MOVE -> {
+            for (i in 0 until event.pointerCount) {
+              val x = event.getX(i).toInt()
+              val y = event.getY(i).toInt()
+              val xx = x * remoteWidth / localWidth
+              val yy = y * remoteHeight / localHeight
+              val p = event.getPointerId(i)
+              // 适配一些机器将点击视作小范围移动
+              if (abs(pointerList[p] - x - y) > 6) packTouchControl(ACTION_MOVE, p, xx, yy)
+            }
+          }
         }
+      } catch (_: IllegalArgumentException) {
       }
-      Thread.sleep(2000)
+      return@setOnTouchListener true
     }
   }
 
-  // 判断是否旋转
-  private fun ifRotation(format: MediaFormat) {
-    configs.remoteWidth = format.getInteger("width")
-    configs.remoteHeight = format.getInteger("height")
-    // 检测是否旋转
-    if ((configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) || (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight)) {
-      // surface
-      var tmp = configs.localWidth
-      configs.localWidth = configs.localHeight
-      configs.localHeight = tmp
-      configs.surfaceLayoutParams.apply {
-        width = configs.localWidth
-        height = configs.localHeight
-      }
-      // 导航球，旋转不改变位置
-      if (configs.remoteWidth > configs.remoteHeight) {
-        tmp = configs.navLayoutParams.y
-        configs.navLayoutParams.y =
-          configs.localHeight - configs.navLayoutParams.x - configs.navLayoutParams.width
-        configs.navLayoutParams.x = tmp
-      } else {
-        tmp = configs.navLayoutParams.x
-        configs.navLayoutParams.x =
-          configs.localWidth - configs.navLayoutParams.y - configs.navLayoutParams.height
-        configs.navLayoutParams.y = tmp
-      }
-      runOnUiThread {
-        windowManager.updateViewLayout(configs.surfaceView, configs.surfaceLayoutParams)
-        windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
-      }
-      requestedOrientation =
-        if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    }
-  }
-
-  // 悬浮控制
+  // 初始化导航悬浮窗
   @SuppressLint("ClickableViewAccessibility", "InflateParams")
   private fun setFloatNav() {
-    // 创建显示悬浮窗
-    configs.navView = LayoutInflater.from(this).inflate(R.layout.float_nav, null)
-    configs.navLayoutParams = LayoutParams().apply {
+    // 创建导航悬浮窗
+    navView = LayoutInflater.from(main).inflate(R.layout.float_nav, null)
+    navLayoutParams = LayoutParams().apply {
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) LayoutParams.TYPE_APPLICATION_OVERLAY
         else LayoutParams.TYPE_PHONE
       flags =
         LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_LAYOUT_IN_SCREEN or LayoutParams.FLAG_NOT_FOCUSABLE    //位置大小设置
-      width = (60 * resources.displayMetrics.density + 0.5f).toInt()
-      height = (60 * resources.displayMetrics.density + 0.5f).toInt()
+      width = (60 * main.resources.displayMetrics.density + 0.5f).toInt()
+      height = (60 * main.resources.displayMetrics.density + 0.5f).toInt()
       gravity = Gravity.START or Gravity.TOP
       format = PixelFormat.RGBA_8888
-      x = 0
-      y = configs.localHeight * 3 / 8
     }
     // 手势处理
     var xy = 0
-    val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+    val gestureDetector = GestureDetector(main, object : GestureDetector.SimpleOnGestureListener() {
       override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
         packNavControl(KeyEvent.ACTION_DOWN, KEYCODE_BACK)
         packNavControl(KeyEvent.ACTION_UP, KEYCODE_BACK)
@@ -517,7 +212,7 @@ class MainActivity : AppCompatActivity() {
       }
 
     })
-    configs.navView.setOnTouchListener { _, event ->
+    navView.setOnTouchListener { _, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           xy = event.rawX.toInt() + event.rawY.toInt()
@@ -533,9 +228,9 @@ class MainActivity : AppCompatActivity() {
           } else {
             event.action = ACTION_CANCEL
             gestureDetector.onTouchEvent(event)
-            configs.navLayoutParams.x = x - configs.navLayoutParams.width / 2
-            configs.navLayoutParams.y = y - configs.navLayoutParams.height / 2
-            windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
+            navLayoutParams.x = x - navLayoutParams.width / 2
+            navLayoutParams.y = y - navLayoutParams.height / 2
+            main.windowManager.updateViewLayout(navView, navLayoutParams)
             return@setOnTouchListener true
           }
         }
@@ -544,82 +239,6 @@ class MainActivity : AppCompatActivity() {
           return@setOnTouchListener true
         }
       }
-    }
-    // 将悬浮窗控件添加到WindowManager
-    windowManager.addView(configs.navView, configs.navLayoutParams)
-  }
-
-  // 组装导航报文
-  private fun packNavControl(action: Int, key: Int) {
-    val byteBuffer = ByteBuffer.allocate(14)
-    byteBuffer.clear()
-    // 输入事件
-    byteBuffer.put(0)
-    // 事件类型
-    byteBuffer.put(action.toByte())
-    // 按键类型
-    byteBuffer.putInt(key)
-    // 重复次数
-    byteBuffer.putInt(0)
-    byteBuffer.putInt(0)
-    byteBuffer.flip()
-    configs.controls.offer(byteBuffer.array())
-  }
-
-  // 被控端熄屏
-  private fun setPowerOff() {
-    val byteBuffer = ByteBuffer.allocate(2)
-    byteBuffer.clear()
-    byteBuffer.put(10)
-    byteBuffer.put(0)
-    byteBuffer.flip()
-    configs.controls.offer(byteBuffer.array())
-  }
-
-  // 触摸事件
-  @SuppressLint("ClickableViewAccessibility")
-  private fun setTouchHandle() {
-    // 触摸xy记录（为了适配有些设备过于敏感，将点击识别为小范围移动）
-    val pointerList = ArrayList<Int>(10)
-    for (i in 1..10) pointerList.add(0)
-    configs.surfaceView.setOnTouchListener { _, event ->
-      try {
-        when (event.actionMasked) {
-          MotionEvent.ACTION_DOWN, ACTION_POINTER_DOWN -> {
-            val i = event.actionIndex
-            val x = event.getX(i).toInt()
-            val y = event.getY(i).toInt()
-            val xx = x * configs.remoteWidth / configs.localWidth
-            val yy = y * configs.remoteHeight / configs.localHeight
-            val p = event.getPointerId(i)
-            packTouchControl(MotionEvent.ACTION_DOWN, p, xx, yy)
-            // 记录xy信息
-            pointerList[p] = x + y
-          }
-          MotionEvent.ACTION_UP, ACTION_POINTER_UP, ACTION_CANCEL -> {
-            val i = event.actionIndex
-            val x = event.getX(i).toInt()
-            val y = event.getY(i).toInt()
-            val xx = x * configs.remoteWidth / configs.localWidth
-            val yy = y * configs.remoteHeight / configs.localHeight
-            val p = event.getPointerId(i)
-            packTouchControl(MotionEvent.ACTION_UP, p, xx, yy)
-          }
-          ACTION_MOVE -> {
-            for (i in 0 until event.pointerCount) {
-              val x = event.getX(i).toInt()
-              val y = event.getY(i).toInt()
-              val xx = x * configs.remoteWidth / configs.localWidth
-              val yy = y * configs.remoteHeight / configs.localHeight
-              val p = event.getPointerId(i)
-              // 适配一些机器将点击视作小范围移动
-              if (abs(pointerList[p] - x - y) > 6) packTouchControl(ACTION_MOVE, p, xx, yy)
-            }
-          }
-        }
-      } catch (_: IllegalArgumentException) {
-      }
-      return@setOnTouchListener true
     }
   }
 
@@ -637,14 +256,191 @@ class MainActivity : AppCompatActivity() {
     byteBuffer.putInt(x)
     byteBuffer.putInt(y)
     // 屏幕尺寸
-    byteBuffer.putShort(configs.remoteWidth.toShort())
-    byteBuffer.putShort(configs.remoteHeight.toShort())
+    byteBuffer.putShort(remoteWidth.toShort())
+    byteBuffer.putShort(remoteHeight.toShort())
     // 按压力度presureInt和buttons
     byteBuffer.putShort(1)
     byteBuffer.putInt(0)
     byteBuffer.putInt(0)
     byteBuffer.flip()
-    configs.controls.offer(byteBuffer.array())
+    controls.offer(byteBuffer.array())
+  }
+
+  // 组装导航报文
+  private fun packNavControl(action: Int, key: Int) {
+    val byteBuffer = ByteBuffer.allocate(14)
+    byteBuffer.clear()
+    // 输入事件
+    byteBuffer.put(0)
+    // 事件类型
+    byteBuffer.put(action.toByte())
+    // 按键类型
+    byteBuffer.putInt(key)
+    // 重复次数
+    byteBuffer.putInt(0)
+    byteBuffer.putInt(0)
+    byteBuffer.flip()
+    controls.offer(byteBuffer.array())
+  }
+
+  // 初始化音频播放器
+  private fun setAudioTrack() {
+    val sampleRate = 44100
+    // 初始化音频播放器
+    val minBufferSize = AudioTrack.getMinBufferSize(
+      sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT
+    )
+    audioTrack = AudioTrack.Builder().setAudioAttributes(
+      AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+    ).setAudioFormat(
+      AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate)
+        .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
+    ).setBufferSizeInBytes(minBufferSize * 8).build()
+    // 声音增强
+    try {
+      loudnessEnhancer = LoudnessEnhancer(audioTrack.audioSessionId)
+      loudnessEnhancer.setTargetGain(4000)
+      loudnessEnhancer.enabled = true
+    } catch (_: IllegalArgumentException) {
+    }
+    audioTrack.play()
+  }
+
+}
+
+class MainActivity : AppCompatActivity() {
+
+  lateinit var configs: Configs
+
+  // 创建界面
+  @SuppressLint("InflateParams")
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+
+    // viewModel
+    configs = ViewModelProvider(this)[Configs::class.java]
+    // 全屏显示
+    window.decorView.systemUiVisibility =
+      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+    // 设置异形屏
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      window.attributes.layoutInDisplayCutoutMode =
+        LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+    }
+    // 冷启动
+    if (!configs.isInit) {
+      // 注册广播用以关闭程序
+      val filter = IntentFilter()
+      filter.addAction(ACTION_SCREEN_OFF)
+      registerReceiver(ScreenReceiver(), filter)
+      // 检查悬浮窗权限
+      if (!Settings.canDrawOverlays(this)) {
+        val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+        intent.data = Uri.parse("package:$packageName")
+        startActivity(intent)
+      }
+      configs.isInit = true
+      configs.main = this
+      configs.init()
+    }
+    // 读取数据库并展示设备列表
+    setDevicesList()
+  }
+
+  // 自动恢复界面
+  override fun onPause() {
+    super.onPause()
+    if (configs.status == 1) {
+      startActivity(intent)
+    }
+  }
+
+  // 读取数据库并展示设备列表
+  private fun setDevicesList() {
+    val devices = findViewById<RecyclerView>(R.id.devices)
+    val deviceAdapter = DeviceAdapter(this)
+    devices.layoutManager = LinearLayoutManager(this)
+    devices.adapter = deviceAdapter
+    // 添加设备
+    findViewById<TextView>(R.id.add_device).setOnClickListener {
+      val addDeviceView = LayoutInflater.from(this).inflate(R.layout.add_device, null, false)
+      val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+      builder.setView(addDeviceView)
+      builder.setCancelable(false)
+      val dialog = builder.create()
+      dialog.setCanceledOnTouchOutside(true)
+      dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+      addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
+        deviceAdapter.newDevice(
+          addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
+          addDeviceView.findViewById<EditText>(R.id.add_device_ip).text.toString()
+            .replace("\\s|\\n|\\r|\\t".toRegex(), ""),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_resolution).selectedItem.toString()
+            .toInt()
+        )
+        dialog.cancel()
+      }
+      dialog.show()
+    }
+  }
+
+  // 开始投屏
+  @SuppressLint("SourceLockedOrientationActivity")
+  fun startScrcpy() {
+    // 子线程发送并连接server
+    Thread {
+      // 发送server
+      sendServer()
+      // 连接server
+      connectServer {
+        // 配置视频解码器
+        setVideoDecodec()
+        val videoInputThread = Thread { decodecInput("video") }
+        videoInputThread.priority = 10
+        videoInputThread.start()
+        val videoOutputThread = Thread { decodecOutput("video") }
+        videoOutputThread.priority = 10
+        videoOutputThread.start()
+        // 配置音频解码器
+        if (setAudioDecodec()) {
+          val audioInputThread = Thread { decodecInput("audio") }
+          audioInputThread.priority = 8
+          audioInputThread.start()
+          val audioOutputThread = Thread { decodecOutput("audio") }
+          audioOutputThread.priority = 8
+          audioOutputThread.start()
+        }
+        val controlOutputThread = Thread { controlOutput() }
+        controlOutputThread.priority = 5
+        controlOutputThread.start()
+        val notOffScreenThread = Thread { notOffScreen() }
+        notOffScreenThread.priority = 1
+        notOffScreenThread.start()
+        // 设置被控端熄屏
+        setPowerOff()
+        // 设置状态为投屏中
+        configs.status = 1
+      }
+    }.start()
+    // 初始状态为竖屏
+    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    // 设置显示悬浮窗
+    // 防止横屏打开的问题
+    if (configs.localWidth > configs.localHeight) {
+      val tmp = configs.localWidth
+      configs.localWidth = configs.localHeight
+      configs.localHeight = tmp
+    }
+    configs.surfaceLayoutParams.width = configs.localWidth
+    configs.surfaceLayoutParams.height = configs.localHeight
+    windowManager.addView(configs.surfaceView, configs.surfaceLayoutParams)
+    // 设置导航悬浮窗
+    configs.navLayoutParams.x = 0
+    configs.navLayoutParams.y = configs.localHeight * 3 / 8
+    windowManager.addView(configs.navView, configs.navLayoutParams)
   }
 
   // 发送server
@@ -667,9 +463,14 @@ class MainActivity : AppCompatActivity() {
       socket.connect(InetSocketAddress(configs.remoteIp, configs.remotePort), 1000)
     } catch (_: IOException) {
       runOnUiThread { Toast.makeText(this, "连接失败，请检查IP地址以及是否开启ADB网络调试", Toast.LENGTH_SHORT).show() }
-      Thread.sleep(1000)
-      finishAndRemoveTask()
-      Runtime.getRuntime().exit(0)
+      // 删除导航悬浮窗
+      windowManager.removeView(configs.navView)
+      // 删除显示悬浮窗
+      windowManager.removeView(configs.surfaceView)
+      // 取消强制旋转
+      requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+      // 恢复为未投屏状态
+      configs.status = -7
     }
     val connection = AdbConnection.create(socket, crypto)
     connection.connect()
@@ -719,10 +520,7 @@ class MainActivity : AppCompatActivity() {
         break
       }
     }
-    configs.adbStream.write(" CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 > /dev/null 2>&1 & \n")
-    // 修改状态
-    Log.d("scrcpy", "发送server完成")
-    configs.status = 1
+    configs.adbStream.write(" CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${configs.videoCodecMime} max_size=${configs.remoteHeight} > /dev/null 2>&1 & \n")
   }
 
   // 连接server
@@ -748,19 +546,259 @@ class MainActivity : AppCompatActivity() {
       // 删除旧文件
       val versionCode = BuildConfig.VERSION_CODE
       configs.adbStream.write(" rm /data/local/tmp/scrcpy-server$versionCode.jar \n")
-      Thread.sleep(1000)
-      runOnUiThread {
-        finishAndRemoveTask()
-        Runtime.getRuntime().exit(0)
-      }
+      configs.adbStream.close()
+      // 删除导航悬浮窗
+      windowManager.removeView(configs.navView)
+      // 删除显示悬浮窗
+      windowManager.removeView(configs.surfaceView)
+      // 取消强制旋转
+      requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+      // 恢复为未投屏状态
+      configs.status = -7
     }
     configs.videoStream = DataInputStream(videoSocket?.getInputStream())
     configs.audioStream = DataInputStream(audioSocket?.getInputStream())
     configs.controlStream = DataOutputStream(controlSocket?.getOutputStream())
-    // 修改状态
-    Log.d("scrcpy", "连接server完成")
-    configs.status = 2
     callback()
+  }
+
+  // 视频解码器
+  private fun setVideoDecodec() {
+    // CodecMeta
+    configs.videoStream.readInt()
+    configs.remoteWidth = configs.videoStream.readInt()
+    configs.remoteHeight = configs.videoStream.readInt()
+    // 创建解码器
+    val codecMime =
+      if (configs.videoCodecMime == "h265") MediaFormat.MIMETYPE_VIDEO_HEVC else MediaFormat.MIMETYPE_VIDEO_AVC
+    configs.videoDecodec = MediaCodec.createDecoderByType(codecMime)
+    val mediaFormat =
+      MediaFormat.createVideoFormat(codecMime, configs.remoteWidth, configs.remoteHeight)
+    // 获取视频标识头
+    val csd0 = readFrame(configs.videoStream)
+    val csd1 = readFrame(configs.videoStream)
+    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0))
+    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1))
+    // 配置解码器
+    configs.videoDecodec.configure(mediaFormat, configs.surfaceView.holder.surface, null, 0)
+    // 启动解码器
+    configs.videoDecodec.start()
+    // 解析首帧，解决开始黑屏问题
+    var inIndex: Int
+    do {
+      inIndex = configs.videoDecodec.dequeueInputBuffer(0)
+    } while (inIndex < 0)
+    configs.videoDecodec.getInputBuffer(inIndex)!!.put(csd0)
+    configs.videoDecodec.queueInputBuffer(inIndex, 0, csd0.size, 0, 0)
+    do {
+      inIndex = configs.videoDecodec.dequeueInputBuffer(0)
+    } while (inIndex < 0)
+    configs.videoDecodec.getInputBuffer(inIndex)!!.put(csd1)
+    configs.videoDecodec.queueInputBuffer(inIndex, 0, csd1.size, 0, 0)
+  }
+
+  // 音频解码器
+  private fun setAudioDecodec(): Boolean {
+    // 是否停止
+    if (configs.audioStream.readInt() == 0) return false
+    // 创建音频解码器
+    configs.audioDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_OPUS)
+    val sampleRate = 44100
+    val channelCount = 2
+    val bitRate = 128000
+    val mediaFormat =
+      MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_OPUS, sampleRate, channelCount)
+    mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate)
+    // 获取音频标识头
+    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(readFrame(configs.audioStream)))
+    // csd1和csd2暂时没用到，所以默认全是用0
+    val csd12bytes = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+    val csd12ByteBuffer = ByteBuffer.wrap(csd12bytes, 0, csd12bytes.size)
+    mediaFormat.setByteBuffer("csd-1", csd12ByteBuffer)
+    mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer)
+    // 配置解码器
+    configs.audioDecodec.configure(mediaFormat, null, null, 0)
+    // 启动解码器
+    configs.audioDecodec.start()
+    return true
+  }
+
+  // 输入
+  private fun decodecInput(mode: String) {
+    var inIndex: Int
+    val stream = if (mode == "video") configs.videoStream else configs.audioStream
+    val decodec = if (mode == "video") configs.videoDecodec else configs.audioDecodec
+    // 开始解码
+    try {
+      while (configs.status == 0) Thread.sleep(20)
+      while (configs.status == 1) {
+        // 向缓冲区输入数据帧
+        val buffer = readFrame(stream)
+        // 找到一个空的输入缓冲区
+        do {
+          inIndex = decodec.dequeueInputBuffer(0)
+        } while (inIndex < 0)
+        decodec.getInputBuffer(inIndex)!!.put(buffer)
+        // 提交解码器解码
+        decodec.queueInputBuffer(inIndex, 0, buffer.size, 0, 0)
+      }
+    } finally {
+      stream.close()
+      // 神奇不，try里面套try，可是我不知道为什么有时会莫名其妙崩溃，所以直接忽略，哈哈哈
+      try {
+        decodec.stop()
+        decodec.release()
+      } catch (_: IllegalStateException) {
+      }
+      configs.status--
+    }
+  }
+
+  // 输出
+  private fun decodecOutput(mode: String) {
+    var outIndex: Int
+    val bufferInfo = BufferInfo()
+    val decodec = if (mode == "video") configs.videoDecodec else configs.audioDecodec
+    try {
+      while (configs.status == 0) Thread.sleep(20)
+      if (mode == "video") {
+        var decodeNum = 0
+        while (configs.status == 1) {
+          // 找到已完成的输出缓冲区
+          outIndex = decodec.dequeueOutputBuffer(bufferInfo, 0)
+          if (outIndex >= 0) {
+            // 每120帧(两秒)检查一次是否旋转，防止未收到旋转信息
+            decodeNum++
+            if (decodeNum > 119) {
+              decodeNum = 0
+              ifRotation(decodec.getOutputFormat(outIndex))
+            }
+            decodec.releaseOutputBuffer(outIndex, true)
+          } else if (outIndex == INFO_OUTPUT_FORMAT_CHANGED) {
+            ifRotation(decodec.outputFormat)
+          } else {
+            Thread.sleep(8)
+            continue
+          }
+        }
+      } else {
+        val track = configs.audioTrack
+        while (configs.status == 1) {
+          // 找到已完成的输出缓冲区
+          outIndex = decodec.dequeueOutputBuffer(bufferInfo, 0)
+          if (outIndex < 0) {
+            Thread.sleep(4)
+            continue
+          }
+          track.write(
+            decodec.getOutputBuffer(outIndex)!!, bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING
+          )
+          decodec.releaseOutputBuffer(outIndex, false)
+        }
+      }
+    } catch (_: IllegalArgumentException) {
+    } finally {
+      if (mode == "video") {
+        // 隐藏悬浮窗
+        windowManager.removeView(configs.navView)
+        windowManager.removeView(configs.surfaceView)
+      }
+      configs.status--
+    }
+  }
+
+  // 控制报文输出
+  private fun controlOutput() {
+    try {
+      while (configs.status == 0) Thread.sleep(20)
+      while (configs.status == 1) {
+        if (configs.controls.isEmpty()) {
+          Thread.sleep(2)
+          continue
+        }
+        try {
+          configs.controlStream.write(configs.controls.poll())
+        } catch (_: NullPointerException) {
+        }
+      }
+    } finally {
+      // 清空控制命令
+      for (i in configs.controls) {
+        configs.controlStream.write(configs.controls.poll())
+      }
+      configs.controlStream.flush()
+      configs.controls.clear()
+      configs.status--
+    }
+  }
+
+  // 防止被控端熄屏
+  private fun notOffScreen() {
+    try {
+      while (configs.status == 0) Thread.sleep(20)
+      while (configs.status == 1) {
+        configs.adbStream.write(" dumpsys deviceidle | grep mScreenOn \n")
+        while (configs.status == 1) {
+          val str = String(configs.adbStream.read())
+          if (str.contains("mScreenOn=true")) break
+          else if (str.contains("mScreenOn=false")) {
+            configs.adbStream.write(" input keyevent 26 \n")
+            break
+          }
+        }
+        Thread.sleep(2000)
+      }
+    } finally {
+      // 恢复分辨率
+      configs.adbStream.write(" wm size reset \n")
+      configs.adbStream.close()
+      configs.status--
+    }
+  }
+
+  // 被控端熄屏
+  private fun setPowerOff() {
+    val byteBuffer = ByteBuffer.allocate(2)
+    byteBuffer.clear()
+    byteBuffer.put(10)
+    byteBuffer.put(0)
+    byteBuffer.flip()
+    configs.controls.offer(byteBuffer.array())
+  }
+
+  // 判断是否旋转
+  private fun ifRotation(format: MediaFormat) {
+    configs.remoteWidth = format.getInteger("width")
+    configs.remoteHeight = format.getInteger("height")
+    // 检测是否旋转
+    if ((configs.remoteWidth > configs.remoteHeight && configs.localWidth < configs.localHeight) || (configs.remoteWidth < configs.remoteHeight && configs.localWidth > configs.localHeight)) {
+      // surface
+      var tmp = configs.localWidth
+      configs.localWidth = configs.localHeight
+      configs.localHeight = tmp
+      configs.surfaceLayoutParams.apply {
+        width = configs.localWidth
+        height = configs.localHeight
+      }
+      // 导航球，旋转不改变位置
+      if (configs.remoteWidth > configs.remoteHeight) {
+        tmp = configs.navLayoutParams.y
+        configs.navLayoutParams.y =
+          configs.localHeight - configs.navLayoutParams.x - configs.navLayoutParams.width
+        configs.navLayoutParams.x = tmp
+      } else {
+        tmp = configs.navLayoutParams.x
+        configs.navLayoutParams.x =
+          configs.localWidth - configs.navLayoutParams.y - configs.navLayoutParams.height
+        configs.navLayoutParams.y = tmp
+      }
+      runOnUiThread {
+        windowManager.updateViewLayout(configs.surfaceView, configs.surfaceLayoutParams)
+        windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
+      }
+      requestedOrientation =
+        if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
   }
 
   // 从socket流中解析数据
@@ -775,14 +813,12 @@ class MainActivity : AppCompatActivity() {
   // 按键广播处理
   inner class ScreenReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
-      // 恢复被控端屏幕
-      if (configs.status > 0) {
-        Thread { configs.adbStream.write(" wm size reset \n") }.start()
-        Thread.sleep(80)
+      if (configs.status == 1) {
+        // 恢复为未投屏状态
+        configs.status = -1
+        // 取消强制旋转
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
       }
-      finishAndRemoveTask()
-      Runtime.getRuntime().exit(0)
     }
   }
-
 }

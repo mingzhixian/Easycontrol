@@ -13,11 +13,8 @@
         android:label="投屏"
         android:screenOrientation="portrait"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:targetApi="31" >
-        <activity
-            android:name=".Page2"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true" >
