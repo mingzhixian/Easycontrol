@@ -55,7 +55,7 @@ adb tcpip 5555
 - 有线控制，没想法，我认为有线并不舒服，减少的那点延迟不明显，我妈妈现在手机放家里随便一个地方，平板拿起来点击投屏就行，出门才用手机，在家平板大屏幕才爽
 
 ## 演示
-4MB大小，可能加载较慢，可直接前往[此处查看](https://github.com/mingzhixian/scrcpy/blob/master/pic/演示.gif)
+1.5MB大小，可能加载较慢，可直接前往[此处查看](https://github.com/mingzhixian/scrcpy/blob/master/pic/演示.gif)
 
 <img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/演示.gif" width="200px">
 
