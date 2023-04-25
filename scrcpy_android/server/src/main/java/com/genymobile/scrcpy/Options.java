@@ -14,7 +14,7 @@ public class Options {
   private AudioCodec audioCodec = AudioCodec.OPUS;
   private int videoBitRate = 16000000; // 修改
   private int audioBitRate = 128000;
-  private int maxFps = 60; // 修改
+  private int maxFps = 45; // 修改
   private int lockVideoOrientation = -1;
   private boolean tunnelForward = true; // 修改
   private Rect crop;
