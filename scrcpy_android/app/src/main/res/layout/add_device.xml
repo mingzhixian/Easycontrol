@@ -53,7 +53,6 @@
             android:layout_marginStart="25dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="25dp"
-            android:layout_marginBottom="25dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -95,6 +94,60 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:entries="@array/resolutionItems"
+                    android:foregroundTint="#000000"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="25dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="帧率:"
+                    android:textSize="@dimen/largeFont" />
+
+                <Spinner
+                    android:id="@+id/add_device_fps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:entries="@array/fps"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="视频码率:"
+                    android:textSize="@dimen/largeFont" />
+
+                <Spinner
+                    android:id="@+id/add_device_video_bit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:entries="@array/videoBit"
                     android:foregroundTint="#000000"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
