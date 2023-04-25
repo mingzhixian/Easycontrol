@@ -143,7 +143,6 @@ public final class Server {
       for (AsyncProcessor asyncProcessor : asyncProcessors) {
         asyncProcessor.stop();
       }
-
       try {
         initThread.join();
         for (AsyncProcessor asyncProcessor : asyncProcessors) {

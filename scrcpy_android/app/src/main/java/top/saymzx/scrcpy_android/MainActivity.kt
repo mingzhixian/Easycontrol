@@ -1,6 +1,9 @@
 package top.saymzx.scrcpy_android
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.*
 import android.content.Intent.*
 import android.content.pm.ActivityInfo
@@ -22,6 +25,7 @@ import android.view.WindowManager.LayoutParams
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -67,6 +71,12 @@ class Configs : ViewModel() {
   // 视频编解码器类型
   var videoCodecMime = "h264"
 
+  // 视频帧率
+  var fps = 30
+
+  // 视频码率
+  var videoBit = 12000000
+
   // 状态标识(-7为关闭状态，小于0为关闭中，0为准备中，1为投屏中)
   var status = -7
 
@@ -94,7 +104,7 @@ class Configs : ViewModel() {
   lateinit var audioTrack: AudioTrack
 
   // 音频放大器
-  lateinit var loudnessEnhancer: LoudnessEnhancer
+  private lateinit var loudnessEnhancer: LoudnessEnhancer
 
   // context
   @SuppressLint("StaticFieldLeak")
@@ -131,8 +141,8 @@ class Configs : ViewModel() {
       y = 0
     }
     // 触摸xy记录（为了适配有些设备过于敏感，将点击识别为小范围移动）
-    val pointerList = ArrayList<Int>(10)
-    for (i in 1..10) pointerList.add(0)
+    val pointerList = ArrayList<Int>(20)
+    for (i in 1..20) pointerList.add(0)
     surfaceView.setOnTouchListener { _, event ->
       try {
         when (event.actionMasked) {
@@ -140,31 +150,47 @@ class Configs : ViewModel() {
             val i = event.actionIndex
             val x = event.getX(i).toInt()
             val y = event.getY(i).toInt()
-            val xx = x * remoteWidth / localWidth
-            val yy = y * remoteHeight / localHeight
             val p = event.getPointerId(i)
-            packTouchControl(MotionEvent.ACTION_DOWN, p, xx, yy)
+            packTouchControl(
+              MotionEvent.ACTION_DOWN,
+              p,
+              x * remoteWidth / localWidth,
+              y * remoteHeight / localHeight
+            )
             // 记录xy信息
-            pointerList[p] = x + y
+            pointerList[p] = x
+            pointerList[10 + p] = y
           }
           MotionEvent.ACTION_UP, ACTION_POINTER_UP, ACTION_CANCEL -> {
             val i = event.actionIndex
             val x = event.getX(i).toInt()
             val y = event.getY(i).toInt()
-            val xx = x * remoteWidth / localWidth
-            val yy = y * remoteHeight / localHeight
             val p = event.getPointerId(i)
-            packTouchControl(MotionEvent.ACTION_UP, p, xx, yy)
+            packTouchControl(
+              MotionEvent.ACTION_UP,
+              p,
+              x * remoteWidth / localWidth,
+              y * remoteHeight / localHeight
+            )
           }
           ACTION_MOVE -> {
             for (i in 0 until event.pointerCount) {
               val x = event.getX(i).toInt()
               val y = event.getY(i).toInt()
-              val xx = x * remoteWidth / localWidth
-              val yy = y * remoteHeight / localHeight
               val p = event.getPointerId(i)
-              // 适配一些机器将点击视作小范围移动
-              if (abs(pointerList[p] - x - y) > 6) packTouchControl(ACTION_MOVE, p, xx, yy)
+              // 适配一些机器将点击视作小范围移动(小于3的圆内不做处理)
+              if (pointerList[p] != -1) {
+                if ((pointerList[p] - x) * (pointerList[p] - x) + (pointerList[10 + p] - y) * (pointerList[10 + p] - y) < 9) {
+                  return@setOnTouchListener true
+                }
+                pointerList[p] = -1
+              }
+              packTouchControl(
+                ACTION_MOVE,
+                p,
+                x * remoteWidth / localWidth,
+                y * remoteHeight / localHeight
+              )
             }
           }
         }
@@ -322,18 +348,13 @@ class MainActivity : AppCompatActivity() {
     // viewModel
     configs = ViewModelProvider(this)[Configs::class.java]
     // 全屏显示
-    window.decorView.systemUiVisibility =
-      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-    // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      window.attributes.layoutInDisplayCutoutMode =
-        LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-    }
+    setFullScreen()
     // 冷启动
     if (!configs.isInit) {
       // 注册广播用以关闭程序
       val filter = IntentFilter()
       filter.addAction(ACTION_SCREEN_OFF)
+      filter.addAction("top.saymzx.notification")
       registerReceiver(ScreenReceiver(), filter)
       // 检查悬浮窗权限
       if (!Settings.canDrawOverlays(this)) {
@@ -349,11 +370,29 @@ class MainActivity : AppCompatActivity() {
     setDevicesList()
   }
 
+  // 防止全屏状态失效
+  override fun onResume() {
+    setFullScreen()
+    super.onResume()
+  }
+
   // 自动恢复界面
   override fun onPause() {
     super.onPause()
     if (configs.status == 1) {
       startActivity(intent)
+    }
+  }
+
+  // 设置全屏显示
+  private fun setFullScreen() {
+    // 全屏显示
+    window.decorView.systemUiVisibility =
+      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+    // 设置异形屏
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      window.attributes.layoutInDisplayCutoutMode =
+        LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }
   }
 
@@ -379,6 +418,10 @@ class MainActivity : AppCompatActivity() {
             .replace("\\s|\\n|\\r|\\t".toRegex(), ""),
           addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_resolution).selectedItem.toString()
+            .toInt(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
+            .toInt(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItem.toString()
             .toInt()
         )
         dialog.cancel()
@@ -427,6 +470,8 @@ class MainActivity : AppCompatActivity() {
     }.start()
     // 初始状态为竖屏
     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    // 全屏显示
+    setFullScreen()
     // 设置显示悬浮窗
     // 防止横屏打开的问题
     if (configs.localWidth > configs.localHeight) {
@@ -441,6 +486,8 @@ class MainActivity : AppCompatActivity() {
     configs.navLayoutParams.x = 0
     configs.navLayoutParams.y = configs.localHeight * 3 / 8
     windowManager.addView(configs.navView, configs.navLayoutParams)
+    // 设置常驻通知栏用以关闭
+    setNotification()
   }
 
   // 发送server
@@ -520,7 +567,7 @@ class MainActivity : AppCompatActivity() {
         break
       }
     }
-    configs.adbStream.write(" CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${configs.videoCodecMime} max_size=${configs.remoteHeight} > /dev/null 2>&1 & \n")
+    configs.adbStream.write(" CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${configs.videoCodecMime} max_size=${configs.remoteHeight} video_bit_rate=${configs.videoBit} max_fps=${configs.fps} > /dev/null 2>&1 & \n")
   }
 
   // 连接server
@@ -530,6 +577,20 @@ class MainActivity : AppCompatActivity() {
     var controlSocket: Socket? = null
     // 尝试连接server
     for (i in 1..100) {
+      // 中途关闭
+      if (configs.status < 0) {
+        // 删除旧进程
+        configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
+        configs.adbStream.close()
+        // 删除导航悬浮窗
+        windowManager.removeView(configs.navView)
+        // 删除显示悬浮窗
+        windowManager.removeView(configs.surfaceView)
+        // 取消强制旋转
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        // 恢复为未投屏状态
+        configs.status = -7
+      }
       try {
         if (videoSocket == null) videoSocket = Socket(configs.remoteIp, configs.remoteSocketPort)
         if (audioSocket == null) audioSocket = Socket(configs.remoteIp, configs.remoteSocketPort)
@@ -546,6 +607,8 @@ class MainActivity : AppCompatActivity() {
       // 删除旧文件
       val versionCode = BuildConfig.VERSION_CODE
       configs.adbStream.write(" rm /data/local/tmp/scrcpy-server$versionCode.jar \n")
+      // 删除旧进程
+      configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
       configs.adbStream.close()
       // 删除导航悬浮窗
       windowManager.removeView(configs.navView)
@@ -599,7 +662,7 @@ class MainActivity : AppCompatActivity() {
 
   // 音频解码器
   private fun setAudioDecodec(): Boolean {
-    // 是否停止
+    // 是否不支持音频（安卓11以下不支持）
     if (configs.audioStream.readInt() == 0) return false
     // 创建音频解码器
     configs.audioDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_OPUS)
@@ -717,7 +780,9 @@ class MainActivity : AppCompatActivity() {
           continue
         }
         try {
-          configs.controlStream.write(configs.controls.poll())
+          val control = configs.controls.poll()
+          configs.controlStream.write(control)
+          configs.controlStream.flush()
         } catch (_: NullPointerException) {
         }
       }
@@ -751,7 +816,11 @@ class MainActivity : AppCompatActivity() {
     } finally {
       // 恢复分辨率
       configs.adbStream.write(" wm size reset \n")
+      while (configs.status != -6) Thread.sleep(10)
+      configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
       configs.adbStream.close()
+      // 取消常驻通知
+      (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
       configs.status--
     }
   }
@@ -810,10 +879,40 @@ class MainActivity : AppCompatActivity() {
     return buffer
   }
 
+  // 设置通知栏
+  @SuppressLint("LaunchActivityFromNotification")
+  private fun setNotification() {
+    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val importance = NotificationManager.IMPORTANCE_DEFAULT
+      val channel = NotificationChannel("scrcpy_android", "chat", importance).apply {
+        description = "常驻通知用于停止投屏"
+      }
+      notificationManager.createNotificationChannel(channel)
+    }
+    val intent = Intent("top.saymzx.notification")
+    val builder = NotificationCompat.Builder(this, "scrcpy_android")
+      .setSmallIcon(R.drawable.icon)
+      .setContentTitle("投屏")
+      .setContentText("点击关闭投屏")
+      .setPriority(NotificationCompat.PRIORITY_MAX)
+      .setContentIntent(
+        PendingIntent.getBroadcast(
+          this,
+          0,
+          intent,
+          PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+      )
+      .setAutoCancel(true)
+      .setOngoing(true)
+    notificationManager.notify(1, builder.build())
+  }
+
   // 按键广播处理
   inner class ScreenReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
-      if (configs.status == 1) {
+      if (configs.status > 0) {
         // 恢复为未投屏状态
         configs.status = -1
         // 取消强制旋转
