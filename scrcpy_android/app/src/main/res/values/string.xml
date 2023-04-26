@@ -13,16 +13,16 @@
         <item>800</item>
     </string-array>
     <string-array name="fps">
-        <item>30</item>
-        <item>90</item>
         <item>60</item>
+        <item>90</item>
+        <item>30</item>
         <item>40</item>
         <item>10</item>
     </string-array>
     <string-array name="videoBit">
-        <item>12000000</item>
-        <item>18000000</item>
         <item>16000000</item>
+        <item>18000000</item>
+        <item>12000000</item>
         <item>8000000</item>
         <item>4000000</item>
     </string-array>
