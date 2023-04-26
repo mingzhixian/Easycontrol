@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 
 public final class AudioCapture {
 
-  public static final int SAMPLE_RATE = 44100;
+  public static final int SAMPLE_RATE = 48000;
   public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
   public static final int CHANNELS = 2;
   public static final int FORMAT = AudioFormat.ENCODING_PCM_16BIT;
