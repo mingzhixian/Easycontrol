@@ -18,7 +18,7 @@ public final class Streamer {
   private final boolean sendCodecMeta;
   private final boolean sendFrameMeta;
 
-  private final ByteBuffer headerBuffer = ByteBuffer.allocate(12);
+  private final ByteBuffer headerBuffer = ByteBuffer.allocate(4);
 
   public Streamer(FileDescriptor fd, Codec codec, boolean sendCodecMeta, boolean sendFrameMeta) {
     this.fd = fd;
@@ -67,9 +67,7 @@ public final class Streamer {
       fixOpusConfigPacket(buffer);
     }
 
-    if (sendFrameMeta) {
       writeFrameMeta(fd, buffer.remaining(), pts, config, keyFrame);
-    }
 
     IO.writeFully(fd, buffer);
   }
@@ -84,17 +82,17 @@ public final class Streamer {
   private void writeFrameMeta(FileDescriptor fd, int packetSize, long pts, boolean config, boolean keyFrame) throws IOException {
     headerBuffer.clear();
 
-    long ptsAndFlags;
-    if (config) {
-      ptsAndFlags = PACKET_FLAG_CONFIG; // non-media data packet
-    } else {
-      ptsAndFlags = pts;
-      if (keyFrame) {
-        ptsAndFlags |= PACKET_FLAG_KEY_FRAME;
-      }
-    }
-
-    headerBuffer.putLong(ptsAndFlags);
+//    long ptsAndFlags;
+//    if (config) {
+//      ptsAndFlags = PACKET_FLAG_CONFIG; // non-media data packet
+//    } else {
+//      ptsAndFlags = pts;
+//      if (keyFrame) {
+//        ptsAndFlags |= PACKET_FLAG_KEY_FRAME;
+//      }
+//    }
+//
+//    headerBuffer.putLong(ptsAndFlags);
     headerBuffer.putInt(packetSize);
     headerBuffer.flip();
     IO.writeFully(fd, headerBuffer);
