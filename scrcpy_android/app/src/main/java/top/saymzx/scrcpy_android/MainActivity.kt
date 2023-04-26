@@ -730,9 +730,9 @@ class MainActivity : AppCompatActivity() {
           // 找到已完成的输出缓冲区
           outIndex = decodec.dequeueOutputBuffer(bufferInfo, 0)
           if (outIndex >= 0) {
-            // 每120帧(两秒)检查一次是否旋转，防止未收到旋转信息
+            // 每两秒检查一次是否旋转，防止未收到旋转信息
             decodeNum++
-            if (decodeNum > 119) {
+            if (decodeNum > configs.fps * 2 - 1) {
               decodeNum = 0
               ifRotation(decodec.getOutputFormat(outIndex))
             }
@@ -819,8 +819,6 @@ class MainActivity : AppCompatActivity() {
       while (configs.status != -6) Thread.sleep(10)
       configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
       configs.adbStream.close()
-      // 取消常驻通知
-      (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
       configs.status--
     }
   }
@@ -917,6 +915,8 @@ class MainActivity : AppCompatActivity() {
         configs.status = -1
         // 取消强制旋转
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        // 取消常驻通知
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
       }
     }
   }

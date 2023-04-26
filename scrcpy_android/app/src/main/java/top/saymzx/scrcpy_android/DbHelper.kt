@@ -35,7 +35,7 @@ class DbHelper(
       if (cursor.moveToFirst()) {
         do {
           val name = cursor.getString(cursor.getColumnIndex("name"))
-          db.execSQL("update DevicesDb set fps='30',videoBit='12000000' where name=='$name'")
+          db.execSQL("update DevicesDb set fps='60',videoBit='16000000' where name=='$name'")
         } while (cursor.moveToNext())
       }
       cursor.close()
