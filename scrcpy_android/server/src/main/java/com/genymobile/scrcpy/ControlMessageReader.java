@@ -84,7 +84,7 @@ public class ControlMessageReader {
       case ControlMessage.TYPE_EXPAND_SETTINGS_PANEL:
       case ControlMessage.TYPE_COLLAPSE_PANELS:
       case ControlMessage.TYPE_ROTATE_DEVICE:
-        msg = parseSetRotate();
+        msg = ControlMessage.createEmpty(type);
         break;
       default:
         Ln.w("Unknown event type: " + type);
@@ -192,14 +192,6 @@ public class ControlMessageReader {
     }
     int mode = buffer.get();
     return ControlMessage.createSetScreenPowerMode(mode);
-  }
-
-  private ControlMessage parseSetRotate() {
-    if (buffer.remaining() < 1) {
-      return null;
-    }
-    int rotate = buffer.get();
-    return ControlMessage.createSetRotate(rotate);
   }
 
   private static Position readPosition(ByteBuffer buffer) {
