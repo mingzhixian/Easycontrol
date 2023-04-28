@@ -117,6 +117,13 @@ public final class ControlMessage {
     return msg;
   }
 
+  public static ControlMessage createSetRotate(int rotate) {
+    ControlMessage msg = new ControlMessage();
+    msg.type = TYPE_ROTATE_DEVICE;
+    msg.action = rotate;
+    return msg;
+  }
+
   public static ControlMessage createEmpty(int type) {
     ControlMessage msg = new ControlMessage();
     msg.type = type;

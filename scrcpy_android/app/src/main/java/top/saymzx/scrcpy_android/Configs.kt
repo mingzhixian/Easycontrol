@@ -80,6 +80,9 @@ class Configs : ViewModel() {
   // 音频放大器
   private lateinit var loudnessEnhancer: LoudnessEnhancer
 
+  // 目前屏幕方向
+  var nowOrientation=-1
+
   // context
   @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity
