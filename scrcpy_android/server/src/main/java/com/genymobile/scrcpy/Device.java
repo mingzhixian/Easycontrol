@@ -315,17 +315,23 @@ public final class Device {
   /**
    * Disable auto-rotation (if enabled), set the screen rotation and re-enable auto-rotation (if it was enabled).
    */
-  public static void rotateDevice() {
+  public static void rotateDevice(int rorate) {
     WindowManager wm = ServiceManager.getWindowManager();
 
     boolean accelerometerRotation = !wm.isRotationFrozen();
 
     int currentRotation = wm.getRotation();
-    int newRotation = (currentRotation & 1) ^ 1; // 0->1, 1->0, 2->1, 3->0
-    String newRotationString = newRotation == 0 ? "portrait" : "landscape";
-
-    Ln.i("Device rotation requested: " + newRotationString);
-    wm.freezeRotation(newRotation);
+//    int newRotation = (currentRotation & 1) ^ 1; // 0->1, 1->0, 2->1, 3->0
+//    String newRotationString = newRotation == 0 ? "portrait" : "landscape";
+//
+//    Ln.i("Device rotation requested: " + newRotationString);
+    // 防止上下旋转未识别
+    if (currentRotation == rorate) {
+      wm.freezeRotation(rorate ^ 1);
+      wm.freezeRotation(rorate);
+    } else {
+      wm.freezeRotation(rorate);
+    }
 
     // restore auto-rotate if necessary
     if (accelerometerRotation) {

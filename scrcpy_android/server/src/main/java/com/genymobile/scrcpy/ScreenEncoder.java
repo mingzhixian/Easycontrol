@@ -78,7 +78,11 @@ public class ScreenEncoder implements Device.RotationListener {
         Rect videoRect = screenInfo.getVideoSize().toRect();
         format.setInteger(MediaFormat.KEY_WIDTH, videoRect.width());
         format.setInteger(MediaFormat.KEY_HEIGHT, videoRect.height());
-        format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline);
+        // 减少B帧，降低延迟
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+          format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline);
+          format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel31);
+        }
 
         Surface surface = null;
         try {
@@ -98,6 +102,10 @@ public class ScreenEncoder implements Device.RotationListener {
           mediaCodec.stop();
         } catch (IllegalStateException | IllegalArgumentException e) {
           Ln.e("Encoding error: " + e.getClass().getName() + ": " + e.getMessage());
+          // 回退参数
+          format = createFormat(codec.getMimeType(), videoBitRate, maxFps, codecOptions);
+          format.setInteger(MediaFormat.KEY_WIDTH, videoRect.width());
+          format.setInteger(MediaFormat.KEY_HEIGHT, videoRect.height());
           if (!prepareRetry(device, screenInfo)) {
             throw e;
           }
