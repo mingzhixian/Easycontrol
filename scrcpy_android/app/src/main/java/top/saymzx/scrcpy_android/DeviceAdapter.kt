@@ -40,6 +40,7 @@ class DeviceAdapter(private val main: MainActivity) :
       // 设置状态为准备中
       main.configs.status = 0
       main.configs.remoteIp = device.address
+      main.configs.remotePort = device.port
       main.configs.videoCodecMime = device.videoCodec
       main.configs.remoteHeight = device.resolution
       main.configs.fps = device.fps
