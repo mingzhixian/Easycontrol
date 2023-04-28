@@ -54,6 +54,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ."
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
@@ -74,6 +75,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:digits="1234567890"
+                    android:text="5555"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
