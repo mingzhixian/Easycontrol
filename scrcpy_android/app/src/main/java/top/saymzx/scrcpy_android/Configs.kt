@@ -30,7 +30,7 @@ class Configs : ViewModel() {
   var remoteIp = ""
 
   // 被控端ADB端口
-  val remotePort = 5555
+  var remotePort = 5555
 
   // 被控端socket端口
   val remoteSocketPort = 6006
