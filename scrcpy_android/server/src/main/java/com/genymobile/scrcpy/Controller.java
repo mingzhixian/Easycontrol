@@ -170,7 +170,7 @@ public class Controller implements AsyncProcessor {
         }
         break;
       case ControlMessage.TYPE_ROTATE_DEVICE:
-        Device.rotateDevice();
+        Device.rotateDevice(msg.getAction());
         break;
       default:
         // do nothing
