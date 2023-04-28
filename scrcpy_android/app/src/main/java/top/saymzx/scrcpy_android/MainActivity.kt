@@ -119,8 +119,7 @@ class MainActivity : AppCompatActivity() {
       addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
         deviceAdapter.newDevice(
           addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
-          addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString()
-            .replace("\\s|\\n|\\r|\\t".toRegex(), ""),
+          addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString(),
           addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_resolution).selectedItem.toString()
@@ -639,8 +638,20 @@ class MainActivity : AppCompatActivity() {
 
   // 按键广播处理
   inner class ScreenReceiver : BroadcastReceiver() {
-    override fun onReceive(p0: Context?, p1: Intent?) {
+    @SuppressLint("WrongConstant")
+    override fun onReceive(context: Context?, intent: Intent?) {
       if (configs.status > 0) {
+        // 如果为通知栏关闭则自动收起通知栏
+        try {
+          val service = getSystemService("statusbar")
+          if (service != null) {
+            val collapse = Class.forName("android.app.StatusBarManager").getMethod("collapsePanels")
+            collapse.isAccessible = true
+            collapse.invoke(service)
+          }
+        } catch (e: Exception) {
+          e.printStackTrace()
+        }
         // 恢复为未投屏状态
         configs.status = -1
         // 取消强制旋转
