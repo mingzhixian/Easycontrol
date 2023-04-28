@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 class DeviceAdapter(private val main: MainActivity) :
   RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
   private var dbHelper = DbHelper(main, "scrcpy_android.db", 2)
-  var devices = initData()
+  private var devices = initData()
 
   inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val textViewName: TextView = view.findViewById(R.id.device_name)

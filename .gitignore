@@ -9,6 +9,7 @@ scrcpy_android/.idea/navEditor.xml
 scrcpy_android/.idea/assetWizardSettings.xml
 scrcpy_android/.DS_Store
 scrcpy_android/build
+scrcpy_android/app/release
 scrcpy_android/captures
 scrcpy_android/.externalNativeBuild
 scrcpy_android/.cxx
@@ -25,6 +26,7 @@ scrcpy_back/.idea/navEditor.xml
 scrcpy_back/.idea/assetWizardSettings.xml
 scrcpy_back/.DS_Store
 scrcpy_back/build
+scrcpy_back/app/release
 scrcpy_back/captures
 scrcpy_back/.externalNativeBuild
 scrcpy_back/.cxx

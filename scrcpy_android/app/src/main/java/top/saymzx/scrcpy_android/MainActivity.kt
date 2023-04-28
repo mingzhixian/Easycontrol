@@ -8,8 +8,6 @@ import android.content.*
 import android.content.Intent.*
 import android.content.pm.ActivityInfo
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.*
 import android.media.MediaCodec.BufferInfo
@@ -70,13 +68,7 @@ class MainActivity : AppCompatActivity() {
       configs.isInit = true
       configs.main = this
       configs.init()
-      // 注册重力感应用以旋转屏幕
-      val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-      sensorManager.registerListener(
-        OrientationListener(),
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-        SensorManager.SENSOR_DELAY_NORMAL
-      )
+      configs.sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
     // 读取数据库并展示设备列表
     setDevicesList()
@@ -200,6 +192,12 @@ class MainActivity : AppCompatActivity() {
     windowManager.addView(configs.navView, configs.navLayoutParams)
     // 设置常驻通知栏用以关闭
     setNotification()
+    // 注册重力传感器
+    configs.sensorManager.registerListener(
+      configs.orientationListener,
+      configs.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+      SensorManager.SENSOR_DELAY_NORMAL
+    )
   }
 
   // 发送server
@@ -531,6 +529,8 @@ class MainActivity : AppCompatActivity() {
       while (configs.status != -6) Thread.sleep(10)
       configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
       configs.adbStream.close()
+      // 关闭重力传感器监听
+      configs.sensorManager.unregisterListener(configs.orientationListener)
       configs.status--
     }
   }
@@ -541,16 +541,6 @@ class MainActivity : AppCompatActivity() {
     byteBuffer.clear()
     byteBuffer.put(10)
     byteBuffer.put(0)
-    byteBuffer.flip()
-    configs.controls.offer(byteBuffer.array())
-  }
-
-  // 被控端旋转
-  private fun setRotation(rotation: Int) {
-    val byteBuffer = ByteBuffer.allocate(2)
-    byteBuffer.clear()
-    byteBuffer.put(11)
-    byteBuffer.put(rotation.toByte())
     byteBuffer.flip()
     configs.controls.offer(byteBuffer.array())
   }
@@ -587,12 +577,12 @@ class MainActivity : AppCompatActivity() {
         windowManager.updateViewLayout(configs.navView, configs.navLayoutParams)
       }
       // 旋转方向
-      if (configs.remoteWidth > configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE))
-        requestedOrientation = configs.nowOrientation
-      else if (configs.remoteWidth < configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT))
-        requestedOrientation = configs.nowOrientation
-      else
-        requestedOrientation =
+      requestedOrientation =
+        if (configs.remoteWidth > configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE))
+          configs.nowOrientation
+        else if (configs.remoteWidth < configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT))
+          configs.nowOrientation
+        else
           if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
   }
@@ -649,38 +639,4 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  // 重力感应处理
-  inner class OrientationListener : SensorEventListener {
-    override fun onSensorChanged(event: SensorEvent?) {
-      if (event == null || Sensor.TYPE_ACCELEROMETER != event.sensor.type) {
-        return
-      }
-      val values = event.values
-      val x = values[0]
-      val y = values[1]
-
-      val newOrientation = if (x < 4.5 && x >= -4.5 && y >= 4.5) {
-        //纵向显示
-        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-      } else if (x >= 4.5 && y < 4.5 && y >= -4.5) {
-        //横向显示
-        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-      } else if (x <= -4.5 && y < 4.5 && y >= -4.5) {
-        //与正常的横向方向相反显示
-        ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-      } else {
-        //与正常的纵向方向相反显示
-        ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-      }
-      // 发送旋转请求
-      if (configs.status == 1 && configs.nowOrientation != newOrientation) {
-        configs.nowOrientation = newOrientation
-        setRotation(if (newOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT || newOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT) 0 else 1)
-      }
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-    }
-
-  }
 }
