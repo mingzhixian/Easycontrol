@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class DeviceAdapter(private val main: MainActivity) :
   RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
-  private var dbHelper = DbHelper(main, "scrcpy_android.db", 2)
+  private var dbHelper = DbHelper(main, "scrcpy_android.db", 3)
   private var devices = initData()
 
   inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -29,7 +29,7 @@ class DeviceAdapter(private val main: MainActivity) :
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     val device = devices[position]
     holder.textViewName.text = device.name
-    holder.textViewIP.text = device.ip
+    holder.textViewIP.text = device.address
     // 单击打开投屏
     holder.linearLayout.setOnClickListener {
       // 防止上次未关闭完全以及用户双击导致打开两次
@@ -39,7 +39,7 @@ class DeviceAdapter(private val main: MainActivity) :
       }
       // 设置状态为准备中
       main.configs.status = 0
-      main.configs.remoteIp = device.ip
+      main.configs.remoteIp = device.address
       main.configs.videoCodecMime = device.videoCodec
       main.configs.remoteHeight = device.resolution
       main.configs.fps = device.fps
@@ -48,8 +48,7 @@ class DeviceAdapter(private val main: MainActivity) :
     }
     // 长按删除
     holder.linearLayout.setOnLongClickListener {
-      val deleteDeviceView =
-        LayoutInflater.from(main).inflate(R.layout.delete_device, null, false)
+      val deleteDeviceView = LayoutInflater.from(main).inflate(R.layout.delete_device, null, false)
       val builder: AlertDialog.Builder = AlertDialog.Builder(main)
       builder.setView(deleteDeviceView)
       builder.setCancelable(false)
@@ -61,9 +60,7 @@ class DeviceAdapter(private val main: MainActivity) :
       }
       deleteDeviceView.findViewById<Button>(R.id.delete_device_ok).setOnClickListener {
         dbHelper.writableDatabase.delete(
-          "DevicesDb",
-          "name = ?",
-          arrayOf(device.name)
+          "DevicesDb", "name = ?", arrayOf(device.name)
         )
         devices.remove(device)
         notifyDataSetChanged()
@@ -81,14 +78,14 @@ class DeviceAdapter(private val main: MainActivity) :
   private fun initData(): ArrayList<Device> {
     val devices = ArrayList<Device>()
     //数据库获取
-    val cursor =
-      dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
+    val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
     if (cursor.moveToFirst()) {
       do {
         devices.add(
           Device(
             cursor.getString(cursor.getColumnIndex("name")),
-            cursor.getString(cursor.getColumnIndex("ip")),
+            cursor.getString(cursor.getColumnIndex("address")),
+            cursor.getInt(cursor.getColumnIndex("port")),
             cursor.getString(cursor.getColumnIndex("videoCodec")),
             cursor.getInt(cursor.getColumnIndex("resolution")),
             cursor.getInt(cursor.getColumnIndex("fps")),
@@ -105,7 +102,8 @@ class DeviceAdapter(private val main: MainActivity) :
   @SuppressLint("NotifyDataSetChanged")
   fun newDevice(
     name: String,
-    ip: String,
+    address: String,
+    port: Int,
     videoCodec: String,
     resolution: Int,
     fps: Int,
@@ -113,7 +111,8 @@ class DeviceAdapter(private val main: MainActivity) :
   ) {
     val values = ContentValues().apply {
       put("name", name)
-      put("ip", ip)
+      put("address", address)
+      put("port", port)
       put("videoCodec", videoCodec)
       put("resolution", resolution)
       put("fps", fps)
@@ -121,7 +120,7 @@ class DeviceAdapter(private val main: MainActivity) :
     }
     // ip重复
     if (dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
-      devices.add(Device(name, ip, videoCodec, resolution, fps, videoBit))
+      devices.add(Device(name, address, port, videoCodec, resolution, fps, videoBit))
       notifyDataSetChanged()
     }
   }
