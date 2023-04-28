@@ -1,7 +1,12 @@
 package top.saymzx.scrcpy_android
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
@@ -81,7 +86,13 @@ class Configs : ViewModel() {
   private lateinit var loudnessEnhancer: LoudnessEnhancer
 
   // 目前屏幕方向
-  var nowOrientation=-1
+  var nowOrientation = -1
+
+  // 传感器管理
+  lateinit var sensorManager: SensorManager
+
+  // 重力传感器处理
+  val orientationListener = OrientationListener()
 
   // context
   @SuppressLint("StaticFieldLeak")
@@ -307,6 +318,63 @@ class Configs : ViewModel() {
     } catch (_: IllegalArgumentException) {
     }
     audioTrack.play()
+  }
+
+  // 重力感应处理
+  inner class OrientationListener : SensorEventListener {
+    override fun onSensorChanged(event: SensorEvent?) {
+      if (event == null || Sensor.TYPE_ACCELEROMETER != event.sensor.type) {
+        return
+      }
+      val values = event.values
+      val x = values[0]
+      val y = values[1]
+
+      val newOrientation = if (x < 4 && x > -4 && y > 5) {
+        //纵向显示
+        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+      } else if (x > 5 && y < 4 && y > -4) {
+        //横向显示
+        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+      } else if (x < -5 && y < 4 && y > -4) {
+        //与正常的横向方向相反显示
+        ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+      } else if (x < 4 && x > -4 && y < -5) {
+        //与正常的纵向方向相反显示
+        ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+      } else {
+        return
+      }
+      // 发送旋转请求
+      if (status == 1 && nowOrientation != newOrientation) {
+        // 如果是横屏变相反横屏
+        if (remoteWidth > remoteHeight && (newOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE || newOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)) {
+          main.requestedOrientation = newOrientation
+        }
+        // 如果是竖屏变相反竖屏
+        else if (remoteWidth < remoteHeight && (newOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT || newOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)) {
+          main.requestedOrientation = newOrientation
+        }
+        // 如果是横竖屏切换
+        else {
+          nowOrientation = newOrientation
+          setRotation()
+        }
+      }
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+    }
+
+  }
+
+  // 被控端旋转
+  private fun setRotation() {
+    val byteBuffer = ByteBuffer.allocate(1)
+    byteBuffer.clear()
+    byteBuffer.put(11)
+    byteBuffer.flip()
+    controls.offer(byteBuffer.array())
   }
 
 }
