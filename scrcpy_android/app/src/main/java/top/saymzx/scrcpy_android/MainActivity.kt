@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tananaev.adblib.AdbConnection
 import com.tananaev.adblib.AdbCrypto
 import java.io.*
+import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.nio.ByteBuffer
@@ -118,13 +119,13 @@ class MainActivity : AppCompatActivity() {
       addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
         deviceAdapter.newDevice(
           addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
-          addDeviceView.findViewById<EditText>(R.id.add_device_ip).text.toString()
+          addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString()
             .replace("\\s|\\n|\\r|\\t".toRegex(), ""),
+          addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_resolution).selectedItem.toString()
             .toInt(),
-          addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
-            .toInt(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString().toInt(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItem.toString()
             .toInt()
         )
@@ -217,9 +218,12 @@ class MainActivity : AppCompatActivity() {
     // 连接ADB
     val socket = Socket()
     try {
+      // 支持域名
+      configs.remoteIp = Inet4Address.getByName(configs.remoteIp).hostAddress!!
       socket.connect(InetSocketAddress(configs.remoteIp, configs.remotePort), 1000)
     } catch (_: IOException) {
       runOnUiThread { Toast.makeText(this, "连接失败，请检查IP地址以及是否开启ADB网络调试", Toast.LENGTH_SHORT).show() }
+      (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
       // 删除导航悬浮窗
       windowManager.removeView(configs.navView)
       // 删除显示悬浮窗
@@ -229,8 +233,26 @@ class MainActivity : AppCompatActivity() {
       // 恢复为未投屏状态
       configs.status = -7
     }
+    // 超时未授权
+    var connected = false
+    Thread {
+      Thread.sleep(10000)
+      if (!connected) {
+        runOnUiThread { Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show() }
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
+        // 删除导航悬浮窗
+        windowManager.removeView(configs.navView)
+        // 删除显示悬浮窗
+        windowManager.removeView(configs.surfaceView)
+        // 取消强制旋转
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        // 恢复为未投屏状态
+        configs.status = -7
+      }
+    }.start()
     val connection = AdbConnection.create(socket, crypto)
     connection.connect()
+    connected = true
     configs.adbStream = connection.open("shell:")
     // 删除旧进程
     configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
@@ -292,6 +314,7 @@ class MainActivity : AppCompatActivity() {
         // 删除旧进程
         configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
         configs.adbStream.close()
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
         // 删除导航悬浮窗
         windowManager.removeView(configs.navView)
         // 删除显示悬浮窗
@@ -578,12 +601,9 @@ class MainActivity : AppCompatActivity() {
       }
       // 旋转方向
       requestedOrientation =
-        if (configs.remoteWidth > configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE))
-          configs.nowOrientation
-        else if (configs.remoteWidth < configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT))
-          configs.nowOrientation
-        else
-          if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (configs.remoteWidth > configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)) configs.nowOrientation
+        else if (configs.remoteWidth < configs.remoteHeight && (configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT || configs.nowOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT)) configs.nowOrientation
+        else if (configs.remoteWidth > configs.remoteHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
   }
 
@@ -607,21 +627,13 @@ class MainActivity : AppCompatActivity() {
       notificationManager.createNotificationChannel(channel)
     }
     val intent = Intent("top.saymzx.notification")
-    val builder = NotificationCompat.Builder(this, "scrcpy_android")
-      .setSmallIcon(R.drawable.icon)
-      .setContentTitle("投屏")
-      .setContentText("点击关闭投屏")
-      .setPriority(NotificationCompat.PRIORITY_MAX)
+    val builder = NotificationCompat.Builder(this, "scrcpy_android").setSmallIcon(R.drawable.icon)
+      .setContentTitle("投屏").setContentText("点击关闭投屏").setPriority(NotificationCompat.PRIORITY_MAX)
       .setContentIntent(
         PendingIntent.getBroadcast(
-          this,
-          0,
-          intent,
-          PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+          this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-      )
-      .setAutoCancel(true)
-      .setOngoing(true)
+      ).setAutoCancel(true).setOngoing(true)
     notificationManager.notify(1, builder.build())
   }
 
