@@ -28,6 +28,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.tananaev.adblib.AdbAuthenticationFailedException
 import com.tananaev.adblib.AdbConnection
 import com.tananaev.adblib.AdbCrypto
 import java.io.*
@@ -37,6 +38,7 @@ import java.net.Socket
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.xml.bind.DatatypeConverter
 
 class MainActivity : AppCompatActivity() {
@@ -232,26 +234,31 @@ class MainActivity : AppCompatActivity() {
       // 恢复为未投屏状态
       configs.status = -7
     }
-    // 超时未授权
-    var connected = false
-    Thread {
-      Thread.sleep(10000)
-      if (!connected) {
-        runOnUiThread { Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show() }
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
-        // 删除导航悬浮窗
-        windowManager.removeView(configs.navView)
-        // 删除显示悬浮窗
-        windowManager.removeView(configs.surfaceView)
-        // 取消强制旋转
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        // 恢复为未投屏状态
-        configs.status = -7
-      }
-    }.start()
     val connection = AdbConnection.create(socket, crypto)
-    connection.connect()
-    connected = true
+    try {
+      // 十秒超时
+      connection.connect(10000, TimeUnit.MILLISECONDS, true)
+    } catch (_: AdbAuthenticationFailedException) {
+      Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show()
+      // 删除导航悬浮窗
+      windowManager.removeView(configs.navView)
+      // 删除显示悬浮窗
+      windowManager.removeView(configs.surfaceView)
+      // 取消强制旋转
+      requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+      // 恢复为未投屏状态
+      configs.status = -7
+    } catch (_: IOException) {
+      Toast.makeText(this, "连接中断", Toast.LENGTH_SHORT).show()
+      // 删除导航悬浮窗
+      windowManager.removeView(configs.navView)
+      // 删除显示悬浮窗
+      windowManager.removeView(configs.surfaceView)
+      // 取消强制旋转
+      requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+      // 恢复为未投屏状态
+      configs.status = -7
+    }
     configs.adbStream = connection.open("shell:")
     // 删除旧进程
     configs.adbStream.write(" ps -ef | grep scrcpy | grep -v grep | awk '{print $2}' | xargs kill -9 \n")
