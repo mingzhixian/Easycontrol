@@ -32,3 +32,4 @@ scrcpy_back/captures
 scrcpy_back/.externalNativeBuild
 scrcpy_back/.cxx
 scrcpy_back/local.properties
+/scrcpy_android/app/debug
