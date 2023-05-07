@@ -41,6 +41,7 @@ class DeviceAdapter(private val main: MainActivity) :
       main.configs.status = 0
       main.configs.remoteIp = device.address
       main.configs.remotePort = device.port
+      main.configs.remoteSocketPort = device.remoteSocketPort
       main.configs.videoCodecMime = device.videoCodec
       main.configs.remoteHeight = device.resolution
       main.configs.fps = device.fps
@@ -87,6 +88,7 @@ class DeviceAdapter(private val main: MainActivity) :
             cursor.getString(cursor.getColumnIndex("name")),
             cursor.getString(cursor.getColumnIndex("address")),
             cursor.getInt(cursor.getColumnIndex("port")),
+            cursor.getInt(cursor.getColumnIndex("remoteSocketPort")),
             cursor.getString(cursor.getColumnIndex("videoCodec")),
             cursor.getInt(cursor.getColumnIndex("resolution")),
             cursor.getInt(cursor.getColumnIndex("fps")),
@@ -105,6 +107,7 @@ class DeviceAdapter(private val main: MainActivity) :
     name: String,
     address: String,
     port: Int,
+    remoteSocketPort: Int,
     videoCodec: String,
     resolution: Int,
     fps: Int,
@@ -114,6 +117,7 @@ class DeviceAdapter(private val main: MainActivity) :
       put("name", name)
       put("address", address)
       put("port", port)
+      put("remoteSocketPort", remoteSocketPort)
       put("videoCodec", videoCodec)
       put("resolution", resolution)
       put("fps", fps)
@@ -121,7 +125,7 @@ class DeviceAdapter(private val main: MainActivity) :
     }
     // ip重复
     if (dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
-      devices.add(Device(name, address, port, videoCodec, resolution, fps, videoBit))
+      devices.add(Device(name, address, port, remoteSocketPort, videoCodec, resolution, fps, videoBit))
       notifyDataSetChanged()
     }
   }

@@ -67,6 +67,7 @@ public final class Server {
 
     int scid = options.getScid();
     boolean tunnelForward = options.isTunnelForward();
+    int remoteSocketPort = options.getRemoteSocketPort();
     boolean control = options.getControl();
     boolean audio = options.getAudio();
     boolean sendDummyByte = options.getSendDummyByte();
@@ -94,7 +95,7 @@ public final class Server {
 
     List<AsyncProcessor> asyncProcessors = new ArrayList<>();
 
-    try (DesktopConnection connection = DesktopConnection.open(scid, tunnelForward, audio, control, sendDummyByte)) {
+    try (DesktopConnection connection = DesktopConnection.open(scid, tunnelForward, remoteSocketPort, audio, control, sendDummyByte)) {
       if (options.getSendDeviceMeta()) {
         connection.sendDeviceMeta(Device.getDeviceName());
       }
@@ -235,6 +236,10 @@ public final class Server {
         case "tunnel_forward":
           boolean tunnelForward = Boolean.parseBoolean(value);
           options.setTunnelForward(tunnelForward);
+          break;
+        case "remoteSocketPort":
+          int remoteSocketPort = Integer.parseInt(value);
+          options.setRemoteSocketPort(remoteSocketPort);
           break;
         case "crop":
           Rect crop = parseCrop(value);

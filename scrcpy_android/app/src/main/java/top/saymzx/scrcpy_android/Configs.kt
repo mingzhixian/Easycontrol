@@ -33,7 +33,7 @@ class Configs : ViewModel() {
   var remotePort = 5555
 
   // 被控端socket端口
-  val remoteSocketPort = 6006
+  var remoteSocketPort = 6008
 
   // 被控端屏幕大小（缩放后的，即视频流大小）
   var remoteWidth = 0

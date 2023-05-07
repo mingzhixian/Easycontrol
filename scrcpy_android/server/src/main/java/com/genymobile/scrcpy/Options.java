@@ -42,6 +42,8 @@ public class Options {
   private boolean sendDummyByte = false; // 修改
   private boolean sendCodecMeta = true; // write the codec metadata before the stream
 
+  private int remoteSocketPort;
+
   public Ln.Level getLogLevel() {
     return logLevel;
   }
@@ -288,5 +290,13 @@ public class Options {
 
   public void setSendCodecMeta(boolean sendCodecMeta) {
     this.sendCodecMeta = sendCodecMeta;
+  }
+
+  public int getRemoteSocketPort() {
+    return remoteSocketPort;
+  }
+
+  public void setRemoteSocketPort(int remoteSocketPort) {
+    this.remoteSocketPort = remoteSocketPort;
   }
 }

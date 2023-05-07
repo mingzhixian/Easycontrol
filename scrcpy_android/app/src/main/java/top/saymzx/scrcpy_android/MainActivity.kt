@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity() {
           addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
           addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString(),
           addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
+          addDeviceView.findViewById<EditText>(R.id.add_device_socket_port).text.toString().toInt(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
           addDeviceView.findViewById<Spinner>(R.id.add_device_resolution).selectedItem.toString()
             .toInt(),
@@ -298,7 +299,8 @@ class MainActivity : AppCompatActivity() {
         break
       }
     }
-    configs.adbStream.write(" CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${configs.videoCodecMime} max_size=${configs.remoteHeight} video_bit_rate=${configs.videoBit} max_fps=${configs.fps} > /dev/null 2>&1 & \n")
+    runOnUiThread{Toast.makeText(this,"参数 CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${configs.videoCodecMime} max_size=${configs.remoteHeight} video_bit_rate=${configs.videoBit} max_fps=${configs.fps} remoteSocketPort=${configs.remoteSocketPort} > /dev/null 2>&1 & \n",Toast.LENGTH_LONG).show()}
+    configs.adbStream.write(" CLASSPATH=/data/local/tmp/scrcpy-server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${configs.videoCodecMime} max_size=${configs.remoteHeight} video_bit_rate=${configs.videoBit} max_fps=${configs.fps} remoteSocketPort=${configs.remoteSocketPort} > /dev/null 2>&1 & \n")
   }
 
   // 连接server

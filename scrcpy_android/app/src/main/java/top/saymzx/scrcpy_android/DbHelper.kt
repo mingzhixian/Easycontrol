@@ -18,6 +18,7 @@ class DbHelper(
           "\t name text PRIMARY KEY,\n" +
           "\t address text,\n" +
           "\t port integer,\n" +
+          "\t remoteSocketPort integer,\n" +
           "\t videoCodec text,\n" +
           "\t resolution integer,\n" +
           "\t fps integer,\n" +
@@ -52,6 +53,7 @@ class DbHelper(
             "\t name text PRIMARY KEY,\n" +
             "\t address text,\n" +
             "\t port integer,\n" +
+            "\t remoteSocketPort integer,\n" +
             "\t videoCodec text,\n" +
             "\t resolution integer,\n" +
             "\t fps integer,\n" +

@@ -29,6 +29,26 @@
             android:layout_marginEnd="25dp"
             android:textSize="@dimen/middleFont" />
 
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="25dp"
+            android:text="被控端socket端口:"
+            android:textSize="@dimen/largeFont" />
+
+        <EditText
+            android:id="@+id/add_device_socket_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="25dp"
+            android:text="6008"
+            android:textSize="@dimen/middleFont" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:digits="1234567890"
-                    android:text="5555"
+                    android:text="55556"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 

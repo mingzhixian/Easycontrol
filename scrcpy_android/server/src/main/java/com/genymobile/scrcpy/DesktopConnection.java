@@ -62,13 +62,13 @@ public final class DesktopConnection implements Closeable {
     return SOCKET_NAME_PREFIX + String.format("_%08x", scid);
   }
 
-  public static DesktopConnection open(int scid, boolean tunnelForward, boolean audio, boolean control, boolean sendDummyByte) throws IOException {
+  public static DesktopConnection open(int scid, boolean tunnelForward, int remoteSocketPort, boolean audio, boolean control, boolean sendDummyByte) throws IOException {
     Socket videoSocket = null;
     Socket audioSocket = null;
     Socket controlSocket = null;
     try {
       if (tunnelForward) {
-        try (ServerSocket localServerSocket = new ServerSocket(6006)) {
+        try (ServerSocket localServerSocket = new ServerSocket(remoteSocketPort)) {
           videoSocket = localServerSocket.accept();
           if (sendDummyByte) {
             // send one byte so the client may read() to detect a connection error
