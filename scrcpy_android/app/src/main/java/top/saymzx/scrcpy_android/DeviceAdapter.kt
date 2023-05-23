@@ -1,22 +1,20 @@
 package top.saymzx.scrcpy_android
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 
 class DeviceAdapter(private val main: MainActivity) :
   RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
-  private var dbHelper = DbHelper(main, "scrcpy_android.db", 3)
-  private var devices = initData()
 
   inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val textViewName: TextView = view.findViewById(R.id.device_name)
-    val textViewIP: TextView = view.findViewById(R.id.device_ip)
+    val textViewAddress: TextView = view.findViewById(R.id.device_address)
     val linearLayout: LinearLayout = view.findViewById(R.id.device)
   }
 
@@ -27,25 +25,13 @@ class DeviceAdapter(private val main: MainActivity) :
 
   @SuppressLint("MissingInflatedId", "NotifyDataSetChanged")
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    val device = devices[position]
+    val device = main.appData.devices[position]
     holder.textViewName.text = device.name
-    holder.textViewIP.text = device.address
+    val address = "${device.address}:${device.port}"
+    holder.textViewAddress.text = address
     // 单击打开投屏
     holder.linearLayout.setOnClickListener {
-      // 防止上次未关闭完全以及用户双击导致打开两次
-      if (main.configs.status != -7) {
-        Toast.makeText(main, "请等待上一个连接关闭完成", Toast.LENGTH_SHORT).show()
-        return@setOnClickListener
-      }
-      // 设置状态为准备中
-      main.configs.status = 0
-      main.configs.remoteIp = device.address
-      main.configs.remotePort = device.port
-      main.configs.videoCodecMime = device.videoCodec
-      main.configs.remoteHeight = device.resolution
-      main.configs.fps = device.fps
-      main.configs.videoBit = device.videoBit
-      main.startScrcpy()
+      Scrcpy(device, main).start()
     }
     // 长按删除
     holder.linearLayout.setOnLongClickListener {
@@ -60,10 +46,10 @@ class DeviceAdapter(private val main: MainActivity) :
         dialog.cancel()
       }
       deleteDeviceView.findViewById<Button>(R.id.delete_device_ok).setOnClickListener {
-        dbHelper.writableDatabase.delete(
+        main.appData.dbHelper.writableDatabase.delete(
           "DevicesDb", "name = ?", arrayOf(device.name)
         )
-        devices.remove(device)
+        main.appData.devices.remove(device)
         notifyDataSetChanged()
         dialog.cancel()
       }
@@ -72,32 +58,7 @@ class DeviceAdapter(private val main: MainActivity) :
     }
   }
 
-  override fun getItemCount() = devices.size
-
-  // 初始化读取数据
-  @SuppressLint("Range")
-  private fun initData(): ArrayList<Device> {
-    val devices = ArrayList<Device>()
-    //数据库获取
-    val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
-    if (cursor.moveToFirst()) {
-      do {
-        devices.add(
-          Device(
-            cursor.getString(cursor.getColumnIndex("name")),
-            cursor.getString(cursor.getColumnIndex("address")),
-            cursor.getInt(cursor.getColumnIndex("port")),
-            cursor.getString(cursor.getColumnIndex("videoCodec")),
-            cursor.getInt(cursor.getColumnIndex("resolution")),
-            cursor.getInt(cursor.getColumnIndex("fps")),
-            cursor.getInt(cursor.getColumnIndex("videoBit"))
-          )
-        )
-      } while (cursor.moveToNext())
-    }
-    cursor.close()
-    return devices
-  }
+  override fun getItemCount() = main.appData.devices.size
 
   //新建数据
   @SuppressLint("NotifyDataSetChanged")
@@ -106,22 +67,24 @@ class DeviceAdapter(private val main: MainActivity) :
     address: String,
     port: Int,
     videoCodec: String,
-    resolution: Int,
+    maxSize: Int,
     fps: Int,
-    videoBit: Int
+    videoBit: Int,
+    setResolution: Boolean,
   ) {
     val values = ContentValues().apply {
       put("name", name)
       put("address", address)
       put("port", port)
       put("videoCodec", videoCodec)
-      put("resolution", resolution)
+      put("maxSize", maxSize)
       put("fps", fps)
       put("videoBit", videoBit)
+      put("setResolution", if (setResolution) 1 else 0)
     }
-    // ip重复
-    if (dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
-      devices.add(Device(name, address, port, videoCodec, resolution, fps, videoBit))
+    // 名称重复
+    if (main.appData.dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
+      main.appData.devices.add(Device(name, address, port, videoCodec, maxSize, fps, videoBit, setResolution))
       notifyDataSetChanged()
     }
   }
