@@ -361,7 +361,6 @@ public final class Server {
     Ln.initLogLevel(options.getLogLevel());
 
     if (options.getListEncoders() || options.getListDisplays()) {
-
       if (options.getListEncoders()) {
         Ln.i(LogUtils.buildVideoEncoderListMessage());
         Ln.i(LogUtils.buildAudioEncoderListMessage());
@@ -372,7 +371,6 @@ public final class Server {
       // Just print the requested data, do not mirror
       return;
     }
-
     try {
       scrcpy(options);
     } catch (ConfigurationException e) {

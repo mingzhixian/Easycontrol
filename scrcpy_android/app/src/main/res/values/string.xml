@@ -14,6 +14,7 @@
     </string-array>
     <string-array name="fps">
         <item>60</item>
+        <item>120</item>
         <item>90</item>
         <item>40</item>
         <item>30</item>

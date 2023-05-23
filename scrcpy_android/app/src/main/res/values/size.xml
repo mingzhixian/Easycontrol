@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--字体-->
     <dimen name="largeFont">24sp</dimen>
     <dimen name="middleFont">18sp</dimen>
+    <!--floatVideo界面等比缩放用-->
+    <dimen name="floatVideoBackground">24dp</dimen>
+    <dimen name="floatVideoTitle">34dp</dimen>
+    <dimen name="floatVideoBarHeight">10dp</dimen>
+    <dimen name="floatVideoButton">16dp</dimen>
+    <dimen name="floatVideoNavButton">22dp</dimen>
 </resources>
