@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
 
     <application
-        android:icon="@drawable/icon"
+        android:icon="@mipmap/icon"
         android:label="投屏"
         android:screenOrientation="portrait"
         android:supportsRtl="true"

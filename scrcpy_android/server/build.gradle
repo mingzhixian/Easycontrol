@@ -21,19 +21,18 @@ android {
 
     task copyRelease(dependsOn: 'deleteServer', type: Copy){
         from file('build/outputs/apk/release/server-release-unsigned.apk')
-        into file('../app/src/main/assets')
-        rename('server-release-unsigned.apk', 'scrcpy-server.jar')
+        into file('../app/src/main/res/raw/')
+        rename('server-release-unsigned.apk', 'scrcpy_server.jar')
     }
 
     task deleteServer(type: Delete){
         delete "../app/src/main/assets/scrcpy-server.jar"
     }
 
-
     task copyDebug (dependsOn: 'deleteServer', type: Copy){
         from file("build/outputs/apk/debug/server-debug.apk")
-        into file("../app/src/main/assets/")
-        rename('server-debug.apk', 'scrcpy-server.jar')
+        into file("../app/src/main/res/raw/")
+        rename('server-debug.apk', 'scrcpy_server.jar')
     }
 
     afterEvaluate {
