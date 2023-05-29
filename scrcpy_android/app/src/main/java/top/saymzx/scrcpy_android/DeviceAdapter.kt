@@ -31,7 +31,8 @@ class DeviceAdapter(private val main: MainActivity) :
     holder.textViewAddress.text = address
     // 单击打开投屏
     holder.linearLayout.setOnClickListener {
-      Scrcpy(device, main).start()
+      if (device.status != -10) Toast.makeText(main, "此设备正在投屏或未完全关闭", Toast.LENGTH_SHORT).show()
+      else Scrcpy(device, main).start()
     }
     // 长按删除
     holder.linearLayout.setOnLongClickListener {
@@ -71,6 +72,7 @@ class DeviceAdapter(private val main: MainActivity) :
     fps: Int,
     videoBit: Int,
     setResolution: Boolean,
+    defaultFull: Boolean
   ) {
     val values = ContentValues().apply {
       put("name", name)
@@ -81,10 +83,23 @@ class DeviceAdapter(private val main: MainActivity) :
       put("fps", fps)
       put("videoBit", videoBit)
       put("setResolution", if (setResolution) 1 else 0)
+      put("defaultFull", if (defaultFull) 1 else 0)
     }
     // 名称重复
     if (main.appData.dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
-      main.appData.devices.add(Device(name, address, port, videoCodec, maxSize, fps, videoBit, setResolution))
+      main.appData.devices.add(
+        Device(
+          name,
+          address,
+          port,
+          videoCodec,
+          maxSize,
+          fps,
+          videoBit,
+          setResolution,
+          defaultFull
+        )
+      )
       notifyDataSetChanged()
     }
   }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="350dp"
+    android:layout_width="300dp"
     android:layout_height="wrap_content">
 
     <LinearLayout
@@ -11,20 +12,23 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/loading_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
             android:layout_marginTop="25dp"
             android:layout_marginEnd="25dp"
-            android:text="确定删除吗？"
+            android:layout_marginBottom="25dp"
+            android:text="连接中。。。"
+            android:gravity="center"
             android:textSize="@dimen/largeFont" />
 
+
         <Button
-            android:id="@+id/delete_device_cancel"
+            android:id="@+id/loading_cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
-            android:layout_marginTop="25dp"
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/background"
@@ -32,16 +36,5 @@
             android:text="取消"
             android:textSize="@dimen/largeFont" />
 
-        <Button
-            android:id="@+id/delete_device_ok"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
-            android:layout_marginEnd="50dp"
-            android:layout_marginBottom="25dp"
-            android:background="@drawable/background"
-            android:backgroundTint="@color/cancelButtonBackground"
-            android:text="确认"
-            android:textSize="@dimen/middleFont" />
     </LinearLayout>
 </ScrollView>

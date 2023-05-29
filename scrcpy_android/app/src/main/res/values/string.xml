@@ -5,9 +5,9 @@
         <item>h265</item>
     </string-array>
     <string-array name="resolutionItems">
-        <item>1920</item>
-        <item>2560</item>
         <item>1600</item>
+        <item>2560</item>
+        <item>1920</item>
         <item>1280</item>
         <item>1024</item>
         <item>800</item>
@@ -21,10 +21,11 @@
         <item>10</item>
     </string-array>
     <string-array name="videoBit">
-        <item>16000000</item>
-        <item>18000000</item>
-        <item>12000000</item>
         <item>8000000</item>
+        <item>18000000</item>
+        <item>16000000</item>
+        <item>12000000</item>
         <item>4000000</item>
+        <item>2000000</item>
     </string-array>
 </resources>
