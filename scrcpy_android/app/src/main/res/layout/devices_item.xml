@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/background"
-    android:backgroundTint="#c4ccc5"
+    android:backgroundTint="@color/cardBackground"
     android:id="@+id/device"
     android:layout_marginBottom="10dp">
 
@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:text="设备名称"
-        android:textColor="#000000"
+        android:textColor="@color/textColor"
         android:textSize="@dimen/largeFont"
         android:layout_marginTop="10dp"
         android:layout_marginStart="16dp"
@@ -26,7 +26,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:text="192.168.43.1:5555"
-        android:textColor="#585757"
+        android:textColor="@color/ignoreTextColor"
         android:textSize="@dimen/middleFont"
         android:layout_marginTop="4dp"
         android:layout_marginStart="22dp"

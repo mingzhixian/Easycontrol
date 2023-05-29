@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background"
-        android:backgroundTint="#bbcdc0"
+        android:backgroundTint="@color/alertBackground"
         android:orientation="vertical">
 
         <TextView
@@ -28,7 +28,7 @@
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/background"
-            android:backgroundTint="#95af81"
+            android:backgroundTint="@color/alertButtonBackground"
             android:text="取消"
             android:textSize="@dimen/largeFont" />
 
@@ -40,7 +40,7 @@
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/background"
-            android:backgroundTint="#97a797"
+            android:backgroundTint="@color/cancelButtonBackground"
             android:text="确认"
             android:textSize="@dimen/middleFont" />
     </LinearLayout>
