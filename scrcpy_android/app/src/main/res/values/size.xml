@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--字体-->
+    <dimen name="veryLargeFont">34sp</dimen>
     <dimen name="largeFont">24sp</dimen>
     <dimen name="middleFont">18sp</dimen>
     <!--floatVideo界面-->

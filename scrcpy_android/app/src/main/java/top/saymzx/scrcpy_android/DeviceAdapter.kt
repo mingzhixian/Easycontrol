@@ -32,7 +32,10 @@ class DeviceAdapter(private val main: MainActivity) :
     // 单击打开投屏
     holder.linearLayout.setOnClickListener {
       if (device.status != -10) Toast.makeText(main, "此设备正在投屏或未完全关闭", Toast.LENGTH_SHORT).show()
-      else Scrcpy(device, main).start()
+      else {
+        device.scrcpy=Scrcpy(device, main)
+        device.scrcpy.start()
+      }
     }
     // 长按删除
     holder.linearLayout.setOnLongClickListener {
