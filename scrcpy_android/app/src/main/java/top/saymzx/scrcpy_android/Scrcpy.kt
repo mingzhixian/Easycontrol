@@ -13,7 +13,6 @@ import okio.BufferedSink
 import okio.BufferedSource
 import java.net.Inet4Address
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 
 class Scrcpy(val device: Device, val main: MainActivity) {
 
@@ -166,9 +165,8 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     // 已连接ADB
     if (oldStatus > 0) {
       // 恢复分辨率
-      if (device.setResolution) mainScope.launch {
-        adb.shell("sleep 2 && wm size reset && ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9 &")
-      }
+      if (device.setResolution) mainScope.launch { runAdbCmd("sleep 2 && wm size reset &") }
+      mainScope.launch { runAdbCmd("sleep 3 && ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9 &") }
       // 已转发端口
       if (oldStatus > 1) {
         mainScope.cancel()
@@ -221,31 +219,14 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     if (runAdbCmd(" ls -l /data/local/tmp/scrcpy_server$versionCode.jar ").contains("No such file or directory")) {
       runAdbCmd("rm /data/local/tmp/serverBase64")
       runAdbCmd("rm /data/local/tmp/scrcpy_server*")
-      val server = main.resources.openRawResource(R.raw.scrcpy_server)
-      val serverFileBase64 = Base64.encode(withContext(Dispatchers.IO) {
+      val serverFileBase64 = Base64.encodeToString(withContext(Dispatchers.IO) {
+        val server = main.resources.openRawResource(R.raw.scrcpy_server)
         val buffer = ByteArray(server.available())
         server.read(buffer)
         server.close()
-        return@withContext buffer
+        buffer
       }, 2)
-      var serverBase64part: String
-      val len: Int = serverFileBase64.size
-      var sourceOffset = 0
-      while (sourceOffset < len) {
-        if (len - sourceOffset >= 4056) {
-          val filePart = ByteArray(4056)
-          System.arraycopy(serverFileBase64!!, sourceOffset, filePart, 0, 4056)
-          sourceOffset += 4056
-          serverBase64part = String(filePart, StandardCharsets.US_ASCII)
-        } else {
-          val rem = len - sourceOffset
-          val remPart = ByteArray(rem)
-          System.arraycopy(serverFileBase64!!, sourceOffset, remPart, 0, rem)
-          sourceOffset += rem
-          serverBase64part = String(remPart, StandardCharsets.US_ASCII)
-        }
-        runAdbCmd("echo $serverBase64part >> /data/local/tmp/serverBase64\n")
-      }
+      runAdbCmd("echo $serverFileBase64 >> /data/local/tmp/serverBase64\n")
       runAdbCmd("base64 -d < /data/local/tmp/serverBase64 > /data/local/tmp/scrcpy_server$versionCode.jar && rm /data/local/tmp/serverBase64")
     }
     runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")

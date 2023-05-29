@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/appBackground"
+    android:orientation="vertical">
+
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="160dp"
+      android:layout_marginBottom="60dp"
+      android:paddingStart="30dp"
+      android:text="Scrcpy_android"
+      android:textColor="#000000"
+      android:textSize="@dimen/veryLargeFont"
+      android:textStyle="bold" />
+
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="40dp"
+      android:text="  欢迎使用Scrcpy_android，本软件基于开源项目scrcpy，实现了安卓客户端，并进行了一些小的修改，"
+      android:textSize="@dimen/largeFont" />
+
+
+  <TextView
+      android:id="@+id/show_app_privacy"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textSize="@dimen/middleFont" />
+</LinearLayout>
