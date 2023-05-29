@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets
 class Scrcpy(val device: Device, val main: MainActivity) {
 
   // ip地址
-  private val ip = Inet4Address.getByName(device.address).hostAddress!!
+  private var ip = ""
 
   // 协程
   private var mainScope = MainScope()
@@ -52,6 +52,10 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     main.appData.loadingDialog.show()
     mainScope.launch {
       try {
+        // 获取IP地址
+        ip = withContext(Dispatchers.IO) {
+          Inet4Address.getByName(device.address)
+        }.hostAddress!!
         // 发送server
         sendServer()
         // 转发端口
@@ -478,7 +482,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
 
   // 执行adb命令
   private suspend fun runAdbCmd(cmd: String): String {
-    Log.i("Scrcpy", "RunADBCmd:$cmd")
     return withContext(Dispatchers.IO) { adb.shell(cmd).allOutput }
   }
 
