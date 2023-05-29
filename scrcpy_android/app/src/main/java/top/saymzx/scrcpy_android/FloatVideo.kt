@@ -56,18 +56,15 @@ class FloatVideo(
   // 控制队列
   val controls = LinkedList<ByteArray>() as Queue<ByteArray>
 
-  // 广播处理
-  private val scrcpyBroadcastReceiver = ScrcpyBroadcastReceiver()
-
   // 显示悬浮窗
   fun show(): Boolean {
     // 设置视频界面触摸监听
     setSurfaceListener()
     // 全屏or小窗模式
+    scrcpy.main.windowManager.addView(floatVideo, floatVideoParams)
     if (scrcpy.device.isFull) {
       if (!setFull()) return false
     } else setSmallWindow()
-    scrcpy.main.windowManager.addView(floatVideo, floatVideoParams)
     update(true)
     return true
   }
@@ -84,6 +81,7 @@ class FloatVideo(
       floatVideo,
       floatVideoParams
     )
+    if (scrcpy.device.isFull) scrcpy.main.windowManager.updateViewLayout(floatNav, floatNavParams)
     // 减少未修改大小的无用调用
     if (hasChangeSize) {
       // 更新视频界面大小
@@ -167,7 +165,6 @@ class FloatVideo(
         Toast.makeText(scrcpy.main, "仅能有一个设备处于全屏状态", Toast.LENGTH_SHORT).show()
         return false
       }
-    Log.i("Scrcpy", "全屏状态")
     scrcpy.device.isFull = true
     // 旋转屏幕方向
     scrcpy.main.startActivity(scrcpy.main.intent)
@@ -186,11 +183,6 @@ class FloatVideo(
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.GONE
     // 通知栏
     setNotification()
-    // 注册广播用以关闭程序
-    val filter = IntentFilter()
-    filter.addAction(Intent.ACTION_SCREEN_OFF)
-    filter.addAction("top.saymzx.notification")
-    scrcpy.main.registerReceiver(scrcpyBroadcastReceiver, filter)
     // 监听导航悬浮球
     setFloatNavListener()
     return true
@@ -271,38 +263,37 @@ class FloatVideo(
 
   // 检测旋转
   fun checkRotation(newWidth: Int, newHeight: Int) {
-    if ((newWidth > newHeight) xor (remoteVideoWidth > remoteVideoHeight)) {
-      remoteVideoWidth =
-        remoteVideoWidth xor remoteVideoHeight xor remoteVideoWidth.also { remoteVideoHeight = it }
+    if ((newWidth > newHeight) xor (localVideoWidth > localVideoHeight)) {
+      val isLandscape = newWidth > newHeight
+      val remoteVideoMax = maxOf(remoteVideoWidth, remoteVideoHeight)
+      val remoteVideoMin = minOf(remoteVideoWidth, remoteVideoHeight)
+      remoteVideoWidth = if (isLandscape) remoteVideoMax else remoteVideoMin
+      remoteVideoHeight = if (isLandscape) remoteVideoMin else remoteVideoMax
       // 全屏or小窗
-      val metric = DisplayMetrics()
-      scrcpy.main.windowManager.defaultDisplay.getRealMetrics(metric)
-      val deviceWidth = metric.widthPixels
-      val deviceHeight = metric.heightPixels
       if (scrcpy.device.isFull) {
         // 旋转屏幕方向
         scrcpy.main.requestedOrientation =
-          if (remoteVideoWidth > remoteVideoHeight) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        // 导航球，旋转不改变位置
+          if (isLandscape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        // 导航球
         floatNavParams.apply {
-          if (remoteVideoWidth > remoteVideoHeight) {
-            val tmp = floatNavParams.y
-            y = deviceHeight - x - floatNavParams.width
-            x = tmp
-          } else {
-            val tmp = floatNavParams.x
-            x = deviceWidth - y - floatNavParams.height
-            y = tmp
-          }
+          x = 40
+          y =
+            (if (isLandscape) scrcpy.main.appData.deviceWidth else scrcpy.main.appData.deviceHeight) / 2
         }
         // 更新悬浮窗
         floatVideoParams.apply {
-          width = deviceWidth
-          height = deviceHeight
+          width =
+            if (isLandscape) scrcpy.main.appData.deviceHeight else scrcpy.main.appData.deviceWidth
+          height =
+            if (isLandscape) scrcpy.main.appData.deviceWidth else scrcpy.main.appData.deviceHeight
         }
       } else {
         // 更新悬浮窗
         floatVideoParams.apply {
+          val metric = DisplayMetrics()
+          scrcpy.main.windowManager.defaultDisplay.getRealMetrics(metric)
+          val deviceWidth = metric.widthPixels
+          val deviceHeight = metric.heightPixels
           // 防止旋转后超出界面
           x = if (x > deviceWidth) deviceWidth / 2 else x
           y = if (y > deviceHeight) deviceHeight / 2 else y
@@ -518,9 +509,9 @@ class FloatVideo(
       gravity = Gravity.START or Gravity.TOP
       width = scrcpy.main.resources.getDimension(R.dimen.floatNav).toInt()
       height = scrcpy.main.resources.getDimension(R.dimen.floatNav).toInt()
-      x = 20
+      x = 40
       y =
-        (if (remoteVideoWidth > remoteVideoHeight) scrcpy.main.appData.deviceWidth else scrcpy.main.appData.deviceHeight) * 3 / 8
+        (if (remoteVideoWidth > remoteVideoHeight) scrcpy.main.appData.deviceWidth else scrcpy.main.appData.deviceHeight) / 2
       format = PixelFormat.RGBA_8888
     }
     scrcpy.main.windowManager.addView(floatNav, floatNavParams)
@@ -585,18 +576,6 @@ class FloatVideo(
           )
         ).setAutoCancel(true).setOngoing(true)
     notificationManager.notify(1, builder.build())
-  }
-
-  // 广播处理
-  inner class ScrcpyBroadcastReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent?) {
-      Log.e("Scrcpy", "收到广播，停止投屏")
-      // 取消通知
-      (scrcpy.main.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
-      // 取消广播监听
-      scrcpy.main.unregisterReceiver(scrcpyBroadcastReceiver)
-      scrcpy.stop()
-    }
   }
 
 }

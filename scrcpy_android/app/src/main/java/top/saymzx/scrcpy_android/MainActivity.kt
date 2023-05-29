@@ -8,6 +8,7 @@ import android.media.*
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
+import android.util.Log
 import android.view.*
 import android.view.KeyEvent.*
 import android.view.MotionEvent.*
@@ -28,7 +29,14 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     var VIEWMODEL_STORE: ViewModelStore? = null
   }
 
+  // 数据
   val appData = ViewModelProvider(this).get(AppData::class.java)
+
+  // 设置值
+  val sharedPreferences: SharedPreferences = getSharedPreferences("set", MODE_PRIVATE)
+
+  // 广播处理
+  private val scrcpyBroadcastReceiver = ScrcpyBroadcastReceiver()
 
   // 创建界面
   @SuppressLint("InflateParams")
@@ -46,12 +54,19 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     setDevicesList()
     // 设置添加按钮监听
     setAddDeviceListener()
+    // 如果第一次使用展示介绍信息
+    //if (sharedPreferences.getBoolean("firstUse", true)) startActivity(Intent(this, ShowApp::class.java))
   }
 
   override fun onResume() {
     // 全面屏
     setFullScreen()
     super.onResume()
+    // 注册广播用以关闭程序
+    val filter = IntentFilter()
+    filter.addAction(ACTION_SCREEN_OFF)
+    filter.addAction("top.saymzx.notification")
+    registerReceiver(scrcpyBroadcastReceiver, filter)
   }
 
   // 如果有投屏处于全屏状态则自动恢复界面
@@ -61,6 +76,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       startActivity(intent)
       break
     }
+    unregisterReceiver(scrcpyBroadcastReceiver)
   }
 
   // 设置全面屏
@@ -125,11 +141,22 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
+  // ViewModel
   override fun getViewModelStore(): ViewModelStore {
     if (VIEWMODEL_STORE == null) {
       VIEWMODEL_STORE = ViewModelStore()
     }
     return VIEWMODEL_STORE!!
+  }
+
+  // 广播处理
+  inner class ScrcpyBroadcastReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+      Log.i("Scrcpy", "收到广播，停止投屏")
+      // 取消通知
+      (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
+      for (i in appData.devices) if (i.isFull && i.status >= 0) i.scrcpy.stop()
+    }
   }
 
 }
