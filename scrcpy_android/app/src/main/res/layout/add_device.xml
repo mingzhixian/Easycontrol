@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background"
-        android:backgroundTint="#bbcdc0"
+        android:backgroundTint="@color/alertBackground"
         android:orientation="vertical">
 
         <TextView
@@ -168,7 +168,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:entries="@array/videoBit"
-                    android:foregroundTint="#000000"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
@@ -192,6 +191,26 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="默认全屏显示:"
+                    android:textSize="@dimen/largeFont" />
+
+                <Switch
+                    android:id="@+id/add_device_default_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"/>
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <Button
@@ -203,7 +222,7 @@
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/background"
-            android:backgroundTint="#869879"
+            android:backgroundTint="@color/alertButtonBackground"
             android:text="确认"
             android:textSize="@dimen/largeFont" />
 

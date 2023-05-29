@@ -22,7 +22,8 @@ class DbHelper(
           "\t maxSize integer,\n" +
           "\t fps integer,\n" +
           "\t videoBit integer," +
-          "\t setResolution integer" +
+          "\t setResolution integer,"+
+          "\t defaultFull integer"+
           ")"
     )
   }
@@ -80,7 +81,7 @@ class DbHelper(
       // 删除旧表
       db.execSQL("drop table DevicesDbOld")
     }
-    // 修改列名，增加端口列
+    // 修改列名，增加默认全屏列、是否修改分辨率列
     if (oldVersion < 4) {
       // 修改表名
       db!!.execSQL("alter table DevicesDb rename to DevicesDbOld")
@@ -94,7 +95,8 @@ class DbHelper(
             "\t maxSize integer,\n" +
             "\t fps integer,\n" +
             "\t videoBit integer," +
-            "\t setResolution integer"+
+            "\t setResolution integer,"+
+            "\t defaultFull integer"+
             ")"
       )
       // 将数据搬移至新表
@@ -107,10 +109,13 @@ class DbHelper(
             put("address", cursor.getString(cursor.getColumnIndex("address")))
             put("port", cursor.getInt(cursor.getColumnIndex("port")))
             put("videoCodec", cursor.getString(cursor.getColumnIndex("videoCodec")))
-            put("maxSize", cursor.getString(cursor.getColumnIndex("resolution")))
+            // 修改为默认值
+            put("maxSize", "1600")
             put("fps", cursor.getString(cursor.getColumnIndex("fps")))
-            put("videoBit", cursor.getString(cursor.getColumnIndex("videoBit")))
+            // 修改为默认值
+            put("videoBit", "8000000")
             put("setResolution", 1)
+            put("defaultFull", 1)
           }
           db.insert("DevicesDb", null, values)
         } while (cursor.moveToNext())

@@ -18,10 +18,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.malinskiy.adam.AndroidDebugBridgeClientFactory
-import com.malinskiy.adam.interactor.StartAdbInteractor
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.io.*
 import java.util.*
 
@@ -39,37 +35,35 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    appData.dbHelper=DbHelper(this, "scrcpy_android.db", 4)
-    // 启动ADB客户端
-    GlobalScope.launch {
-      StartAdbInteractor().execute()
-      appData.adb = AndroidDebugBridgeClientFactory().build()
-    }
-    appData.init()
-    // 全屏显示
-    setFullScreen()
+    if (!appData.isInit) appData.init(this)
     // 检查悬浮窗权限
     if (!Settings.canDrawOverlays(this)) {
       val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
       intent.data = Uri.parse("package:$packageName")
       startActivity(intent)
     }
-    val deviceAdapter = DeviceAdapter(this)
     // 读取数据库并展示设备列表
-    setDevicesList(deviceAdapter)
+    setDevicesList()
     // 设置添加按钮监听
-    setAddDeviceListener(deviceAdapter)
-    // 保存文件到缓存
-    saveFileToDir()
+    setAddDeviceListener()
   }
 
-  // 防止全屏状态失效
   override fun onResume() {
+    // 全面屏
     setFullScreen()
     super.onResume()
   }
 
-  // 设置全屏显示
+  // 如果有投屏处于全屏状态则自动恢复界面
+  override fun onPause() {
+    super.onPause()
+    for (i in appData.devices) if (i.isFull && i.status >= 0) {
+      startActivity(intent)
+      break
+    }
+  }
+
+  // 设置全面屏
   private fun setFullScreen() {
     // 全屏显示
     window.decorView.systemUiVisibility =
@@ -82,14 +76,14 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   }
 
   // 读取数据库并展示设备列表
-  private fun setDevicesList(deviceAdapter: DeviceAdapter) {
+  private fun setDevicesList() {
     val devices = findViewById<RecyclerView>(R.id.devices)
     devices.layoutManager = LinearLayoutManager(this)
-    devices.adapter = deviceAdapter
+    devices.adapter = appData.deviceAdapter
   }
 
   // 添加设备监听
-  private fun setAddDeviceListener(deviceAdapter: DeviceAdapter) {
+  private fun setAddDeviceListener() {
     findViewById<TextView>(R.id.add_device).setOnClickListener {
       // 显示添加界面
       val addDeviceView = LayoutInflater.from(this).inflate(R.layout.add_device, null, false)
@@ -110,7 +104,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
         // 名字不能为空
         if (addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString() != "") {
-          deviceAdapter.newDevice(
+          appData.deviceAdapter.newDevice(
             addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
             addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString(),
             addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
@@ -121,31 +115,13 @@ class MainActivity : Activity(), ViewModelStoreOwner {
               .toInt(),
             addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItem.toString()
               .toInt(),
-            addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked
+            addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
+            addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked
           )
           dialog.cancel()
         }
       }
       dialog.show()
-    }
-  }
-
-  // 保存文件到缓存
-  private fun saveFileToDir() {
-    // Server
-    val serverFile =
-      File(applicationContext.filesDir, "scrcpy_server${BuildConfig.VERSION_CODE}.jar")
-    if (!serverFile.isFile) {
-      Runtime.getRuntime().exec("rm ${applicationContext.filesDir}/scrcpy_server*")
-      val server = resources.openRawResource(R.raw.scrcpy_server)
-      val buffer = ByteArray(4096)
-      var len = server.read(buffer)
-      val stream = FileOutputStream(serverFile)
-      do {
-        stream.write(buffer, 0, len)
-        len = server.read(buffer)
-      } while (len > 0)
-      stream.close()
     }
   }
 
