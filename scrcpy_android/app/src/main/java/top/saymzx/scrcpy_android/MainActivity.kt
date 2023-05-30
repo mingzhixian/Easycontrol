@@ -33,7 +33,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   val appData = ViewModelProvider(this).get(AppData::class.java)
 
   // 设置值
-  val sharedPreferences: SharedPreferences = getSharedPreferences("set", MODE_PRIVATE)
+  //val sharedPreferences: SharedPreferences = getSharedPreferences("set", MODE_PRIVATE)
 
   // 广播处理
   private val scrcpyBroadcastReceiver = ScrcpyBroadcastReceiver()
