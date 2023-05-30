@@ -68,9 +68,8 @@ adb tcpip 5555
 
 ## 截图
 
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/软件界面.png" width="200px">
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/添加设备.png" width="200px">
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/小窗.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/软件界面.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/添加设备.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/小窗-竖屏.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/小窗-横屏.png" width="200px">
 
 ## 鼓励
 如果您觉得我的软件对您有帮助，可以赏俺一个硬币，万分感谢！
