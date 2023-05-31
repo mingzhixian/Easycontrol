@@ -15,15 +15,15 @@
 
 ## 本软件特色
 
-- 使用简单，打开软件后选择被控端即可
+- 使用简单
 - 得益于Scrcpy2.0集成了Sndcpy，支持了音频的传输（经测试游戏和音乐可以传输，通话不会流转）
-- 在连接之初会自动根据主控端分辨率修改被控端分辨率，最大化利用主控端屏幕
+- 自动修改被控端分辨率，最大化利用主控端屏幕
 - 良好的旋转支持
 - 自动检测被控端屏幕状态，熄屏后自动亮屏
-- 使用导航悬浮球提供导航，减少主被控端手势冲突
 - 超快启动
 - 较低的延迟
 - 支持小窗显示
+- 支持多设备同时连接
 
 ## 使用步骤
 
@@ -68,10 +68,16 @@ adb tcpip 5555
 
 ## 截图
 
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/软件界面.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/添加设备.png" width="200px">
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/小窗-竖屏.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/小窗-横屏.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/软件界面.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/添加设备.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/小窗-竖屏.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/小窗-横屏.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/多设备.png" width="200px">
 
 ## 鼓励
+
 如果您觉得我的软件对您有帮助，可以赏俺一个硬币，万分感谢！
 
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/微信.jpg" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/支付宝.jpg" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/微信.jpg" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/支付宝.jpg" width="200px">
+
+## 反馈
+
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/其他/反馈群.png" width="200px">
