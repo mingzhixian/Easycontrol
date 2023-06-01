@@ -16,32 +16,55 @@
             android:layout_marginStart="25dp"
             android:layout_marginTop="25dp"
             android:layout_marginEnd="25dp"
-            android:text="确定删除吗？"
+            android:text="干什么◔ ‸◔？ "
             android:textSize="@dimen/largeFont" />
 
         <Button
             android:id="@+id/delete_device_cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
+            android:layout_marginStart="25dp"
             android:layout_marginTop="25dp"
-            android:layout_marginEnd="50dp"
+            android:layout_marginEnd="25dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/background"
             android:backgroundTint="@color/alertButtonBackground"
             android:text="取消"
             android:textSize="@dimen/largeFont" />
 
-        <Button
-            android:id="@+id/delete_device_ok"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
-            android:layout_marginEnd="50dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
             android:layout_marginBottom="25dp"
-            android:background="@drawable/background"
-            android:backgroundTint="@color/cancelButtonBackground"
-            android:text="确认"
-            android:textSize="@dimen/middleFont" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/delete_device_change"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cancelButtonBackground"
+                android:text="修改"
+                android:textSize="@dimen/middleFont" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/delete_device_delete"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cancelButtonBackground"
+                android:text="删除"
+                android:textSize="@dimen/middleFont" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

@@ -1,9 +1,10 @@
 package top.saymzx.scrcpy_android
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.text.Html
-import android.text.method.LinkMovementMethod
+import android.widget.Button
 import android.widget.TextView
 
 
@@ -11,6 +12,46 @@ class ShowApp : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_show_app)
-      // 设置隐私政策链接
+    // 步骤
+    var step = 1
+    // 设置隐私政策链接
+    findViewById<TextView>(R.id.show_app_privacy).setOnClickListener {
+      try {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.addCategory(Intent.CATEGORY_BROWSABLE)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.data = Uri.parse("https://github.com/mingzhixian/scrcpy/blob/master/PRIVACY.md")
+        startActivity(intent)
+      } catch (_: Exception) {
+      }
+    }
+    // 设置下一步按钮
+    findViewById<Button>(R.id.show_app_agree).setOnClickListener {
+      when (step) {
+        // 第二步，展示软件界面
+        1 -> {
+          setResult(1)
+          finish()
+          step++
+        }
+        // 第三步，展示添加设备
+        2 -> {
+          step++
+        }
+        // 第四步，展示小窗使用
+        3 -> {
+          step++
+        }
+        // 第五步，展示全屏使用
+        4 -> {
+          step++
+        }
+        // 第六步，同意隐私协议，进入软件
+        5 -> {
+          setResult(1)
+          finish()
+        }
+      }
+    }
   }
 }

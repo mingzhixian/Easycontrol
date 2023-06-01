@@ -126,7 +126,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:entries="@array/resolutionItems"
+                    android:entries="@array/maxSizeItems"
                     android:foregroundTint="#000000"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
@@ -147,7 +147,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:entries="@array/fps"
+                    android:entries="@array/fpsItems"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
@@ -167,7 +167,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:entries="@array/videoBit"
+                    android:entries="@array/videoBitItems"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
@@ -204,6 +204,26 @@
 
                 <Switch
                     android:id="@+id/add_device_default_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否显示导航球:"
+                    android:textSize="@dimen/largeFont" />
+
+                <Switch
+                    android:id="@+id/add_device_float_nav"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"

@@ -1,0 +1,15 @@
+<svg width="1024" height="2400" xmlns="http://www.w3.org/2000/svg" t="1684830946878" class="icon" version="1.1" p-id="4172">
+ <g id="Layer_1">
+  <title>Layer 1</title>
+  <text opacity="0.7" font-weight="bold" transform="matrix(5.60752 0 0 5.77016 -554.9 -1450.12)" stroke="#000" xml:space="preserve" text-anchor="start" font-family="'Noto Sans Mono'" font-size="24" id="svg_1" y="331.00695" x="102.78538" fill="#000000">Scrcpy_android</text>
+  <g stroke="null" opacity="0.65">
+   <path stroke="null" d="m839.5438,1282.55098l-234.02276,0c-32.3411,0 -58.48768,25.86195 -58.48768,57.69205l0,461.60748c0,31.90115 26.21862,57.69205 58.48768,57.69205l234.02276,0c32.3411,0 58.48768,-25.86195 58.48768,-57.69205l0,-461.60748c0,-31.8301 -26.21862,-57.69205 -58.48768,-57.69205z" fill="#4DBBF7"/>
+   <path stroke="null" d="m766.36217,1239.28194c16.13453,0 29.24384,12.93098 29.24384,28.84603l0,461.60748c0,15.91505 -13.10931,28.84603 -29.24384,28.84603l-233.95074,0c-16.13453,0 -29.24384,-12.93098 -29.24384,-28.84603l0,-461.60748c0,-15.91505 13.10931,-28.84603 29.24384,-28.84603l233.95074,0m0,-43.26904l-233.95074,0c-40.40836,0 -73.1096,32.32744 -73.1096,72.11507l0,461.60748c0,39.85867 32.77327,72.11507 73.1096,72.11507l234.02276,0c40.40836,0 73.1096,-32.32744 73.1096,-72.11507l0,-461.60748c0,-39.78762 -32.77327,-72.11507 -73.18163,-72.11507z" fill="#3d3c36"/>
+   <path stroke="null" d="m664.00872,1744.22951l-29.24384,0c-16.0625,0 -29.24384,-13.00203 -29.24384,-28.84603l0,-28.84603c0,-15.844 13.18134,-28.84603 29.24384,-28.84603l29.24384,0c16.0625,0 29.24384,13.00203 29.24384,28.84603l0,28.84603c0,15.844 -13.18134,28.84603 -29.24384,28.84603z" fill="#3d3c36"/>
+  </g>
+  <text xml:space="preserve" text-anchor="start" font-family="'Noto Sans Mono'" font-size="53" id="svg_3" y="770.38627" x="92.96302" stroke-width="0" stroke="#000" fill="#000000">欢迎使用Scrcpy_android</text>
+  <text xml:space="preserve" text-anchor="start" font-family="'Noto Sans Mono'" font-size="53" id="svg_4" y="885.20107" x="189.25931" stroke-width="0" stroke="#000" fill="#000000">本软件基于开源项目scrcpy</text>
+  <text xml:space="preserve" text-anchor="start" font-family="'Noto Sans Mono'" font-size="53" stroke-width="0" id="svg_6" y="992.60848" x="292.96301" stroke="#000" fill="#000000">实现了Scrcpy安卓客户端</text>
+ </g>
+
+</svg>

@@ -32,9 +32,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   // 数据
   val appData = ViewModelProvider(this).get(AppData::class.java)
 
-  // 设置值
-  //val sharedPreferences: SharedPreferences = getSharedPreferences("set", MODE_PRIVATE)
-
   // 广播处理
   private val scrcpyBroadcastReceiver = ScrcpyBroadcastReceiver()
 
@@ -55,7 +52,12 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     // 设置添加按钮监听
     setAddDeviceListener()
     // 如果第一次使用展示介绍信息
-    //if (sharedPreferences.getBoolean("firstUse", true)) startActivity(Intent(this, ShowApp::class.java))
+    if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
+      Intent(
+        this,
+        ShowApp::class.java
+      ), 1
+    )
   }
 
   override fun onResume() {
@@ -63,9 +65,13 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     setFullScreen()
     super.onResume()
     // 注册广播用以关闭程序
+    try {
+      unregisterReceiver(scrcpyBroadcastReceiver)
+    } catch (_: IllegalArgumentException) {
+    }
     val filter = IntentFilter()
     filter.addAction(ACTION_SCREEN_OFF)
-    filter.addAction("top.saymzx.notification")
+    filter.addAction("top.saymzx.scrcpy_android.notification")
     registerReceiver(scrcpyBroadcastReceiver, filter)
   }
 
@@ -76,7 +82,20 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       startActivity(intent)
       break
     }
-    unregisterReceiver(scrcpyBroadcastReceiver)
+  }
+
+  // 其他页面回调
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    // ShowApp页面回调
+    if (requestCode == 1) {
+      if (resultCode == 1) {
+        appData.settings.edit().apply {
+          putBoolean("FirstUse", false)
+          apply()
+        }
+      }
+    }
+    super.onActivityResult(requestCode, resultCode, data)
   }
 
   // 设置全面屏
@@ -132,7 +151,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
             addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItem.toString()
               .toInt(),
             addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked
+            addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked,
+            addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked
           )
           dialog.cancel()
         }
