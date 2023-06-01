@@ -1,32 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/appBackground"
     android:orientation="vertical">
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="160dp"
-      android:layout_marginBottom="60dp"
-      android:paddingStart="30dp"
-      android:text="Scrcpy_android"
-      android:textColor="#000000"
-      android:textSize="@dimen/veryLargeFont"
-      android:textStyle="bold" />
+    <ImageView
+        android:id="@+id/show_app_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/show_app_1" />
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_margin="40dp"
-      android:text="  欢迎使用Scrcpy_android，本软件基于开源项目scrcpy，实现了安卓客户端，并进行了一些小的修改，"
-      android:textSize="@dimen/largeFont" />
+    <TextView
+        android:id="@+id/show_app_privacy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="40dp"
+        android:textStyle="bold"
+        android:text="隐私政策"
+        android:textSize="@dimen/middleFont" />
 
+    <Button
+        android:id="@+id/show_app_agree"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/background"
+        android:backgroundTint="@color/buttonBackground"
+        android:text="下一步"
+        android:textSize="@dimen/largeFont"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-  <TextView
-      android:id="@+id/show_app_privacy"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textSize="@dimen/middleFont" />
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

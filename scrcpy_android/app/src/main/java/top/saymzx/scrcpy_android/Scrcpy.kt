@@ -59,8 +59,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
         sendServer()
         // 转发端口
         tcpForward()
-        // 已连接音视频
-        device.status = 2
         // 配置视频解码
         setVideoDecodec()
         // 配置音频解码
@@ -68,89 +66,21 @@ class Scrcpy(val device: Device, val main: MainActivity) {
         // 配置音频播放
         if (canAudio) setAudioTrack()
         // 视频解码
-        var isVideoFinally = false
-        launch {
-          try {
-            decodeInput("video")
-          } finally {
-            if (isVideoFinally) {
-              videoDecodec.stop()
-              videoDecodec.release()
-              floatVideo.hide()
-            } else isVideoFinally = true
-            device.status--
-          }
-        }
-        launch {
-          try {
-            decodeOutput("video")
-          } finally {
-            if (isVideoFinally) {
-              videoDecodec.stop()
-              videoDecodec.release()
-              floatVideo.hide()
-            } else isVideoFinally = true
-            device.status--
-          }
-        }
+        launch { decodeInput("video") }
+        launch { decodeOutput("video") }
         // 音频解码
-        var isAudioFinally = false
         if (canAudio) {
-          launch {
-            try {
-              decodeInput("audio")
-            } finally {
-              if (isAudioFinally) {
-                audioDecodec.stop()
-                audioDecodec.release()
-                loudnessEnhancer.release()
-                audioTrack.stop()
-                audioTrack.release()
-              } else isAudioFinally = true
-              device.status--
-            }
-          }
-          launch {
-            try {
-              decodeOutput("audio")
-            } finally {
-              if (isAudioFinally) {
-                audioDecodec.stop()
-                audioDecodec.release()
-                loudnessEnhancer.release()
-                audioTrack.stop()
-                audioTrack.release()
-              } else isAudioFinally = true
-              device.status--
-            }
-          }
+          launch { decodeInput("audio") }
+          launch { decodeOutput("audio") }
         }
         // 配置控制输出
-        launch {
-          try {
-            setControlOutput()
-          } finally {
-            withContext(NonCancellable) {
-              // 等待其他结束完成
-              while (device.status > if (canAudio) -5 else -3) delay(50)
-              withContext(Dispatchers.IO) {
-                videoStream.close()
-                audioStream.close()
-                controlStream.close()
-              }
-              adb.close()
-              device.status = -10
-              device.isFull = device.defaultFull
-            }
-          }
-        }
+        launch { setControlOutput() }
         // 投屏中
-        device.status = 3
+        device.status = 1
         // 设置被控端熄屏（默认投屏后熄屏）
         delay(200)
         setPowerOff()
       } catch (e: Exception) {
-        if (device.status < 2) main.appData.loadingDialog.cancel()
         Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
         Log.e("Scrcpy", e.toString())
         stop()
@@ -160,21 +90,41 @@ class Scrcpy(val device: Device, val main: MainActivity) {
 
   // 停止投屏
   fun stop() {
-    val oldStatus = device.status
+    main.appData.loadingDialog.cancel()
     device.status = -1
-    // 已连接ADB
-    if (oldStatus > 0) {
-      // 恢复分辨率
-      if (device.setResolution) mainScope.launch { runAdbCmd("sleep 2 && wm size reset &") }
-      mainScope.launch { runAdbCmd("sleep 3 && ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9 &") }
-      // 已转发端口
-      if (oldStatus > 1) {
-        mainScope.cancel()
-      } else {
-        adb.close()
-        device.status = -10
+    try {
+      floatVideo.hide()
+    } catch (_: Exception) {
+    }
+    try {
+      if (canAudio) {
+        audioDecodec.stop()
+        audioDecodec.release()
+        loudnessEnhancer.release()
+        audioTrack.stop()
+        audioTrack.release()
       }
-    } else device.status = -10
+    } catch (_: Exception) {
+    }
+    try {
+      videoDecodec.stop()
+      videoDecodec.release()
+    } catch (_: Exception) {
+    }
+    try {
+      videoStream.close()
+      audioStream.close()
+      controlStream.close()
+    } catch (_: Exception) {
+    }
+    try {
+      // 恢复分辨率
+      if (device.setResolution) mainScope.launch { runAdbCmd("wm size reset") }
+      mainScope.launch { runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9") }
+      mainScope.cancel()
+      adb.close()
+    } catch (_: Exception) {
+    }
   }
 
   // 初始化音频播放器
@@ -190,7 +140,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     ).setAudioFormat(
       AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate)
         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
-    ).setBufferSizeInBytes(minBufferSize * 8).build()
+    ).setBufferSizeInBytes(minBufferSize * 4).build()
     // 声音增强
     try {
       loudnessEnhancer = LoudnessEnhancer(audioTrack.audioSessionId)
@@ -206,8 +156,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     // 连接ADB
     adb =
       Dadb.create(ip, device.port, AdbKeyPair.read(main.appData.privateKey, main.appData.publicKey))
-    // 已连接ADB
-    device.status = 1
     // 修改分辨率
     if (device.setResolution) runAdbCmd(
       "wm size ${main.appData.deviceWidth}x${main.appData.deviceHeight}"
@@ -456,8 +404,12 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   // 从socket流中解析数据
   private suspend fun readFrame(stream: BufferedSource): ByteArray {
     return withContext(Dispatchers.IO) {
-      val size = stream.readInt()
-      stream.readByteArray(size.toLong())
+      try {
+        val size = stream.readInt()
+        stream.readByteArray(size.toLong())
+      } catch (_: IllegalStateException) {
+        ByteArray(3)
+      }
     }
   }
 

@@ -4,7 +4,7 @@
         <item>h264</item>
         <item>h265</item>
     </string-array>
-    <string-array name="resolutionItems">
+    <string-array name="maxSizeItems">
         <item>1600</item>
         <item>2560</item>
         <item>1920</item>
@@ -12,7 +12,7 @@
         <item>1024</item>
         <item>800</item>
     </string-array>
-    <string-array name="fps">
+    <string-array name="fpsItems">
         <item>60</item>
         <item>120</item>
         <item>90</item>
@@ -20,7 +20,7 @@
         <item>30</item>
         <item>10</item>
     </string-array>
-    <string-array name="videoBit">
+    <string-array name="videoBitItems">
         <item>8000000</item>
         <item>18000000</item>
         <item>16000000</item>

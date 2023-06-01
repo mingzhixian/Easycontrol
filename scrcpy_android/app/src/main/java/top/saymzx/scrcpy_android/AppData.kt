@@ -2,6 +2,8 @@ package top.saymzx.scrcpy_android
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +17,7 @@ import java.io.File
 class AppData : ViewModel() {
 
   // 是否初始化
-  var isInit=false
+  var isInit = false
 
   // 数据库管理
   lateinit var dbHelper: DbHelper
@@ -32,15 +34,20 @@ class AppData : ViewModel() {
   var deviceWidth = 0
   var deviceHeight = 0
 
+  // 设置值
+  lateinit var settings: SharedPreferences
+
   // 加载框（全局通用）
   @SuppressLint("StaticFieldLeak")
   lateinit var loadingDialog: AlertDialog
+
   @SuppressLint("StaticFieldLeak")
   lateinit var loading: View
 
   // 初始化数据
   fun init(main: MainActivity) {
-    isInit=true
+    isInit = true
+    settings = main.getSharedPreferences("setting", Context.MODE_PRIVATE)
     // 获取系统分辨率
     val metric = DisplayMetrics()
     main.windowManager.defaultDisplay.getRealMetrics(metric)
@@ -49,7 +56,7 @@ class AppData : ViewModel() {
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
     // 数据库管理
-    dbHelper = DbHelper(main, "scrcpy_android.db", 4)
+    dbHelper = DbHelper(main, "scrcpy_android.db", 5)
     deviceAdapter = DeviceAdapter(main)
     // 从数据库获取设备列表
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
@@ -65,7 +72,8 @@ class AppData : ViewModel() {
             cursor.getInt(cursor.getColumnIndex("fps")),
             cursor.getInt(cursor.getColumnIndex("videoBit")),
             cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
-            cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1
+            cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
+            cursor.getInt(cursor.getColumnIndex("floatNav")) == 1
           )
         )
       } while (cursor.moveToNext())
@@ -92,7 +100,8 @@ class AppData : ViewModel() {
     loading.findViewById<TextView>(R.id.loading_text).text = text
     if (isCanCancel) {
       loading.findViewById<Button>(R.id.loading_cancel).visibility = View.VISIBLE
-      loading.findViewById<Button>(R.id.loading_cancel).setOnClickListener { cancelFun?.let { it1 -> it1() } }
+      loading.findViewById<Button>(R.id.loading_cancel)
+        .setOnClickListener { cancelFun?.let { it1 -> it1() } }
     } else loading.findViewById<Button>(R.id.loading_cancel).visibility = View.GONE
     loadingDialog.show()
   }
