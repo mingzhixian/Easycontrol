@@ -72,14 +72,14 @@ adb tcpip 5555
 
 <img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/软件界面.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/添加设备.png" width="200px">
 <img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/小窗-竖屏.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/小窗-横屏.png" width="200px">
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/多设备.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/多设备.png" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/小小窗.png" width="200px">
 
 ## 鼓励
 
 如果您觉得我的软件对您有帮助，可以赏俺一个硬币，万分感谢！
 
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/微信.jpg" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/截屏/支付宝.jpg" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/捐赠/微信.jpg" width="200px"><img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/捐赠/支付宝.jpg" width="200px">
 
 ## 反馈
 
-<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/其他/反馈群.png" width="200px">
+<img src="https://github.com/mingzhixian/scrcpy/blob/master/pic/其他/反馈群.jpg" width="200px">
