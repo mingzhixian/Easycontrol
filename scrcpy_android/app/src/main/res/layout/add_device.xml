@@ -27,6 +27,7 @@
             android:layout_marginStart="25dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="25dp"
+            android:hint="不可为空"
             android:textSize="@dimen/middleFont" />
 
         <TextView
@@ -46,6 +47,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="25dp"
             android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.:"
+            android:hint="支持IPv4/v6地址、域名"
             android:textSize="@dimen/middleFont" />
 
         <CheckBox

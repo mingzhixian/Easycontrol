@@ -2,6 +2,7 @@ package top.saymzx.scrcpy_android
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.DisplayMetrics
@@ -33,6 +34,10 @@ class AppData : ViewModel() {
   // 系统分辨率
   var deviceWidth = 0
   var deviceHeight = 0
+
+  // 剪切板
+  lateinit var clipBorad: ClipboardManager
+  var clipText=""
 
   // 设置值
   lateinit var settings: SharedPreferences
@@ -93,6 +98,8 @@ class AppData : ViewModel() {
     loadingDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     loading = LayoutInflater.from(main).inflate(R.layout.loading, null, false)
     main.appData.loadingDialog.setView(loading)
+    // 剪切板
+    clipBorad = main.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
   }
 
   // 显示加载框

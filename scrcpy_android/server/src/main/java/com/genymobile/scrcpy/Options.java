@@ -21,14 +21,14 @@ public class Options {
   private boolean control = true;
   private int displayId;
   private boolean showTouches;
-  private boolean stayAwake = true; // 修改
+  private boolean stayAwake = false; // 修改
   private List<CodecOption> videoCodecOptions;
   private List<CodecOption> audioCodecOptions;
 
   private String videoEncoder;
   private String audioEncoder;
   private boolean powerOffScreenOnClose = true; // 修改
-  private boolean clipboardAutosync = false; // 修改
+  private boolean clipboardAutosync = true; // 修改
   private boolean downsizeOnError = true;
   private boolean cleanup = true; // 未修改此处，但修改了是否清除文件
   private boolean powerOn = true;

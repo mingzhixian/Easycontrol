@@ -119,6 +119,14 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   // 添加设备监听
   private fun setAddDeviceListener() {
+    findViewById<TextView>(R.id.add_device).setOnLongClickListener {
+      for (i in appData.devices) {
+        i.status = -1
+        i.scrcpy.stop()
+      }
+      Toast.makeText(this, "已强制清理", Toast.LENGTH_SHORT).show()
+      return@setOnLongClickListener true
+    }
     findViewById<TextView>(R.id.add_device).setOnClickListener {
       // 显示添加界面
       val addDeviceView = LayoutInflater.from(this).inflate(R.layout.add_device, null, false)

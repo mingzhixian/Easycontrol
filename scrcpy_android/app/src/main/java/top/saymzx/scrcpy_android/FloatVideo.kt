@@ -14,7 +14,6 @@ import android.util.DisplayMetrics
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.view.*
 import java.nio.ByteBuffer
@@ -37,7 +36,7 @@ class FloatVideo(
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
       else WindowManager.LayoutParams.TYPE_PHONE
     flags =
-      WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON      //位置大小设置
+      WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
     gravity = Gravity.START or Gravity.TOP
   }
 
@@ -54,16 +53,13 @@ class FloatVideo(
   val controls = LinkedList<ByteArray>() as Queue<ByteArray>
 
   // 显示悬浮窗
-  fun show(): Boolean {
+  fun show() {
     // 设置视频界面触摸监听
     setSurfaceListener()
     // 全屏or小窗模式
     scrcpy.main.windowManager.addView(floatVideo, floatVideoParams)
-    if (scrcpy.device.isFull) {
-      if (!setFull()) return false
-    } else setSmallWindow()
+    if (scrcpy.device.isFull) setFull() else setSmallWindow()
     update(true)
-    return true
   }
 
   // 隐藏悬浮窗
@@ -72,6 +68,7 @@ class FloatVideo(
     if (scrcpy.device.isFull && scrcpy.device.floatNav) scrcpy.main.windowManager.removeView(
       floatNav
     )
+    scrcpy.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
   }
 
   // 更新悬浮窗
@@ -160,13 +157,7 @@ class FloatVideo(
   }
 
   // 设置全屏
-  private fun setFull(): Boolean {
-    // 仅能有一个处于全屏状态
-    for (i in scrcpy.main.appData.devices)
-      if (i.isFull && i.status >= 0 && i.name != scrcpy.device.name) {
-        Toast.makeText(scrcpy.main, "仅能有一个设备处于全屏状态", Toast.LENGTH_SHORT).show()
-        return false
-      }
+  private fun setFull() {
     scrcpy.device.isFull = true
     // 旋转屏幕方向
     scrcpy.main.startActivity(scrcpy.main.intent)
@@ -194,7 +185,6 @@ class FloatVideo(
     floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener(null)
     floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener(null)
     floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener(null)
-    return true
   }
 
   // 设置小窗
@@ -227,6 +217,114 @@ class FloatVideo(
     setStopListener()
     setNavListener()
     setSetSizeListener()
+    setFloatVideoListener()
+  }
+
+  // 设置小小窗
+  private fun setSmallSmall() {
+    // 最小化小窗
+    floatVideoParams.apply {
+      if (remoteVideoWidth < remoteVideoHeight) {
+        width = scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmall).toInt()
+        height =
+          (remoteVideoHeight.toFloat() / remoteVideoWidth.toFloat() * width + scrcpy.main.resources.getDimension(
+            R.dimen.floatVideoTitle
+          ) * 0.1).toInt()
+      } else {
+        height = scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmall).toInt()
+        width =
+          (remoteVideoWidth.toFloat() / remoteVideoHeight.toFloat() * (height - scrcpy.main.resources.getDimension(
+            R.dimen.floatVideoTitle
+          ) * 0.1)).toInt()
+      }
+    }
+    update(true)
+    // 取消无用监听
+    floatVideo.setOnTouchListener(null)
+    floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener(null)
+    floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener(null)
+    floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener(null)
+    floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener(null)
+    floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener(null)
+    floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener(null)
+    floatVideo.findViewById<SurfaceView>(R.id.float_video_surface).setOnTouchListener(null)
+    // 取消焦点
+    setFocus(false)
+    // 设置监听
+    val smallSmallGestureDetector =
+      GestureDetector(scrcpy.main, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapUp(event: MotionEvent): Boolean {
+          // 竖屏打开
+          if (remoteVideoHeight > remoteVideoWidth) {
+            floatVideoParams.apply {
+              x = scrcpy.main.appData.deviceWidth / 8
+              y = scrcpy.main.appData.deviceHeight / 8
+              height = scrcpy.main.appData.deviceHeight * 3 / 4
+              width =
+                (remoteVideoWidth.toFloat() / remoteVideoHeight.toFloat() * (height - scrcpy.main.resources.getDimension(
+                  R.dimen.floatVideoTitle
+                ) * 0.7)).toInt()
+            }
+          }
+          // 横屏打开
+          else {
+            floatVideoParams.apply {
+              x = scrcpy.main.appData.deviceWidth / 8
+              y = scrcpy.main.appData.deviceHeight / 8
+              width = scrcpy.main.appData.deviceWidth * 3 / 4
+              height =
+                ((remoteVideoHeight.toFloat() / remoteVideoWidth.toFloat()) * width + scrcpy.main.resources.getDimension(
+                  R.dimen.floatVideoTitle
+                ) * 0.7).toInt()
+            }
+          }
+          update(true)
+          floatVideo.setOnTouchListener(null)
+          setFloatBar()
+          setStopListener()
+          setNavListener()
+          setSetSizeListener()
+          setSurfaceListener()
+          setFloatVideoListener()
+          return super.onDoubleTap(event)
+        }
+      })
+    // 记录按下坐标，避免设备过于敏感
+    var xx = 0
+    var yy = 0
+    var isMoveVideo = false
+    floatVideo.setOnTouchListener { _, event ->
+      when (event.actionMasked) {
+        MotionEvent.ACTION_DOWN -> {
+          xx = event.x.toInt()
+          yy = event.y.toInt()
+          smallSmallGestureDetector.onTouchEvent(event)
+        }
+        MotionEvent.ACTION_MOVE -> {
+          val x = event.x.toInt()
+          val y = event.y.toInt()
+          if (!isMoveVideo) {
+            if ((xx - x) * (xx - x) + (yy - y) * (yy - y) < 9) return@setOnTouchListener true
+            isMoveVideo = true
+            // 取消点击监控
+            event.action = MotionEvent.ACTION_CANCEL
+            smallSmallGestureDetector.onTouchEvent(event)
+          }
+          // 新位置
+          val newX = event.rawX.toInt() - xx
+          val newY = event.rawY.toInt() - yy
+          // 移动悬浮窗
+          floatVideoParams.x = newX
+          floatVideoParams.y = newY
+          update(false)
+        }
+        MotionEvent.ACTION_UP -> {
+          isMoveVideo = false
+          smallSmallGestureDetector.onTouchEvent(event)
+        }
+      }
+      return@setOnTouchListener true
+    }
   }
 
   // 组装触控报文
@@ -324,12 +422,26 @@ class FloatVideo(
     }
   }
 
+  // 设置焦点监听
+  private fun setFloatVideoListener() {
+    floatVideo.setOnTouchListener { _, event ->
+      when (event.action) {
+        MotionEvent.ACTION_OUTSIDE -> {
+          setFocus(false)
+          return@setOnTouchListener true
+        }
+      }
+      return@setOnTouchListener true
+    }
+  }
+
   // 设置视频区域触摸监听
   private fun setSurfaceListener() {
     // 视频触摸控制
     val pointerList = ArrayList<Int>(20)
     for (i in 1..20) pointerList.add(0)
     floatVideo.findViewById<SurfaceView>(R.id.float_video_surface).setOnTouchListener { _, event ->
+      setFocus(true)
       try {
         when (event.actionMasked) {
           MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
@@ -372,14 +484,17 @@ class FloatVideo(
   // 设置三大金刚键监听控制
   private fun setNavListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener {
+      setFocus(true)
       packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK)
       packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener {
+      setFocus(true)
       packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME)
       packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME)
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener {
+      setFocus(true)
       packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_APP_SWITCH)
       packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_APP_SWITCH)
     }
@@ -388,6 +503,7 @@ class FloatVideo(
   // 设置悬浮窗大小拖动按钮监听控制
   private fun setSetSizeListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener { _, event ->
+      setFocus(true)
       if (event.actionMasked == MotionEvent.ACTION_MOVE) {
         // 计算新大小（等比缩放，按照最长边缩放）
         val newWidth: Float
@@ -436,6 +552,7 @@ class FloatVideo(
       statusBarHeight = scrcpy.main.resources.getDimensionPixelSize(resourceId)
     }
     floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener { _, event ->
+      setFocus(true)
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           xx = event.x.toInt()
@@ -463,8 +580,10 @@ class FloatVideo(
             floatVideoParams.x =
               if (rawX <= criticality) scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding)
                 .toInt() else
-                deviceWidth -floatVideoParams.width- scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding).toInt()
-            floatVideoParams.y = scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding).toInt()
+                deviceWidth - floatVideoParams.width - scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding)
+                  .toInt()
+            floatVideoParams.y =
+              (scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding) * 2).toInt()
             update(false)
           } else {
             // 新位置
@@ -527,7 +646,7 @@ class FloatVideo(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         else WindowManager.LayoutParams.TYPE_PHONE
       flags =
-        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON      //位置大小设置
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
       gravity = Gravity.START or Gravity.TOP
       width = scrcpy.main.resources.getDimension(R.dimen.floatNav).toInt()
       height = scrcpy.main.resources.getDimension(R.dimen.floatNav).toInt()
@@ -571,100 +690,18 @@ class FloatVideo(
     }
   }
 
-  // 设置小小窗
-  private fun setSmallSmall() {
-    // 最小化小窗
-    floatVideoParams.apply {
-      if (remoteVideoWidth < remoteVideoHeight) {
-        width = scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmall).toInt()
-        height = (remoteVideoHeight / remoteVideoWidth) * width
-      } else {
-        height = scrcpy.main.resources.getDimension(R.dimen.floatVideoSmallSmall).toInt()
-        width = (remoteVideoWidth / remoteVideoHeight) * height
-      }
-    }
-    update(true)
-    // 取消无用监听
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener(null)
-    floatVideo.findViewById<SurfaceView>(R.id.float_video_surface).setOnTouchListener(null)
-    // 设置监听
-    val smallSmallGestureDetector =
-      GestureDetector(scrcpy.main, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(event: MotionEvent): Boolean {
-          // 竖屏打开
-          if (remoteVideoHeight > remoteVideoWidth) {
-            floatVideoParams.apply {
-              x = scrcpy.main.appData.deviceWidth / 8
-              y = scrcpy.main.appData.deviceHeight / 8
-              height = scrcpy.main.appData.deviceHeight * 3 / 4
-              width =
-                (remoteVideoWidth.toFloat() / remoteVideoHeight.toFloat() * (height - scrcpy.main.resources.getDimension(
-                  R.dimen.floatVideoTitle
-                ) * 0.7)).toInt()
-            }
-          }
-          // 横屏打开
-          else {
-            floatVideoParams.apply {
-              x = scrcpy.main.appData.deviceWidth / 8
-              y = scrcpy.main.appData.deviceHeight / 8
-              width = scrcpy.main.appData.deviceWidth * 3 / 4
-              height =
-                ((remoteVideoHeight.toFloat() / remoteVideoWidth.toFloat()) * width + scrcpy.main.resources.getDimension(
-                  R.dimen.floatVideoTitle
-                ) * 0.7).toInt()
-            }
-          }
-          update(true)
-          floatVideo.findViewById<LinearLayout>(R.id.float_video).setOnTouchListener(null)
-          setFloatBar()
-          setStopListener()
-          setNavListener()
-          setSetSizeListener()
-          setSurfaceListener()
-          return super.onDoubleTap(event)
-        }
-      })
-    // 记录按下坐标，避免设备过于敏感
-    var xx = 0
-    var yy = 0
-    var isMoveVideo = false
-    floatVideo.findViewById<LinearLayout>(R.id.float_video).setOnTouchListener { _, event ->
-      when (event.actionMasked) {
-        MotionEvent.ACTION_DOWN -> {
-          xx = event.x.toInt()
-          yy = event.y.toInt()
-          smallSmallGestureDetector.onTouchEvent(event)
-        }
-        MotionEvent.ACTION_MOVE -> {
-          val x = event.x.toInt()
-          val y = event.y.toInt()
-          if (!isMoveVideo) {
-            if ((xx - x) * (xx - x) + (yy - y) * (yy - y) < 9) return@setOnTouchListener true
-            isMoveVideo = true
-            // 取消点击监控
-            event.action = MotionEvent.ACTION_CANCEL
-            smallSmallGestureDetector.onTouchEvent(event)
-          }
-          // 新位置
-          val newX = event.rawX.toInt() - xx
-          val newY = event.rawY.toInt() - yy
-          // 移动悬浮窗
-          floatVideoParams.x = newX
-          floatVideoParams.y = newY
-          update(false)
-        }
-        MotionEvent.ACTION_UP -> {
-          isMoveVideo = false
-          smallSmallGestureDetector.onTouchEvent(event)
-        }
-      }
-      return@setOnTouchListener true
+  // 获得焦点
+  private var isFocus = true
+  private fun setFocus(newFocus: Boolean) {
+    if (newFocus != isFocus) {
+      floatVideoParams.flags =
+        if (newFocus) WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        else WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+      scrcpy.main.windowManager.updateViewLayout(
+        floatVideo,
+        floatVideoParams
+      )
+      isFocus = newFocus
     }
   }
 
