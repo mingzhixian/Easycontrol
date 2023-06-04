@@ -12,8 +12,6 @@ class ShowApp : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_show_app)
-    // 步骤
-    var step = 1
     // 设置隐私政策链接
     findViewById<TextView>(R.id.show_app_privacy).setOnClickListener {
       try {
@@ -27,31 +25,8 @@ class ShowApp : Activity() {
     }
     // 设置下一步按钮
     findViewById<Button>(R.id.show_app_agree).setOnClickListener {
-      when (step) {
-        // 第二步，展示软件界面
-        1 -> {
-          setResult(1)
-          finish()
-          step++
-        }
-        // 第三步，展示添加设备
-        2 -> {
-          step++
-        }
-        // 第四步，展示小窗使用
-        3 -> {
-          step++
-        }
-        // 第五步，展示全屏使用
-        4 -> {
-          step++
-        }
-        // 第六步，同意隐私协议，进入软件
-        5 -> {
-          setResult(1)
-          finish()
-        }
-      }
+      setResult(1)
+      finish()
     }
   }
 }

@@ -1,5 +1,7 @@
 package top.saymzx.scrcpy_android
 
+import android.content.ClipData
+import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.media.*
 import android.media.audiofx.LoudnessEnhancer
 import android.util.Base64
@@ -13,6 +15,7 @@ import okio.BufferedSink
 import okio.BufferedSource
 import java.net.Inet4Address
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 
 class Scrcpy(val device: Device, val main: MainActivity) {
 
@@ -34,11 +37,15 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   private lateinit var adb: Dadb
   private lateinit var videoStream: BufferedSource
   private lateinit var audioStream: BufferedSource
-  private lateinit var controlStream: BufferedSink
+  private lateinit var controlOutStream: BufferedSink
+  private lateinit var controlInStream: BufferedSource
 
   // 解码器
   private lateinit var videoDecodec: MediaCodec
   private lateinit var audioDecodec: MediaCodec
+
+  // 剪切板
+  private var clipText = ""
 
   // 开始投屏
   fun start() {
@@ -73,8 +80,9 @@ class Scrcpy(val device: Device, val main: MainActivity) {
           launch { decodeInput("audio") }
           launch { decodeOutput("audio") }
         }
-        // 配置控制输出
+        // 配置控制
         launch { setControlOutput() }
+        launch { setControlInput() }
         // 投屏中
         device.status = 1
         // 设置被控端熄屏（默认投屏后熄屏）
@@ -114,7 +122,8 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     try {
       videoStream.close()
       audioStream.close()
-      controlStream.close()
+      controlOutStream.close()
+      controlInStream.close()
     } catch (_: Exception) {
     }
     try {
@@ -194,7 +203,9 @@ class Scrcpy(val device: Device, val main: MainActivity) {
             audioStream = adb.open("tcp:6006").source
             connect = 2
           }
-          controlStream = adb.open("tcp:6006").sink
+          val control = adb.open("tcp:6006")
+          controlOutStream = control.sink
+          controlInStream = control.source
           break
         } catch (_: Exception) {
           Log.i("Scrcpy", "连接失败，再次尝试")
@@ -215,7 +226,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       floatVideo = FloatVideo(this@Scrcpy, remoteVideoWidth, remoteVideoHeight)
     }
     main.appData.loadingDialog.cancel()
-    if (!floatVideo.show()) stop()
+    floatVideo.show()
     // 创建解码器
     val codecMime =
       if (device.videoCodec == "h265") MediaFormat.MIMETYPE_VIDEO_HEVC else MediaFormat.MIMETYPE_VIDEO_AVC
@@ -368,7 +379,14 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   private suspend fun setControlOutput() {
     // 清除投屏之前的信息
     floatVideo.controls.clear()
+    // 检查剪切板
+    var checkNum = 0
     while (mainScope.isActive) {
+      checkNum++
+      if (checkNum > 100) {
+        checkNum = 0
+        checkClipBoard()
+      }
       if (floatVideo.controls.isEmpty()) {
         delay(4)
         continue
@@ -376,8 +394,8 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       try {
         val control = floatVideo.controls.poll()
         withContext(Dispatchers.IO) {
-          control?.let { controlStream.write(it) }
-          controlStream.flush()
+          control?.let { controlOutStream.write(it) }
+          controlOutStream.flush()
         }
       } catch (_: NullPointerException) {
       }
@@ -401,14 +419,79 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     floatVideo.controls.offer(byteBuffer.array())
   }
 
+  // 控制报文输入
+  private suspend fun setControlInput() {
+    while (mainScope.isActive) {
+      when (withContext(Dispatchers.IO) {
+        try {
+          controlInStream.readByte().toInt()
+        } catch (_: IllegalStateException) {
+          -1
+        }
+      }) {
+        // 剪切板报告报文
+        0 -> {
+          val newClipText = String(
+            withContext(Dispatchers.IO) {
+              controlInStream.readByteArray(
+                controlInStream.readInt().toLong()
+              )
+            },
+            StandardCharsets.UTF_8
+          )
+          main.appData.clipBorad.setPrimaryClip(
+            ClipData.newPlainText(
+              MIMETYPE_TEXT_PLAIN,
+              newClipText
+            )
+          )
+          clipText = newClipText
+          break
+        }
+        // 设置剪切板回应报文
+        1 -> {
+          withContext(Dispatchers.IO) {
+            controlInStream.readLong()
+          }
+          break
+        }
+      }
+      delay(500)
+    }
+  }
+
+  // 检测剪切板
+  private fun checkClipBoard() {
+    val clip = main.appData.clipBorad.primaryClip
+    val newClipText =
+      if (clip != null && clip.itemCount > 0) clip.getItemAt(0).text.toString() else ""
+    if (clipText != newClipText) {
+      clipText = newClipText
+      setClipBoard(newClipText)
+    }
+  }
+
+  // 设置剪切板文本
+  private fun setClipBoard(text: String) {
+    val textByteArray = text.toByteArray(StandardCharsets.UTF_8)
+    val byteBuffer = ByteBuffer.allocate(14 + textByteArray.size)
+    byteBuffer.clear()
+    byteBuffer.put(9)
+    byteBuffer.putLong(101)
+    byteBuffer.put(0)
+    byteBuffer.putInt(textByteArray.size)
+    byteBuffer.put(textByteArray)
+    byteBuffer.flip()
+    floatVideo.controls.offer(byteBuffer.array())
+  }
+
   // 从socket流中解析数据
   private suspend fun readFrame(stream: BufferedSource): ByteArray {
     return withContext(Dispatchers.IO) {
       try {
-        val size = stream.readInt()
-        stream.readByteArray(size.toLong())
+        stream.readByteArray(stream.readInt().toLong())
       } catch (_: IllegalStateException) {
-        ByteArray(3)
+        ByteArray(1)
       }
     }
   }
