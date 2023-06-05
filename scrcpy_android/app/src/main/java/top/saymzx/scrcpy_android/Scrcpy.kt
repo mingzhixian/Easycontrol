@@ -100,6 +100,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   fun stop() {
     main.appData.loadingDialog.cancel()
     device.status = -1
+    device.isFull = device.defaultFull
     try {
       floatVideo.hide()
     } catch (_: Exception) {

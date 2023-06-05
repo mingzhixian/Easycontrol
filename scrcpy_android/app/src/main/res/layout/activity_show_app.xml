@@ -11,68 +11,82 @@
         android:id="@+id/show_app_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="Scrcpy_android"
-        android:textSize="@dimen/veryLargeFont"
-        android:textStyle="bold"
-        android:textColor="#121214"
-        android:layout_marginTop="140dp"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"/>
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="20dp"
+        android:text="Scrcpy_android"
+        android:textColor="#121214"
+        android:textSize="36dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/show_app_title"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="100dp"
         android:text="欢迎使用Scrcpy_android"
-        android:textSize="20sp"
         android:textColor="#38383c"
-        android:layout_marginTop="120dp"
-        android:layout_marginStart="40dp"/>
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/show_app_title" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/show_app_title"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="140dp"
         android:text="本软件基于开源项目Scrcpy"
-        android:textSize="20sp"
         android:textColor="#38383c"
-        android:layout_marginTop="170dp"
-        android:layout_marginStart="80dp"/>
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/show_app_title" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/show_app_title"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="180dp"
         android:text="实现了Scrcpy安卓客户端"
-        android:textSize="20sp"
         android:textColor="#38383c"
-        android:layout_marginTop="220dp"
-        android:layout_marginStart="120dp"/>
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/show_app_title" />
 
     <ImageView
         android:id="@+id/show_app_image"
-        android:layout_width="330dp"
-        android:layout_height="316dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="400dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginBottom="130dp"
         android:alpha="0.6"
         android:src="@drawable/icon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/show_app_how_to_use"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="90dp"
+        android:text="使用说明"
+        android:textSize="17dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/show_app_privacy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="40dp"
-        android:textStyle="bold"
+        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="50dp"
         android:text="隐私政策"
-        android:textSize="@dimen/middleFont" />
+        android:textSize="17dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/show_app_agree"

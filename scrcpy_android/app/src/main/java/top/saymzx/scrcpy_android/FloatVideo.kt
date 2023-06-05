@@ -36,9 +36,9 @@ class FloatVideo(
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
       else WindowManager.LayoutParams.TYPE_PHONE
     flags =
-      WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+      WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
     gravity = Gravity.START or Gravity.TOP
-    format=PixelFormat.RGBA_8888
+    format = PixelFormat.RGBA_8888
   }
 
   // 导航悬浮球
@@ -159,6 +159,8 @@ class FloatVideo(
 
   // 设置全屏
   private fun setFull() {
+    // 取消焦点
+    setFocus(false)
     scrcpy.device.isFull = true
     // 旋转屏幕方向
     scrcpy.main.startActivity(scrcpy.main.intent)
@@ -180,6 +182,7 @@ class FloatVideo(
     // 监听导航悬浮球
     if (scrcpy.device.floatNav) setFloatNavListener()
     // 取消无用监听
+    floatVideo.setOnTouchListener(null)
     floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener(null)
     floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener(null)
     floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener(null)
@@ -693,9 +696,9 @@ class FloatVideo(
   }
 
   // 获得焦点
-  private var isFocus = true
+  private var isFocus = false
   private fun setFocus(newFocus: Boolean) {
-    if (newFocus != isFocus) {
+    if (!scrcpy.device.isFull && newFocus != isFocus) {
       floatVideoParams.flags =
         if (newFocus) WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         else WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE

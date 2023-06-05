@@ -27,6 +27,7 @@
         <item>8000000</item>
         <item>4000000</item>
         <item>2000000</item>
+        <item>1000000</item>
     </string-array>
     <string-array name="videoBitItems2">
         <item>18Mbps</item>
