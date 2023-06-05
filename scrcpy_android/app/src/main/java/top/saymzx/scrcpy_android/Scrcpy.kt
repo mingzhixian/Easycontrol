@@ -45,7 +45,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   private lateinit var audioDecodec: MediaCodec
 
   // 剪切板
-  private var clipText = ""
+  private var clipBoardText = ""
 
   // 开始投屏
   fun start() {
@@ -379,12 +379,11 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   private suspend fun setControlOutput() {
     // 清除投屏之前的信息
     floatVideo.controls.clear()
-    // 检查剪切板
-    var checkNum = 0
+    var loopNum = 0
     while (mainScope.isActive) {
-      checkNum++
-      if (checkNum > 100) {
-        checkNum = 0
+      loopNum++
+      if (loopNum > 150) {
+        loopNum = 0
         checkClipBoard()
       }
       if (floatVideo.controls.isEmpty()) {
@@ -402,6 +401,48 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     }
   }
 
+  // 检测报文输入
+  private suspend fun setControlInput() {
+    while (mainScope.isActive) {
+      // 检测被控端剪切板变化
+      val type = withContext(Dispatchers.IO) {
+        try {
+          controlInStream.readByte().toInt()
+        } catch (_: IllegalStateException) {
+          -1
+        }
+      }
+      when (type) {
+        // 剪切板报告报文
+        0 -> {
+          val newClipBoardText = String(
+            withContext(Dispatchers.IO) {
+              controlInStream.readByteArray(
+                controlInStream.readInt().toLong()
+              )
+            },
+            StandardCharsets.UTF_8
+          )
+          if (clipBoardText != newClipBoardText) {
+            clipBoardText = newClipBoardText
+            main.appData.clipBorad.setPrimaryClip(
+              ClipData.newPlainText(
+                MIMETYPE_TEXT_PLAIN,
+                clipBoardText
+              )
+            )
+          }
+        }
+        // 设置剪切板回应报文
+        1 -> {
+          withContext(Dispatchers.IO) {
+            controlInStream.readLong()
+          }
+        }
+      }
+    }
+  }
+
   // 防止被控端熄屏
   private fun checkScreenOff() {
     mainScope.launch {
@@ -411,63 +452,17 @@ class Scrcpy(val device: Device, val main: MainActivity) {
 
   // 被控端熄屏
   private fun setPowerOff() {
-    val byteBuffer = ByteBuffer.allocate(2)
-    byteBuffer.clear()
-    byteBuffer.put(10)
-    byteBuffer.put(0)
-    byteBuffer.flip()
-    floatVideo.controls.offer(byteBuffer.array())
+    floatVideo.controls.offer(byteArrayOf(10, 0))
   }
 
-  // 控制报文输入
-  private suspend fun setControlInput() {
-    while (mainScope.isActive) {
-      when (withContext(Dispatchers.IO) {
-        try {
-          controlInStream.readByte().toInt()
-        } catch (_: IllegalStateException) {
-          -1
-        }
-      }) {
-        // 剪切板报告报文
-        0 -> {
-          val newClipText = String(
-            withContext(Dispatchers.IO) {
-              controlInStream.readByteArray(
-                controlInStream.readInt().toLong()
-              )
-            },
-            StandardCharsets.UTF_8
-          )
-          main.appData.clipBorad.setPrimaryClip(
-            ClipData.newPlainText(
-              MIMETYPE_TEXT_PLAIN,
-              newClipText
-            )
-          )
-          clipText = newClipText
-          break
-        }
-        // 设置剪切板回应报文
-        1 -> {
-          withContext(Dispatchers.IO) {
-            controlInStream.readLong()
-          }
-          break
-        }
-      }
-      delay(500)
-    }
-  }
-
-  // 检测剪切板
+  // 同步本机剪切板至被控端
   private fun checkClipBoard() {
-    val clip = main.appData.clipBorad.primaryClip
-    val newClipText =
-      if (clip != null && clip.itemCount > 0) clip.getItemAt(0).text.toString() else ""
-    if (clipText != newClipText) {
-      clipText = newClipText
-      setClipBoard(newClipText)
+    val clipBorad = main.appData.clipBorad.primaryClip
+    val newClipBoardText =
+      if (clipBorad != null && clipBorad.itemCount > 0) clipBorad.getItemAt(0).text.toString() else ""
+    if (clipBoardText != newClipBoardText && newClipBoardText != "") {
+      clipBoardText = newClipBoardText
+      setClipBoard(clipBoardText)
     }
   }
 

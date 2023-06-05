@@ -169,7 +169,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:entries="@array/videoBitItems"
+                    android:entries="@array/videoBitItems2"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
@@ -246,7 +246,8 @@
             android:background="@drawable/background"
             android:backgroundTint="@color/alertButtonBackground"
             android:text="确认"
-            android:textSize="@dimen/largeFont" />
+            android:textSize="@dimen/largeFont"
+            android:gravity="center"/>
 
     </LinearLayout>
 </ScrollView>
