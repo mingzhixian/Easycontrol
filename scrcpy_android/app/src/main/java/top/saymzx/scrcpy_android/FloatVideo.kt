@@ -38,6 +38,7 @@ class FloatVideo(
     flags =
       WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
     gravity = Gravity.START or Gravity.TOP
+    format=PixelFormat.RGBA_8888
   }
 
   // 导航悬浮球
@@ -286,6 +287,7 @@ class FloatVideo(
           setSetSizeListener()
           setSurfaceListener()
           setFloatVideoListener()
+          setFocus(true)
           return super.onDoubleTap(event)
         }
       })

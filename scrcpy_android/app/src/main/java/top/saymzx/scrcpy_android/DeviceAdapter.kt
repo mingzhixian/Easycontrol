@@ -86,7 +86,7 @@ class DeviceAdapter(private val main: MainActivity) :
           val newVideoCodec = videoCodec.selectedItem.toString()
           val newMaxSize = maxSize.selectedItem.toString().toInt()
           val newFps = fps.selectedItem.toString().toInt()
-          val newVideoBit = videoBit.selectedItem.toString().toInt()
+          val newVideoBit = main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
           val newSetResolution = if (setResolution.isChecked) 1 else 0
           val newDefaultFull = if (defaultFull.isChecked) 1 else 0
           val newFloatNav = if (floatNav.isChecked) 1 else 0
@@ -132,27 +132,27 @@ class DeviceAdapter(private val main: MainActivity) :
         address.setText(device.address)
         port.setText(device.port.toString())
         videoCodec.setSelection(
-          getStringIndex(
+          main.getStringIndex(
             device.videoCodec,
             main.resources.getStringArray(R.array.videoCodecItems)
           )
         )
         maxSize.setSelection(
-          getStringIndex(
+          main.getStringIndex(
             device.maxSize.toString(),
             main.resources.getStringArray(R.array.maxSizeItems)
           )
         )
         fps.setSelection(
-          getStringIndex(
+          main.getStringIndex(
             device.fps.toString(),
             main.resources.getStringArray(R.array.fpsItems)
           )
         )
         videoBit.setSelection(
-          getStringIndex(
+          main.getStringIndex(
             device.videoBit.toString(),
-            main.resources.getStringArray(R.array.videoBitItems)
+            main.resources.getStringArray(R.array.videoBitItems1)
           )
         )
         setResolution.isChecked = device.setResolution
@@ -222,16 +222,6 @@ class DeviceAdapter(private val main: MainActivity) :
       )
       notifyDataSetChanged()
     }
-  }
-
-  // 获取string 在string array中的位置
-  private fun getStringIndex(str: String, strArray: Array<String>): Int {
-    for ((index, i) in strArray.withIndex()) {
-      if (str == i) return index
-      else index
-    }
-    // 找不到返回0
-    return 0
   }
 
 }

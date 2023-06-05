@@ -136,6 +136,25 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       val dialog = builder.create()
       dialog.setCanceledOnTouchOutside(true)
       dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+      // 设置默认值
+      addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).setSelection(
+        getStringIndex(
+          "1600",
+          resources.getStringArray(R.array.maxSizeItems)
+        )
+      )
+      addDeviceView.findViewById<Spinner>(R.id.add_device_fps).setSelection(
+        getStringIndex(
+          "60",
+          resources.getStringArray(R.array.fpsItems)
+        )
+      )
+      addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).setSelection(
+        getStringIndex(
+          "8000000",
+          resources.getStringArray(R.array.videoBitItems1)
+        )
+      )
       // 是否显示高级选项
       addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
         addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -156,8 +175,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
               .toInt(),
             addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
               .toInt(),
-            addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItem.toString()
-              .toInt(),
+            resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
             addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
             addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked,
             addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked
@@ -167,6 +185,15 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       }
       dialog.show()
     }
+  }
+
+  // 获取string 在string array中的位置
+  fun getStringIndex(str: String, strArray: Array<String>): Int {
+    for ((index, i) in strArray.withIndex()) {
+      if (str == i) return index
+    }
+    // 找不到返回0
+    return 0
   }
 
   // ViewModel
