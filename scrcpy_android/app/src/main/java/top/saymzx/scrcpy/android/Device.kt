@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 class Device(
   val name: String,

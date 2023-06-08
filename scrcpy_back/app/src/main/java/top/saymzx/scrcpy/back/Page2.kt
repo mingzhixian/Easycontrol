@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_back
+package top.saymzx.scrcpy.back
 
 import android.app.Activity
 import android.os.Bundle

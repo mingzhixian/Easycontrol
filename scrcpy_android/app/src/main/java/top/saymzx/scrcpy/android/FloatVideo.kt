@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -50,9 +50,6 @@ class FloatVideo(
   private var localVideoWidth = 0
   private var localVideoHeight = 0
 
-  // 控制队列
-  val controls = LinkedList<ByteArray>() as Queue<ByteArray>
-
   // 显示悬浮窗
   fun show() {
     // 设置视频界面触摸监听
@@ -65,11 +62,11 @@ class FloatVideo(
 
   // 隐藏悬浮窗
   fun hide() {
-    scrcpy.main.windowManager.removeView(floatVideo)
+    scrcpy.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     if (scrcpy.device.isFull && scrcpy.device.floatNav) scrcpy.main.windowManager.removeView(
       floatNav
     )
-    scrcpy.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    scrcpy.main.windowManager.removeView(floatVideo)
   }
 
   // 更新悬浮窗
@@ -305,6 +302,7 @@ class FloatVideo(
           yy = event.y.toInt()
           smallSmallGestureDetector.onTouchEvent(event)
         }
+
         MotionEvent.ACTION_MOVE -> {
           val x = event.x.toInt()
           val y = event.y.toInt()
@@ -323,6 +321,7 @@ class FloatVideo(
           floatVideoParams.y = newY
           update(false)
         }
+
         MotionEvent.ACTION_UP -> {
           isMoveVideo = false
           smallSmallGestureDetector.onTouchEvent(event)
@@ -353,7 +352,7 @@ class FloatVideo(
     touchByteBuffer.putInt(0)
     touchByteBuffer.putInt(0)
     touchByteBuffer.flip()
-    controls.offer(touchByteBuffer.array())
+    scrcpy.writeControlOutput(touchByteBuffer.array())
   }
 
   // 组装导航报文
@@ -370,7 +369,7 @@ class FloatVideo(
     navByteBuffer.putInt(0)
     navByteBuffer.putInt(0)
     navByteBuffer.flip()
-    controls.offer(navByteBuffer.array())
+    scrcpy.writeControlOutput(navByteBuffer.array())
   }
 
   // 检测旋转
@@ -459,6 +458,7 @@ class FloatVideo(
             pointerList[p] = x
             pointerList[10 + p] = y
           }
+
           MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
             val i = event.actionIndex
             val x = event.getX(i).toInt()
@@ -466,6 +466,7 @@ class FloatVideo(
             val p = event.getPointerId(i)
             packTouchControl(MotionEvent.ACTION_UP, p, x, y)
           }
+
           MotionEvent.ACTION_MOVE -> {
             for (i in 0 until event.pointerCount) {
               val x = event.getX(i).toInt()
@@ -564,6 +565,7 @@ class FloatVideo(
           yy = event.y.toInt()
           barGestureDetector.onTouchEvent(event)
         }
+
         MotionEvent.ACTION_MOVE -> {
           val x = event.x.toInt()
           val y = event.y.toInt()
@@ -602,6 +604,7 @@ class FloatVideo(
             update(false)
           }
         }
+
         MotionEvent.ACTION_UP -> {
           isMoveVideoBar = false
           barGestureDetector.onTouchEvent(event)
@@ -670,6 +673,7 @@ class FloatVideo(
           gestureDetector.onTouchEvent(event)
           return@setOnTouchListener true
         }
+
         MotionEvent.ACTION_MOVE -> {
           val x = event.rawX.toInt()
           val y = event.rawY.toInt()
@@ -687,6 +691,7 @@ class FloatVideo(
           scrcpy.main.windowManager.updateViewLayout(floatNav, floatNavParams)
           return@setOnTouchListener true
         }
+
         else -> {
           gestureDetector.onTouchEvent(event)
           return@setOnTouchListener true

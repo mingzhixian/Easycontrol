@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -37,7 +37,6 @@ class AppData : ViewModel() {
 
   // 剪切板
   lateinit var clipBorad: ClipboardManager
-  var clipText=""
 
   // 设置值
   lateinit var settings: SharedPreferences
@@ -97,7 +96,7 @@ class AppData : ViewModel() {
     loadingDialog.setCanceledOnTouchOutside(false)
     loadingDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     loading = LayoutInflater.from(main).inflate(R.layout.loading, null, false)
-    main.appData.loadingDialog.setView(loading)
+    loadingDialog.setView(loading)
     // 剪切板
     clipBorad = main.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
   }

@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 import android.app.Activity
 import android.content.Intent
@@ -23,6 +23,8 @@ class ShowApp : Activity() {
       window.attributes.layoutInDisplayCutoutMode =
         WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }
+    // 隐藏标题栏
+    actionBar?.hide()
     // 设置隐私政策链接
     findViewById<TextView>(R.id.show_app_privacy).setOnClickListener {
       try {
