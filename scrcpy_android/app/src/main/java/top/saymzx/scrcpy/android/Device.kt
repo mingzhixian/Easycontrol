@@ -10,7 +10,8 @@ class Device(
   val videoBit: Int,
   val setResolution:Boolean,
   val defaultFull:Boolean,
-  val floatNav:Boolean
+  val floatNav:Boolean,
+  val setLoud:Boolean
 ){
   var isFull=defaultFull
   // -1为停止状态，0为准备中，1为投屏中

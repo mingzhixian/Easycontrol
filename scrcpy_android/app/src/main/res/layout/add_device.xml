@@ -66,7 +66,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="25dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="25dp"
             android:orientation="vertical"
             android:visibility="gone">
@@ -80,7 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="端口:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <EditText
                     android:layout_width="match_parent"
@@ -101,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="编解码器:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Spinner
                     android:id="@+id/add_device_videoCodec"
@@ -121,7 +120,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="分辨率:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Spinner
                     android:id="@+id/add_device_max_size"
@@ -142,7 +141,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="帧率:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Spinner
                     android:id="@+id/add_device_fps"
@@ -162,7 +161,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="视频码率:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Spinner
                     android:id="@+id/add_device_video_bit"
@@ -182,7 +181,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="是否修改分辨率:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Switch
                     android:id="@+id/add_device_set_resolution"
@@ -202,7 +201,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="默认全屏显示:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Switch
                     android:id="@+id/add_device_default_full"
@@ -222,7 +221,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="是否显示导航球:"
-                    android:textSize="@dimen/largeFont" />
+                    android:textSize="@dimen/middleFont" />
 
                 <Switch
                     android:id="@+id/add_device_float_nav"
@@ -230,6 +229,26 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:checked="true"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否设置音频放大:"
+                    android:textSize="@dimen/middleFont" />
+
+                <Switch
+                    android:id="@+id/add_device_set_loud"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="false"/>
 
             </LinearLayout>
 
