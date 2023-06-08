@@ -201,14 +201,12 @@ class DbHelper(
             put("address", cursor.getString(cursor.getColumnIndex("address")))
             put("port", cursor.getInt(cursor.getColumnIndex("port")))
             put("videoCodec", cursor.getString(cursor.getColumnIndex("videoCodec")))
-            // 修改为默认值
-            put("maxSize", "1600")
+            put("maxSize", cursor.getString(cursor.getColumnIndex("maxSize")))
             put("fps", cursor.getString(cursor.getColumnIndex("fps")))
-            // 修改为默认值
-            put("videoBit", "8000000")
-            put("setResolution", 1)
-            put("defaultFull", 1)
-            put("floatNav", 1)
+            put("videoBit", cursor.getString(cursor.getColumnIndex("videoBit")))
+            put("setResolution", cursor.getString(cursor.getColumnIndex("setResolution")))
+            put("defaultFull", cursor.getString(cursor.getColumnIndex("defaultFull")))
+            put("floatNav", cursor.getString(cursor.getColumnIndex("floatNav")))
             put("setLoud", 0)
           }
           db.insert("DevicesDb", null, values)
@@ -217,6 +215,35 @@ class DbHelper(
       cursor.close()
       // 删除旧表
       db.execSQL("drop table DevicesDbOld")
+    }
+    // 修改默认值
+    if (oldVersion < 7) {
+      val cursor =
+        db!!.query("DevicesDb", null, null, null, null, null, null)
+      if (cursor.moveToFirst()) {
+        do {
+          val values = ContentValues().apply {
+            put("name", cursor.getString(cursor.getColumnIndex("name")))
+            put("address", cursor.getString(cursor.getColumnIndex("address")))
+            put("port", cursor.getInt(cursor.getColumnIndex("port")))
+            put("videoCodec", cursor.getString(cursor.getColumnIndex("videoCodec")))
+            put("maxSize", cursor.getString(cursor.getColumnIndex("maxSize")))
+            put("fps", cursor.getString(cursor.getColumnIndex("fps")))
+            put("videoBit", cursor.getString(cursor.getColumnIndex("videoBit")))
+            put("setResolution", cursor.getString(cursor.getColumnIndex("setResolution")))
+            put("defaultFull", cursor.getString(cursor.getColumnIndex("defaultFull")))
+            put("floatNav", cursor.getString(cursor.getColumnIndex("floatNav")))
+            put("setLoud", 1)
+          }
+          db.update(
+            "DevicesDb",
+            values,
+            "name=?",
+            arrayOf(cursor.getString(cursor.getColumnIndex("name")))
+          )
+        } while (cursor.moveToNext())
+      }
+      cursor.close()
     }
   }
 }

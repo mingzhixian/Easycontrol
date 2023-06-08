@@ -11,8 +11,8 @@ android {
         applicationId "top.saymzx.scrcpy.android"
         minSdk 23
         targetSdk 33
-        versionCode 90
-        versionName "9.0"
+        versionCode 93
+        versionName "9.3"
         resConfigs "zh"
         resConfigs "xhdpi"
         ndk {

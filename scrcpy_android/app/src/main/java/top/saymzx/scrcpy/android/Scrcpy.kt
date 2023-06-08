@@ -73,42 +73,42 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     }
     main.appData.loadingDialog.show()
     mainScope.launch {
-      //     try {
-      // 获取IP地址
-      ip = withContext(Dispatchers.IO) {
-        Inet4Address.getByName(device.address)
-      }.hostAddress!!
-      // 发送server
-      sendServer()
-      // 转发端口
-      tcpForward()
-      // 配置视频解码
-      setVideoDecodec()
-      // 配置音频解码
-      setAudioDecodec()
-      // 配置音频播放
-      if (canAudio) setAudioTrack()
-      // 视频解码
-      launch { decodeInput("video") }
-      launch { decodeOutput("video") }
-      // 音频解码
-      if (canAudio) {
-        launch { decodeInput("audio") }
-        launch { decodeOutput("audio") }
+      try {
+        // 获取IP地址
+        ip = withContext(Dispatchers.IO) {
+          Inet4Address.getByName(device.address)
+        }.hostAddress!!
+        // 发送server
+        sendServer()
+        // 转发端口
+        tcpForward()
+        // 配置视频解码
+        setVideoDecodec()
+        // 配置音频解码
+        setAudioDecodec()
+        // 配置音频播放
+        if (canAudio) setAudioTrack()
+        // 视频解码
+        launch { decodeInput("video") }
+        launch { decodeOutput("video") }
+        // 音频解码
+        if (canAudio) {
+          launch { decodeInput("audio") }
+          launch { decodeOutput("audio") }
+        }
+        // 配置控制
+        launch { setControlInput() }
+        // 投屏中
+        device.status = 1
+        // 设置被控端熄屏（默认投屏后熄屏）
+        setPowerOff()
+      } catch (e: Exception) {
+        if (device.status != -1) {
+          Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
+          Log.e("Scrcpy", e.toString())
+          stop()
+        }
       }
-      // 配置控制
-      launch { setControlInput() }
-      // 投屏中
-      device.status = 1
-      // 设置被控端熄屏（默认投屏后熄屏）
-      setPowerOff()
-//      } catch (e: Exception) {
-//        if (device.status != -1) {
-//          Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
-//          Log.e("Scrcpy", e.toString())
-//          stop()
-//        }
-//      }
     }
   }
 
