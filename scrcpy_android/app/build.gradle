@@ -15,17 +15,10 @@ android {
         versionName "9.0"
         resConfigs "zh"
         resConfigs "xhdpi"
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-                arguments "-DANDROID_STL=c++_shared"
-            }
-        }
         ndk {
             abiFilter "arm64-v8a"
         }
     }
-
     buildTypes {
         release {
             minifyEnabled true
@@ -41,18 +34,8 @@ android {
         jvmTarget = '1.8'
     }
     buildToolsVersion '30.0.3'
-
     packagingOptions {
         resources.excludes.add("META-INF/*")
-    }
-
-    buildFeatures {
-        prefab true
-    }
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-        }
     }
 }
 
@@ -63,5 +46,4 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation("dev.mobile:dadb:1.2.6")
-    implementation 'com.google.oboe:oboe:1.7.0'
 }

@@ -71,6 +71,7 @@ class DeviceAdapter(private val main: MainActivity) :
         val setResolution = addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution)
         val defaultFull = addDeviceView.findViewById<Switch>(R.id.add_device_default_full)
         val floatNav = addDeviceView.findViewById<Switch>(R.id.add_device_float_nav)
+        val setLoud = addDeviceView.findViewById<Switch>(R.id.add_device_set_loud)
         // 是否显示高级选项
         addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
           addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -86,10 +87,12 @@ class DeviceAdapter(private val main: MainActivity) :
           val newVideoCodec = videoCodec.selectedItem.toString()
           val newMaxSize = maxSize.selectedItem.toString().toInt()
           val newFps = fps.selectedItem.toString().toInt()
-          val newVideoBit = main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
+          val newVideoBit =
+            main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
           val newSetResolution = if (setResolution.isChecked) 1 else 0
           val newDefaultFull = if (defaultFull.isChecked) 1 else 0
           val newFloatNav = if (floatNav.isChecked) 1 else 0
+          val newSetLoud = if (setLoud.isChecked) 1 else 0
           val values = ContentValues().apply {
             put("address", newAddress)
             put("port", newPort)
@@ -100,6 +103,7 @@ class DeviceAdapter(private val main: MainActivity) :
             put("setResolution", newSetResolution)
             put("defaultFull", newDefaultFull)
             put("floatNav", newFloatNav)
+            put("setLoud", newSetLoud)
           }
           if (main.appData.dbHelper.writableDatabase.update(
               "DevicesDb",
@@ -120,7 +124,8 @@ class DeviceAdapter(private val main: MainActivity) :
                 newVideoBit,
                 newSetResolution == 1,
                 newDefaultFull == 1,
-                newFloatNav == 1
+                newFloatNav == 1,
+                newSetLoud == 1
               )
             )
             notifyDataSetChanged()
@@ -158,6 +163,7 @@ class DeviceAdapter(private val main: MainActivity) :
         setResolution.isChecked = device.setResolution
         defaultFull.isChecked = device.defaultFull
         floatNav.isChecked = device.floatNav
+        setLoud.isChecked = device.setLoud
         // 设置不可变参数
         name.isFocusable = false
         name.isFocusableInTouchMode = false
@@ -190,7 +196,8 @@ class DeviceAdapter(private val main: MainActivity) :
     videoBit: Int,
     setResolution: Boolean,
     defaultFull: Boolean,
-    floatNav: Boolean
+    floatNav: Boolean,
+    setLoud: Boolean
   ) {
     val values = ContentValues().apply {
       put("name", name)
@@ -203,6 +210,7 @@ class DeviceAdapter(private val main: MainActivity) :
       put("setResolution", if (setResolution) 1 else 0)
       put("defaultFull", if (defaultFull) 1 else 0)
       put("floatNav", if (floatNav) 1 else 0)
+      put("setLoud", if (setLoud) 1 else 0)
     }
     // 名称重复
     if (main.appData.dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
@@ -217,7 +225,8 @@ class DeviceAdapter(private val main: MainActivity) :
           videoBit,
           setResolution,
           defaultFull,
-          floatNav
+          floatNav,
+          setLoud
         )
       )
       notifyDataSetChanged()

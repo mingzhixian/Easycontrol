@@ -63,13 +63,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   // 剪切板
   private var clipBoardText = ""
 
-  // Natice
-  companion object {
-    init {
-      System.loadLibrary("native-lib")
-    }
-  }
-
   // 开始投屏
   fun start() {
     device.isFull = device.defaultFull
@@ -80,42 +73,42 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     }
     main.appData.loadingDialog.show()
     mainScope.launch {
-      try {
-        // 获取IP地址
-        ip = withContext(Dispatchers.IO) {
-          Inet4Address.getByName(device.address)
-        }.hostAddress!!
-        // 发送server
-        sendServer()
-        // 转发端口
-        tcpForward()
-        // 配置视频解码
-        setVideoDecodec()
-        // 配置音频解码
-        setAudioDecodec()
-        // 配置音频播放
-        if (canAudio) setAudioTrack()
-        // 视频解码
-        launch { decodeInput("video") }
-        launch { decodeOutput("video") }
-        // 音频解码
-        if (canAudio) {
-          launch { decodeInput("audio") }
-          launch { decodeOutput("audio") }
-        }
-        // 配置控制
-        launch { setControlInput() }
-        // 投屏中
-        device.status = 1
-        // 设置被控端熄屏（默认投屏后熄屏）
-        setPowerOff()
-      } catch (e: Exception) {
-        if (device.status != -1) {
-          Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
-          Log.e("Scrcpy", e.toString())
-          stop()
-        }
+      //     try {
+      // 获取IP地址
+      ip = withContext(Dispatchers.IO) {
+        Inet4Address.getByName(device.address)
+      }.hostAddress!!
+      // 发送server
+      sendServer()
+      // 转发端口
+      tcpForward()
+      // 配置视频解码
+      setVideoDecodec()
+      // 配置音频解码
+      setAudioDecodec()
+      // 配置音频播放
+      if (canAudio) setAudioTrack()
+      // 视频解码
+      launch { decodeInput("video") }
+      launch { decodeOutput("video") }
+      // 音频解码
+      if (canAudio) {
+        launch { decodeInput("audio") }
+        launch { decodeOutput("audio") }
       }
+      // 配置控制
+      launch { setControlInput() }
+      // 投屏中
+      device.status = 1
+      // 设置被控端熄屏（默认投屏后熄屏）
+      setPowerOff()
+//      } catch (e: Exception) {
+//        if (device.status != -1) {
+//          Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
+//          Log.e("Scrcpy", e.toString())
+//          stop()
+//        }
+//      }
     }
   }
 
@@ -161,24 +154,37 @@ class Scrcpy(val device: Device, val main: MainActivity) {
 
   // 初始化音频播放器
   private fun setAudioTrack() {
+    val audioDecodecBuild = AudioTrack.Builder()
     val sampleRate = 48000
-    // 初始化音频播放器
     val minBufferSize = AudioTrack.getMinBufferSize(
       sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT
     )
-    audioTrack = AudioTrack.Builder().setAudioAttributes(
-      AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
-        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
-    ).setAudioFormat(
+    audioDecodecBuild.setBufferSizeInBytes(minBufferSize * 4)
+    val audioAttributesBulider = AudioAttributes.Builder()
+      .setUsage(AudioAttributes.USAGE_MEDIA)
+      .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+    if (!device.setLoud) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        audioDecodecBuild.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+      } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        audioAttributesBulider.setFlags(AudioAttributes.FLAG_LOW_LATENCY)
+      }
+    }
+    audioDecodecBuild.setAudioAttributes(audioAttributesBulider.build())
+    audioDecodecBuild.setAudioFormat(
       AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate)
         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
-    ).setBufferSizeInBytes(minBufferSize * 4).build()
+    )
+    audioTrack = audioDecodecBuild.build()
     // 声音增强
-    try {
-      loudnessEnhancer = LoudnessEnhancer(audioTrack.audioSessionId)
-      loudnessEnhancer.setTargetGain(4000)
-      loudnessEnhancer.enabled = true
-    } catch (_: IllegalArgumentException) {
+    if (device.setLoud) {
+      try {
+        loudnessEnhancer = LoudnessEnhancer(audioTrack.audioSessionId)
+        loudnessEnhancer.setTargetGain(4000)
+        loudnessEnhancer.enabled = true
+      } catch (_: Exception) {
+        Toast.makeText(main, "音频放大器未生效", Toast.LENGTH_SHORT).show()
+      }
     }
     audioTrack.play()
   }
@@ -290,23 +296,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   // 音频解码器
   private suspend fun setAudioDecodec() {
     // 创建音频解码器
-    val player = AudioTrack.Builder()
-      .setAudioAttributes(
-        AudioAttributes.Builder()
-          .setUsage(AudioAttributes.USAGE_MEDIA)
-          .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-          .build()
-      )
-      .setAudioFormat(
-        AudioFormat.Builder()
-          .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-          .setSampleRate(44100)
-          .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-          .build()
-      )
-      .setBufferSizeInBytes(minBuffSize)
-      .build()
-
     audioDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_OPUS)
     // 是否不支持音频（安卓11以下不支持）
     val can = withContext(Dispatchers.IO) { audioStream.readInt() }
@@ -330,12 +319,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer)
     // 配置解码器
     audioDecodec.configure(mediaFormat, null, null, 0)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      audioDecodec.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
-    }
-    else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      AudioAttributes.FLAG_LOW_LATENCY
-    }
     // 启动解码器
     audioDecodec.start()
   }
@@ -535,8 +518,4 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       }
     }
   }
-
-  // JNI
-  external fun setOboe()
-  external fun stopOboe()
 }

@@ -60,7 +60,7 @@ class AppData : ViewModel() {
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
     // 数据库管理
-    dbHelper = DbHelper(main, "scrcpy_android.db", 5)
+    dbHelper = DbHelper(main, "scrcpy_android.db", 6)
     deviceAdapter = DeviceAdapter(main)
     // 从数据库获取设备列表
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
@@ -77,7 +77,8 @@ class AppData : ViewModel() {
             cursor.getInt(cursor.getColumnIndex("videoBit")),
             cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
             cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
-            cursor.getInt(cursor.getColumnIndex("floatNav")) == 1
+            cursor.getInt(cursor.getColumnIndex("floatNav")) == 1,
+            cursor.getInt(cursor.getColumnIndex("setLoud")) == 1
           )
         )
       } while (cursor.moveToNext())
