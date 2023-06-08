@@ -1,16 +1,29 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 import android.content.ClipData
 import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
-import android.media.*
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioTrack
+import android.media.MediaCodec
+import android.media.MediaFormat
 import android.media.audiofx.LoudnessEnhancer
+import android.os.Build
 import android.util.Base64
 import android.util.Log
 import android.view.SurfaceView
 import android.widget.Toast
 import dadb.AdbKeyPair
 import dadb.Dadb
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
 import java.net.Inet4Address
@@ -40,6 +53,9 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   private lateinit var controlOutStream: BufferedSink
   private lateinit var controlInStream: BufferedSource
 
+  // 输出锁
+  private val controlOutputLock = Mutex()
+
   // 解码器
   private lateinit var videoDecodec: MediaCodec
   private lateinit var audioDecodec: MediaCodec
@@ -47,12 +63,19 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   // 剪切板
   private var clipBoardText = ""
 
+  // Natice
+  companion object {
+    init {
+      System.loadLibrary("native-lib")
+    }
+  }
+
   // 开始投屏
   fun start() {
+    device.isFull = device.defaultFull
     device.status = 0
     // 显示加载中
     main.appData.showLoading("连接中...", true) {
-      main.appData.loadingDialog.cancel()
       stop()
     }
     main.appData.loadingDialog.show()
@@ -81,37 +104,43 @@ class Scrcpy(val device: Device, val main: MainActivity) {
           launch { decodeOutput("audio") }
         }
         // 配置控制
-        launch { setControlOutput() }
         launch { setControlInput() }
         // 投屏中
         device.status = 1
         // 设置被控端熄屏（默认投屏后熄屏）
-        delay(200)
         setPowerOff()
       } catch (e: Exception) {
-        Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
-        Log.e("Scrcpy", e.toString())
-        stop()
+        if (device.status != -1) {
+          Toast.makeText(main, e.toString(), Toast.LENGTH_SHORT).show()
+          Log.e("Scrcpy", e.toString())
+          stop()
+        }
       }
     }
   }
 
   // 停止投屏
   fun stop() {
-    main.appData.loadingDialog.cancel()
+    if (device.status == 0) main.appData.loadingDialog.cancel()
     device.status = -1
-    device.isFull = device.defaultFull
+    try {
+      // 恢复分辨率
+      if (device.setResolution) mainScope.launch { runAdbCmd("wm size reset") }
+      mainScope.launch { runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9") }
+      mainScope.cancel()
+    } catch (_: Exception) {
+    }
     try {
       floatVideo.hide()
     } catch (_: Exception) {
     }
     try {
       if (canAudio) {
-        audioDecodec.stop()
-        audioDecodec.release()
         loudnessEnhancer.release()
         audioTrack.stop()
         audioTrack.release()
+        audioDecodec.stop()
+        audioDecodec.release()
       }
     } catch (_: Exception) {
     }
@@ -125,13 +154,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       audioStream.close()
       controlOutStream.close()
       controlInStream.close()
-    } catch (_: Exception) {
-    }
-    try {
-      // 恢复分辨率
-      if (device.setResolution) mainScope.launch { runAdbCmd("wm size reset") }
-      mainScope.launch { runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9") }
-      mainScope.cancel()
       adb.close()
     } catch (_: Exception) {
     }
@@ -268,6 +290,23 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   // 音频解码器
   private suspend fun setAudioDecodec() {
     // 创建音频解码器
+    val player = AudioTrack.Builder()
+      .setAudioAttributes(
+        AudioAttributes.Builder()
+          .setUsage(AudioAttributes.USAGE_MEDIA)
+          .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+          .build()
+      )
+      .setAudioFormat(
+        AudioFormat.Builder()
+          .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+          .setSampleRate(44100)
+          .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+          .build()
+      )
+      .setBufferSizeInBytes(minBuffSize)
+      .build()
+
     audioDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_OPUS)
     // 是否不支持音频（安卓11以下不支持）
     val can = withContext(Dispatchers.IO) { audioStream.readInt() }
@@ -291,6 +330,12 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer)
     // 配置解码器
     audioDecodec.configure(mediaFormat, null, null, 0)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      audioDecodec.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+    }
+    else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      AudioAttributes.FLAG_LOW_LATENCY
+    }
     // 启动解码器
     audioDecodec.start()
   }
@@ -361,7 +406,13 @@ class Scrcpy(val device: Device, val main: MainActivity) {
         }
       }
     } else {
+      var loopNum = 0
       while (mainScope.isActive) {
+        loopNum++
+        if (loopNum > 150) {
+          loopNum = 0
+          checkClipBoard()
+        }
         // 找到已完成的输出缓冲区
         outIndex = decodec.dequeueOutputBuffer(bufferInfo, 0)
         if (outIndex < 0) {
@@ -372,32 +423,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
           decodec.getOutputBuffer(outIndex)!!, bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING
         )
         decodec.releaseOutputBuffer(outIndex, false)
-      }
-    }
-  }
-
-  // 控制报文输出
-  private suspend fun setControlOutput() {
-    // 清除投屏之前的信息
-    floatVideo.controls.clear()
-    var loopNum = 0
-    while (mainScope.isActive) {
-      loopNum++
-      if (loopNum > 150) {
-        loopNum = 0
-        checkClipBoard()
-      }
-      if (floatVideo.controls.isEmpty()) {
-        delay(4)
-        continue
-      }
-      try {
-        val control = floatVideo.controls.poll()
-        withContext(Dispatchers.IO) {
-          control?.let { controlOutStream.write(it) }
-          controlOutStream.flush()
-        }
-      } catch (_: NullPointerException) {
       }
     }
   }
@@ -453,7 +478,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
 
   // 被控端熄屏
   private fun setPowerOff() {
-    floatVideo.controls.offer(byteArrayOf(10, 0))
+    writeControlOutput(byteArrayOf(10, 0))
   }
 
   // 同步本机剪切板至被控端
@@ -478,7 +503,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     byteBuffer.putInt(textByteArray.size)
     byteBuffer.put(textByteArray)
     byteBuffer.flip()
-    floatVideo.controls.offer(byteBuffer.array())
+    writeControlOutput(byteBuffer.array())
   }
 
   // 从socket流中解析数据
@@ -497,4 +522,21 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     return withContext(Dispatchers.IO) { adb.shell(cmd).allOutput }
   }
 
+  // 控制报文输出
+  fun writeControlOutput(byteArray: ByteArray) {
+    if (device.status == 1) {
+      mainScope.launch {
+        withContext(Dispatchers.IO) {
+          controlOutputLock.withLock {
+            controlOutStream.write(byteArray)
+            controlOutStream.flush()
+          }
+        }
+      }
+    }
+  }
+
+  // JNI
+  external fun setOboe()
+  external fun stopOboe()
 }

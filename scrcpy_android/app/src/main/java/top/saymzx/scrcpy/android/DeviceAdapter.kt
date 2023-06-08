@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog

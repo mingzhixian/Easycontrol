@@ -11,9 +11,7 @@
     <application
         android:icon="@drawable/icon"
         android:label="投屏"
-        android:screenOrientation="portrait"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:targetApi="31" >
         <activity
             android:name=".ShowApp"

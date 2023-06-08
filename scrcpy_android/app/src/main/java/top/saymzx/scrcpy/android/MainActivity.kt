@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy_android
+package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -108,6 +108,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       window.attributes.layoutInDisplayCutoutMode =
         LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }
+    // 隐藏标题栏
+    actionBar?.hide()
   }
 
   // 读取数据库并展示设备列表
