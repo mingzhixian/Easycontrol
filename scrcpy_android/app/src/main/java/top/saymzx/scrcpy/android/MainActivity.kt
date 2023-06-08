@@ -180,7 +180,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
             resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
             addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
             addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked
+            addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked,
+            addDeviceView.findViewById<Switch>(R.id.add_device_set_loud).isChecked
           )
           dialog.cancel()
         }
