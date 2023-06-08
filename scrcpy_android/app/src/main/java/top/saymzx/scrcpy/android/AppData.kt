@@ -60,7 +60,7 @@ class AppData : ViewModel() {
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
     // 数据库管理
-    dbHelper = DbHelper(main, "scrcpy_android.db", 6)
+    dbHelper = DbHelper(main, "scrcpy_android.db", 7)
     deviceAdapter = DeviceAdapter(main)
     // 从数据库获取设备列表
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
