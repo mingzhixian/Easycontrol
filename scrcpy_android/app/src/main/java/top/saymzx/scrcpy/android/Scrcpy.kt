@@ -29,6 +29,8 @@ import okio.BufferedSource
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.util.LinkedList
+import java.util.Queue
 
 class Scrcpy(val device: Device, val main: MainActivity) {
 
@@ -121,7 +123,6 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       if (device.setResolution) mainScope.launch { runAdbCmd("wm size reset") }
       mainScope.launch {
         runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
-        mainScope.cancel()
       }
     } catch (_: Exception) {
     }
@@ -152,6 +153,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       adb.close()
     } catch (_: Exception) {
     }
+    mainScope.cancel()
   }
 
   // 初始化音频播放器
@@ -358,32 +360,25 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   }
 
   // 输出
+  private var checkRotationNotification = false
   private suspend fun decodeOutput(mode: String) {
     val decodec = if (mode == "video") videoDecodec else audioDecodec
     var outIndex: Int
     val bufferInfo = MediaCodec.BufferInfo()
     if (mode == "video") {
-      var decodeNum = 0
-      val decodeMaxNum = device.fps * 2 - 1
       while (mainScope.isActive) {
         // 找到已完成的输出缓冲区
         outIndex = decodec.dequeueOutputBuffer(bufferInfo, 0)
         if (outIndex >= 0) {
-          // 每两秒检查一次是否旋转，防止未收到旋转信息
-          decodeNum++
-          if (decodeNum > decodeMaxNum) {
-            decodeNum = 0
+          // 是否需要检查旋转
+          if (checkRotationNotification) {
+            checkRotationNotification = false
             floatVideo.checkRotation(
               decodec.getOutputFormat(outIndex).getInteger("width"),
               decodec.getOutputFormat(outIndex).getInteger("height")
             )
           }
           decodec.releaseOutputBuffer(outIndex, true)
-        } else if (outIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-          floatVideo.checkRotation(
-            decodec.outputFormat.getInteger("width"),
-            decodec.outputFormat.getInteger("height")
-          )
         } else {
           delay(4)
           continue
@@ -449,14 +444,27 @@ class Scrcpy(val device: Device, val main: MainActivity) {
             controlInStream.readLong()
           }
         }
+        // 设置旋转报文
+        2 -> {
+          // 延迟0.5秒等待画面稳定
+          delay(500)
+          checkRotationNotification = true
+        }
       }
     }
   }
 
   // 防止被控端熄屏
+  private var isScreenOning = false
   private fun checkScreenOff() {
     mainScope.launch {
-      if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn").contains("mScreenOn=true")) runAdbCmd("input keyevent 26")
+      if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn").contains("mScreenOn=true") && !isScreenOning) {
+        // 避免短时重复操作
+        isScreenOning = true
+        runAdbCmd("input keyevent 26")
+        delay(100)
+        isScreenOning = false
+      }
     }
   }
 
@@ -507,14 +515,29 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   }
 
   // 控制报文输出
+  private val controls = LinkedList<ByteArray>() as Queue<ByteArray>
+  private var isWriting = false
   fun writeControlOutput(byteArray: ByteArray) {
     if (device.status == 1) {
-      mainScope.launch {
-        withContext(Dispatchers.IO) {
-          controlOutputLock.withLock {
-            controlOutStream.write(byteArray)
-            controlOutStream.flush()
+      // 减少大量协程开销
+      controls.offer(byteArray)
+      if (!isWriting) {
+        mainScope.launch {
+          isWriting = true
+          withContext(Dispatchers.IO) {
+            controlOutputLock.withLock {
+              while (!controls.isEmpty()) {
+                try {
+                  controls.poll()?.let {
+                    controlOutStream.write(it)
+                    controlOutStream.flush()
+                  }
+                } catch (_: NullPointerException) {
+                }
+              }
+            }
           }
+          isWriting = false
         }
       }
     }
