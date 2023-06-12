@@ -32,7 +32,7 @@ window.onload = function () {
 			tables: true
 		});
 		if (artUrl == "./README.md") {
-			$("#articleTitle").html(SiteTitle());
+			$("#articleTitle").html("Scrcpy");
 		} else {
 			$("#articleTitle").html(getTitle(artUrl));
 		}
@@ -45,7 +45,7 @@ window.onload = function () {
 			type: "get",
 		}).done(function (output) {
 			var converter = new showdown.Converter();
-			$("#articleTitle").html(SiteTitle());
+			$("#articleTitle").html("Scrcpy");
 			$("#articleBody").html(converter.makeHtml(output));
 			directory();
 		}).fail(function () {
