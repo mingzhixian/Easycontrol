@@ -36,7 +36,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   private var ip = ""
 
   // 协程
-  private var mainScope = MainScope()
+  var mainScope = MainScope()
 
   // 视频悬浮窗
   private lateinit var floatVideo: FloatVideo
@@ -119,8 +119,10 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     try {
       // 恢复分辨率
       if (device.setResolution) mainScope.launch { runAdbCmd("wm size reset") }
-      mainScope.launch { runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9") }
-      mainScope.cancel()
+      mainScope.launch {
+        runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
+        mainScope.cancel()
+      }
     } catch (_: Exception) {
     }
     try {
@@ -201,8 +203,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
     // 停止旧服务
     runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
     // 快速启动
-    val versionCode = BuildConfig.VERSION_CODE
-    if (runAdbCmd(" ls -l /data/local/tmp/scrcpy_server$versionCode.jar ").contains("No such file or directory")) {
+    if (runAdbCmd(" ls -l /data/local/tmp/scrcpy_server${main.appData.versionCode}.jar ").contains("No such file or directory")) {
       runAdbCmd("rm /data/local/tmp/serverBase64")
       runAdbCmd("rm /data/local/tmp/scrcpy_server*")
       val serverFileBase64 = Base64.encodeToString(withContext(Dispatchers.IO) {
@@ -213,9 +214,9 @@ class Scrcpy(val device: Device, val main: MainActivity) {
         buffer
       }, 2)
       runAdbCmd("echo $serverFileBase64 >> /data/local/tmp/serverBase64\n")
-      runAdbCmd("base64 -d < /data/local/tmp/serverBase64 > /data/local/tmp/scrcpy_server$versionCode.jar && rm /data/local/tmp/serverBase64")
+      runAdbCmd("base64 -d < /data/local/tmp/serverBase64 > /data/local/tmp/scrcpy_server${main.appData.versionCode}.jar && rm /data/local/tmp/serverBase64")
     }
-    runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server$versionCode.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
+    runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server${main.appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
   }
 
   // 转发端口
@@ -501,7 +502,7 @@ class Scrcpy(val device: Device, val main: MainActivity) {
   }
 
   // 执行adb命令
-  private suspend fun runAdbCmd(cmd: String): String {
+  suspend fun runAdbCmd(cmd: String): String {
     return withContext(Dispatchers.IO) { adb.shell(cmd).allOutput }
   }
 
@@ -518,4 +519,5 @@ class Scrcpy(val device: Device, val main: MainActivity) {
       }
     }
   }
+
 }
