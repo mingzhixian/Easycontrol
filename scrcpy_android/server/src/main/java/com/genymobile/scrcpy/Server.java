@@ -95,6 +95,7 @@ public final class Server {
     List<AsyncProcessor> asyncProcessors = new ArrayList<>();
 
     try (DesktopConnection connection = DesktopConnection.open(scid, tunnelForward, audio, control, sendDummyByte)) {
+      device.setConnection(connection);
       if (options.getSendDeviceMeta()) {
         connection.sendDeviceMeta(Device.getDeviceName());
       }
