@@ -20,7 +20,7 @@
 
 ## 使用说明
 
-请前往[此处](https://github.saymzx.top/mingzhixian/scrcpy/blob/master/?art=HOW_TO_USE.md)查看
+请前往[此处](https://scrcpy.saymzx.top/?art=HOW_TO_USE.md)查看
 
 ## 下载
 - [scrcpy_android](https://github.saymzx.top/mingzhixian/scrcpy/releases/latest/scrcpy_android.apk)
@@ -30,7 +30,7 @@
 
 <img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/main.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/addDevice.png?raw=true" width="200px">
 <img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallV.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallH.png?raw=true" width="200px">
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/teoDevices.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.png?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/twoDevices.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.png?raw=true" width="200px">
 
 ## 鼓励
 
