@@ -12,6 +12,8 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import dadb.AdbKeyPair
+import okhttp3.OkHttp
+import okhttp3.OkHttpClient
 import java.io.File
 
 @SuppressLint("Range")
@@ -41,10 +43,15 @@ class AppData : ViewModel() {
   // 设置值
   lateinit var settings: SharedPreferences
 
+  // OKHTTP
+  var okhttpClient=OkHttpClient()
+
+  // 当前版本号
+  val versionCode = BuildConfig.VERSION_CODE
+
   // 加载框（全局通用）
   @SuppressLint("StaticFieldLeak")
   lateinit var loadingDialog: AlertDialog
-
   @SuppressLint("StaticFieldLeak")
   lateinit var loading: View
 

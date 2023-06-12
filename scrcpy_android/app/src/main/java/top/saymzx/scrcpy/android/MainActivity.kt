@@ -19,6 +19,10 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import okhttp3.Request
+import org.json.JSONObject
 import java.io.*
 import java.util.*
 
@@ -58,6 +62,21 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         ShowApp::class.java
       ), 1
     )
+    // 检查更新
+    val request: Request = Request.Builder()
+      .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
+      .build()
+    MainScope().apply {
+      launch {
+        appData.okhttpClient.newCall(request).execute().use { response ->
+          val json = JSONObject(response.body!!.string())
+          val newVersionCode = json.getInt("tag_name")
+          Log.e("aaaa","$newVersionCode  ${appData.versionCode}")
+          if (newVersionCode > appData.versionCode)
+            Toast.makeText(this@MainActivity, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+        }
+      }
+    }
   }
 
   override fun onResume() {

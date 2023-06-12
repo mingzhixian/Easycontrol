@@ -3,11 +3,10 @@
 ## 准备
 
 1. 被控端打开无线ADB调试，端口为5555；
-有root的用户可以在/data/adb/service.d/下新建adb.sh，并添加
+有root的用户可以在终端下输入以下命令，之后手机将开机自动启动ADB无线调试：
 ``` shell
-sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd
+echo "sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh && chmod +x /data/adb/service.d/adb.sh
 ```
-然后，为adb.sh添加可执行权限就可以，之后手机将开机自动启动ADB无线调试。
 无root的用户，可在有线连接ADB后，在电脑端输入以下命令：
 ``` shell
 adb tcpip 5555
