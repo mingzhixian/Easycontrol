@@ -63,20 +63,17 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       ), 1
     )
     // 检查更新
-    val request: Request = Request.Builder()
-      .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
-      .build()
-    MainScope().apply {
-      launch {
-        appData.okhttpClient.newCall(request).execute().use { response ->
-          val json = JSONObject(response.body!!.string())
-          val newVersionCode = json.getInt("tag_name")
-          Log.e("aaaa","$newVersionCode  ${appData.versionCode}")
-          if (newVersionCode > appData.versionCode)
-            Toast.makeText(this@MainActivity, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
-        }
+    Thread {
+      val request: Request = Request.Builder()
+        .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
+        .build()
+      appData.okhttpClient.newCall(request).execute().use { response ->
+        val json = JSONObject(response.body!!.string())
+        val newVersionCode = json.getInt("tag_name")
+        if (newVersionCode > appData.versionCode)
+          Toast.makeText(this@MainActivity, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
       }
-    }
+    }.start()
   }
 
   override fun onResume() {
