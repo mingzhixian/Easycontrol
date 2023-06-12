@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.app.NotificationCompat
 import androidx.core.view.*
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.math.sqrt
@@ -355,23 +356,6 @@ class FloatVideo(
     scrcpy.writeControlOutput(touchByteBuffer.array())
   }
 
-  // 组装导航报文
-  private fun packNavControl(action: Int, key: Int) {
-    val navByteBuffer = ByteBuffer.allocate(14)
-    navByteBuffer.clear()
-    // 输入事件
-    navByteBuffer.put(0)
-    // 事件类型
-    navByteBuffer.put(action.toByte())
-    // 按键类型
-    navByteBuffer.putInt(key)
-    // 重复次数
-    navByteBuffer.putInt(0)
-    navByteBuffer.putInt(0)
-    navByteBuffer.flip()
-    scrcpy.writeControlOutput(navByteBuffer.array())
-  }
-
   // 检测旋转
   fun checkRotation(newWidth: Int, newHeight: Int) {
     if ((newWidth > newHeight) xor (localVideoWidth > localVideoHeight)) {
@@ -491,18 +475,21 @@ class FloatVideo(
   private fun setNavListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener {
       setFocus(true)
-      packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK)
-      packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
+      scrcpy.mainScope.launch {
+        scrcpy.runAdbCmd("input keyevent ${KeyEvent.KEYCODE_BACK}")
+      }
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener {
       setFocus(true)
-      packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME)
-      packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME)
+      scrcpy.mainScope.launch {
+        scrcpy.runAdbCmd("input keyevent ${KeyEvent.KEYCODE_HOME}")
+      }
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener {
       setFocus(true)
-      packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_APP_SWITCH)
-      packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_APP_SWITCH)
+      scrcpy.mainScope.launch {
+        scrcpy.runAdbCmd("input keyevent ${KeyEvent.KEYCODE_APP_SWITCH}")
+      }
     }
   }
 
@@ -628,20 +615,23 @@ class FloatVideo(
     val gestureDetector =
       GestureDetector(scrcpy.main, object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-          packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK)
-          packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
+          scrcpy.mainScope.launch {
+            scrcpy.runAdbCmd("input keyevent ${KeyEvent.KEYCODE_BACK}")
+          }
           return super.onSingleTapConfirmed(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-          packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME)
-          packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME)
+          scrcpy.mainScope.launch {
+            scrcpy.runAdbCmd("input keyevent ${KeyEvent.KEYCODE_HOME}")
+          }
           return super.onDoubleTap(e)
         }
 
         override fun onLongPress(e: MotionEvent) {
-          packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_APP_SWITCH)
-          packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_APP_SWITCH)
+          scrcpy.mainScope.launch {
+            scrcpy.runAdbCmd("input keyevent ${KeyEvent.KEYCODE_APP_SWITCH}")
+          }
           super.onLongPress(e)
         }
       })
