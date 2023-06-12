@@ -17,6 +17,7 @@ import com.genymobile.scrcpy.wrappers.ServiceManager;
 import com.genymobile.scrcpy.wrappers.SurfaceControl;
 import com.genymobile.scrcpy.wrappers.WindowManager;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Device {
@@ -61,6 +62,8 @@ public final class Device {
 
   private final boolean supportsInputEvents;
 
+  private DesktopConnection connection = null;
+
   public Device(Options options) throws ConfigurationException {
     displayId = options.getDisplayId();
     DisplayInfo displayInfo = ServiceManager.getDisplayManager().getDisplayInfo(displayId);
@@ -88,6 +91,14 @@ public final class Device {
           // notify
           if (rotationListener != null) {
             rotationListener.onRotationChanged(rotation);
+            // 发送报文
+            if (connection != null) {
+              DeviceMessage event = DeviceMessage.createRotation();
+              try {
+                connection.sendDeviceMessage(event);
+              } catch (IOException e) {
+              }
+            }
           }
         }
       }
@@ -128,6 +139,10 @@ public final class Device {
     if (!supportsInputEvents) {
       Ln.w("Input events are not supported for secondary displays before Android 10");
     }
+  }
+
+  public void setConnection(DesktopConnection connection) {
+    this.connection = connection;
   }
 
   public synchronized void setMaxSize(int newMaxSize) {
