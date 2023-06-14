@@ -21,7 +21,8 @@
             android:layout_marginBottom="25dp"
             android:text="连接中。。。"
             android:gravity="center"
-            android:textSize="@dimen/largeFont" />
+            android:textSize="@dimen/largeFont"
+            android:textColor="@color/ignoreTextColor"/>
 
 
         <Button
@@ -34,7 +35,8 @@
             android:background="@drawable/background"
             android:backgroundTint="@color/alertButtonBackground"
             android:text="取消"
-            android:textSize="@dimen/largeFont" />
+            android:textSize="@dimen/largeFont"
+            android:textColor="@color/buttonTextColor"/>
 
     </LinearLayout>
 </ScrollView>

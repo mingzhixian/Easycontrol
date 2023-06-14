@@ -19,22 +19,23 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.*
 import java.util.*
 
+@SuppressLint("StaticFieldLeak")
+lateinit var appData: AppData
 
 class MainActivity : Activity(), ViewModelStoreOwner {
 
   companion object {
     var VIEWMODEL_STORE: ViewModelStore? = null
   }
-
-  // 数据
-  val appData = ViewModelProvider(this).get(AppData::class.java)
 
   // 广播处理
   private val scrcpyBroadcastReceiver = ScrcpyBroadcastReceiver()
@@ -44,6 +45,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
+    appData = ViewModelProvider(this).get(AppData::class.java)
     if (!appData.isInit) appData.init(this)
     // 检查悬浮窗权限
     if (!Settings.canDrawOverlays(this)) {
@@ -63,17 +65,19 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       ), 1
     )
     // 检查更新
-    Thread {
-      val request: Request = Request.Builder()
-        .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
-        .build()
-      appData.okhttpClient.newCall(request).execute().use { response ->
-        val json = JSONObject(response.body!!.string())
-        val newVersionCode = json.getInt("tag_name")
-        if (newVersionCode > appData.versionCode)
-          Toast.makeText(this@MainActivity, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+    appData.mainScope.launch {
+      withContext(Dispatchers.IO) {
+        val request: Request = Request.Builder()
+          .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
+          .build()
+        appData.okhttpClient.newCall(request).execute().use { response ->
+          val json = JSONObject(response.body!!.string())
+          val newVersionCode = json.getInt("tag_name")
+          if (newVersionCode > appData.versionCode)
+            Toast.makeText(this@MainActivity, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+        }
       }
-    }.start()
+    }
   }
 
   override fun onResume() {
@@ -87,7 +91,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
     val filter = IntentFilter()
     filter.addAction(ACTION_SCREEN_OFF)
-    filter.addAction("top.saymzx.scrcpy_android.notification")
+    filter.addAction("top.saymzx.scrcpy.android.notification")
     registerReceiver(scrcpyBroadcastReceiver, filter)
   }
 
@@ -196,8 +200,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
             resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
             addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
             addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_set_loud).isChecked
+            addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked
           )
           dialog.cancel()
         }
@@ -226,10 +229,9 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   // 广播处理
   inner class ScrcpyBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-      Log.i("Scrcpy", "收到广播，停止投屏")
       // 取消通知
       (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
-      for (i in appData.devices) if (i.isFull && i.status >= 0) i.scrcpy.stop()
+      for (i in appData.devices) if (i.status >= 0) i.scrcpy.stop()
     }
   }
 
