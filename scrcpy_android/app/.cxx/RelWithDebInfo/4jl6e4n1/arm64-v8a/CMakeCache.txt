@@ -232,8 +232,8 @@ CMAKE_TOOLCHAIN_FILE:FILEPATH=C:/Users/kic/AppData/Local/Android/Sdk/ndk/23.1.77
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
-//Path to a library.
-log-lib:FILEPATH=log-lib-NOTFOUND
+//The directory containing a CMake configuration file for log-lib.
+log-lib_DIR:PATH=log-lib_DIR-NOTFOUND
 
 //Value Computed by CMake
 native-lib_BINARY_DIR:STATIC=E:/Code/scrcpy/scrcpy_android/app/.cxx/RelWithDebInfo/4jl6e4n1/arm64-v8a
@@ -243,6 +243,9 @@ native-lib_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 native-lib_SOURCE_DIR:STATIC=E:/Code/scrcpy/scrcpy_android/app/src/main/cpp
+
+//The directory containing a CMake configuration file for oboe.
+oboe_DIR:PATH=E:/Code/scrcpy/scrcpy_android/app/.cxx/RelWithDebInfo/4jl6e4n1/prefab/arm64-v8a/prefab/lib/aarch64-linux-android/cmake/oboe
 
 
 ########################

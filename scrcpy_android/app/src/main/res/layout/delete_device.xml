@@ -17,7 +17,8 @@
             android:layout_marginTop="25dp"
             android:layout_marginEnd="25dp"
             android:text="干什么◔ ‸◔？ "
-            android:textSize="@dimen/largeFont" />
+            android:textSize="@dimen/largeFont"
+            android:textColor="@color/ignoreTextColor"/>
 
         <Button
             android:id="@+id/delete_device_cancel"
@@ -30,7 +31,8 @@
             android:background="@drawable/background"
             android:backgroundTint="@color/alertButtonBackground"
             android:text="取消"
-            android:textSize="@dimen/largeFont" />
+            android:textSize="@dimen/largeFont"
+            android:textColor="@color/buttonTextColor"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,7 +50,8 @@
                 android:background="@drawable/background"
                 android:backgroundTint="@color/cancelButtonBackground"
                 android:text="修改"
-                android:textSize="@dimen/middleFont" />
+                android:textSize="@dimen/middleFont"
+                android:textColor="@color/buttonTextColor"/>
 
             <Space
                 android:layout_width="0dp"
@@ -63,7 +66,8 @@
                 android:background="@drawable/background"
                 android:backgroundTint="@color/cancelButtonBackground"
                 android:text="删除"
-                android:textSize="@dimen/middleFont" />
+                android:textSize="@dimen/middleFont"
+                android:textColor="@color/buttonTextColor"/>
         </LinearLayout>
 
     </LinearLayout>

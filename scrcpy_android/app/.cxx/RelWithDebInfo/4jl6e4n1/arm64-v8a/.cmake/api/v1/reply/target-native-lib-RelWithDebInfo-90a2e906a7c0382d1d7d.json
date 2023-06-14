@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "E:/Code/scrcpy/scrcpy_android/app/build/intermediates/cxx/Debug/1dk555j6/obj/arm64-v8a/libnative-lib.so"
+			"path" : "E:/Code/scrcpy/scrcpy_android/app/build/intermediates/cxx/RelWithDebInfo/4jl6e4n1/obj/arm64-v8a/libnative-lib.so"
 		}
 	],
 	"backtrace" : 1,
@@ -42,7 +42,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -fexceptions -frtti -stdlib=libc++ -g  -fno-limit-debug-info -fPIC"
+					"fragment" : "-DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -fexceptions -frtti -stdlib=libc++ -O2 -g -DNDEBUG -fPIC"
 				}
 			],
 			"defines" : 

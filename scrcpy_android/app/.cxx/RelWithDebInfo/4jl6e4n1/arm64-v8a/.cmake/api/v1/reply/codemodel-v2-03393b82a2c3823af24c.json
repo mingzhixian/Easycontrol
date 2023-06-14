@@ -6,7 +6,7 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"jsonFile" : "directory-.-RelWithDebInfo-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.6.0"
@@ -19,7 +19,7 @@
 					]
 				}
 			],
-			"name" : "Debug",
+			"name" : "RelWithDebInfo",
 			"projects" : 
 			[
 				{
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "native-lib::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-native-lib-Debug-adf0f9786c8156337f47.json",
+					"jsonFile" : "target-native-lib-RelWithDebInfo-90a2e906a7c0382d1d7d.json",
 					"name" : "native-lib",
 					"projectIndex" : 0
 				}
@@ -49,7 +49,7 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "E:/Code/scrcpy/scrcpy_android/app/.cxx/Debug/1dk555j6/arm64-v8a",
+		"build" : "E:/Code/scrcpy/scrcpy_android/app/.cxx/RelWithDebInfo/4jl6e4n1/arm64-v8a",
 		"source" : "E:/Code/scrcpy/scrcpy_android/app/src/main/cpp"
 	},
 	"version" : 

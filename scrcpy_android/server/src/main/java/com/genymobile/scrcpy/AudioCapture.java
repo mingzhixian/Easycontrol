@@ -9,6 +9,7 @@ import android.media.AudioRecord;
 import android.media.AudioTimestamp;
 import android.media.MediaCodec;
 import android.media.MediaRecorder;
+import android.media.audiofx.AutomaticGainControl;
 import android.os.Build;
 import android.os.SystemClock;
 
@@ -126,7 +127,7 @@ public final class AudioCapture {
       pts = nextPts;
     }
 
-    long durationUs = r * 1000000 / (CHANNELS * BYTES_PER_SAMPLE * SAMPLE_RATE);
+    long durationUs = r * 1000000L / (CHANNELS * BYTES_PER_SAMPLE * SAMPLE_RATE);
     nextPts = pts + durationUs;
 
     if (previousPts != 0 && pts < previousPts) {

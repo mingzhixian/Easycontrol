@@ -68,7 +68,7 @@ build CMakeFiles/native-lib.dir/native-lib.cpp.o: CXX_COMPILER__native-lib_Debug
 build E$:/Code/scrcpy/scrcpy_android/app/build/intermediates/cxx/Debug/1dk555j6/obj/arm64-v8a/libnative-lib.so: CXX_SHARED_LIBRARY_LINKER__native-lib_Debug CMakeFiles/native-lib.dir/native-lib.cpp.o | C$:/Users/kic/.gradle/caches/transforms-3/76d7a26834e433e53154d34200c47d62/transformed/oboe-1.7.0/prefab/modules/oboe/libs/android.arm64-v8a/liboboe.so
   LANGUAGE_COMPILE_FLAGS = -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -fexceptions -frtti -stdlib=libc++ -g  -fno-limit-debug-info
   LINK_FLAGS = -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--fatal-warnings -Qunused-arguments -Wl,--no-undefined
-  LINK_LIBRARIES = C:/Users/kic/.gradle/caches/transforms-3/76d7a26834e433e53154d34200c47d62/transformed/oboe-1.7.0/prefab/modules/oboe/libs/android.arm64-v8a/liboboe.so   -latomic -lm
+  LINK_LIBRARIES = -llog  C:/Users/kic/.gradle/caches/transforms-3/76d7a26834e433e53154d34200c47d62/transformed/oboe-1.7.0/prefab/modules/oboe/libs/android.arm64-v8a/liboboe.so   -latomic -lm
   OBJECT_DIR = CMakeFiles\native-lib.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

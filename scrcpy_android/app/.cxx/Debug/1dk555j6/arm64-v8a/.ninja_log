@@ -1,0 +1,5 @@
+# ninja log v5
+2	547	7084456102241083	CMakeFiles/native-lib.dir/native-lib.cpp.o	efa1ba300d36ab08
+547	607	7084456102821160	E:/Code/scrcpy/scrcpy_android/app/build/intermediates/cxx/Debug/1dk555j6/obj/arm64-v8a/libnative-lib.so	635eb66b5a268c5e
+2	557	7084468509328098	CMakeFiles/native-lib.dir/native-lib.cpp.o	efa1ba300d36ab08
+558	626	7084468510038199	E:/Code/scrcpy/scrcpy_android/app/build/intermediates/cxx/Debug/1dk555j6/obj/arm64-v8a/libnative-lib.so	635eb66b5a268c5e

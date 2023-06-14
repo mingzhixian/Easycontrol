@@ -22,10 +22,9 @@ class DbHelper(
           "\t maxSize integer,\n" +
           "\t fps integer,\n" +
           "\t videoBit integer," +
-          "\t setResolution integer,"+
-          "\t defaultFull integer,"+
-          "\t floatNav integer,"+
-          "\t setLoud integer"+
+          "\t setResolution integer," +
+          "\t defaultFull integer," +
+          "\t floatNav integer" +
           ")"
     )
   }
@@ -97,8 +96,8 @@ class DbHelper(
             "\t maxSize integer,\n" +
             "\t fps integer,\n" +
             "\t videoBit integer," +
-            "\t setResolution integer,"+
-            "\t defaultFull integer"+
+            "\t setResolution integer," +
+            "\t defaultFull integer" +
             ")"
       )
       // 将数据搬移至新表
@@ -140,9 +139,9 @@ class DbHelper(
             "\t maxSize integer,\n" +
             "\t fps integer,\n" +
             "\t videoBit integer," +
-            "\t setResolution integer,"+
-            "\t defaultFull integer,"+
-            "\t floatNav integer"+
+            "\t setResolution integer," +
+            "\t defaultFull integer," +
+            "\t floatNav integer" +
             ")"
       )
       // 将数据搬移至新表
@@ -185,10 +184,10 @@ class DbHelper(
             "\t maxSize integer,\n" +
             "\t fps integer,\n" +
             "\t videoBit integer," +
-            "\t setResolution integer,"+
-            "\t defaultFull integer,"+
-            "\t floatNav integer,"+
-            "\t setLoud integer"+
+            "\t setResolution integer," +
+            "\t defaultFull integer," +
+            "\t floatNav integer," +
+            "\t setLoud integer" +
             ")"
       )
       // 将数据搬移至新表
@@ -234,6 +233,34 @@ class DbHelper(
             put("defaultFull", cursor.getString(cursor.getColumnIndex("defaultFull")))
             put("floatNav", cursor.getString(cursor.getColumnIndex("floatNav")))
             put("setLoud", 1)
+          }
+          db.update(
+            "DevicesDb",
+            values,
+            "name=?",
+            arrayOf(cursor.getString(cursor.getColumnIndex("name")))
+          )
+        } while (cursor.moveToNext())
+      }
+      cursor.close()
+    }
+    // 删除列
+    if (oldVersion < 8) {
+      val cursor =
+        db!!.query("DevicesDb", null, null, null, null, null, null)
+      if (cursor.moveToFirst()) {
+        do {
+          val values = ContentValues().apply {
+            put("name", cursor.getString(cursor.getColumnIndex("name")))
+            put("address", cursor.getString(cursor.getColumnIndex("address")))
+            put("port", cursor.getInt(cursor.getColumnIndex("port")))
+            put("videoCodec", cursor.getString(cursor.getColumnIndex("videoCodec")))
+            put("maxSize", cursor.getString(cursor.getColumnIndex("maxSize")))
+            put("fps", cursor.getString(cursor.getColumnIndex("fps")))
+            put("videoBit", cursor.getString(cursor.getColumnIndex("videoBit")))
+            put("setResolution", cursor.getString(cursor.getColumnIndex("setResolution")))
+            put("defaultFull", cursor.getString(cursor.getColumnIndex("defaultFull")))
+            put("floatNav", cursor.getString(cursor.getColumnIndex("floatNav")))
           }
           db.update(
             "DevicesDb",

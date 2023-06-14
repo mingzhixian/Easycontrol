@@ -1,0 +1,7 @@
+[
+{
+  "directory": "E:/Code/scrcpy/scrcpy_android/app/.cxx/RelWithDebInfo/4jl6e4n1/arm64-v8a",
+  "command": "C:\\Users\\kic\\AppData\\Local\\Android\\Sdk\\ndk\\23.1.7779620\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android23 --sysroot=C:/Users/kic/AppData/Local/Android/Sdk/ndk/23.1.7779620/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dnative_lib_EXPORTS -isystem C:/Users/kic/.gradle/caches/transforms-3/76d7a26834e433e53154d34200c47d62/transformed/oboe-1.7.0/prefab/modules/oboe/include -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -fexceptions -frtti -stdlib=libc++ -O2 -g -DNDEBUG -fPIC -o CMakeFiles\\native-lib.dir\\native-lib.cpp.o -c E:\\Code\\scrcpy\\scrcpy_android\\app\\src\\main\\cpp\\native-lib.cpp",
+  "file": "E:\\Code\\scrcpy\\scrcpy_android\\app\\src\\main\\cpp\\native-lib.cpp"
+}
+]
