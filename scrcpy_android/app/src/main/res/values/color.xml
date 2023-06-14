@@ -9,6 +9,7 @@
     <!--字体颜色-->
     <color name="textColor">#000000</color>
     <color name="ignoreTextColor">#585757</color>
+    <color name="buttonTextColor">#000000</color>
     <!--悬浮窗相关颜色-->
     <color name="floatVideoBarColor">#e6e6e6</color>
     <color name="stopButtonColor">#930f0f</color>

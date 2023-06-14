@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import dadb.AdbKeyPair
+import kotlinx.coroutines.MainScope
 import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import java.io.File
@@ -21,6 +22,12 @@ class AppData : ViewModel() {
 
   // 是否初始化
   var isInit = false
+
+  @SuppressLint("StaticFieldLeak")
+  lateinit var main: MainActivity
+
+  // 全局协程域
+  val mainScope = MainScope()
 
   // 数据库管理
   lateinit var dbHelper: DbHelper
@@ -44,7 +51,7 @@ class AppData : ViewModel() {
   lateinit var settings: SharedPreferences
 
   // OKHTTP
-  var okhttpClient=OkHttpClient()
+  var okhttpClient = OkHttpClient()
 
   // 当前版本号
   val versionCode = BuildConfig.VERSION_CODE
@@ -52,12 +59,14 @@ class AppData : ViewModel() {
   // 加载框（全局通用）
   @SuppressLint("StaticFieldLeak")
   lateinit var loadingDialog: AlertDialog
+
   @SuppressLint("StaticFieldLeak")
   lateinit var loading: View
 
   // 初始化数据
-  fun init(main: MainActivity) {
+  fun init(m: MainActivity) {
     isInit = true
+    main = m
     settings = main.getSharedPreferences("setting", Context.MODE_PRIVATE)
     // 获取系统分辨率
     val metric = DisplayMetrics()
@@ -67,7 +76,7 @@ class AppData : ViewModel() {
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
     // 数据库管理
-    dbHelper = DbHelper(main, "scrcpy_android.db", 7)
+    dbHelper = DbHelper(main, "scrcpy_android.db", 8)
     deviceAdapter = DeviceAdapter(main)
     // 从数据库获取设备列表
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
@@ -84,8 +93,7 @@ class AppData : ViewModel() {
             cursor.getInt(cursor.getColumnIndex("videoBit")),
             cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
             cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
-            cursor.getInt(cursor.getColumnIndex("floatNav")) == 1,
-            cursor.getInt(cursor.getColumnIndex("setLoud")) == 1
+            cursor.getInt(cursor.getColumnIndex("floatNav")) == 1
           )
         )
       } while (cursor.moveToNext())

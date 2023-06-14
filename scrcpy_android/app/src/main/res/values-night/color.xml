@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="appBackground">#585959</color>
+    <color name="cardBackground">#7a8176</color>
+    <color name="buttonBackground">#93b578</color>
+    <color name="alertBackground">#8e9588</color>
+    <color name="alertButtonBackground">#7a8b51</color>
+    <color name="cancelButtonBackground">#9ca194</color>
+    <!--字体颜色-->
+    <color name="textColor">#dcdcdc</color>
+    <color name="ignoreTextColor">#c6c5c5</color>
+    <color name="buttonTextColor">#4a5146</color>
+    <!--悬浮窗相关颜色-->
+    <color name="floatVideoBarColor">#aaaaaa</color>
+    <color name="stopButtonColor">#b74141</color>
+    <color name="navButtonColor">#c0c4ba</color>
+    <color name="setSizeColor">#abb0aa</color>
+</resources>

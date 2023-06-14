@@ -15,7 +15,7 @@
         android:layout_marginTop="100dp"
         android:layout_marginEnd="20dp"
         android:text="Scrcpy_android"
-        android:textColor="#121214"
+        android:textColor="@color/textColor"
         android:textSize="36dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +27,7 @@
         android:layout_marginStart="30dp"
         android:layout_marginTop="100dp"
         android:text="欢迎使用Scrcpy_android"
-        android:textColor="#38383c"
+        android:textColor="@color/ignoreTextColor"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/show_app_title" />
@@ -38,7 +38,7 @@
         android:layout_marginStart="50dp"
         android:layout_marginTop="140dp"
         android:text="本软件基于开源项目Scrcpy"
-        android:textColor="#38383c"
+        android:textColor="@color/ignoreTextColor"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/show_app_title" />
@@ -49,7 +49,7 @@
         android:layout_marginStart="70dp"
         android:layout_marginTop="180dp"
         android:text="实现了Scrcpy安卓客户端"
-        android:textColor="#38383c"
+        android:textColor="@color/ignoreTextColor"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/show_app_title" />
@@ -73,6 +73,7 @@
         android:text="使用说明"
         android:textSize="17dp"
         android:textStyle="bold"
+        android:textColor="@color/ignoreTextColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -85,6 +86,7 @@
         android:text="隐私政策"
         android:textSize="17dp"
         android:textStyle="bold"
+        android:textColor="@color/ignoreTextColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -98,6 +100,7 @@
         android:backgroundTint="@color/buttonBackground"
         android:text="同意"
         android:textSize="@dimen/largeFont"
+        android:textColor="@color/buttonTextColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

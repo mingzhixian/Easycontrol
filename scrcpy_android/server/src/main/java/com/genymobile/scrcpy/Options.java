@@ -12,8 +12,8 @@ public class Options {
   private int maxSize = 1920; // 修改
   private VideoCodec videoCodec = VideoCodec.H264;
   private AudioCodec audioCodec = AudioCodec.OPUS;
-  private int videoBitRate = 16000000; // 修改
-  private int audioBitRate = 128000;
+  private int videoBitRate = 8000000; // 修改
+  private int audioBitRate = 64000;
   private int maxFps = 45; // 修改
   private int lockVideoOrientation = -1;
   private boolean tunnelForward = true; // 修改
