@@ -70,11 +70,16 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         val request: Request = Request.Builder()
           .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
           .build()
-        appData.okhttpClient.newCall(request).execute().use { response ->
-          val json = JSONObject(response.body!!.string())
-          val newVersionCode = json.getInt("tag_name")
-          if (newVersionCode > appData.versionCode)
-            Toast.makeText(this@MainActivity, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+        try {
+          appData.okhttpClient.newCall(request).execute().use { response ->
+            val json = JSONObject(response.body!!.string())
+            val newVersionCode = json.getInt("tag_name")
+            if (newVersionCode > appData.versionCode)
+              withContext(Dispatchers.Main) {
+                Toast.makeText(appData.main, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+              }
+          }
+        } catch (_: Exception) {
         }
       }
     }
