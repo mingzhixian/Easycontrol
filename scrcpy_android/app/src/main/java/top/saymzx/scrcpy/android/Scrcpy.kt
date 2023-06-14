@@ -349,7 +349,7 @@ class Scrcpy(val device: Device) {
         try {
           val byteArray = ByteArray(bufferInfo.size)
           decodec.getOutputBuffer(outIndex)!!.get(byteArray)
-          audioTrack.write(byteArray,0,bufferInfo.size)
+          audioTrack.write(byteArray, 0, bufferInfo.size)
           decodec.releaseOutputBuffer(outIndex, false)
         } catch (e: IllegalStateException) {
           stop(e)
@@ -371,7 +371,7 @@ class Scrcpy(val device: Device) {
     val audioDecodecBuild = AudioTrack.Builder()
     val sampleRate = 48000
     val minBufferSize = AudioTrack.getMinBufferSize(
-      sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_FLOAT
+      sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT
     )
     audioDecodecBuild.setBufferSizeInBytes(minBufferSize * 2)
     val audioAttributesBulider = AudioAttributes.Builder()
@@ -379,14 +379,14 @@ class Scrcpy(val device: Device) {
       .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
     audioDecodecBuild.setAudioAttributes(audioAttributesBulider.build())
     audioDecodecBuild.setAudioFormat(
-      AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_FLOAT).setSampleRate(sampleRate)
+      AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate)
         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
     )
     audioTrack = audioDecodecBuild.build()
     // 声音增强
     try {
       loudnessEnhancer = LoudnessEnhancer(audioTrack.audioSessionId)
-      loudnessEnhancer.setTargetGain(3000)
+      loudnessEnhancer.setTargetGain(3500)
       loudnessEnhancer.enabled = true
     } catch (_: Exception) {
       Toast.makeText(appData.main, "音频放大器未生效", Toast.LENGTH_SHORT).show()
@@ -575,15 +575,4 @@ class Scrcpy(val device: Device) {
       }
     }
   }
-
-//  // Natice
-//  companion object {
-//    init {
-//      System.loadLibrary("native-lib")
-//    }
-//  }
-//
-//  private external fun setOboe()
-//  private external fun stopOboe()
-//  private external fun setByte(byteArray: ByteArray, size: Int)
 }
