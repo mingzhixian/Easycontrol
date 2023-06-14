@@ -15,12 +15,6 @@ android {
         versionName "10.0"
         resConfigs "zh"
         resConfigs "xhdpi"
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-                arguments "-DANDROID_STL=c++_shared"
-            }
-        }
         ndk {
             abiFilter "arm64-v8a"
         }
@@ -43,14 +37,6 @@ android {
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
-    buildFeatures {
-        prefab true
-    }
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-        }
-    }
 }
 
 dependencies {
@@ -61,5 +47,4 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'dev.mobile:dadb:1.2.6'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.google.oboe:oboe:1.7.0'
 }
