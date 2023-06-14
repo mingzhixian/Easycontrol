@@ -170,6 +170,8 @@ class FloatVideo(
       height =
         if (isLandScape) appData.deviceWidth else appData.deviceHeight
     }
+    localVideoWidth = floatVideoParams.width
+    localVideoHeight = floatVideoParams.height
     // 隐藏上下栏
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.GONE
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.GONE

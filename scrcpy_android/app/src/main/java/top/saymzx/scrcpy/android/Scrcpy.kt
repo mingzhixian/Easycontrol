@@ -100,34 +100,28 @@ class Scrcpy(val device: Device) {
       }
       // 视频解码输入
       launch {
-        withContext(Dispatchers.Default) {
-          try {
-            decodeInput("video")
-          } catch (e: Exception) {
-            stop(e)
-          }
+        try {
+          decodeInput("video")
+        } catch (e: Exception) {
+          stop(e)
         }
       }
       // 音频解码输入
       if (canAudio) {
         launch {
-          withContext(Dispatchers.Default) {
-            try {
-              decodeInput("audio")
-            } catch (e: Exception) {
-              stop(e)
-            }
+          try {
+            decodeInput("audio")
+          } catch (e: Exception) {
+            stop(e)
           }
         }
       }
       // 配置控制输入
       launch {
-        withContext(Dispatchers.Default) {
-          try {
-            setControlInput()
-          } catch (e: Exception) {
-            stop(e)
-          }
+        try {
+          setControlInput()
+        } catch (e: Exception) {
+          stop(e)
         }
       }
     }
