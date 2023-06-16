@@ -11,6 +11,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -363,6 +364,8 @@ class FloatVideo(
           height =
             if (isLandscape) appData.deviceWidth else appData.deviceHeight
         }
+        localVideoWidth = floatVideoParams.width
+        localVideoHeight = floatVideoParams.height
       } else {
         // 更新悬浮窗
         floatVideoParams.apply {
@@ -383,8 +386,8 @@ class FloatVideo(
           x = (appData.deviceWidth - width) / 2
           y = (appData.deviceHeight - height) / 2
         }
-        update(true)
       }
+      update(true)
     }
   }
 
@@ -507,6 +510,7 @@ class FloatVideo(
     if (resourceId > 0) {
       statusBarHeight = appData.main.resources.getDimensionPixelSize(resourceId)
     }
+    var deviceWidth = 0
     floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener { _, event ->
       setFocus(true)
       when (event.actionMasked) {
@@ -514,6 +518,9 @@ class FloatVideo(
           xx = event.x.toInt()
           yy = event.y.toInt()
           barGestureDetector.onTouchEvent(event)
+          val metric = DisplayMetrics()
+          appData.main.windowManager.defaultDisplay.getRealMetrics(metric)
+          deviceWidth = metric.widthPixels
         }
 
         MotionEvent.ACTION_MOVE -> {
@@ -528,9 +535,6 @@ class FloatVideo(
           }
           // 贴边变成小小窗
           val criticality = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
-          val metric = DisplayMetrics()
-          appData.main.windowManager.defaultDisplay.getRealMetrics(metric)
-          val deviceWidth = metric.widthPixels
           val rawX = event.rawX.toInt()
           if ((rawX <= criticality || rawX >= (deviceWidth - criticality)) && event.rawY.toInt() <= criticality) {
             setSmallSmall()
