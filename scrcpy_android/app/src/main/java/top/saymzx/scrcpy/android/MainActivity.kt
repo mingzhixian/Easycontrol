@@ -92,12 +92,15 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     // 注册广播用以关闭程序
     try {
       unregisterReceiver(scrcpyBroadcastReceiver)
-    } catch (_: IllegalArgumentException) {
+    } catch (_: Exception) {
     }
     val filter = IntentFilter()
     filter.addAction(ACTION_SCREEN_OFF)
     filter.addAction("top.saymzx.scrcpy.android.notification")
-    registerReceiver(scrcpyBroadcastReceiver, filter)
+    try {
+      registerReceiver(scrcpyBroadcastReceiver, filter)
+    } catch (_: Exception) {
+    }
   }
 
   // 如果有投屏处于全屏状态则自动恢复界面
