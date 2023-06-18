@@ -5,14 +5,15 @@
 1. 被控端打开无线ADB调试，端口为5555<br>
 	 有root的用户可以在终端下输入以下命令，之后手机将开机自动启动ADB无线调试：<br>
 	 ``` shell
-	 echo "sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh &
-	 chmod +x /data/adb/service.d/adb.sh
+	 echo "sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh & chmod +x /data/adb/service.d/adb.sh
 	 ```
+	 <br>
 	 无root的用户，可在有线连接ADB后，在电脑端输入以下命令：<br>
 	 ``` shell
 	 adb tcpip 5555
 	 ```
 2. 被控端安装scrcpy_back(可选)<br>
+	 如主备控端分辨率相同，或在添加设备时选择不修改分辨率则可以不在被控端安装scrcpy_back
 	 将该软件放至桌面左半部分，将通知栏磁贴放至通知栏左半部分（放在左边是因为避免修改分辨率后显示界面超出屏幕点击不到，放在左边可保证总能在屏幕内显示），点击scrcpy_back或长按磁贴，并允许永久调试，测试软件是否正常工作（软件会自动退出，不是崩溃，可以手动修改分辨率，测试软件是否正常工作）
 3. 被控端建议改为使用静态地址(可选)<br>
 	 可在手机上配置静态获取，也可以在路由器上配置静态分配
