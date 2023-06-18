@@ -28,18 +28,18 @@
 
 ## 截图
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/main.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/addDevice.png?raw=true" width="200px">
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallV.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallH.png?raw=true" width="200px">
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/twoDevices.png?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.png?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/main.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/addDevice.webp?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallV.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallH.webp?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/twoDevices.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.webp?raw=true" width="200px">
 
 ## 鼓励
 
 如果您觉得我的软件对您有帮助，可以赞助我一个硬币，十分感谢！
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/wechat.jpg?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/alipay.jpg?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/wechat.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/alipay.webp?raw=true" width="200px">
 
 ## 反馈
 
 请在Github或QQ群反馈BUG或建议。
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/qq.jpg?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/qq.webp?raw=true" width="200px">
