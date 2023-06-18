@@ -78,9 +78,16 @@ public class ScreenEncoder implements Device.RotationListener {
         Rect videoRect = screenInfo.getVideoSize().toRect();
         format.setInteger(MediaFormat.KEY_WIDTH, videoRect.width());
         format.setInteger(MediaFormat.KEY_HEIGHT, videoRect.height());
-        if (mediaCodec.getCodecInfo().getCapabilitiesForType(codec.getMimeType()).getEncoderCapabilities().isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)) {
+        MediaCodecInfo codeInfo = mediaCodec.getCodecInfo();
+        if (codeInfo.getCapabilitiesForType(codec.getMimeType()).getEncoderCapabilities().isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)) {
           format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
         }
+        // 使用基线编码标准，会造成快速运动时模糊
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+//          format.setInteger(
+//              "profile",
+//              MediaCodecInfo.CodecProfileLevel.AVCProfileConstrainedBaseline);
+//        }
         Surface surface = null;
         try {
           mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
