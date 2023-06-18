@@ -8,8 +8,10 @@ import android.media.AudioTrack
 import android.media.AudioTrack.WRITE_NON_BLOCKING
 import android.media.MediaCodec
 import android.media.MediaCodec.Callback
+import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.audiofx.LoudnessEnhancer
+import android.os.Build
 import android.util.Base64
 import android.util.Log
 import android.view.SurfaceView
@@ -69,7 +71,7 @@ class Scrcpy(private val device: Device) {
     device.status = 0
     // 显示加载中
     appData.showLoading("连接中...", true) {
-      stop()
+      stop("用户停止")
     }
     appData.loadingDialog.show()
     scrcpyScope.launch {
@@ -82,6 +84,10 @@ class Scrcpy(private val device: Device) {
         sendServer()
         // 转发端口
         tcpForward()
+      } catch (e: Exception) {
+        stop("连接错误", e)
+      }
+      try {
         // 配置视频解码
         setVideoDecodec()
         // 配置音频解码
@@ -93,14 +99,14 @@ class Scrcpy(private val device: Device) {
         // 设置被控端熄屏（默认投屏后熄屏）
         setPowerOff()
       } catch (e: Exception) {
-        stop(e)
+        stop("启动错误", e)
       }
       // 视频解码输入
       Thread {
         try {
           decodeInput("video")
         } catch (e: Exception) {
-          stop(e)
+          stop("投屏停止", e)
         }
       }.start()
       // 音频解码输入
@@ -109,7 +115,7 @@ class Scrcpy(private val device: Device) {
           try {
             decodeInput("audio")
           } catch (e: Exception) {
-            stop(e)
+            stop("投屏停止", e)
           }
         }.start()
       }
@@ -118,19 +124,27 @@ class Scrcpy(private val device: Device) {
         try {
           setControlInput()
         } catch (e: Exception) {
-          stop(e)
+          stop("投屏停止", e)
         }
       }.start()
     }
   }
 
   // 停止投屏
-  fun stop(e: Exception = Exception("停止")) {
+  fun stop(scrcpyError: String, e: Exception? = null) {
     // 防止多次调用
     if (device.status == -1) return
+    val oldStatus = device.status
     device.status = -1
-    Log.e("Scrcpy", e.toString())
-    if (device.status == 0) appData.loadingDialog.cancel()
+    appData.mainScope.launch {
+      withContext(Dispatchers.Main) {
+        Toast.makeText(appData.main, scrcpyError, Toast.LENGTH_SHORT).show()
+        if (e != null)
+          Toast.makeText(appData.main, e.toString(), Toast.LENGTH_SHORT).show()
+      }
+    }
+    Log.e("Scrcpy", "$scrcpyError---${e?.toString() ?: ""}")
+    if (oldStatus == 0) appData.loadingDialog.cancel()
     scrcpyScope.cancel()
     appData.mainScope.launch {
       try {
@@ -141,7 +155,10 @@ class Scrcpy(private val device: Device) {
       } catch (_: Exception) {
       }
     }
-    floatVideo.hide()
+    try {
+      floatVideo.hide()
+    } catch (_: Exception) {
+    }
     try {
       if (canAudio) {
         loudnessEnhancer.release()
@@ -157,10 +174,13 @@ class Scrcpy(private val device: Device) {
       videoDecodec.release()
     } catch (_: Exception) {
     }
-    videoStream.close()
-    audioStream.close()
-    controlOutStream.close()
-    controlInStream.close()
+    try {
+      videoStream.close()
+      audioStream.close()
+      controlOutStream.close()
+      controlInStream.close()
+    } catch (_: Exception) {
+    }
   }
 
   // 发送server
@@ -176,7 +196,6 @@ class Scrcpy(private val device: Device) {
     runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
     // 快速启动
     if (runAdbCmd(" ls -l /data/local/tmp/scrcpy_server${appData.versionCode}.jar ").contains("No such file or directory")) {
-      runAdbCmd("rm /data/local/tmp/serverBase64")
       runAdbCmd("rm /data/local/tmp/scrcpy_server*")
       val serverFileBase64 = Base64.encodeToString(withContext(Dispatchers.IO) {
         val server = appData.main.resources.openRawResource(R.raw.scrcpy_server)
@@ -185,8 +204,8 @@ class Scrcpy(private val device: Device) {
         server.close()
         buffer
       }, 2)
-      runAdbCmd("echo $serverFileBase64 >> /data/local/tmp/serverBase64\n")
-      runAdbCmd("base64 -d < /data/local/tmp/serverBase64 > /data/local/tmp/scrcpy_server${appData.versionCode}.jar && rm /data/local/tmp/serverBase64")
+      runAdbCmd("echo $serverFileBase64 >> /data/local/tmp/scrcpy_server_base64\n")
+      runAdbCmd("base64 -d < /data/local/tmp/scrcpy_server_base64 > /data/local/tmp/scrcpy_server${appData.versionCode}.jar && rm /data/local/tmp/scrcpy_server_base64")
     }
     runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.0 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
   }
@@ -246,6 +265,13 @@ class Scrcpy(private val device: Device) {
     val csd1 = withContext(Dispatchers.IO) { readFrame(videoStream) }
     mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0))
     mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1))
+    // 配置低延迟解码
+    val codeInfo = videoDecodec.codecInfo
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      if (codeInfo.getCapabilitiesForType(codecMime)
+          .isFeatureSupported(MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency)
+      ) mediaFormat.setInteger(MediaFormat.KEY_LOW_LATENCY, 1)
+    }
     // 配置解码器
     videoDecodec.configure(
       mediaFormat,
@@ -274,8 +300,8 @@ class Scrcpy(private val device: Device) {
             )
           }
           decodec.releaseOutputBuffer(outIndex, true)
-        } catch (e: IllegalStateException) {
-          stop(e)
+        } catch (e: Exception) {
+          stop("投屏停止", e)
         }
       }
 
@@ -341,12 +367,14 @@ class Scrcpy(private val device: Device) {
           checkClipBoard()
         }
         try {
-          val byteArray = ByteArray(bufferInfo.size)
-          decodec.getOutputBuffer(outIndex)!!.get(byteArray)
-          audioTrack.write(byteArray, bufferInfo.size, WRITE_NON_BLOCKING)
+          audioTrack.write(
+            decodec.getOutputBuffer(outIndex)!!,
+            bufferInfo.size,
+            WRITE_NON_BLOCKING
+          )
           decodec.releaseOutputBuffer(outIndex, false)
-        } catch (e: IllegalStateException) {
-          stop(e)
+        } catch (e: Exception) {
+          stop("投屏停止", e)
         }
       }
 

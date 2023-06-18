@@ -8,7 +8,6 @@ import android.media.*
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.util.Log
 import android.view.*
 import android.view.KeyEvent.*
 import android.view.MotionEvent.*
@@ -20,7 +19,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -152,7 +150,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     findViewById<TextView>(R.id.add_device).setOnLongClickListener {
       for (i in appData.devices) {
         i.status = -1
-        i.scrcpy.stop()
+        i.scrcpy.stop("强行停止")
       }
       Toast.makeText(this, "已强制清理", Toast.LENGTH_SHORT).show()
       return@setOnLongClickListener true
@@ -239,7 +237,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     override fun onReceive(context: Context?, intent: Intent?) {
       // 取消通知
       (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
-      for (i in appData.devices) if (i.status >= 0) i.scrcpy.stop()
+      for (i in appData.devices) if (i.status >= 0) i.scrcpy.stop("停止投屏")
     }
   }
 
