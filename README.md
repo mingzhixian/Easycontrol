@@ -20,7 +20,7 @@
 
 ## 使用说明
 
-请前往[此处](https://scrcpy.saymzx.top/?art=HOW_TO_USE.md)查看
+请前往[此处](https://scrcpy.saymzx.top/?art=HOW_TO_USE.md)查看。
 
 ## 下载
 - [scrcpy_android](https://github.saymzx.top/mingzhixian/scrcpy/releases/latest/download/scrcpy_android.apk)
