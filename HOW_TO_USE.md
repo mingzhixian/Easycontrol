@@ -4,12 +4,13 @@
 
 1. 被控端打开无线ADB调试，端口为5555<br>
 	 有root的用户可以在终端下输入以下命令，之后手机将开机自动启动ADB无线调试：<br>
-	 ``` shell
+	 ```
+	 su
 	 echo "sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh & chmod +x /data/adb/service.d/adb.sh
 	 ```
 	 <br>
 	 无root的用户，可在有线连接ADB后，在电脑端输入以下命令：<br>
-	 ``` shell
+	 ```
 	 adb tcpip 5555
 	 ```
 2. 被控端安装scrcpy_back(可选)<br>
