@@ -195,7 +195,8 @@ class Scrcpy(private val device: Device) {
     // 停止旧服务
     runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
     // 快速启动
-    if (runAdbCmd(" ls -l /data/local/tmp/scrcpy_server${appData.versionCode}.jar ").contains("No such file or directory")) {
+    val isHaveServer = runAdbCmd(" ls -l /data/local/tmp/scrcpy_server${appData.versionCode}.jar ")
+    if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
       runAdbCmd("rm /data/local/tmp/scrcpy_server*")
       val serverFileBase64 = Base64.encodeToString(withContext(Dispatchers.IO) {
         val server = appData.main.resources.openRawResource(R.raw.scrcpy_server)

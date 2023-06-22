@@ -16,6 +16,7 @@ scrcpy_android/.externalNativeBuild
 scrcpy_android/.cxx
 scrcpy_android/local.properties
 scrcpy_android/app/src/main/assets/scrcpy-server.jar
+scrcpy_android/app/src/main/res/raw/scrcpy-server.jar
 
 scrcpy_back/*.iml
 scrcpy_back/.gradle
