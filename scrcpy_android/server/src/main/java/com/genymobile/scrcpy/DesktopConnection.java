@@ -1,5 +1,6 @@
 package com.genymobile.scrcpy;
 
+import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 
@@ -43,7 +44,7 @@ public final class DesktopConnection implements Closeable {
       controlInputStream = null;
       controlOutputStream = null;
     }
-    videoFd = ((FileOutputStream) videoSocket.getOutputStream()).getFD();
+    videoFd = videoSocket != null ? ((FileOutputStream) videoSocket.getOutputStream()).getFD() : null;
     audioFd = audioSocket != null ? ((FileOutputStream) audioSocket.getOutputStream()).getFD() : null;
   }
 
@@ -62,23 +63,37 @@ public final class DesktopConnection implements Closeable {
     return SOCKET_NAME_PREFIX + String.format("_%08x", scid);
   }
 
-  public static DesktopConnection open(int scid, boolean tunnelForward, boolean audio, boolean control, boolean sendDummyByte) throws IOException {
+  public static DesktopConnection open(int scid, boolean tunnelForward, boolean video, boolean audio, boolean control, boolean sendDummyByte)
+      throws IOException {
+    String socketName = getSocketName(scid);
+
     Socket videoSocket = null;
     Socket audioSocket = null;
     Socket controlSocket = null;
     try {
-      if (tunnelForward) {
-        try (ServerSocket localServerSocket = new ServerSocket(6006)) {
+      try (ServerSocket localServerSocket = new ServerSocket(6006)) {
+        if (video) {
           videoSocket = localServerSocket.accept();
           if (sendDummyByte) {
             // send one byte so the client may read() to detect a connection error
             videoSocket.getOutputStream().write(0);
+            sendDummyByte = false;
           }
-          if (audio) {
-            audioSocket = localServerSocket.accept();
+        }
+        if (audio) {
+          audioSocket = localServerSocket.accept();
+          if (sendDummyByte) {
+            // send one byte so the client may read() to detect a connection error
+            audioSocket.getOutputStream().write(0);
+            sendDummyByte = false;
           }
-          if (control) {
-            controlSocket = localServerSocket.accept();
+        }
+        if (control) {
+          controlSocket = localServerSocket.accept();
+          if (sendDummyByte) {
+            // send one byte so the client may read() to detect a connection error
+            controlSocket.getOutputStream().write(0);
+            sendDummyByte = false;
           }
         }
       }
@@ -98,10 +113,22 @@ public final class DesktopConnection implements Closeable {
     return new DesktopConnection(videoSocket, audioSocket, controlSocket);
   }
 
+  private Socket getFirstSocket() {
+    if (videoSocket != null) {
+      return videoSocket;
+    }
+    if (audioSocket != null) {
+      return audioSocket;
+    }
+    return controlSocket;
+  }
+
   public void close() throws IOException {
-    videoSocket.shutdownInput();
-    videoSocket.shutdownOutput();
-    videoSocket.close();
+    if (videoSocket != null) {
+      videoSocket.shutdownInput();
+      videoSocket.shutdownOutput();
+      videoSocket.close();
+    }
     if (audioSocket != null) {
       audioSocket.shutdownInput();
       audioSocket.shutdownOutput();
@@ -122,7 +149,8 @@ public final class DesktopConnection implements Closeable {
     System.arraycopy(deviceNameBytes, 0, buffer, 0, len);
     // byte[] are always 0-initialized in java, no need to set '\0' explicitly
 
-    IO.writeFully(videoFd, buffer, 0, buffer.length);
+    FileDescriptor fd = ((FileOutputStream) getFirstSocket().getOutputStream()).getFD();
+    IO.writeFully(fd, buffer, 0, buffer.length);
   }
 
   public FileDescriptor getVideoFd() {

@@ -457,18 +457,18 @@ class FloatVideo(
   private fun setNavListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener {
       setFocus(true)
-      packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK)
-      packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
+      packNavControl(0, 4)
+      packNavControl(1, 4)
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener {
       setFocus(true)
-      packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME)
-      packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME)
+      packNavControl(0, 3)
+      packNavControl(1, 3)
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener {
       setFocus(true)
-      packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_APP_SWITCH)
-      packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_APP_SWITCH)
+      packNavControl(0, 187)
+      packNavControl(1, 187)
     }
   }
 
@@ -582,20 +582,20 @@ class FloatVideo(
     val gestureDetector =
       GestureDetector(appData.main, object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-          packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK)
-          packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
+          packNavControl(0, 4)
+          packNavControl(1, 4)
           return super.onSingleTapConfirmed(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-          packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME)
-          packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME)
+          packNavControl(0, 3)
+          packNavControl(1, 3)
           return super.onDoubleTap(e)
         }
 
         override fun onLongPress(e: MotionEvent) {
-          packNavControl(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_APP_SWITCH)
-          packNavControl(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_APP_SWITCH)
+          packNavControl(0, 187)
+          packNavControl(1, 187)
           super.onLongPress(e)
         }
       })

@@ -12,7 +12,7 @@
 set -e
 
 SCRCPY_DEBUG=false
-SCRCPY_VERSION_NAME=2.0
+SCRCPY_VERSION_NAME=2.1
 
 PLATFORM=${ANDROID_PLATFORM:-33}
 BUILD_TOOLS=${ANDROID_BUILD_TOOLS:-33.0.0}
@@ -48,6 +48,7 @@ cd "$SERVER_DIR/src/main/aidl"
 "$BUILD_TOOLS_DIR/aidl" -o"$GEN_DIR" android/view/IRotationWatcher.aidl
 "$BUILD_TOOLS_DIR/aidl" -o"$GEN_DIR" \
     android/content/IOnPrimaryClipChangedListener.aidl
+"$BUILD_TOOLS_DIR/aidl" -o"$GEN_DIR" android/view/IDisplayFoldListener.aidl
 
 echo "Compiling java sources..."
 cd ../java

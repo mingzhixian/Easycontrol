@@ -1,13 +1,13 @@
 package com.genymobile.scrcpy;
 
+import com.genymobile.scrcpy.wrappers.InputManager;
+
 import android.os.Build;
 import android.os.SystemClock;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
-import com.genymobile.scrcpy.wrappers.InputManager;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -84,7 +84,8 @@ public class Controller implements AsyncProcessor {
     }
   }
 
-  public void start() {
+  @Override
+  public void start(TerminationListener listener) {
     thread = new Thread(() -> {
       try {
         control();
@@ -92,12 +93,14 @@ public class Controller implements AsyncProcessor {
         // this is expected on close
       } finally {
         Ln.d("Controller stopped");
+        listener.onTerminated(true);
       }
-    });
+    }, "control-recv");
     thread.start();
     sender.start();
   }
 
+  @Override
   public void stop() {
     if (thread != null) {
       thread.interrupt();
@@ -105,6 +108,7 @@ public class Controller implements AsyncProcessor {
     sender.stop();
   }
 
+  @Override
   public void join() throws InterruptedException {
     if (thread != null) {
       thread.join();
@@ -230,19 +234,12 @@ public class Controller implements AsyncProcessor {
     pointer.setPressure(pressure);
 
     int source;
-    if (pointerId == POINTER_ID_MOUSE || pointerId == POINTER_ID_VIRTUAL_MOUSE) {
-      // real mouse event (forced by the client when --forward-on-click)
-      pointerProperties[pointerIndex].toolType = MotionEvent.TOOL_TYPE_MOUSE;
-      source = InputDevice.SOURCE_MOUSE;
-      pointer.setUp(buttons == 0);
-    } else {
-      // POINTER_ID_GENERIC_FINGER, POINTER_ID_VIRTUAL_FINGER or real touch from device
-      pointerProperties[pointerIndex].toolType = MotionEvent.TOOL_TYPE_FINGER;
-      source = InputDevice.SOURCE_TOUCHSCREEN;
-      // Buttons must not be set for touch events
-      buttons = 0;
-      pointer.setUp(action == MotionEvent.ACTION_UP);
-    }
+    // POINTER_ID_GENERIC_FINGER, POINTER_ID_VIRTUAL_FINGER or real touch from device
+    pointerProperties[pointerIndex].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    source = InputDevice.SOURCE_TOUCHSCREEN;
+    // Buttons must not be set for touch events
+    buttons = 0;
+    pointer.setUp(action == MotionEvent.ACTION_UP);
 
     int pointerCount = pointersState.update(pointerProperties, pointerCoords);
     if (pointerCount == 1) {
@@ -261,7 +258,6 @@ public class Controller implements AsyncProcessor {
     MotionEvent event = MotionEvent
         .obtain(lastTouchDown, now, action, pointerCount, pointerProperties, pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source,
             0);
-
     return device.injectEvent(event, Device.INJECT_MODE_ASYNC);
   }
 

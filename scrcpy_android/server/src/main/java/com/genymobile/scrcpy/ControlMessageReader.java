@@ -139,8 +139,7 @@ public class ControlMessageReader {
     int action = Binary.toUnsigned(buffer.get());
     long pointerId = buffer.getLong();
     Position position = readPosition(buffer);
-    // 不转了，大部分设备都不支持压力，直接使用1.0
-    float pressure = buffer.getShort();
+    float pressure = Binary.u16FixedPointToFloat(buffer.getShort());
     int actionButton = buffer.getInt();
     int buttons = buffer.getInt();
     return ControlMessage.createInjectTouchEvent(action, pointerId, position, pressure, actionButton, buttons);
