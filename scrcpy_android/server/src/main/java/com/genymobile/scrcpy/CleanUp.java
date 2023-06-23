@@ -140,11 +140,12 @@ public final class CleanUp {
   }
 
   public static void unlinkSelf() {
-    try {
-      new File(SERVER_PATH).delete();
-    } catch (Exception e) {
-      Ln.e("Could not unlink server", e);
-    }
+    // 修改
+//        try {
+//            new File(SERVER_PATH).delete();
+//        } catch (Exception e) {
+//            Ln.e("Could not unlink server", e);
+//        }
   }
 
   public static void main(String... args) {

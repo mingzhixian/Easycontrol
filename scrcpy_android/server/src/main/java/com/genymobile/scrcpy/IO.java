@@ -23,7 +23,7 @@ public final class IO {
     while (remaining > 0) {
       try {
         int w = Os.write(fd, from);
-        if (BuildConfig.DEBUG && w < 0) {
+        if (w < 0) {
           // w should not be negative, since an exception is thrown on error
           throw new AssertionError("Os.write() returned a negative value (" + w + ")");
         }

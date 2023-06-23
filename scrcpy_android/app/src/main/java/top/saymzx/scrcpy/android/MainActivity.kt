@@ -92,10 +92,10 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       unregisterReceiver(scrcpyBroadcastReceiver)
     } catch (_: Exception) {
     }
-    val filter = IntentFilter()
-    filter.addAction(ACTION_SCREEN_OFF)
-    filter.addAction("top.saymzx.scrcpy.android.notification")
     try {
+      val filter = IntentFilter()
+      filter.addAction(ACTION_SCREEN_OFF)
+      filter.addAction("top.saymzx.scrcpy.android.notification")
       registerReceiver(scrcpyBroadcastReceiver, filter)
     } catch (_: Exception) {
     }
@@ -149,7 +149,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   private fun setAddDeviceListener() {
     findViewById<TextView>(R.id.add_device).setOnLongClickListener {
       for (i in appData.devices) {
-        i.status = -1
         i.scrcpy.stop("强行停止")
       }
       Toast.makeText(this, "已强制清理", Toast.LENGTH_SHORT).show()
