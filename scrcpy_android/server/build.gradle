@@ -7,8 +7,8 @@ android {
         applicationId "com.genymobile.scrcpy"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 20000
-        versionName "2.0"
+        versionCode 20100
+        versionName "2.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -17,8 +17,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '30.0.3'
-
     task copyRelease(dependsOn: 'deleteServer', type: Copy){
         from file('build/outputs/apk/release/server-release-unsigned.apk')
         into file('../app/src/main/res/raw/')
