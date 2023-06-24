@@ -149,7 +149,10 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   private fun setAddDeviceListener() {
     findViewById<TextView>(R.id.add_device).setOnLongClickListener {
       for (i in appData.devices) {
-        i.scrcpy.stop("强行停止")
+        try {
+          i.scrcpy.stop("强行停止")
+        } catch (_: Exception) {
+        }
       }
       Toast.makeText(this, "已强制清理", Toast.LENGTH_SHORT).show()
       return@setOnLongClickListener true

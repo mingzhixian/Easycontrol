@@ -16,8 +16,8 @@ import android.util.Base64
 import android.util.Log
 import android.view.SurfaceView
 import android.widget.Toast
-import dadb.AdbKeyPair
-import dadb.Dadb
+import dev.mobile.dadb.AdbKeyPair
+import dev.mobile.dadb.Dadb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -193,7 +193,7 @@ class Scrcpy(private val device: Device) {
       "wm size ${appData.deviceWidth}x${appData.deviceHeight}"
     )
     // 停止旧服务
-//    runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
+    runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
     // 快速启动
     val isHaveServer = runAdbCmd(" ls -l /data/local/tmp/scrcpy_server${appData.versionCode}.jar ")
     if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
@@ -208,7 +208,7 @@ class Scrcpy(private val device: Device) {
       runAdbCmd("echo $serverFileBase64 >> /data/local/tmp/scrcpy_server_base64\n")
       runAdbCmd("base64 -d < /data/local/tmp/scrcpy_server_base64 > /data/local/tmp/scrcpy_server${appData.versionCode}.jar && rm /data/local/tmp/scrcpy_server_base64")
     }
-//    runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
+    runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
   }
 
   // 转发端口
