@@ -17,6 +17,7 @@
 
 package dev.mobile.dadb
 
+import android.util.Base64
 import java.io.File
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -24,7 +25,6 @@ import java.nio.ByteOrder
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.interfaces.RSAPublicKey
-import java.util.*
 import javax.crypto.Cipher
 
 
@@ -104,16 +104,14 @@ class AdbKeyPair(
       publicKeyFile.absoluteFile.parentFile?.mkdirs()
 
       privateKeyFile.writer().use { out ->
-        val base64 = Base64.getMimeEncoder(64, "\n".toByteArray())
         out.write("-----BEGIN PRIVATE KEY-----\n")
-        out.write(base64.encodeToString(keyPair.private.encoded))
+        out.write(Base64.encodeToString(keyPair.private.encoded, 0))
         out.write("\n-----END PRIVATE KEY-----")
       }
 
       publicKeyFile.writer().use { out ->
-        val base64 = Base64.getEncoder()
         val bytes = convertRsaPublicKeyToAdbFormat(keyPair.public as RSAPublicKey)
-        out.write(base64.encodeToString(bytes))
+        out.write(Base64.encodeToString(bytes, 0))
         out.write(" unknown@unknown")
       }
     }
