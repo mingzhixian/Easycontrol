@@ -11,9 +11,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
-import dadb.AdbKeyPair
+import dev.mobile.dadb.AdbKeyPair
 import kotlinx.coroutines.MainScope
-import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import java.io.File
 
