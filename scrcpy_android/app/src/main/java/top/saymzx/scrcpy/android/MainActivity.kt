@@ -13,6 +13,7 @@ import android.view.KeyEvent.*
 import android.view.MotionEvent.*
 import android.view.WindowManager.LayoutParams
 import android.widget.*
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -45,47 +46,28 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     setContentView(R.layout.activity_main)
     appData = ViewModelProvider(this).get(AppData::class.java)
     if (!appData.isInit) appData.init(this)
-    // 检查悬浮窗权限
-    if (!Settings.canDrawOverlays(this)) {
-      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-      intent.data = Uri.parse("package:$packageName")
-      startActivity(intent)
-    }
-    // 读取数据库并展示设备列表
-    setDevicesList()
-    // 设置添加按钮监听
-    setAddDeviceListener()
     // 如果第一次使用展示介绍信息
     if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
       Intent(
         this,
-        ShowApp::class.java
+        ShowAppActivity::class.java
       ), 1
     )
+    // 检查权限
+    checkPermission()
+    // 读取数据库并展示设备列表
+    setDevicesList()
+    // 添加按钮监听
+    setAddDeviceListener()
+    // 设置按钮监听
+    setSetButtonListener()
     // 检查更新
-    appData.mainScope.launch {
-      withContext(Dispatchers.IO) {
-        val request: Request = Request.Builder()
-          .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
-          .build()
-        try {
-          appData.okhttpClient.newCall(request).execute().use { response ->
-            val json = JSONObject(response.body!!.string())
-            val newVersionCode = json.getInt("tag_name")
-            if (newVersionCode > appData.versionCode)
-              withContext(Dispatchers.Main) {
-                Toast.makeText(appData.main, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
-              }
-          }
-        } catch (_: Exception) {
-        }
-      }
-    }
+    checkUpdate()
   }
 
   override fun onResume() {
     // 全面屏
-    setFullScreen()
+    appData.publicTools.setFullScreen(this)
     super.onResume()
     // 注册广播用以关闭程序
     try {
@@ -124,18 +106,31 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     super.onActivityResult(requestCode, resultCode, data)
   }
 
-  // 设置全面屏
-  private fun setFullScreen() {
-    // 全屏显示
-    window.decorView.systemUiVisibility =
-      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-    // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      window.attributes.layoutInDisplayCutoutMode =
-        LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+  // 检查权限
+  private fun checkPermission() {
+    // 检查悬浮窗权限
+    if (!Settings.canDrawOverlays(this)) {
+      val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+      intent.data = Uri.parse("package:$packageName")
+      startActivity(intent)
+      Toast.makeText(appData.main, "请授予悬浮窗权限", Toast.LENGTH_SHORT).show()
     }
-    // 隐藏标题栏
-    actionBar?.hide()
+    // 检查通知权限
+    if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+      // 请求通知权限
+      val intent =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            .putExtra(Settings.EXTRA_CHANNEL_ID, applicationInfo.uid)
+        } else {
+          Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            .putExtra("app_package", packageName)
+            .putExtra("app_uid", applicationInfo.uid)
+        }
+      startActivity(intent)
+      Toast.makeText(appData.main, "请授予通知权限", Toast.LENGTH_SHORT).show()
+    }
   }
 
   // 读取数据库并展示设备列表
@@ -168,23 +163,41 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
       // 设置默认值
       addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).setSelection(
-        getStringIndex(
+        appData.publicTools.getStringIndex(
           "1600",
           resources.getStringArray(R.array.maxSizeItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_fps).setSelection(
-        getStringIndex(
+        appData.publicTools.getStringIndex(
           "60",
           resources.getStringArray(R.array.fpsItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).setSelection(
-        getStringIndex(
+        appData.publicTools.getStringIndex(
           "8000000",
           resources.getStringArray(R.array.videoBitItems1)
         )
       )
+      addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).setSelection(
+        appData.publicTools.getStringIndex(
+          appData.settings.getString("setVideoCodec", "h264")!!,
+          resources.getStringArray(R.array.videoCodecItems)
+        )
+      )
+      addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).setSelection(
+        appData.publicTools.getStringIndex(
+          appData.settings.getString("setAudioCodec", "opus")!!,
+          resources.getStringArray(R.array.audioCodecItems)
+        )
+      )
+      addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked =
+        appData.settings.getBoolean("setSetResolution", true)
+      addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked =
+        appData.settings.getBoolean("setDefaultFull", true)
+      addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked =
+        appData.settings.getBoolean("setFloatNav", true)
       // 是否显示高级选项
       addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
         addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -201,6 +214,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
             addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString(),
             addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
             addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
+            addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).selectedItem.toString(),
             addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).selectedItem.toString()
               .toInt(),
             addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
@@ -217,13 +231,33 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
-  // 获取string 在string array中的位置
-  fun getStringIndex(str: String, strArray: Array<String>): Int {
-    for ((index, i) in strArray.withIndex()) {
-      if (str == i) return index
+  // 设置按钮监听
+  private fun setSetButtonListener() {
+    findViewById<ImageView>(R.id.set).setOnClickListener {
+      startActivity(Intent(this, SetActivity::class.java))
     }
-    // 找不到返回0
-    return 0
+  }
+
+  // 检查更新
+  private fun checkUpdate() {
+    appData.mainScope.launch {
+      withContext(Dispatchers.IO) {
+        val request: Request = Request.Builder()
+          .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
+          .build()
+        try {
+          appData.okhttpClient.newCall(request).execute().use { response ->
+            val json = JSONObject(response.body!!.string())
+            val newVersionCode = json.getInt("tag_name")
+            if (newVersionCode > appData.versionCode)
+              withContext(Dispatchers.Main) {
+                Toast.makeText(appData.main, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+              }
+          }
+        } catch (_: Exception) {
+        }
+      }
+    }
   }
 
   // ViewModel

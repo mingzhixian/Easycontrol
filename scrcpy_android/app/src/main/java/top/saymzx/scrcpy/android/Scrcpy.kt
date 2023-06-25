@@ -156,10 +156,6 @@ class Scrcpy(private val device: Device) {
       }
     }
     try {
-      floatVideo.hide()
-    } catch (_: Exception) {
-    }
-    try {
       if (canAudio) {
         loudnessEnhancer.release()
         audioTrack.stop()
@@ -179,6 +175,10 @@ class Scrcpy(private val device: Device) {
       audioStream.close()
       controlOutStream.close()
       controlInStream.close()
+    } catch (_: Exception) {
+    }
+    try {
+      floatVideo.hide()
     } catch (_: Exception) {
     }
   }
@@ -208,7 +208,7 @@ class Scrcpy(private val device: Device) {
       runAdbCmd("echo $serverFileBase64 >> /data/local/tmp/scrcpy_server_base64\n")
       runAdbCmd("base64 -d < /data/local/tmp/scrcpy_server_base64 > /data/local/tmp/scrcpy_server${appData.versionCode}.jar && rm /data/local/tmp/scrcpy_server_base64")
     }
-    runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
+    runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_server${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} audio_codec=${device.audioCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 &")
   }
 
   // 转发端口
@@ -324,7 +324,9 @@ class Scrcpy(private val device: Device) {
   private val audioDecodecQueue = LinkedList<Int>() as Queue<Int>
   private suspend fun setAudioDecodec() {
     // 创建音频解码器
-    audioDecodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_OPUS)
+    val codecMime =
+      if (device.audioCodec == "opus") MediaFormat.MIMETYPE_AUDIO_OPUS else MediaFormat.MIMETYPE_AUDIO_AAC
+    audioDecodec = MediaCodec.createDecoderByType(codecMime)
     // 是否不支持音频（安卓11以下不支持）
     val can = withContext(Dispatchers.IO) { audioStream.readInt() }
     if (can == 0) {
@@ -336,18 +338,20 @@ class Scrcpy(private val device: Device) {
     val channelCount = 2
     val bitRate = 64000
     val mediaFormat =
-      MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_OPUS, sampleRate, channelCount)
+      MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount)
     mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate)
     // 获取音频标识头
     mediaFormat.setByteBuffer(
       "csd-0",
       ByteBuffer.wrap(withContext(Dispatchers.IO) { readFrame(audioStream) })
     )
-    // csd1和csd2暂时没用到，所以默认全是用0
-    val csd12bytes = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
-    val csd12ByteBuffer = ByteBuffer.wrap(csd12bytes, 0, csd12bytes.size)
-    mediaFormat.setByteBuffer("csd-1", csd12ByteBuffer)
-    mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer)
+    if (device.audioCodec == "opus") {
+      // csd1和csd2暂时没用到，所以默认全是用0
+      val csd12bytes = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+      val csd12ByteBuffer = ByteBuffer.wrap(csd12bytes, 0, csd12bytes.size)
+      mediaFormat.setByteBuffer("csd-1", csd12ByteBuffer)
+      mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer)
+    }
     // 配置解码器
     audioDecodec.configure(mediaFormat, null, null, 0)
     // 配置异步

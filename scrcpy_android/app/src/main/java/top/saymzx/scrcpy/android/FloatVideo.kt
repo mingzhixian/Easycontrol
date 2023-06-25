@@ -11,7 +11,6 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -571,7 +570,11 @@ class FloatVideo(
   // 设置关闭按钮监听控制
   private fun setStopListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener {
-      hide()
+      for (i in appData.devices) {
+        if (i.name == device.name) {
+          i.scrcpy.stop("用户停止", null)
+        }
+      }
     }
   }
 

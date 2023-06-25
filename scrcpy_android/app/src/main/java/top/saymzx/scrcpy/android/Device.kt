@@ -5,6 +5,7 @@ class Device(
   val address: String,
   val port: Int,
   val videoCodec: String,
+  val audioCodec:String,
   val maxSize: Int,
   val fps: Int,
   val videoBit: Int,

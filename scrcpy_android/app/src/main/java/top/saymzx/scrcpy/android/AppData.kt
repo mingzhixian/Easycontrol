@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -27,6 +28,9 @@ class AppData : ViewModel() {
 
   // 全局协程域
   val mainScope = MainScope()
+
+  // 公共工具库
+  val publicTools=PublicTools()
 
   // 数据库管理
   lateinit var dbHelper: DbHelper
@@ -75,7 +79,7 @@ class AppData : ViewModel() {
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
     // 数据库管理
-    dbHelper = DbHelper(main, "scrcpy_android.db", 8)
+    dbHelper = DbHelper(main, "scrcpy_android.db", 9)
     deviceAdapter = DeviceAdapter(main)
     // 从数据库获取设备列表
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
@@ -87,6 +91,7 @@ class AppData : ViewModel() {
             cursor.getString(cursor.getColumnIndex("address")),
             cursor.getInt(cursor.getColumnIndex("port")),
             cursor.getString(cursor.getColumnIndex("videoCodec")),
+            cursor.getString(cursor.getColumnIndex("audioCodec")),
             cursor.getInt(cursor.getColumnIndex("maxSize")),
             cursor.getInt(cursor.getColumnIndex("fps")),
             cursor.getInt(cursor.getColumnIndex("videoBit")),

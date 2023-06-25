@@ -19,6 +19,7 @@ class DbHelper(
           "\t address text,\n" +
           "\t port integer,\n" +
           "\t videoCodec text,\n" +
+          "\t audioCodec text,\n" +
           "\t maxSize integer,\n" +
           "\t fps integer,\n" +
           "\t videoBit integer," +
@@ -271,6 +272,51 @@ class DbHelper(
         } while (cursor.moveToNext())
       }
       cursor.close()
+    }
+    // 修改列名，增加是否设置音频放大器
+    if (oldVersion < 9) {
+      // 修改表名
+      db!!.execSQL("alter table DevicesDb rename to DevicesDbOld")
+      // 新建新表
+      db.execSQL(
+        "CREATE TABLE DevicesDb (\n" +
+            "\t name text PRIMARY KEY,\n" +
+            "\t address text,\n" +
+            "\t port integer,\n" +
+            "\t videoCodec text,\n" +
+            "\t audioCodec text,\n" +
+            "\t maxSize integer,\n" +
+            "\t fps integer,\n" +
+            "\t videoBit integer," +
+            "\t setResolution integer," +
+            "\t defaultFull integer," +
+            "\t floatNav integer" +
+            ")"
+      )
+      // 将数据搬移至新表
+      val cursor =
+        db.query("DevicesDbOld", null, null, null, null, null, null)
+      if (cursor.moveToFirst()) {
+        do {
+          val values = ContentValues().apply {
+            put("name", cursor.getString(cursor.getColumnIndex("name")))
+            put("address", cursor.getString(cursor.getColumnIndex("address")))
+            put("port", cursor.getInt(cursor.getColumnIndex("port")))
+            put("videoCodec", cursor.getString(cursor.getColumnIndex("videoCodec")))
+            put("audioCodec", "opus")
+            put("maxSize", cursor.getString(cursor.getColumnIndex("maxSize")))
+            put("fps", cursor.getString(cursor.getColumnIndex("fps")))
+            put("videoBit", cursor.getString(cursor.getColumnIndex("videoBit")))
+            put("setResolution", cursor.getString(cursor.getColumnIndex("setResolution")))
+            put("defaultFull", cursor.getString(cursor.getColumnIndex("defaultFull")))
+            put("floatNav", cursor.getString(cursor.getColumnIndex("floatNav")))
+          }
+          db.insert("DevicesDb", null, values)
+        } while (cursor.moveToNext())
+      }
+      cursor.close()
+      // 删除旧表
+      db.execSQL("drop table DevicesDbOld")
     }
   }
 }
