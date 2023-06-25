@@ -18,6 +18,7 @@
 package dev.mobile.dadb
 
 import android.util.Base64
+import android.util.Log
 import java.io.File
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -105,14 +106,16 @@ class AdbKeyPair(
 
       privateKeyFile.writer().use { out ->
         out.write("-----BEGIN PRIVATE KEY-----\n")
-        out.write(Base64.encodeToString(keyPair.private.encoded, 0))
+        out.write(Base64.encodeToString(keyPair.private.encoded,  Base64.NO_WRAP))
         out.write("\n-----END PRIVATE KEY-----")
+        out.flush()
       }
 
       publicKeyFile.writer().use { out ->
         val bytes = convertRsaPublicKeyToAdbFormat(keyPair.public as RSAPublicKey)
-        out.write(Base64.encodeToString(bytes, 0))
+        out.write(Base64.encodeToString(bytes, Base64.NO_WRAP))
         out.write(" unknown@unknown")
+        out.flush()
       }
     }
 

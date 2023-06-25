@@ -4,6 +4,10 @@
         <item>h264</item>
         <item>h265</item>
     </string-array>
+    <string-array name="audioCodecItems">
+        <item>opus</item>
+        <item>aac</item>
+    </string-array>
     <string-array name="maxSizeItems">
         <item>2560</item>
         <item>1920</item>

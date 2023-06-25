@@ -5,6 +5,8 @@ public final class DeviceMessage {
     public static final int TYPE_CLIPBOARD = 0;
     public static final int TYPE_ACK_CLIPBOARD = 1;
 
+    public static final int TYPE_ROTATION = 2;
+
     public static final long SEQUENCE_INVALID = ControlMessage.SEQUENCE_INVALID;
 
     private int type;
@@ -18,6 +20,12 @@ public final class DeviceMessage {
         DeviceMessage event = new DeviceMessage();
         event.type = TYPE_CLIPBOARD;
         event.text = text;
+        return event;
+    }
+
+    public static DeviceMessage createRotation() {
+        DeviceMessage event = new DeviceMessage();
+        event.type = TYPE_ROTATION;
         return event;
     }
 

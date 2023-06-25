@@ -11,7 +11,7 @@ import android.widget.Button
 import android.widget.TextView
 
 
-class ShowApp : Activity() {
+class ShowAppActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_show_app)
