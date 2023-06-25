@@ -25,7 +25,7 @@ class DeviceAdapter(private val main: MainActivity) :
 
   @SuppressLint("MissingInflatedId", "NotifyDataSetChanged")
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    val device =appData.devices[position]
+    val device = appData.devices[position]
     holder.textViewName.text = device.name
     val addressID = "${device.address}:${device.port}"
     holder.textViewAddress.text = addressID
@@ -65,6 +65,7 @@ class DeviceAdapter(private val main: MainActivity) :
         val address = addDeviceView.findViewById<EditText>(R.id.add_device_address)
         val port = addDeviceView.findViewById<EditText>(R.id.add_device_port)
         val videoCodec = addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec)
+        val audioCodec = addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec)
         val maxSize = addDeviceView.findViewById<Spinner>(R.id.add_device_max_size)
         val fps = addDeviceView.findViewById<Spinner>(R.id.add_device_fps)
         val videoBit = addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit)
@@ -84,6 +85,7 @@ class DeviceAdapter(private val main: MainActivity) :
           val newAddress = address.text.toString()
           val newPort = port.text.toString().toInt()
           val newVideoCodec = videoCodec.selectedItem.toString()
+          val newAudioCodec = audioCodec.selectedItem.toString()
           val newMaxSize = maxSize.selectedItem.toString().toInt()
           val newFps = fps.selectedItem.toString().toInt()
           val newVideoBit =
@@ -95,6 +97,7 @@ class DeviceAdapter(private val main: MainActivity) :
             put("address", newAddress)
             put("port", newPort)
             put("videoCodec", newVideoCodec)
+            put("audioCodec", newAudioCodec)
             put("maxSize", newMaxSize)
             put("fps", newFps)
             put("videoBit", newVideoBit)
@@ -116,6 +119,7 @@ class DeviceAdapter(private val main: MainActivity) :
                 newAddress,
                 newPort,
                 newVideoCodec,
+                newAudioCodec,
                 newMaxSize,
                 newFps,
                 newVideoBit,
@@ -133,25 +137,31 @@ class DeviceAdapter(private val main: MainActivity) :
         address.setText(device.address)
         port.setText(device.port.toString())
         videoCodec.setSelection(
-          main.getStringIndex(
+          appData.publicTools.getStringIndex(
             device.videoCodec,
             main.resources.getStringArray(R.array.videoCodecItems)
           )
         )
+        audioCodec.setSelection(
+          appData.publicTools.getStringIndex(
+            device.audioCodec,
+            main.resources.getStringArray(R.array.audioCodecItems)
+          )
+        )
         maxSize.setSelection(
-          main.getStringIndex(
+          appData.publicTools.getStringIndex(
             device.maxSize.toString(),
             main.resources.getStringArray(R.array.maxSizeItems)
           )
         )
         fps.setSelection(
-          main.getStringIndex(
+          appData.publicTools.getStringIndex(
             device.fps.toString(),
             main.resources.getStringArray(R.array.fpsItems)
           )
         )
         videoBit.setSelection(
-          main.getStringIndex(
+          appData.publicTools.getStringIndex(
             device.videoBit.toString(),
             main.resources.getStringArray(R.array.videoBitItems1)
           )
@@ -186,6 +196,7 @@ class DeviceAdapter(private val main: MainActivity) :
     address: String,
     port: Int,
     videoCodec: String,
+    audioCodec: String,
     maxSize: Int,
     fps: Int,
     videoBit: Int,
@@ -198,6 +209,7 @@ class DeviceAdapter(private val main: MainActivity) :
       put("address", address)
       put("port", port)
       put("videoCodec", videoCodec)
+      put("audioCodec", audioCodec)
       put("maxSize", maxSize)
       put("fps", fps)
       put("videoBit", videoBit)
@@ -213,6 +225,7 @@ class DeviceAdapter(private val main: MainActivity) :
           address,
           port,
           videoCodec,
+          audioCodec,
           maxSize,
           fps,
           videoBit,
