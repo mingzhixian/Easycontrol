@@ -1,6 +1,5 @@
 package com.genymobile.scrcpy;
 
-import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 

@@ -18,7 +18,7 @@
         android:textSize="@dimen/largeFont"
         android:layout_marginTop="10dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="10dp"/>
+        android:layout_marginEnd="10dp" />
 
     <TextView
         android:id="@+id/device_address"
@@ -31,5 +31,5 @@
         android:layout_marginTop="4dp"
         android:layout_marginStart="22dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp" />
 </LinearLayout>

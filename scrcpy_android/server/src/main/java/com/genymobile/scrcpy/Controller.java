@@ -1,7 +1,5 @@
 package com.genymobile.scrcpy;
 
-import com.genymobile.scrcpy.wrappers.InputManager;
-
 import android.os.Build;
 import android.os.SystemClock;
 import android.view.InputDevice;

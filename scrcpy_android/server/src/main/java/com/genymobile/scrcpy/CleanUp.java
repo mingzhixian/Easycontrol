@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 
-import java.io.File;
 import java.io.IOException;
 
 /**

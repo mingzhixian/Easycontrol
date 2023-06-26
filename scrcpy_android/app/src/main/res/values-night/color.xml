@@ -6,6 +6,7 @@
     <color name="alertBackground">#8e9588</color>
     <color name="alertButtonBackground">#7a8b51</color>
     <color name="cancelButtonBackground">#9ca194</color>
+    <color name="SwitchBackground">#8aac71</color>
     <!--字体颜色-->
     <color name="textColor">#dcdcdc</color>
     <color name="ignoreTextColor">#c6c5c5</color>
