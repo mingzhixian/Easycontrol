@@ -26,6 +26,7 @@
             android:layout_height="@dimen/floatVideoTitle"
             android:padding="@dimen/floatVideoBarPadding"
             android:layout_weight="50">
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -45,7 +46,7 @@
             android:padding="@dimen/floatVideoButtonPadding"
             android:layout_weight="13"
             android:contentDescription="float_video_stop"
-            android:src="@drawable/nav_home"
+            android:src="@drawable/radio_button"
             android:tint="@color/stopButtonColor"
             tools:ignore="HardcodedText" />
 
@@ -78,7 +79,7 @@
             android:contentDescription="float_video_switch"
             android:src="@drawable/nav_switch"
             tools:ignore="HardcodedText"
-            android:tint="@color/navButtonColor"/>
+            android:tint="@color/navButtonColor" />
 
         <Space
             android:layout_width="0dp"
@@ -94,7 +95,7 @@
             android:contentDescription="float_video_home"
             android:src="@drawable/nav_home"
             tools:ignore="HardcodedText"
-            android:tint="@color/navButtonColor"/>
+            android:tint="@color/navButtonColor" />
 
         <Space
             android:layout_width="0dp"
@@ -110,7 +111,7 @@
             android:contentDescription="float_video_back"
             android:src="@drawable/nav_back"
             tools:ignore="HardcodedText"
-            android:tint="@color/navButtonColor"/>
+            android:tint="@color/navButtonColor" />
 
         <Space
             android:layout_width="0dp"
@@ -124,7 +125,7 @@
             android:padding="@dimen/floatVideoButtonPadding"
             android:layout_weight="13"
             android:contentDescription="float_video_set_size"
-            android:src="@drawable/nav_home"
+            android:src="@drawable/radio_button"
             android:tint="@color/setSizeColor"
             tools:ignore="HardcodedText" />
 

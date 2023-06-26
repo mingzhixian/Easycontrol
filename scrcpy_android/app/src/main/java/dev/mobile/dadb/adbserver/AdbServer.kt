@@ -5,7 +5,10 @@ import dev.mobile.dadb.Dadb
 import okio.buffer
 import okio.sink
 import okio.source
-import java.io.*
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.OutputStreamWriter
 import java.net.Socket
 import java.nio.charset.StandardCharsets
 

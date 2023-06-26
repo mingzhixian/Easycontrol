@@ -28,8 +28,7 @@ class FloatVideo(
   val touchHandle: (byteArray: ByteArray) -> Unit
 ) {
   // 悬浮窗
-  @SuppressLint("InflateParams")
-  val floatVideo: View = LayoutInflater.from(appData.main).inflate(R.layout.float_video, null)
+  lateinit var floatVideo: View
 
   // 悬浮窗Layout
   private var floatVideoParams: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
@@ -55,14 +54,18 @@ class FloatVideo(
   private var isShow = false
 
   // 显示悬浮窗
+  @SuppressLint("InflateParams")
   fun show() {
-    isShow = true
-    // 设置视频界面触摸监听
-    setSurfaceListener()
-    // 全屏or小窗模式
-    appData.main.windowManager.addView(floatVideo, floatVideoParams)
-    if (device.isFull) setFull() else setSmallWindow()
-    update(true)
+    appData.main.runOnUiThread {
+      floatVideo = appData.main.layoutInflater.inflate(R.layout.float_video, null, false)
+      isShow = true
+      // 设置视频界面触摸监听
+      setSurfaceListener()
+      // 全屏or小窗模式
+      appData.main.windowManager.addView(floatVideo, floatVideoParams)
+      if (device.isFull) setFull() else setSmallWindow()
+      update(true)
+    }
   }
 
   // 隐藏悬浮窗
@@ -579,8 +582,9 @@ class FloatVideo(
   }
 
   // 设置导航悬浮球监听控制
+  @SuppressLint("InflateParams")
   private fun setFloatNavListener() {
-    floatNav = LayoutInflater.from(appData.main).inflate(R.layout.float_nav, null)
+    floatNav = appData.main.layoutInflater.inflate(R.layout.float_nav, null)
     // 导航球
     val gestureDetector =
       GestureDetector(appData.main, object : GestureDetector.SimpleOnGestureListener() {
