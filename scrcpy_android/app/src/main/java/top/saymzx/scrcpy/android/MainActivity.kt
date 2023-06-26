@@ -51,8 +51,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         ShowAppActivity::class.java
       ), 1
     )
-    // 检查权限
-    checkPermission()
     // 读取数据库并展示设备列表
     setDevicesList()
     // 添加按钮监听
@@ -64,6 +62,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   }
 
   override fun onResume() {
+    // 检查权限
+    checkPermission()
     // 全面屏
     appData.publicTools.setFullScreen(this)
     super.onResume()
@@ -117,6 +117,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       intent.data = Uri.parse("package:$packageName")
       startActivity(intent)
       Toast.makeText(appData.main, "请授予悬浮窗权限", Toast.LENGTH_SHORT).show()
+      return
     }
     // 检查通知权限
     if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
@@ -133,6 +134,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         }
       startActivity(intent)
       Toast.makeText(appData.main, "请授予通知权限", Toast.LENGTH_SHORT).show()
+      return
     }
   }
 
