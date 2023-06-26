@@ -227,7 +227,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:checked="true" />
+                    android:checked="true"
+                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
 
             </LinearLayout>
 
@@ -249,7 +253,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:checked="true" />
+                    android:checked="true"
+                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
 
             </LinearLayout>
 
@@ -271,7 +279,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:checked="true" />
+                    android:checked="true"
+                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
 
             </LinearLayout>
 

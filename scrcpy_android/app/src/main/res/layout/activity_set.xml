@@ -9,12 +9,12 @@
 
     <ImageView
         android:id="@+id/set_back"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="50dp"
-        android:src="@drawable/back"
-        android:tint="@color/buttonTextColor" />
+        android:src="@drawable/nav_back"
+        android:tint="@color/ignoreTextColor" />
 
     <TextView
         android:layout_width="match_parent"
@@ -115,7 +115,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:checked="true" />
+            android:checked="true"
+            android:thumbTint="@color/SwitchBackground"
+            android:thumbTintMode="multiply"
+            android:trackTint="@color/buttonBackground"
+            android:trackTintMode="multiply" />
     </LinearLayout>
 
     <LinearLayout
@@ -145,7 +149,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:checked="true" />
+            android:checked="true"
+            android:thumbTint="@color/SwitchBackground"
+            android:thumbTintMode="multiply"
+            android:trackTint="@color/buttonBackground"
+            android:trackTintMode="multiply" />
     </LinearLayout>
 
     <LinearLayout
@@ -175,7 +183,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:checked="true" />
+            android:checked="true"
+            android:thumbTint="@color/SwitchBackground"
+            android:thumbTintMode="multiply"
+            android:trackTint="@color/buttonBackground"
+            android:trackTintMode="multiply" />
     </LinearLayout>
 
 

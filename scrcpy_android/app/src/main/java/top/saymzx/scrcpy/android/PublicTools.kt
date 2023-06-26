@@ -1,9 +1,14 @@
 package top.saymzx.scrcpy.android
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Build
+import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
+import android.widget.TextView
 
 class PublicTools {
 
@@ -28,5 +33,30 @@ class PublicTools {
     }
     // 隐藏标题栏
     context.actionBar?.hide()
+  }
+
+  // 显示加载框
+  fun showLoading(
+    text: String,
+    context: Context,
+    isCanCancel: Boolean,
+    cancelFun: (() -> Unit)?
+  ): AlertDialog {
+    // 加载框
+    val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+    builder.setCancelable(false)
+    val loadingDialog = builder.create()
+    loadingDialog.setCanceledOnTouchOutside(false)
+    loadingDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    val loading = LayoutInflater.from(context).inflate(R.layout.loading, null, false)
+    loadingDialog.setView(loading)
+    loading.findViewById<TextView>(R.id.loading_text).text = text
+    if (isCanCancel) {
+      loading.findViewById<Button>(R.id.loading_cancel).visibility = View.VISIBLE
+      loading.findViewById<Button>(R.id.loading_cancel)
+        .setOnClickListener { cancelFun?.let { it1 -> it1() } }
+    } else loading.findViewById<Button>(R.id.loading_cancel).visibility = View.GONE
+    loadingDialog.show()
+    return loadingDialog
   }
 }

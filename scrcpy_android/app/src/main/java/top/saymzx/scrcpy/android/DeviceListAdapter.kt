@@ -6,41 +6,51 @@ import android.content.ContentValues
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.recyclerview.widget.RecyclerView
+import android.widget.BaseAdapter
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.Switch
+import android.widget.TextView
+import android.widget.Toast
 
-class DeviceAdapter(private val main: MainActivity) :
-  RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
+class DeviceListAdapter : BaseAdapter() {
+  override fun getCount(): Int = appData.devices.size
 
-  inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val textViewName: TextView = view.findViewById(R.id.device_name)
-    val textViewAddress: TextView = view.findViewById(R.id.device_address)
-    val linearLayout: LinearLayout = view.findViewById(R.id.device)
+  override fun getItem(p0: Int): Any {
+    return appData.devices[p0]
   }
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-    val view = LayoutInflater.from(parent.context).inflate(R.layout.devices_item, parent, false)
-    return ViewHolder(view)
+  override fun getItemId(p0: Int): Long {
+    return p0.toLong()
   }
 
-  @SuppressLint("MissingInflatedId", "NotifyDataSetChanged")
-  override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+  override fun getView(position: Int, convertView: View?, viewGroup: ViewGroup?): View {
+    var convertView: View? = convertView
+    if (convertView == null) {
+      convertView = LayoutInflater.from(viewGroup!!.context).inflate(R.layout.devices_item, null)
+    }
     val device = appData.devices[position]
-    holder.textViewName.text = device.name
+    convertView!!.findViewById<TextView>(R.id.device_name).text = device.name
     val addressID = "${device.address}:${device.port}"
-    holder.textViewAddress.text = addressID
+    convertView.findViewById<TextView>(R.id.device_address).text = addressID
+    val linearLayout = convertView.findViewById<LinearLayout>(R.id.device)
     // 单击打开投屏
-    holder.linearLayout.setOnClickListener {
-      if (device.status != -1) Toast.makeText(main, "此设备正在投屏", Toast.LENGTH_SHORT).show()
+    linearLayout.setOnClickListener {
+      if (device.status != -1) Toast.makeText(appData.main, "此设备正在投屏", Toast.LENGTH_SHORT)
+        .show()
       else {
         device.scrcpy = Scrcpy(device)
         device.scrcpy.start()
       }
     }
     // 长按选项
-    holder.linearLayout.setOnLongClickListener {
-      val deleteDeviceView = LayoutInflater.from(main).inflate(R.layout.delete_device, null, false)
-      val builder: AlertDialog.Builder = AlertDialog.Builder(main)
+    linearLayout.setOnLongClickListener {
+      val deleteDeviceView =
+        LayoutInflater.from(appData.main).inflate(R.layout.delete_device, null, false)
+      val builder: AlertDialog.Builder = AlertDialog.Builder(appData.main)
       builder.setView(deleteDeviceView)
       builder.setCancelable(false)
       val dialog = builder.create()
@@ -53,8 +63,9 @@ class DeviceAdapter(private val main: MainActivity) :
       deleteDeviceView.findViewById<Button>(R.id.delete_device_change).setOnClickListener {
         dialog.cancel()
         // 显示更新框
-        val addDeviceView = LayoutInflater.from(main).inflate(R.layout.add_device, null, false)
-        val updateBuilder: AlertDialog.Builder = AlertDialog.Builder(main)
+        val addDeviceView =
+          LayoutInflater.from(appData.main).inflate(R.layout.add_device, null, false)
+        val updateBuilder: AlertDialog.Builder = AlertDialog.Builder(appData.main)
         updateBuilder.setView(addDeviceView)
         updateBuilder.setCancelable(false)
         val updateDialog = updateBuilder.create()
@@ -89,7 +100,7 @@ class DeviceAdapter(private val main: MainActivity) :
           val newMaxSize = maxSize.selectedItem.toString().toInt()
           val newFps = fps.selectedItem.toString().toInt()
           val newVideoBit =
-            main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
+            appData.main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
           val newSetResolution = if (setResolution.isChecked) 1 else 0
           val newDefaultFull = if (defaultFull.isChecked) 1 else 0
           val newFloatNav = if (floatNav.isChecked) 1 else 0
@@ -139,31 +150,31 @@ class DeviceAdapter(private val main: MainActivity) :
         videoCodec.setSelection(
           appData.publicTools.getStringIndex(
             device.videoCodec,
-            main.resources.getStringArray(R.array.videoCodecItems)
+            appData.main.resources.getStringArray(R.array.videoCodecItems)
           )
         )
         audioCodec.setSelection(
           appData.publicTools.getStringIndex(
             device.audioCodec,
-            main.resources.getStringArray(R.array.audioCodecItems)
+            appData.main.resources.getStringArray(R.array.audioCodecItems)
           )
         )
         maxSize.setSelection(
           appData.publicTools.getStringIndex(
             device.maxSize.toString(),
-            main.resources.getStringArray(R.array.maxSizeItems)
+            appData.main.resources.getStringArray(R.array.maxSizeItems)
           )
         )
         fps.setSelection(
           appData.publicTools.getStringIndex(
             device.fps.toString(),
-            main.resources.getStringArray(R.array.fpsItems)
+            appData.main.resources.getStringArray(R.array.fpsItems)
           )
         )
         videoBit.setSelection(
           appData.publicTools.getStringIndex(
             device.videoBit.toString(),
-            main.resources.getStringArray(R.array.videoBitItems1)
+            appData.main.resources.getStringArray(R.array.videoBitItems1)
           )
         )
         setResolution.isChecked = device.setResolution
@@ -185,9 +196,8 @@ class DeviceAdapter(private val main: MainActivity) :
       dialog.show()
       return@setOnLongClickListener true
     }
+    return convertView
   }
-
-  override fun getItemCount() = appData.devices.size
 
   //新建数据
   @SuppressLint("NotifyDataSetChanged")
@@ -237,5 +247,4 @@ class DeviceAdapter(private val main: MainActivity) :
       notifyDataSetChanged()
     }
   }
-
 }

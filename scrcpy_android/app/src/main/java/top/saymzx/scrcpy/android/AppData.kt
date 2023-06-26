@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -30,11 +29,13 @@ class AppData : ViewModel() {
   val mainScope = MainScope()
 
   // 公共工具库
-  val publicTools=PublicTools()
+  val publicTools = PublicTools()
 
   // 数据库管理
   lateinit var dbHelper: DbHelper
-  lateinit var deviceAdapter: DeviceAdapter
+
+  // 设备列表管理
+  lateinit var deviceListAdapter: DeviceListAdapter
 
   // 设备列表
   val devices = ArrayList<Device>()
@@ -59,13 +60,6 @@ class AppData : ViewModel() {
   // 当前版本号
   val versionCode = BuildConfig.VERSION_CODE
 
-  // 加载框（全局通用）
-  @SuppressLint("StaticFieldLeak")
-  lateinit var loadingDialog: AlertDialog
-
-  @SuppressLint("StaticFieldLeak")
-  lateinit var loading: View
-
   // 初始化数据
   fun init(m: MainActivity) {
     isInit = true
@@ -80,7 +74,8 @@ class AppData : ViewModel() {
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
     // 数据库管理
     dbHelper = DbHelper(main, "scrcpy_android.db", 9)
-    deviceAdapter = DeviceAdapter(main)
+    // 设备列表管理
+    deviceListAdapter = DeviceListAdapter()
     // 从数据库获取设备列表
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
     if (cursor.moveToFirst()) {
@@ -109,27 +104,8 @@ class AppData : ViewModel() {
     if (!privateKey.isFile || !publicKey.isFile) {
       AdbKeyPair.generate(privateKey, publicKey)
     }
-    // 加载框
-    val builder: AlertDialog.Builder = AlertDialog.Builder(main)
-    builder.setCancelable(false)
-    loadingDialog = builder.create()
-    loadingDialog.setCanceledOnTouchOutside(false)
-    loadingDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-    loading = LayoutInflater.from(main).inflate(R.layout.loading, null, false)
-    loadingDialog.setView(loading)
     // 剪切板
     clipBorad = main.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-  }
-
-  // 显示加载框
-  fun showLoading(text: String, isCanCancel: Boolean, cancelFun: (() -> Unit)?) {
-    loading.findViewById<TextView>(R.id.loading_text).text = text
-    if (isCanCancel) {
-      loading.findViewById<Button>(R.id.loading_cancel).visibility = View.VISIBLE
-      loading.findViewById<Button>(R.id.loading_cancel)
-        .setOnClickListener { cancelFun?.let { it1 -> it1() } }
-    } else loading.findViewById<Button>(R.id.loading_cancel).visibility = View.GONE
-    loadingDialog.show()
   }
 
 }

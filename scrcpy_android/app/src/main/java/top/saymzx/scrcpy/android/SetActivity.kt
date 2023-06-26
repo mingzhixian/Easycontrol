@@ -1,6 +1,9 @@
 package top.saymzx.scrcpy.android
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -9,6 +12,13 @@ import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.documentfile.provider.DocumentFile
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 
 class SetActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,16 +144,192 @@ class SetActivity : Activity() {
   // 设置导出按钮监听
   private fun setExportListener() {
     findViewById<TextView>(R.id.set_export).setOnClickListener {
-      // 检查读写存储权限
-      Toast.makeText(this, "UI按钮，别点", Toast.LENGTH_SHORT).show()
+      openDirectory()
+      fileMode = 1
     }
   }
 
   // 设置导入按钮监听
   private fun setImportListener() {
     findViewById<TextView>(R.id.set_import).setOnClickListener {
-      // 检查读写存储权限
-      Toast.makeText(this, "UI按钮，别点", Toast.LENGTH_SHORT).show()
+      openDirectory()
+      fileMode = 2
     }
+  }
+
+  // 检查存储权限
+  private fun openDirectory() {
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+    startActivityForResult(intent, 22)
+    Toast.makeText(this, "请不要选择Download或其他隐私位置", Toast.LENGTH_LONG).show()
+  }
+
+  // 操作类型(1为导出，2为导入)
+  private var fileMode = 1
+
+  @SuppressLint("Range")
+  override fun onActivityResult(
+    requestCode: Int, resultCode: Int, resultData: Intent?
+  ) {
+    if (requestCode == 22 && resultCode == RESULT_OK) {
+      resultData?.data?.also { uri ->
+        val documentFile = DocumentFile.fromTreeUri(this, uri)
+        // 显示加载中
+        val alert = appData.publicTools.showLoading("请等待...", this, false, null)
+        // 导出
+        if (documentFile == null) {
+          alert.cancel()
+          Toast.makeText(this, "空地址", Toast.LENGTH_SHORT).show()
+          return
+        }
+        if (fileMode == 1) {
+          val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
+          val privateKeyUri =
+            privateKeyDoc?.uri ?: documentFile.createFile("scrcpt/key", "scrcpy_private.key")!!.uri
+          writeToFile(appData.privateKey, privateKeyUri, 2)
+          val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
+          val publicKeyUri =
+            publicKeyDoc?.uri ?: documentFile.createFile("scrcpt/key", "scrcpy_public.key")!!.uri
+          writeToFile(appData.privateKey, publicKeyUri, 2)
+          val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
+          val dataBaseUri =
+            dataBaseDoc?.uri ?: documentFile.createFile("scrcpt/json", "scrcpy_database.json")!!.uri
+          dataBaseUri.let {
+            val jsonArray = JSONArray()
+            // 从数据库获取设备列表
+            val cursor = appData.dbHelper.readableDatabase.query(
+              "DevicesDb",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            )
+            if (cursor.moveToFirst()) {
+              do {
+                val tmpJsonObject = JSONObject()
+                tmpJsonObject.put("name", cursor.getString(cursor.getColumnIndex("name")))
+                tmpJsonObject.put("address", cursor.getString(cursor.getColumnIndex("address")))
+                tmpJsonObject.put("port", cursor.getInt(cursor.getColumnIndex("port")))
+                tmpJsonObject.put(
+                  "videoCodec",
+                  cursor.getString(cursor.getColumnIndex("videoCodec"))
+                )
+                tmpJsonObject.put(
+                  "audioCodec",
+                  cursor.getString(cursor.getColumnIndex("audioCodec"))
+                )
+                tmpJsonObject.put("maxSize", cursor.getInt(cursor.getColumnIndex("maxSize")))
+                tmpJsonObject.put("fps", cursor.getInt(cursor.getColumnIndex("fps")))
+                tmpJsonObject.put("videoBit", cursor.getInt(cursor.getColumnIndex("videoBit")))
+                tmpJsonObject.put(
+                  "setResolution",
+                  cursor.getInt(cursor.getColumnIndex("setResolution"))
+                )
+                tmpJsonObject.put(
+                  "defaultFull",
+                  cursor.getInt(cursor.getColumnIndex("defaultFull"))
+                )
+                tmpJsonObject.put("floatNav", cursor.getInt(cursor.getColumnIndex("floatNav")))
+                jsonArray.put(tmpJsonObject)
+              } while (cursor.moveToNext())
+            }
+            cursor.close()
+            writeToFile(jsonArray.toString(), it, 1)
+          }
+          alert.cancel()
+        }
+        // 导入
+        else if (fileMode == 2) {
+          // 检查文件是否存在
+          val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
+          val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
+          val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
+          if (privateKeyDoc == null || publicKeyDoc == null || dataBaseDoc == null) {
+            alert.cancel()
+            Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
+            return
+          }
+          readFile(appData.privateKey, privateKeyDoc.uri, 2)
+          readFile(appData.publicKey, publicKeyDoc.uri, 2)
+          val jsonArray = JSONArray(readFile(null, dataBaseDoc.uri, 1))
+          for (i in 0 until jsonArray.length()) {
+            val tmpJsonObject = jsonArray.getJSONObject(i)
+            appData.deviceListAdapter.newDevice(
+              tmpJsonObject.getString("name"),
+              tmpJsonObject.getString("address"),
+              tmpJsonObject.getInt("port"),
+              tmpJsonObject.getString("videoCodec"),
+              tmpJsonObject.getString("audioCodec"),
+              tmpJsonObject.getInt("maxSize"),
+              tmpJsonObject.getInt("fps"),
+              tmpJsonObject.getInt("videoBit"),
+              tmpJsonObject.getInt("setResolution") == 1,
+              tmpJsonObject.getInt("defaultFull") == 1,
+              tmpJsonObject.getInt("floatNav") == 1,
+            )
+          }
+          alert.cancel()
+        }
+      }
+    }
+  }
+
+  // 写入文件(mode为1写入string，mode为2传入File)
+  private fun writeToFile(data: Any, uri: Uri, mode: Int) {
+    try {
+      contentResolver.openFileDescriptor(uri, "w")?.use {
+        FileOutputStream(it.fileDescriptor).use {
+          if (mode == 1) {
+            it.write((data as String).toByteArray())
+          } else if (mode == 2) {
+            val byteArray = ByteArray(512)
+            val fileInputStream = (data as File).inputStream()
+            while (true) {
+              val len = fileInputStream.read(byteArray)
+              if (len < 0) break
+              it.write(byteArray, 0, len)
+            }
+          }
+        }
+      }
+    } catch (e: FileNotFoundException) {
+      e.printStackTrace()
+    } catch (e: IOException) {
+      e.printStackTrace()
+    }
+  }
+
+  // 读取文件(mode为1返回string，mode为2直接写入File)
+  private fun readFile(file: File?, uri: Uri, mode: Int): String {
+    try {
+      contentResolver.openInputStream(uri)?.use {
+        if (mode == 1) {
+          var str = ""
+          val byteArray = ByteArray(512)
+          while (true) {
+            val len = it.read(byteArray)
+            if (len < 0) {
+              return str
+            }
+            str += String(byteArray, 0, len)
+          }
+        } else if (mode == 2) {
+          val byteArray = ByteArray(512)
+          val fileOutputStream = file!!.outputStream()
+          while (true) {
+            val len = it.read(byteArray)
+            if (len < 0) return ""
+            fileOutputStream.write(byteArray, 0, len)
+          }
+        }
+      }
+    } catch (e: FileNotFoundException) {
+      e.printStackTrace()
+    } catch (e: IOException) {
+      e.printStackTrace()
+    }
+    return ""
   }
 }

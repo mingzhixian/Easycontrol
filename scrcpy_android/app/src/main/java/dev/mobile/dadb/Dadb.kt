@@ -20,7 +20,6 @@ package dev.mobile.dadb
 import android.os.Build
 import androidx.annotation.RequiresApi
 import dev.mobile.dadb.adbserver.AdbServer
-import dev.mobile.dadb.forwarding.TcpForwarder
 import okio.*
 import java.io.File
 import java.io.IOException
@@ -46,6 +45,7 @@ interface Dadb : AutoCloseable {
     return AdbShellStream(stream)
   }
 
+  @RequiresApi(Build.VERSION_CODES.O)
   @Throws(IOException::class)
   fun push(
     src: File,
@@ -82,171 +82,10 @@ interface Dadb : AutoCloseable {
   }
 
   @Throws(IOException::class)
-  fun install(file: File, vararg options: String) {
-    if (supportsFeature("abb_exec")) {
-      abbExec("package", "install", "-S", file.length().toString(), *options).use { stream ->
-        stream.sink.writeAll(file.source())
-        stream.sink.flush()
-        val response = stream.source.readString(Charsets.UTF_8)
-        if (!response.startsWith("Success")) {
-          throw IOException("Install failed: $response")
-        }
-      }
-    } else {
-      val fileName = file.name
-      val remotePath = "/data/local/tmp/$fileName"
-      push(file, remotePath)
-      shell("pm install ${options.joinToString(" ")} \"$remotePath\"")
-    }
-  }
-
-  @Throws(IOException::class)
-  fun installMultiple(apks: List<File>, vararg options: String) {
-    // http://aospxref.com/android-12.0.0_r3/xref/packages/modules/adb/client/adb_install.cpp#538
-    if (supportsFeature("abb_exec")) {
-      val totalLength = apks.map { it.length() }.reduce { acc, l -> acc + l }
-      abbExec(
-        "package",
-        "install-create",
-        "-S",
-        totalLength.toString(),
-        *options
-      ).use { createStream ->
-        val response = createStream.source.readString(Charsets.UTF_8)
-        if (!response.startsWith("Success")) {
-          throw IOException("connect error for create: $response")
-        }
-        val pattern = """\[(\w+)]""".toRegex()
-        val sessionId = pattern.find(response)?.groups?.get(1)?.value
-          ?: throw IOException("failed to create session")
-
-        var error: String? = null
-        apks.forEach { apk ->
-          // install write every apk file to stream
-          abbExec(
-            "package",
-            "install-write",
-            "-S",
-            apk.length().toString(),
-            sessionId,
-            apk.name,
-            "-",
-            *options
-          ).use { writeStream ->
-            writeStream.sink.writeAll(apk.source())
-            writeStream.sink.flush()
-
-            val writeResponse = writeStream.source.readString(Charsets.UTF_8)
-            if (!writeResponse.startsWith("Success")) {
-              error = writeResponse
-              return@forEach
-            }
-          }
-        }
-
-        // commit the session
-        val finalCommand = if (error == null) "install-commit" else "install-abandon"
-        abbExec("package", finalCommand, sessionId, *options).use { commitStream ->
-          val finalResponse = commitStream.source.readString(Charsets.UTF_8)
-          if (!finalResponse.startsWith("Success")) {
-            throw IOException("failed to finalize session: $commitStream")
-          }
-        }
-
-        if (error != null) {
-          throw IOException("Install failed: $error")
-        }
-      }
-    } else {
-      val totalLength = apks.map { it.length() }.reduce { acc, l -> acc + l }
-      // step1: create session
-      val response = shell("pm install-create -S $totalLength ${options.joinToString(" ")}")
-      if (!response.allOutput.startsWith("Success")) {
-        throw IOException("pm create session failed: $response")
-      }
-
-      val pattern = """\[(\w+)]""".toRegex()
-      val sessionId = pattern.find(response.allOutput)?.groups?.get(1)?.value
-        ?: throw IOException("failed to create session")
-      var error: String? = null
-
-      val fileNames = apks.map { it.name }
-      val remotePaths = fileNames.map { "/data/local/tmp/$it" }
-
-      // step2: write apk to the session
-      apks.zip(remotePaths).forEachIndexed { index, pair ->
-        val apk = pair.first
-        val remotePath = pair.second
-
-        try {
-          // we should push the apk files to device, when push failed, it would stop the installation
-          push(apk, remotePath)
-        } catch (t: IOException) {
-          error = t.message
-          return@forEachIndexed
-        }
-
-        // pm install-write -S APK_SIZE SESSION_ID INDEX PATH
-        val writeResponse =
-          shell("pm install-write -S ${apk.length()} $sessionId $index $remotePath")
-        if (!writeResponse.allOutput.startsWith("Success")) {
-          error = writeResponse.allOutput
-          return@forEachIndexed
-        }
-      }
-
-      // step3: commit or abandon the session
-      val finalCommand =
-        if (error == null) "pm install-commit $sessionId" else "pm install-abandon $sessionId"
-      val finalResponse = shell(finalCommand)
-      if (!finalResponse.allOutput.startsWith("Success")) {
-        throw IOException("failed to finalize session: $finalResponse")
-      }
-      if (error != null) {
-        throw IOException("Install failed: $error")
-      }
-    }
-  }
-
-  @Throws(IOException::class)
-  fun uninstall(packageName: String) {
-    val response = shell("cmd package uninstall $packageName")
-    if (response.exitCode != 0) {
-      throw IOException("Uninstall failed: ${response.allOutput}")
-    }
-  }
-
-  @Throws(IOException::class)
   fun abbExec(vararg command: String): AdbStream {
     if (!supportsFeature("abb_exec")) throw UnsupportedOperationException("abb_exec is not supported on this version of Android")
     val destination = "abb_exec:${command.joinToString("\u0000")}"
     return open(destination)
-  }
-
-  @Throws(IOException::class)
-  fun root() {
-    val response = restartAdb(this, "root:")
-    if (!response.startsWith("restarting") && !response.contains("already")) {
-      throw IOException("Failed to restart adb as root: $response")
-    }
-    waitRootOrClose(this, root = true)
-  }
-
-  @Throws(IOException::class)
-  fun unroot() {
-    val response = restartAdb(this, "unroot:")
-    if (!response.startsWith("restarting") && !response.contains("not running as root")) {
-      throw IOException("Failed to restart adb as root: $response")
-    }
-    waitRootOrClose(this, root = false)
-  }
-
-  @Throws(InterruptedException::class)
-  fun tcpForward(hostPort: Int, targetPort: Int): AutoCloseable {
-    val forwarder = TcpForwarder(this, hostPort, targetPort)
-    forwarder.start()
-
-    return forwarder
   }
 
   companion object {

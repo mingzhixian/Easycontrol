@@ -2,16 +2,16 @@ package com.genymobile.scrcpy;
 
 public interface Codec {
 
-    enum Type {
-        VIDEO,
-        AUDIO,
-    }
+  enum Type {
+    VIDEO,
+    AUDIO,
+  }
 
-    Type getType();
+  Type getType();
 
-    int getId();
+  int getId();
 
-    String getName();
+  String getName();
 
-    String getMimeType();
+  String getMimeType();
 }

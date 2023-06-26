@@ -11,15 +11,13 @@ import android.provider.Settings
 import android.view.*
 import android.view.KeyEvent.*
 import android.view.MotionEvent.*
-import android.view.WindowManager.LayoutParams
 import android.widget.*
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -92,6 +90,11 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
+  override fun onDestroy() {
+    super.onDestroy()
+    appData.mainScope.cancel()
+  }
+
   // 其他页面回调
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     // ShowApp页面回调
@@ -135,9 +138,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   // 读取数据库并展示设备列表
   private fun setDevicesList() {
-    val devices = findViewById<RecyclerView>(R.id.devices)
-    devices.layoutManager = LinearLayoutManager(this)
-    devices.adapter = appData.deviceAdapter
+    val devicesList = findViewById<ListView>(R.id.devices_list)
+    devicesList.adapter = appData.deviceListAdapter
   }
 
   // 添加设备监听
@@ -209,7 +211,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
         // 名字不能为空
         if (addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString() != "") {
-          appData.deviceAdapter.newDevice(
+          appData.deviceListAdapter.newDevice(
             addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
             addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString(),
             addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
