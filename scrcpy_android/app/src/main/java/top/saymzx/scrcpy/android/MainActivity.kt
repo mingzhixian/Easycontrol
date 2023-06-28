@@ -12,12 +12,10 @@ import android.view.*
 import android.view.KeyEvent.*
 import android.view.MotionEvent.*
 import android.widget.*
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -74,11 +72,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    appData.mainScope.cancel()
-  }
-
   // 其他页面回调
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     // ShowApp页面回调
@@ -101,23 +94,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       intent.data = Uri.parse("package:$packageName")
       startActivity(intent)
       Toast.makeText(appData.main, "请授予悬浮窗权限", Toast.LENGTH_SHORT).show()
-      return
-    }
-    // 检查通知权限
-    if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
-      // 请求通知权限
-      val intent =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-            .putExtra(Settings.EXTRA_CHANNEL_ID, applicationInfo.uid)
-        } else {
-          Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            .putExtra("app_package", packageName)
-            .putExtra("app_uid", applicationInfo.uid)
-        }
-      startActivity(intent)
-      Toast.makeText(appData.main, "请授予通知权限", Toast.LENGTH_SHORT).show()
       return
     }
   }
