@@ -87,8 +87,6 @@ class Scrcpy(private val device: Device) {
         setAudioDecodec()
         // 配置音频播放
         if (canAudio) setAudioTrack()
-        // 投屏中
-        device.status = 1
         // 设置被控端熄屏（默认投屏后熄屏）
         setPowerOff()
       } catch (e: Exception) {
@@ -128,6 +126,8 @@ class Scrcpy(private val device: Device) {
           stop("投屏停止", e)
         }
       }.start()
+      // 投屏中
+      device.status = 1
     }
   }
 
