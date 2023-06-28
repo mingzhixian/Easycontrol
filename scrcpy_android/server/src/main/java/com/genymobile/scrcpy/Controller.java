@@ -123,7 +123,11 @@ public class Controller implements AsyncProcessor {
     switch (msg.getType()) {
       case ControlMessage.TYPE_INJECT_KEYCODE:
         if (device.supportsInputEvents()) {
-          injectKeycode(msg.getAction(), msg.getKeycode(), msg.getRepeat(), msg.getMetaState());
+          try {
+            // 避免不支持导致崩溃
+            injectKeycode(msg.getAction(), msg.getKeycode(), msg.getRepeat(), msg.getMetaState());
+          } catch (Exception ignored) {
+          }
         }
         break;
       case ControlMessage.TYPE_INJECT_TEXT:

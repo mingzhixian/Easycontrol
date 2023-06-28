@@ -34,11 +34,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     var VIEWMODEL_STORE: ViewModelStore? = null
   }
 
-  // 广播处理
-  private val scrcpyBroadcastReceiver = ScrcpyBroadcastReceiver()
-
   // 创建界面
-  @SuppressLint("InflateParams")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -67,18 +63,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     // 全面屏
     appData.publicTools.setFullScreen(this)
     super.onResume()
-    // 注册广播用以关闭程序
-    try {
-      unregisterReceiver(scrcpyBroadcastReceiver)
-    } catch (_: Exception) {
-    }
-    try {
-      val filter = IntentFilter()
-      filter.addAction(ACTION_SCREEN_OFF)
-      filter.addAction("top.saymzx.scrcpy.android.notification")
-      registerReceiver(scrcpyBroadcastReceiver, filter)
-    } catch (_: Exception) {
-    }
   }
 
   // 如果有投屏处于全屏状态则自动恢复界面
@@ -200,8 +184,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         appData.settings.getBoolean("setSetResolution", true)
       addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked =
         appData.settings.getBoolean("setDefaultFull", true)
-      addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked =
-        appData.settings.getBoolean("setFloatNav", true)
       // 是否显示高级选项
       addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
         addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -225,8 +207,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
               .toInt(),
             resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
             addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_float_nav).isChecked
+            addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked
           )
           dialog.cancel()
         }
@@ -264,21 +245,13 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
+  // 强制清理
   // ViewModel
   override fun getViewModelStore(): ViewModelStore {
     if (VIEWMODEL_STORE == null) {
       VIEWMODEL_STORE = ViewModelStore()
     }
     return VIEWMODEL_STORE!!
-  }
-
-  // 广播处理
-  inner class ScrcpyBroadcastReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent?) {
-      // 取消通知
-      (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(1)
-      for (i in appData.devices) if (i.status >= 0) i.scrcpy.stop("停止投屏")
-    }
   }
 
 }
