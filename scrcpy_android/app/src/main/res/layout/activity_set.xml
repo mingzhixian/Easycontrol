@@ -7,231 +7,224 @@
     android:orientation="vertical"
     tools:context=".SetActivity">
 
-    <ImageView
-        android:id="@+id/set_back"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="50dp"
-        android:src="@drawable/nav_back"
-        android:tint="@color/ignoreTextColor" />
-
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="40dp"
-        android:text="默认配置"
-        android:textColor="@color/ignoreTextColor"
-        android:textSize="@dimen/largeFont" />
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="视频编解码器:"
-            android:textColor="@color/ignoreTextColor"
-            android:textSize="@dimen/middleFont" />
-
-        <Spinner
-            android:id="@+id/set_videoCodec"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:entries="@array/videoCodecItems"
-            android:textSize="@dimen/middleFont" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp">
+            <ImageView
+                android:id="@+id/set_back"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="50dp"
+                android:src="@drawable/nav_back"
+                android:tint="@color/ignoreTextColor" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="音频编解码器:"
-            android:textColor="@color/ignoreTextColor"
-            android:textSize="@dimen/middleFont" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="默认配置"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/largeFont" />
 
-        <Spinner
-            android:id="@+id/set_audioCodec"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:entries="@array/audioCodecItems"
-            android:textSize="@dimen/middleFont" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="视频编解码器:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="是否修改分辨率:"
-            android:textColor="@color/ignoreTextColor"
-            android:textSize="@dimen/middleFont" />
+                <Spinner
+                    android:id="@+id/set_videoCodec"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:entries="@array/videoCodecItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
 
-        <Switch
-            android:id="@+id/set_set_resolution"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:checked="true"
-            android:thumbTint="@color/SwitchBackground"
-            android:thumbTintMode="multiply"
-            android:trackTint="@color/buttonBackground"
-            android:trackTintMode="multiply" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="音频编解码器:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="默认全屏显示:"
-            android:textColor="@color/ignoreTextColor"
-            android:textSize="@dimen/middleFont" />
+                <Spinner
+                    android:id="@+id/set_audioCodec"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:entries="@array/audioCodecItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
 
-        <Switch
-            android:id="@+id/set_default_full"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:checked="true"
-            android:thumbTint="@color/SwitchBackground"
-            android:thumbTintMode="multiply"
-            android:trackTint="@color/buttonBackground"
-            android:trackTintMode="multiply" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否修改分辨率:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="是否显示导航球:"
-            android:textColor="@color/ignoreTextColor"
-            android:textSize="@dimen/middleFont" />
+                <Switch
+                    android:id="@+id/set_set_resolution"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"
+                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
 
-        <Switch
-            android:id="@+id/set_float_nav"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:checked="true"
-            android:thumbTint="@color/SwitchBackground"
-            android:thumbTintMode="multiply"
-            android:trackTint="@color/buttonBackground"
-            android:trackTintMode="multiply" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="默认全屏显示:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="40dp"
-        android:text="其他"
-        android:textColor="@color/ignoreTextColor"
-        android:textSize="@dimen/largeFont" />
+                <Switch
+                    android:id="@+id/set_default_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"
+                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
 
-    <TextView
-        android:id="@+id/set_export"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp"
-        android:text="导出配置"
-        android:textColor="@color/textColor"
-        android:textSize="@dimen/middleFont" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="其他"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/largeFont" />
 
-    <TextView
-        android:id="@+id/set_import"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/background"
-        android:backgroundTint="@color/cardBackground"
-        android:paddingStart="20dp"
-        android:paddingTop="14dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="14dp"
-        android:text="导入配置"
-        android:textColor="@color/textColor"
-        android:textSize="@dimen/middleFont" />
+            <TextView
+                android:id="@+id/set_export"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导出配置"
+                android:textColor="@color/textColor"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_import"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导入配置"
+                android:textColor="@color/textColor"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_index"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="前往官网"
+                android:textColor="@color/textColor"
+                android:textSize="@dimen/middleFont" />
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

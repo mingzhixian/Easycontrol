@@ -1,11 +1,6 @@
 package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
@@ -14,11 +9,12 @@ import android.util.DisplayMetrics
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.core.app.NotificationCompat
+import android.widget.TextView
 import androidx.core.view.*
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.math.sqrt
+
 
 @SuppressLint("ClickableViewAccessibility", "InternalInsetResource", "DiscouragedApi")
 class FloatVideo(
@@ -50,15 +46,11 @@ class FloatVideo(
   private var localVideoWidth = 0
   private var localVideoHeight = 0
 
-  // 是否显示
-  private var isShow = false
-
   // 显示悬浮窗
   @SuppressLint("InflateParams")
   fun show() {
     appData.main.runOnUiThread {
       floatVideo = appData.main.layoutInflater.inflate(R.layout.float_video, null, false)
-      isShow = true
       // 设置视频界面触摸监听
       setSurfaceListener()
       // 全屏or小窗模式
@@ -70,26 +62,39 @@ class FloatVideo(
 
   // 隐藏悬浮窗
   fun hide() {
-    if (isShow) {
-      isShow = false
+    try {
       appData.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-      if (device.isFull && device.floatNav) appData.main.windowManager.removeView(
+      hideFloatNav()
+      appData.main.windowManager.removeView(floatVideo)
+    } catch (_: Exception) {
+    }
+  }
+
+  // 隐藏导航球
+  private fun hideFloatNav() {
+    try {
+      appData.main.windowManager.removeView(
         floatNav
       )
-      appData.main.windowManager.removeView(floatVideo)
+    } catch (_: Exception) {
+    }
+  }
+
+  // 退出
+  private fun exit() {
+    for (i in appData.devices) {
+      if (i.name == device.name) {
+        i.scrcpy.stop("用户停止", null)
+      }
     }
   }
 
   // 更新悬浮窗
   private fun update(hasChangeSize: Boolean) {
     appData.main.windowManager.updateViewLayout(
-      floatVideo,
-      floatVideoParams
+      floatVideo, floatVideoParams
     )
-    if (device.isFull && device.floatNav) appData.main.windowManager.updateViewLayout(
-      floatNav,
-      floatNavParams
-    )
+    if (device.isFull) appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
     // 减少未修改大小的无用调用
     if (hasChangeSize && !device.isFull) {
       // 等比缩放控件大小
@@ -170,18 +175,15 @@ class FloatVideo(
       x = 0
       y = 0
       width = if (isLandScape) appData.deviceHeight else appData.deviceWidth
-      height =
-        if (isLandScape) appData.deviceWidth else appData.deviceHeight
+      height = if (isLandScape) appData.deviceWidth else appData.deviceHeight
     }
     localVideoWidth = floatVideoParams.width
     localVideoHeight = floatVideoParams.height
     // 隐藏上下栏
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.GONE
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.GONE
-    // 通知栏
-    setNotification()
     // 监听导航悬浮球
-    if (device.floatNav) setFloatNavListener()
+    setFloatNavListener()
     // 取消无用监听
     floatVideo.setOnTouchListener(null)
     floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener(null)
@@ -194,6 +196,15 @@ class FloatVideo(
 
   // 设置小窗
   private fun setSmallWindow() {
+    device.isFull = false
+    // 显示上下栏
+    floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.VISIBLE
+    floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.VISIBLE
+    // 隐藏导航球
+    floatNav.setOnTouchListener(null)
+    hideFloatNav()
+    // 设置屏幕方向
+    appData.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     // 竖屏打开
     if (remoteVideoHeight > remoteVideoWidth) {
       floatVideoParams.apply {
@@ -354,17 +365,14 @@ class FloatVideo(
         appData.main.requestedOrientation =
           if (isLandscape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         // 导航球
-        if (device.floatNav) floatNavParams.apply {
+        floatNavParams.apply {
           x = 40
-          y =
-            (if (isLandscape) appData.deviceWidth else appData.deviceHeight) / 2
+          y = (if (isLandscape) appData.deviceWidth else appData.deviceHeight) / 2
         }
         // 更新悬浮窗
         floatVideoParams.apply {
-          width =
-            if (isLandscape) appData.deviceHeight else appData.deviceWidth
-          height =
-            if (isLandscape) appData.deviceWidth else appData.deviceHeight
+          width = if (isLandscape) appData.deviceHeight else appData.deviceWidth
+          height = if (isLandscape) appData.deviceWidth else appData.deviceHeight
         }
         localVideoWidth = floatVideoParams.width
         localVideoHeight = floatVideoParams.height
@@ -411,66 +419,62 @@ class FloatVideo(
     // 视频触摸控制
     val pointerList = ArrayList<Int>(20)
     for (i in 1..20) pointerList.add(0)
-    floatVideo.findViewById<SurfaceView>(R.id.float_video_surface)
-      .setOnTouchListener { _, event ->
-        setFocus(true)
-        try {
-          when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-              val i = event.actionIndex
+    floatVideo.findViewById<SurfaceView>(R.id.float_video_surface).setOnTouchListener { _, event ->
+      setFocus(true)
+      try {
+        when (event.actionMasked) {
+          MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+            val i = event.actionIndex
+            val x = event.getX(i).toInt()
+            val y = event.getY(i).toInt()
+            val p = event.getPointerId(i)
+            packTouchControl(MotionEvent.ACTION_DOWN, p, x, y)
+            // 记录xy信息
+            pointerList[p] = x
+            pointerList[10 + p] = y
+          }
+
+          MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
+            val i = event.actionIndex
+            val x = event.getX(i).toInt()
+            val y = event.getY(i).toInt()
+            val p = event.getPointerId(i)
+            packTouchControl(MotionEvent.ACTION_UP, p, x, y)
+          }
+
+          MotionEvent.ACTION_MOVE -> {
+            for (i in 0 until event.pointerCount) {
               val x = event.getX(i).toInt()
               val y = event.getY(i).toInt()
               val p = event.getPointerId(i)
-              packTouchControl(MotionEvent.ACTION_DOWN, p, x, y)
-              // 记录xy信息
-              pointerList[p] = x
-              pointerList[10 + p] = y
-            }
-
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
-              val i = event.actionIndex
-              val x = event.getX(i).toInt()
-              val y = event.getY(i).toInt()
-              val p = event.getPointerId(i)
-              packTouchControl(MotionEvent.ACTION_UP, p, x, y)
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-              for (i in 0 until event.pointerCount) {
-                val x = event.getX(i).toInt()
-                val y = event.getY(i).toInt()
-                val p = event.getPointerId(i)
-                // 适配一些机器将点击视作小范围移动(小于3的圆内不做处理)
-                if (pointerList[p] != -1) {
-                  if ((pointerList[p] - x) * (pointerList[p] - x) + (pointerList[10 + p] - y) * (pointerList[10 + p] - y) < 9) return@setOnTouchListener true
-                  pointerList[p] = -1
-                }
-                packTouchControl(MotionEvent.ACTION_MOVE, p, x, y)
+              // 适配一些机器将点击视作小范围移动(小于3的圆内不做处理)
+              if (pointerList[p] != -1) {
+                if ((pointerList[p] - x) * (pointerList[p] - x) + (pointerList[10 + p] - y) * (pointerList[10 + p] - y) < 9) return@setOnTouchListener true
+                pointerList[p] = -1
               }
+              packTouchControl(MotionEvent.ACTION_MOVE, p, x, y)
             }
           }
-        } catch (_: IllegalArgumentException) {
         }
-        return@setOnTouchListener true
+      } catch (_: IllegalArgumentException) {
       }
+      return@setOnTouchListener true
+    }
   }
 
   // 设置三大金刚键监听控制
   private fun setNavListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener {
       setFocus(true)
-      packNavControl(0, 4)
-      packNavControl(1, 4)
+      sendNavKey(4)
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener {
       setFocus(true)
-      packNavControl(0, 3)
-      packNavControl(1, 3)
+      sendNavKey(3)
     }
     floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener {
       setFocus(true)
-      packNavControl(0, 187)
-      packNavControl(1, 187)
+      sendNavKey(187)
     }
   }
 
@@ -542,9 +546,9 @@ class FloatVideo(
             setSmallSmall()
             floatVideoParams.x =
               if (rawX <= criticality) appData.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding)
-                .toInt() else
-                deviceWidth - floatVideoParams.width - appData.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding)
-                  .toInt()
+                .toInt() else deviceWidth - floatVideoParams.width - appData.main.resources.getDimension(
+                R.dimen.floatVideoSmallSmallPadding
+              ).toInt()
             floatVideoParams.y =
               (appData.main.resources.getDimension(R.dimen.floatVideoSmallSmallPadding) * 2).toInt()
             update(false)
@@ -573,11 +577,7 @@ class FloatVideo(
   // 设置关闭按钮监听控制
   private fun setStopListener() {
     floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener {
-      for (i in appData.devices) {
-        if (i.name == device.name) {
-          i.scrcpy.stop("用户停止", null)
-        }
-      }
+      exit()
     }
   }
 
@@ -589,20 +589,17 @@ class FloatVideo(
     val gestureDetector =
       GestureDetector(appData.main, object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-          packNavControl(0, 4)
-          packNavControl(1, 4)
+          sendNavKey(4)
           return super.onSingleTapConfirmed(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-          packNavControl(0, 3)
-          packNavControl(1, 3)
+          sendNavKey(3)
           return super.onDoubleTap(e)
         }
 
         override fun onLongPress(e: MotionEvent) {
-          packNavControl(0, 187)
-          packNavControl(1, 187)
+          setFloatNavMenuListener()
           super.onLongPress(e)
         }
       })
@@ -661,6 +658,49 @@ class FloatVideo(
     }
   }
 
+  // 设置导航球菜单监听
+  private fun setFloatNavMenuListener() {
+    // 展示MENU
+    floatNavParams.width = appData.main.resources.getDimension(R.dimen.floatNavMenuW).toInt()
+    floatNavParams.height = appData.main.resources.getDimension(R.dimen.floatNavMenuH).toInt()
+    appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
+    floatNav.findViewById<LinearLayout>(R.id.float_nav_menu).visibility = View.VISIBLE
+    floatNav.findViewById<ImageView>(R.id.float_nav_image).visibility = View.GONE
+    // 返回导航球
+    floatNav.findViewById<TextView>(R.id.float_nav_back).setOnClickListener {
+      backFloatNav()
+    }
+    // 发送最近任务键
+    floatNav.findViewById<TextView>(R.id.float_nav_switch).setOnClickListener {
+      sendNavKey(187)
+      backFloatNav()
+    }
+    // 退出全屏
+    floatNav.findViewById<TextView>(R.id.float_nav_exit_full).setOnClickListener {
+      setSmallWindow()
+      update(true)
+    }
+    // 退出
+    floatNav.findViewById<TextView>(R.id.float_nav_exit).setOnClickListener {
+      exit()
+    }
+  }
+
+  // 回到导航球模式
+  private fun backFloatNav() {
+    floatNavParams.width = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
+    floatNavParams.height = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
+    appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
+    floatNav.findViewById<ImageView>(R.id.float_nav_image).visibility = View.VISIBLE
+    floatNav.findViewById<LinearLayout>(R.id.float_nav_menu).visibility = View.GONE
+  }
+
+  // 发送导航按键
+  private fun sendNavKey(key: Int) {
+    packNavControl(0, key)
+    packNavControl(1, key)
+  }
+
   // 获得焦点
   private var isFocus = false
   private fun setFocus(newFocus: Boolean) {
@@ -669,40 +709,10 @@ class FloatVideo(
         if (newFocus) WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         else WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
       appData.main.windowManager.updateViewLayout(
-        floatVideo,
-        floatVideoParams
+        floatVideo, floatVideoParams
       )
       isFocus = newFocus
     }
-  }
-
-  // 设置通知栏
-  @SuppressLint("LaunchActivityFromNotification")
-  private fun setNotification() {
-    // 通知管理
-    val notificationManager =
-      appData.main.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val importance = NotificationManager.IMPORTANCE_DEFAULT
-      val channel = NotificationChannel("scrcpy_android", "chat", importance).apply {
-        description = "常驻通知用于停止投屏"
-      }
-      notificationManager.createNotificationChannel(channel)
-    }
-    val intent = Intent("top.saymzx.scrcpy.android.notification")
-    val builder =
-      NotificationCompat.Builder(appData.main, "scrcpy_android").setSmallIcon(R.drawable.icon)
-        .setContentTitle(device.name).setContentText("点击关闭投屏")
-        .setPriority(NotificationCompat.PRIORITY_MAX)
-        .setContentIntent(
-          PendingIntent.getBroadcast(
-            appData.main,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-          )
-        ).setAutoCancel(true).setOngoing(true)
-    notificationManager.notify(1, builder.build())
   }
 
   // 计算悬浮窗大小

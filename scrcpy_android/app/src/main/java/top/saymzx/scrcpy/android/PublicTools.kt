@@ -59,4 +59,7 @@ class PublicTools {
     loadingDialog.show()
     return loadingDialog
   }
+
+  // DP转PX
+  fun dp2px(dp: Float): Float = dp * appData.main.resources.displayMetrics.density
 }

@@ -82,7 +82,6 @@ class DeviceListAdapter : BaseAdapter() {
         val videoBit = addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit)
         val setResolution = addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution)
         val defaultFull = addDeviceView.findViewById<Switch>(R.id.add_device_default_full)
-        val floatNav = addDeviceView.findViewById<Switch>(R.id.add_device_float_nav)
         // 是否显示高级选项
         addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
           addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -103,7 +102,6 @@ class DeviceListAdapter : BaseAdapter() {
             appData.main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
           val newSetResolution = if (setResolution.isChecked) 1 else 0
           val newDefaultFull = if (defaultFull.isChecked) 1 else 0
-          val newFloatNav = if (floatNav.isChecked) 1 else 0
           val values = ContentValues().apply {
             put("address", newAddress)
             put("port", newPort)
@@ -114,7 +112,6 @@ class DeviceListAdapter : BaseAdapter() {
             put("videoBit", newVideoBit)
             put("setResolution", newSetResolution)
             put("defaultFull", newDefaultFull)
-            put("floatNav", newFloatNav)
           }
           if (appData.dbHelper.writableDatabase.update(
               "DevicesDb",
@@ -135,8 +132,7 @@ class DeviceListAdapter : BaseAdapter() {
                 newFps,
                 newVideoBit,
                 newSetResolution == 1,
-                newDefaultFull == 1,
-                newFloatNav == 1
+                newDefaultFull == 1
               )
             )
             notifyDataSetChanged()
@@ -179,7 +175,6 @@ class DeviceListAdapter : BaseAdapter() {
         )
         setResolution.isChecked = device.setResolution
         defaultFull.isChecked = device.defaultFull
-        floatNav.isChecked = device.floatNav
         // 设置不可变参数
         name.isFocusable = false
         name.isFocusableInTouchMode = false
@@ -211,8 +206,7 @@ class DeviceListAdapter : BaseAdapter() {
     fps: Int,
     videoBit: Int,
     setResolution: Boolean,
-    defaultFull: Boolean,
-    floatNav: Boolean
+    defaultFull: Boolean
   ) {
     val values = ContentValues().apply {
       put("name", name)
@@ -225,7 +219,6 @@ class DeviceListAdapter : BaseAdapter() {
       put("videoBit", videoBit)
       put("setResolution", if (setResolution) 1 else 0)
       put("defaultFull", if (defaultFull) 1 else 0)
-      put("floatNav", if (floatNav) 1 else 0)
     }
     // 名称重复
     if (appData.dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
@@ -240,8 +233,7 @@ class DeviceListAdapter : BaseAdapter() {
           fps,
           videoBit,
           setResolution,
-          defaultFull,
-          floatNav
+          defaultFull
         )
       )
       notifyDataSetChanged()
