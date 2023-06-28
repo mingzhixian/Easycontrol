@@ -201,7 +201,10 @@ class FloatVideo(
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.VISIBLE
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.VISIBLE
     // 隐藏导航球
-    floatNav.setOnTouchListener(null)
+    try {
+      floatNav.setOnTouchListener(null)
+    } catch (_: Exception) {
+    }
     hideFloatNav()
     // 设置屏幕方向
     appData.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
