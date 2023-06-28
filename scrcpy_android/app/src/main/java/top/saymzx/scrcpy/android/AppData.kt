@@ -91,8 +91,7 @@ class AppData : ViewModel() {
             cursor.getInt(cursor.getColumnIndex("fps")),
             cursor.getInt(cursor.getColumnIndex("videoBit")),
             cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
-            cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
-            cursor.getInt(cursor.getColumnIndex("floatNav")) == 1
+            cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1
           )
         )
       } while (cursor.moveToNext())

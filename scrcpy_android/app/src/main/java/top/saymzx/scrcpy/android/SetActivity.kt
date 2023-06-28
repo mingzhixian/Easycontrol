@@ -38,12 +38,12 @@ class SetActivity : Activity() {
     setSetResolutionListener()
     // 设置是否修改分辨率监听
     setDefaultFullListener()
-    // 设置是否修改分辨率监听
-    setFloatNavListener()
     // 设置导出按钮监听
     setExportListener()
     // 设置导入按钮监听
     setImportListener()
+    // 设置官网按钮监听
+    setIndexListener()
   }
 
   // 设置默认值
@@ -64,8 +64,6 @@ class SetActivity : Activity() {
       appData.settings.getBoolean("setSetResolution", true)
     findViewById<Switch>(R.id.set_default_full).isChecked =
       appData.settings.getBoolean("setDefaultFull", true)
-    findViewById<Switch>(R.id.set_float_nav).isChecked =
-      appData.settings.getBoolean("setFloatNav", true)
   }
 
   // 设置返回按钮监听
@@ -121,21 +119,11 @@ class SetActivity : Activity() {
     }
   }
 
-  // 设置是否修改分辨率监听
+  // 设置是否全屏监听
   private fun setDefaultFullListener() {
     findViewById<Switch>(R.id.set_default_full).setOnCheckedChangeListener { _, checked ->
       appData.settings.edit().apply {
         putBoolean("setDefaultFull", checked)
-        apply()
-      }
-    }
-  }
-
-  // 设置是否修改分辨率监听
-  private fun setFloatNavListener() {
-    findViewById<Switch>(R.id.set_float_nav).setOnCheckedChangeListener { _, checked ->
-      appData.settings.edit().apply {
-        putBoolean("setFloatNav", checked)
         apply()
       }
     }
@@ -154,6 +142,21 @@ class SetActivity : Activity() {
     findViewById<TextView>(R.id.set_import).setOnClickListener {
       openDirectory()
       fileMode = 2
+    }
+  }
+
+  // 设置官网按钮监听
+  private fun setIndexListener() {
+    findViewById<TextView>(R.id.set_index).setOnClickListener {
+      try {
+        // 防止没有默认浏览器
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.addCategory(Intent.CATEGORY_BROWSABLE)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.data = Uri.parse("https://github.com/mingzhixian/NovelNeo")
+        startActivity(intent)
+      } catch (_: Exception) {
+      }
     }
   }
 
@@ -231,7 +234,6 @@ class SetActivity : Activity() {
                   "defaultFull",
                   cursor.getInt(cursor.getColumnIndex("defaultFull"))
                 )
-                tmpJsonObject.put("floatNav", cursor.getInt(cursor.getColumnIndex("floatNav")))
                 jsonArray.put(tmpJsonObject)
               } while (cursor.moveToNext())
             }
@@ -266,8 +268,7 @@ class SetActivity : Activity() {
               tmpJsonObject.getInt("fps"),
               tmpJsonObject.getInt("videoBit"),
               tmpJsonObject.getInt("setResolution") == 1,
-              tmpJsonObject.getInt("defaultFull") == 1,
-              tmpJsonObject.getInt("floatNav") == 1,
+              tmpJsonObject.getInt("defaultFull") == 1
             )
           }
           alert.cancel()

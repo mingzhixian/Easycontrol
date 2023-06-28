@@ -1,5 +1,6 @@
 package top.saymzx.scrcpy.android
 
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.media.AudioAttributes
@@ -57,11 +58,12 @@ class Scrcpy(private val device: Device) {
   private var clipBoardText = ""
 
   // 开始投屏
+  private lateinit var alert: AlertDialog
   fun start() {
     device.isFull = device.defaultFull
     device.status = 0
     // 显示加载中
-    val alert = appData.publicTools.showLoading("连接中...", appData.main, true) {
+    alert = appData.publicTools.showLoading("连接中...", appData.main, true) {
       stop("用户停止")
     }
     appData.mainScope.launch {
@@ -75,7 +77,6 @@ class Scrcpy(private val device: Device) {
         // 转发端口
         tcpForward()
       } catch (e: Exception) {
-        alert.cancel()
         stop("连接错误", e)
       }
       try {
@@ -134,24 +135,25 @@ class Scrcpy(private val device: Device) {
   fun stop(scrcpyError: String, e: Exception? = null) {
     // 防止多次调用
     if (device.status == -1) return
-    val oldStatus = device.status
     device.status = -1
     appData.mainScope.launch {
       withContext(Dispatchers.Main) {
         Toast.makeText(appData.main, scrcpyError, Toast.LENGTH_SHORT).show()
         if (e != null)
           Toast.makeText(appData.main, "详细信息：$e", Toast.LENGTH_SHORT).show()
+        Log.e("Scrcpy", "$scrcpyError---${e?.toString() ?: ""}")
       }
-    }
-    Log.e("Scrcpy", "$scrcpyError---${e?.toString() ?: ""}")
-    appData.mainScope.launch {
+      // 恢复分辨率
       try {
-        // 恢复分辨率
         if (device.setResolution) runAdbCmd("wm size reset")
         runAdbCmd("ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9")
         adb.close()
       } catch (_: Exception) {
       }
+    }
+    try {
+      alert.cancel()
+    } catch (_: Exception) {
     }
     try {
       if (canAudio) {
@@ -229,7 +231,7 @@ class Scrcpy(private val device: Device) {
           break
         } catch (_: Exception) {
           Log.i("Scrcpy", "连接失败，再次尝试")
-          delay(50)
+          delay(100)
         }
       }
     }

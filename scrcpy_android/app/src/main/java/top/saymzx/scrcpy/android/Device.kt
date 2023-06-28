@@ -10,8 +10,7 @@ class Device(
   val fps: Int,
   val videoBit: Int,
   val setResolution: Boolean,
-  val defaultFull: Boolean,
-  val floatNav: Boolean
+  val defaultFull: Boolean
 ) {
   var isFull = defaultFull
 
