@@ -1,18 +1,14 @@
 package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.DisplayMetrics
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import dev.mobile.dadb.AdbKeyPair
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.sync.Mutex
 import okhttp3.OkHttpClient
 import java.io.File
 
@@ -21,6 +17,9 @@ class AppData : ViewModel() {
 
   // 是否初始化
   var isInit = false
+
+  // 是否显示默认设备
+  var isShowDefultDevice=false
 
   @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity

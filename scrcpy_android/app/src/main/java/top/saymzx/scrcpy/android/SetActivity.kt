@@ -24,8 +24,7 @@ class SetActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_set)
-    // 全面屏
-    appData.publicTools.setFullScreen(this)
+    appData.publicTools.setStatusAndNavBar(this)
     // 设置默认值
     setValue()
     // 设置返回按钮监听
@@ -38,6 +37,8 @@ class SetActivity : Activity() {
     setSetResolutionListener()
     // 设置是否修改分辨率监听
     setDefaultFullListener()
+    // 设置清除默认设备按钮监听
+    setClearDefultListener()
     // 设置导出按钮监听
     setExportListener()
     // 设置导入按钮监听
@@ -126,6 +127,17 @@ class SetActivity : Activity() {
         putBoolean("setDefaultFull", checked)
         apply()
       }
+    }
+  }
+
+  // 设置清除默认设备按钮监听
+  private fun setClearDefultListener() {
+    findViewById<TextView>(R.id.set_clear_defult).setOnClickListener {
+      appData.settings.edit().apply {
+        putString("DefaultDevice", "")
+        apply()
+      }
+      Toast.makeText(this, "已清除", Toast.LENGTH_SHORT).show()
     }
   }
 

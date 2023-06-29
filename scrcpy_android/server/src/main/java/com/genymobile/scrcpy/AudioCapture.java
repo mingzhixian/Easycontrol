@@ -60,7 +60,7 @@ public final class AudioCapture {
     builder.setAudioFormat(createAudioFormat());
     int minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING);
     // This buffer size does not impact latency
-    builder.setBufferSizeInBytes(4 * minBufferSize);
+    builder.setBufferSizeInBytes(minBufferSize);
     return builder.build();
   }
 

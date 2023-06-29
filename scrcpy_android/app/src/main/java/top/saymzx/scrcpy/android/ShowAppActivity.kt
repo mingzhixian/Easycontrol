@@ -3,10 +3,7 @@ package top.saymzx.scrcpy.android
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 
@@ -15,16 +12,7 @@ class ShowAppActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_show_app)
-    // 全屏显示
-    window.decorView.systemUiVisibility =
-      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-    // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      window.attributes.layoutInDisplayCutoutMode =
-        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-    }
-    // 隐藏标题栏
-    actionBar?.hide()
+    appData.publicTools.setStatusAndNavBar(this)
     // 设置隐私政策链接
     findViewById<TextView>(R.id.show_app_privacy).setOnClickListener {
       try {

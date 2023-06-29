@@ -27,7 +27,7 @@
             android:layout_marginStart="25dp"
             android:layout_marginTop="25dp"
             android:layout_marginEnd="25dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="12dp"
             android:background="@drawable/background"
             android:backgroundTint="@color/alertButtonBackground"
             android:text="取消"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
             android:layout_marginEnd="25dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="12dp"
             android:orientation="horizontal">
 
             <Button
@@ -69,6 +69,19 @@
                 android:textSize="@dimen/middleFont"
                 android:textColor="@color/buttonTextColor" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/delete_device_defult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/background"
+            android:backgroundTint="@color/cancelButtonBackground"
+            android:text="设为默认打开"
+            android:textSize="@dimen/middleFont"
+            android:textColor="@color/buttonTextColor" />
 
     </LinearLayout>
 </ScrollView>

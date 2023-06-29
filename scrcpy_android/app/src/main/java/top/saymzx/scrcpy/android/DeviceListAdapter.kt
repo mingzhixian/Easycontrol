@@ -43,13 +43,13 @@ class DeviceListAdapter : BaseAdapter() {
         .show()
       else {
         device.scrcpy = Scrcpy(device)
-        device.scrcpy.start()
+        device.scrcpy!!.start()
       }
     }
     // 长按选项
     linearLayout.setOnLongClickListener {
       val deleteDeviceView =
-        LayoutInflater.from(appData.main).inflate(R.layout.delete_device, null, false)
+        LayoutInflater.from(appData.main).inflate(R.layout.set_device, null, false)
       val builder: AlertDialog.Builder = AlertDialog.Builder(appData.main)
       builder.setView(deleteDeviceView)
       builder.setCancelable(false)
@@ -186,6 +186,14 @@ class DeviceListAdapter : BaseAdapter() {
         )
         appData.devices.remove(device)
         notifyDataSetChanged()
+        dialog.cancel()
+      }
+      // 设为默认
+      deleteDeviceView.findViewById<Button>(R.id.delete_device_defult).setOnClickListener {
+        appData.settings.edit().apply {
+          putString("DefaultDevice", device.name)
+          apply()
+        }
         dialog.cancel()
       }
       dialog.show()
