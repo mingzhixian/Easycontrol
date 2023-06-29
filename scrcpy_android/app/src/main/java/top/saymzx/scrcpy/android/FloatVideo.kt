@@ -12,7 +12,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.*
-import okhttp3.internal.notifyAll
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.math.sqrt
@@ -173,7 +172,7 @@ class FloatVideo(
     // 进入专注模式
     appData.fullScreenOrientation =
       if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    appData.main.startActivity(Intent(appData.main,FullScreenActivity::class.java))
+    appData.main.startActivity(Intent(appData.main, FullScreenActivity::class.java))
     floatVideoParams.apply {
       x = 0
       y = 0
@@ -199,6 +198,12 @@ class FloatVideo(
 
   // 设置小窗
   private fun setSmallWindow() {
+    // 如果以前是全屏模式先退出专注模式
+    if (device.isFull) {
+      val intent = Intent(appData.main, MainActivity::class.java)
+      intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+      appData.main.startActivity(intent)
+    }
     device.isFull = false
     // 显示上下栏
     floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.VISIBLE
