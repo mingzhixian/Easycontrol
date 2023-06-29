@@ -233,6 +233,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="20dp"
+                android:layout_marginBottom="40dp"
                 android:background="@drawable/background"
                 android:backgroundTint="@color/cardBackground"
                 android:paddingStart="20dp"

@@ -37,7 +37,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
     appData = ViewModelProvider(this).get(AppData::class.java)
-    if (!appData.isInit) appData.init(this)
+    appData.main = this
+    if (!appData.isInit) appData.init()
     appData.publicTools.setStatusAndNavBar(this)
     // 如果第一次使用展示介绍信息
     if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
