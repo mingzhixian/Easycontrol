@@ -16,5 +16,5 @@ class Device(
 
   // -1为停止状态，0为准备中，1为投屏中
   var status = -1
-  lateinit var scrcpy: Scrcpy
+  var scrcpy: Scrcpy? = null
 }

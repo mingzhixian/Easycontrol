@@ -88,6 +88,11 @@ public class ScreenEncoder implements Device.RotationListener, Device.FoldListen
         format.setInteger(MediaFormat.KEY_WIDTH, videoRect.width());
         format.setInteger(MediaFormat.KEY_HEIGHT, videoRect.height());
 
+        MediaCodecInfo codeInfo = mediaCodec.getCodecInfo();
+        if (codeInfo.getCapabilitiesForType(codec.getMimeType()).getEncoderCapabilities().isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)) {
+          format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+        }
+
         Surface surface = null;
         try {
           mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);

@@ -38,11 +38,11 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     setContentView(R.layout.activity_main)
     appData = ViewModelProvider(this).get(AppData::class.java)
     if (!appData.isInit) appData.init(this)
+    appData.publicTools.setStatusAndNavBar(this)
     // 如果第一次使用展示介绍信息
     if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
       Intent(
-        this,
-        ShowAppActivity::class.java
+        this, ShowAppActivity::class.java
       ), 1
     )
     // 读取数据库并展示设备列表
@@ -57,19 +57,26 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   override fun onResume() {
     // 检查权限
-    checkPermission()
-    // 全面屏
-    appData.publicTools.setFullScreen(this)
-    super.onResume()
-  }
-
-  // 如果有投屏处于全屏状态则自动恢复界面
-  override fun onPause() {
-    super.onPause()
-    for (i in appData.devices) if (i.isFull && i.status >= 0) {
-      startActivity(intent)
-      break
+    if (checkPermission()) {
+      // 仅在第一次启动默认设备
+      if (!appData.isShowDefultDevice) {
+        appData.isShowDefultDevice = true
+        // 启动默认设备
+        val defalueDevice = appData.settings.getString("DefaultDevice", "")
+        if (defalueDevice != "") {
+          for (i in appData.devices) {
+            if (i.name == defalueDevice) {
+              if (i.status == -1) {
+                i.scrcpy = Scrcpy(i)
+                i.scrcpy!!.start()
+              }
+              break
+            }
+          }
+        }
+      }
     }
+    super.onResume()
   }
 
   // 其他页面回调
@@ -87,15 +94,16 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   }
 
   // 检查权限
-  private fun checkPermission() {
+  private fun checkPermission(): Boolean {
     // 检查悬浮窗权限
     if (!Settings.canDrawOverlays(this)) {
       val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
       intent.data = Uri.parse("package:$packageName")
       startActivity(intent)
       Toast.makeText(appData.main, "请授予悬浮窗权限", Toast.LENGTH_SHORT).show()
-      return
+      return false
     }
+    return true
   }
 
   // 读取数据库并展示设备列表
@@ -106,16 +114,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   // 添加设备监听
   private fun setAddDeviceListener() {
-    findViewById<TextView>(R.id.add_device).setOnLongClickListener {
-      for (i in appData.devices) {
-        try {
-          i.scrcpy.stop("强行停止")
-        } catch (_: Exception) {
-        }
-      }
-      Toast.makeText(this, "已强制清理", Toast.LENGTH_SHORT).show()
-      return@setOnLongClickListener true
-    }
     findViewById<TextView>(R.id.add_device).setOnClickListener {
       // 显示添加界面
       val addDeviceView = LayoutInflater.from(this).inflate(R.layout.add_device, null, false)
@@ -128,20 +126,17 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       // 设置默认值
       addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).setSelection(
         appData.publicTools.getStringIndex(
-          "1600",
-          resources.getStringArray(R.array.maxSizeItems)
+          "1600", resources.getStringArray(R.array.maxSizeItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_fps).setSelection(
         appData.publicTools.getStringIndex(
-          "60",
-          resources.getStringArray(R.array.fpsItems)
+          "60", resources.getStringArray(R.array.fpsItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).setSelection(
         appData.publicTools.getStringIndex(
-          "8000000",
-          resources.getStringArray(R.array.videoBitItems1)
+          "8000000", resources.getStringArray(R.array.videoBitItems1)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).setSelection(
@@ -163,8 +158,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       // 是否显示高级选项
       addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
         addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
-          if (addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).isChecked)
-            View.VISIBLE
+          if (addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).isChecked) View.VISIBLE
           else View.GONE
       }
       // 完成添加设备
@@ -204,16 +198,14 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     appData.mainScope.launch {
       withContext(Dispatchers.IO) {
         val request: Request = Request.Builder()
-          .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest")
-          .build()
+          .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest").build()
         try {
           appData.okhttpClient.newCall(request).execute().use { response ->
             val json = JSONObject(response.body!!.string())
             val newVersionCode = json.getInt("tag_name")
-            if (newVersionCode > appData.versionCode)
-              withContext(Dispatchers.Main) {
-                Toast.makeText(appData.main, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
-              }
+            if (newVersionCode > appData.versionCode) withContext(Dispatchers.Main) {
+              Toast.makeText(appData.main, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+            }
           }
         } catch (_: Exception) {
         }

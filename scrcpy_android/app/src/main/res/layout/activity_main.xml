@@ -11,23 +11,23 @@
 
     <ImageView
         android:id="@+id/set"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="30dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="20dp"
         android:src="@drawable/set"
-        android:tint="@color/ignoreTextColor"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/ignoreTextColor" />
 
     <ListView
         android:id="@+id/devices_list"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginStart="40dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="70dp"
         android:layout_marginEnd="40dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="20dp"
         android:divider="#00000000"
         android:dividerHeight="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,8 +39,8 @@
         android:id="@+id/add_device"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/background"
         android:backgroundTint="@color/buttonBackground"
         android:text="添加"

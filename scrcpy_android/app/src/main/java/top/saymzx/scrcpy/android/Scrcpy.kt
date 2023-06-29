@@ -3,6 +3,7 @@ package top.saymzx.scrcpy.android
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
@@ -13,6 +14,9 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.audiofx.LoudnessEnhancer
 import android.os.Build
+import android.os.Process
+import android.os.Process.THREAD_PRIORITY_LOWEST
+import android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE
 import android.util.Base64
 import android.util.Log
 import android.view.SurfaceView
@@ -94,6 +98,7 @@ class Scrcpy(private val device: Device) {
       }
       // 视频解码输入
       Thread {
+        Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
           decodeInput("video")
         } catch (e: Exception) {
@@ -103,6 +108,7 @@ class Scrcpy(private val device: Device) {
       // 音频解码输入
       if (canAudio) {
         Thread {
+          Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
           try {
             decodeInput("audio")
           } catch (e: Exception) {
@@ -112,6 +118,7 @@ class Scrcpy(private val device: Device) {
       }
       // 配置控制输入
       Thread {
+        Process.setThreadPriority(THREAD_PRIORITY_LOWEST)
         try {
           setControlInput()
         } catch (e: Exception) {
@@ -120,6 +127,7 @@ class Scrcpy(private val device: Device) {
       }.start()
       // 配置控制输出
       Thread {
+        Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
           setControlOutput()
         } catch (e: Exception) {
@@ -181,6 +189,10 @@ class Scrcpy(private val device: Device) {
       floatVideo.hide()
     } catch (_: Exception) {
     }
+    device.scrcpy = null
+    val intent = Intent(appData.main, MainActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+    appData.main.startActivity(intent)
   }
 
   // 发送server
@@ -249,7 +261,7 @@ class Scrcpy(private val device: Device) {
       // 显示悬浮窗
       floatVideo =
         FloatVideo(device, remoteVideoWidth, remoteVideoHeight) {
-          hasConerols = true
+          hasControls = true
           controls.offer(it)
         }
     }
@@ -357,7 +369,6 @@ class Scrcpy(private val device: Device) {
     // 配置解码器
     audioDecodec.configure(mediaFormat, null, null, 0)
     // 配置异步
-    var loopNum = 0
     audioDecodec.setCallback(object : Callback() {
       override fun onInputBufferAvailable(p0: MediaCodec, p1: Int) {
         audioDecodecQueue.offer(p1)
@@ -368,11 +379,6 @@ class Scrcpy(private val device: Device) {
         outIndex: Int,
         bufferInfo: MediaCodec.BufferInfo
       ) {
-        loopNum++
-        if (loopNum > 100) {
-          loopNum = 0
-          checkClipBoard()
-        }
         try {
           audioTrack.write(
             decodec.getOutputBuffer(outIndex)!!,
@@ -532,16 +538,22 @@ class Scrcpy(private val device: Device) {
 
   // 控制报文输出
   private val controls = LinkedBlockingQueue<ByteArray>()
-  private var hasConerols = false
+  private var hasControls = false
   private fun setControlOutput() {
+    var loopNum = 0
     while (true) {
-      if (!hasConerols) {
+      loopNum++
+      if (loopNum > 200) {
+        loopNum = 0
+        checkClipBoard()
+      }
+      if (!hasControls) {
         Thread.sleep(4)
         continue
       }
       val buffer = controls.poll()
       if (buffer == null) {
-        hasConerols = false
+        hasControls = false
         continue
       }
       controlOutStream.write(buffer)
@@ -552,20 +564,22 @@ class Scrcpy(private val device: Device) {
   // 防止被控端熄屏
   private var isScreenOning = false
   private fun checkScreenOff() {
-    appData.mainScope.launch {
-      if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn").contains("mScreenOn=true") && !isScreenOning) {
-        // 避免短时重复操作
-        isScreenOning = true
-        runAdbCmd("input keyevent 26")
-        delay(100)
-        isScreenOning = false
+    // 避免短时重复操作
+    if (!isScreenOning) {
+      appData.mainScope.launch {
+        if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn").contains("mScreenOn=true")) {
+          isScreenOning = true
+          runAdbCmd("input keyevent 26")
+          delay(500)
+          isScreenOning = false
+        }
       }
     }
   }
 
   // 被控端熄屏
   private fun setPowerOff() {
-    hasConerols = true
+    hasControls = true
     controls.offer(byteArrayOf(10, 0))
   }
 
@@ -591,7 +605,7 @@ class Scrcpy(private val device: Device) {
     byteBuffer.putInt(textByteArray.size)
     byteBuffer.put(textByteArray)
     byteBuffer.flip()
-    hasConerols = true
+    hasControls = true
     controls.offer(byteBuffer.array())
   }
 
