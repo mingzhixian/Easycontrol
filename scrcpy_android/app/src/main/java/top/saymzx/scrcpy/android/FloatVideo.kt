@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.*
+import okhttp3.internal.notifyAll
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.math.sqrt
@@ -170,7 +171,9 @@ class FloatVideo(
     // 旋转屏幕方向
     val isLandScape = remoteVideoWidth > remoteVideoHeight
     // 进入专注模式
-    goToFocus(isLandScape)
+    appData.fullScreenOrientation =
+      if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    appData.main.startActivity(Intent(appData.main,FullScreenActivity::class.java))
     floatVideoParams.apply {
       x = 0
       y = 0
@@ -355,24 +358,26 @@ class FloatVideo(
   // 检测旋转
   fun checkRotation(newWidth: Int, newHeight: Int) {
     if ((newWidth > newHeight) xor (localVideoWidth > localVideoHeight)) {
-      val isLandscape = newWidth > newHeight
+      val isLandScape = newWidth > newHeight
       val remoteVideoMax = maxOf(remoteVideoWidth, remoteVideoHeight)
       val remoteVideoMin = minOf(remoteVideoWidth, remoteVideoHeight)
-      remoteVideoWidth = if (isLandscape) remoteVideoMax else remoteVideoMin
-      remoteVideoHeight = if (isLandscape) remoteVideoMin else remoteVideoMax
+      remoteVideoWidth = if (isLandScape) remoteVideoMax else remoteVideoMin
+      remoteVideoHeight = if (isLandScape) remoteVideoMin else remoteVideoMax
       // 全屏or小窗
       if (device.isFull) {
         // 旋转屏幕方向
-        goToFocus(isLandscape)
+        appData.fullScreenOrientation =
+          if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        appData.fullScreenActivity.updateOrientation()
         // 导航球
         floatNavParams.apply {
           x = 40
-          y = (if (isLandscape) appData.deviceWidth else appData.deviceHeight) / 2
+          y = (if (isLandScape) appData.deviceWidth else appData.deviceHeight) / 2
         }
         // 更新悬浮窗
         floatVideoParams.apply {
-          width = if (isLandscape) appData.deviceHeight else appData.deviceWidth
-          height = if (isLandscape) appData.deviceWidth else appData.deviceHeight
+          width = if (isLandScape) appData.deviceHeight else appData.deviceWidth
+          height = if (isLandScape) appData.deviceWidth else appData.deviceHeight
         }
         localVideoWidth = floatVideoParams.width
         localVideoHeight = floatVideoParams.height
@@ -727,14 +732,6 @@ class FloatVideo(
         R.dimen.floatVideoTitle
       )).toInt()
     }
-  }
-
-  // 进入专注模式
-  private fun goToFocus(isLandScape:Boolean){
-    appData.focusIsLandScape=isLandScape
-    val intent=Intent(appData.main, FullScreenActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-    appData.main.startActivity(intent)
   }
 
 }
