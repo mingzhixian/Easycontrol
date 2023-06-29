@@ -1,6 +1,7 @@
 package top.saymzx.scrcpy.android
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
@@ -84,7 +85,8 @@ class FloatVideo(
   private fun exit() {
     for (i in appData.devices) {
       if (i.name == device.name) {
-        i.scrcpy.stop("用户停止", null)
+        i.scrcpy?.stop("用户停止", null)
+        break
       }
     }
   }
@@ -166,6 +168,8 @@ class FloatVideo(
     // 取消焦点
     setFocus(false)
     device.isFull = true
+    // 进入专注模式
+    appData.main.startActivity(Intent(appData.main, FullScreenActivity::class.java))
     // 旋转屏幕方向
     val isLandScape = remoteVideoWidth > remoteVideoHeight
     appData.main.startActivity(appData.main.intent)

@@ -31,8 +31,18 @@ class PublicTools {
       context.window.attributes.layoutInDisplayCutoutMode =
         WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }
-    // 隐藏标题栏
-    context.actionBar?.hide()
+  }
+
+  // 设置状态栏导航栏颜色
+  fun setStatusAndNavBar(context: Activity) {
+    // 导航栏
+    context.window.navigationBarColor = context.resources.getColor(R.color.appBackground)
+//    context.window.navigationBarDividerColor = context.resources.getColor(R.color.onBackground)
+    // 状态栏
+    context.window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+    context.window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+    context.window.statusBarColor = context.resources.getColor(R.color.appBackground)
+    context.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
   }
 
   // 显示加载框
