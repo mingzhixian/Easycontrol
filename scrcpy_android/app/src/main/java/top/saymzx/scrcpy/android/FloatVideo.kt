@@ -64,7 +64,6 @@ class FloatVideo(
   // 隐藏悬浮窗
   fun hide() {
     try {
-      appData.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
       hideFloatNav()
       appData.main.windowManager.removeView(floatVideo)
     } catch (_: Exception) {
@@ -168,13 +167,10 @@ class FloatVideo(
     // 取消焦点
     setFocus(false)
     device.isFull = true
-    // 进入专注模式
-    appData.main.startActivity(Intent(appData.main, FullScreenActivity::class.java))
     // 旋转屏幕方向
     val isLandScape = remoteVideoWidth > remoteVideoHeight
-    appData.main.startActivity(appData.main.intent)
-    appData.main.requestedOrientation =
-      if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    // 进入专注模式
+    goToFocus(isLandScape)
     floatVideoParams.apply {
       x = 0
       y = 0
@@ -210,8 +206,6 @@ class FloatVideo(
     } catch (_: Exception) {
     }
     hideFloatNav()
-    // 设置屏幕方向
-    appData.main.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     // 竖屏打开
     if (remoteVideoHeight > remoteVideoWidth) {
       floatVideoParams.apply {
@@ -369,8 +363,7 @@ class FloatVideo(
       // 全屏or小窗
       if (device.isFull) {
         // 旋转屏幕方向
-        appData.main.requestedOrientation =
-          if (isLandscape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        goToFocus(isLandscape)
         // 导航球
         floatNavParams.apply {
           x = 40
@@ -734,6 +727,14 @@ class FloatVideo(
         R.dimen.floatVideoTitle
       )).toInt()
     }
+  }
+
+  // 进入专注模式
+  private fun goToFocus(isLandScape:Boolean){
+    appData.focusIsLandScape=isLandScape
+    val intent=Intent(appData.main, FullScreenActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+    appData.main.startActivity(intent)
   }
 
 }
