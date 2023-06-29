@@ -190,9 +190,11 @@ class Scrcpy(private val device: Device) {
     } catch (_: Exception) {
     }
     device.scrcpy = null
-    val intent = Intent(appData.main, MainActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-    appData.main.startActivity(intent)
+    if (device.isFull) {
+      val intent = Intent(appData.main, MainActivity::class.java)
+      intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+      appData.main.startActivity(intent)
+    }
   }
 
   // 发送server

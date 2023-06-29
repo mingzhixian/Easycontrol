@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.util.DisplayMetrics
 import androidx.lifecycle.ViewModel
 import dev.mobile.dadb.AdbKeyPair
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.sync.Mutex
 import okhttp3.OkHttpClient
 import java.io.File
 
@@ -19,12 +19,15 @@ class AppData : ViewModel() {
   var isInit = false
 
   // 是否显示默认设备
-  var isShowDefultDevice=false
+  var isShowDefultDevice = false
 
   @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity
 
-  var focusIsLandScape=false
+  @SuppressLint("StaticFieldLeak")
+  lateinit var fullScreenActivity: FullScreenActivity
+
+  var fullScreenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
   // 全局协程域
   val mainScope = MainScope()
@@ -62,9 +65,8 @@ class AppData : ViewModel() {
   val versionCode = BuildConfig.VERSION_CODE
 
   // 初始化数据
-  fun init(m: MainActivity) {
+  fun init() {
     isInit = true
-    main = m
     settings = main.getSharedPreferences("setting", Context.MODE_PRIVATE)
     // 获取系统分辨率
     val metric = DisplayMetrics()
