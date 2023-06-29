@@ -24,6 +24,8 @@ class AppData : ViewModel() {
   @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity
 
+  var focusIsLandScape=false
+
   // 全局协程域
   val mainScope = MainScope()
 
