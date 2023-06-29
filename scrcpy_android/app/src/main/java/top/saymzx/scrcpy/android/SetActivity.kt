@@ -165,7 +165,7 @@ class SetActivity : Activity() {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.addCategory(Intent.CATEGORY_BROWSABLE)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.data = Uri.parse("https://github.com/mingzhixian/NovelNeo")
+        intent.data = Uri.parse("https://scrcpy.saymzx.top/")
         startActivity(intent)
       } catch (_: Exception) {
       }
