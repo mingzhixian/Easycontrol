@@ -120,21 +120,23 @@ class DeviceListAdapter : BaseAdapter() {
               arrayOf(device.name)
             ) != -1
           ) {
-            appData.devices.remove(device)
-            appData.devices.add(
-              Device(
-                device.name,
-                newAddress,
-                newPort,
-                newVideoCodec,
-                newAudioCodec,
-                newMaxSize,
-                newFps,
-                newVideoBit,
-                newSetResolution == 1,
-                newDefaultFull == 1
-              )
-            )
+            for (i in appData.devices.indices) {
+              if (appData.devices[i].name == device.name) {
+                appData.devices[i] = Device(
+                  device.name,
+                  newAddress,
+                  newPort,
+                  newVideoCodec,
+                  newAudioCodec,
+                  newMaxSize,
+                  newFps,
+                  newVideoBit,
+                  newSetResolution == 1,
+                  newDefaultFull == 1
+                )
+                break
+              }
+            }
             notifyDataSetChanged()
           }
         }

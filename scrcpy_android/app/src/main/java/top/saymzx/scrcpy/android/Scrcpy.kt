@@ -144,6 +144,7 @@ class Scrcpy(private val device: Device) {
     // 防止多次调用
     if (device.status == -1) return
     device.status = -1
+    appData.isFocus = false
     appData.mainScope.launch {
       withContext(Dispatchers.Main) {
         Toast.makeText(appData.main, scrcpyError, Toast.LENGTH_SHORT).show()

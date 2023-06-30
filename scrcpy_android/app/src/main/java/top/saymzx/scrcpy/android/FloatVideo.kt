@@ -170,9 +170,14 @@ class FloatVideo(
     // 旋转屏幕方向
     val isLandScape = remoteVideoWidth > remoteVideoHeight
     // 进入专注模式
-    appData.fullScreenOrientation =
+    appData.isFocus = true
+    appData.isFullScreenActivityInit=false
+    val intent = Intent(appData.main, FullScreenActivity::class.java)
+    intent.putExtra(
+      "isLandScape",
       if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    appData.main.startActivity(Intent(appData.main, FullScreenActivity::class.java))
+    )
+    appData.main.startActivity(intent)
     floatVideoParams.apply {
       x = 0
       y = 0
@@ -371,9 +376,8 @@ class FloatVideo(
       // 全屏or小窗
       if (device.isFull) {
         // 旋转屏幕方向
-        appData.fullScreenOrientation =
+        appData.fullScreenActivity.requestedOrientation =
           if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        appData.fullScreenActivity.updateOrientation()
         // 导航球
         floatNavParams.apply {
           x = 40
