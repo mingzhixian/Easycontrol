@@ -205,7 +205,7 @@ class SetActivity : Activity() {
           val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
           val publicKeyUri =
             publicKeyDoc?.uri ?: documentFile.createFile("scrcpt/key", "scrcpy_public.key")!!.uri
-          writeToFile(appData.privateKey, publicKeyUri, 2)
+          writeToFile(appData.publicKey, publicKeyUri, 2)
           val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
           val dataBaseUri =
             dataBaseDoc?.uri ?: documentFile.createFile("scrcpt/json", "scrcpy_database.json")!!.uri
