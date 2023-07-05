@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy.android
+package top.saymzx.scrcpy.android.helper
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -15,6 +15,10 @@ import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import top.saymzx.scrcpy.android.R
+import top.saymzx.scrcpy.android.appData
+import top.saymzx.scrcpy.android.entity.Device
+import top.saymzx.scrcpy.android.entity.Scrcpy
 
 class DeviceListAdapter : BaseAdapter() {
   override fun getCount(): Int = appData.devices.size
@@ -81,7 +85,6 @@ class DeviceListAdapter : BaseAdapter() {
         val fps = addDeviceView.findViewById<Spinner>(R.id.add_device_fps)
         val videoBit = addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit)
         val setResolution = addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution)
-        val defaultFull = addDeviceView.findViewById<Switch>(R.id.add_device_default_full)
         // 是否显示高级选项
         addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
           addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -101,7 +104,6 @@ class DeviceListAdapter : BaseAdapter() {
           val newVideoBit =
             appData.main.resources.getStringArray(R.array.videoBitItems1)[videoBit.selectedItemPosition].toInt()
           val newSetResolution = if (setResolution.isChecked) 1 else 0
-          val newDefaultFull = if (defaultFull.isChecked) 1 else 0
           val values = ContentValues().apply {
             put("address", newAddress)
             put("port", newPort)
@@ -111,7 +113,6 @@ class DeviceListAdapter : BaseAdapter() {
             put("fps", newFps)
             put("videoBit", newVideoBit)
             put("setResolution", newSetResolution)
-            put("defaultFull", newDefaultFull)
           }
           if (appData.dbHelper.writableDatabase.update(
               "DevicesDb",
@@ -131,8 +132,7 @@ class DeviceListAdapter : BaseAdapter() {
                   newMaxSize,
                   newFps,
                   newVideoBit,
-                  newSetResolution == 1,
-                  newDefaultFull == 1
+                  newSetResolution == 1
                 )
                 break
               }
@@ -176,7 +176,6 @@ class DeviceListAdapter : BaseAdapter() {
           )
         )
         setResolution.isChecked = device.setResolution
-        defaultFull.isChecked = device.defaultFull
         // 设置不可变参数
         name.isFocusable = false
         name.isFocusableInTouchMode = false
@@ -215,8 +214,7 @@ class DeviceListAdapter : BaseAdapter() {
     maxSize: Int,
     fps: Int,
     videoBit: Int,
-    setResolution: Boolean,
-    defaultFull: Boolean
+    setResolution: Boolean
   ) {
     val values = ContentValues().apply {
       put("name", name)
@@ -228,7 +226,6 @@ class DeviceListAdapter : BaseAdapter() {
       put("fps", fps)
       put("videoBit", videoBit)
       put("setResolution", if (setResolution) 1 else 0)
-      put("defaultFull", if (defaultFull) 1 else 0)
     }
     // 名称重复
     if (appData.dbHelper.writableDatabase.insert("DevicesDb", null, values).toInt() != -1) {
@@ -242,11 +239,24 @@ class DeviceListAdapter : BaseAdapter() {
           maxSize,
           fps,
           videoBit,
-          setResolution,
-          defaultFull
+          setResolution
         )
       )
       notifyDataSetChanged()
     }
+  }
+
+  fun newDevice(device: Device) {
+    newDevice(
+      device.name,
+      device.address,
+      device.port,
+      device.videoCodec,
+      device.audioCodec,
+      device.maxSize,
+      device.fps,
+      device.videoBit,
+      device.setResolution
+    )
   }
 }

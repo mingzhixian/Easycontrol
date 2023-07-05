@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy.android
+package top.saymzx.scrcpy.android.helper
 
 import android.annotation.SuppressLint
 import android.content.ContentValues

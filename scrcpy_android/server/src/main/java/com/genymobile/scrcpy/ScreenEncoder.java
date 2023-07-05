@@ -1,5 +1,7 @@
 package com.genymobile.scrcpy;
 
+import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible;
+
 import android.graphics.Rect;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -92,6 +94,7 @@ public class ScreenEncoder implements Device.RotationListener, Device.FoldListen
         if (codeInfo.getCapabilitiesForType(codec.getMimeType()).getEncoderCapabilities().isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)) {
           format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
         }
+        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, COLOR_FormatYUV420Flexible);
 
         Surface surface = null;
         try {

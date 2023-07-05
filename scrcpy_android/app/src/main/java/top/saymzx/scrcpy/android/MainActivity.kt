@@ -15,11 +15,15 @@ import android.widget.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.Request
-import org.json.JSONObject
+import top.saymzx.scrcpy.android.entity.Scrcpy
+import top.saymzx.scrcpy.android.entity.defaultAudioCodec
+import top.saymzx.scrcpy.android.entity.defaultFps
+import top.saymzx.scrcpy.android.entity.defaultFull
+import top.saymzx.scrcpy.android.entity.defaultMaxSize
+import top.saymzx.scrcpy.android.entity.defaultSetResolution
+import top.saymzx.scrcpy.android.entity.defaultVideoBit
+import top.saymzx.scrcpy.android.entity.defaultVideoCodec
+import top.saymzx.scrcpy.android.helper.AppData
 import java.io.*
 import java.util.*
 
@@ -36,22 +40,26 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
+    // 初始化ViewModel
     appData = ViewModelProvider(this).get(AppData::class.java)
     appData.main = this
     if (!appData.isInit) appData.init()
+    // 设置状态栏导航栏颜色沉浸
     appData.publicTools.setStatusAndNavBar(this)
-    // 如果第一次使用展示介绍信息
+    // 如果第一次使用进入软件展示页
     if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
       Intent(
         this, ShowAppActivity::class.java
       ), 1
     )
-    // 读取数据库并展示设备列表
+    // 设置设备列表适配器
     setDevicesList()
     // 添加按钮监听
     setAddDeviceListener()
     // 设置按钮监听
     setSetButtonListener()
+    // 读取默认参数
+    readDeviceDefault()
     // 检查更新
     checkUpdate()
   }
@@ -107,7 +115,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     return true
   }
 
-  // 读取数据库并展示设备列表
+  // 设置设备列表适配器
   private fun setDevicesList() {
     val devicesList = findViewById<ListView>(R.id.devices_list)
     devicesList.adapter = appData.deviceListAdapter
@@ -127,35 +135,31 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       // 设置默认值
       addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).setSelection(
         appData.publicTools.getStringIndex(
-          "1600", resources.getStringArray(R.array.maxSizeItems)
+          defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_fps).setSelection(
         appData.publicTools.getStringIndex(
-          "60", resources.getStringArray(R.array.fpsItems)
+          defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).setSelection(
         appData.publicTools.getStringIndex(
-          "8000000", resources.getStringArray(R.array.videoBitItems1)
+          defaultVideoBit.toString(), resources.getStringArray(R.array.videoBitItems1)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).setSelection(
         appData.publicTools.getStringIndex(
-          appData.settings.getString("setVideoCodec", "h264")!!,
-          resources.getStringArray(R.array.videoCodecItems)
+          defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
         )
       )
       addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).setSelection(
         appData.publicTools.getStringIndex(
-          appData.settings.getString("setAudioCodec", "opus")!!,
-          resources.getStringArray(R.array.audioCodecItems)
+          defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
         )
       )
       addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked =
-        appData.settings.getBoolean("setSetResolution", true)
-      addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked =
-        appData.settings.getBoolean("setDefaultFull", true)
+        defaultSetResolution
       // 是否显示高级选项
       addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
         addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
@@ -164,24 +168,26 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       }
       // 完成添加设备
       addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
+        val name = addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString()
+        val address = addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString()
         // 名字不能为空
-        if (addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString() != "") {
-          appData.deviceListAdapter.newDevice(
-            addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString(),
-            addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString(),
-            addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
-            addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
-            addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).selectedItem.toString(),
-            addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).selectedItem.toString()
-              .toInt(),
-            addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
-              .toInt(),
-            resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
-            addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked,
-            addDeviceView.findViewById<Switch>(R.id.add_device_default_full).isChecked
-          )
-          dialog.cancel()
+        if (name == "" || address == "") {
+          Toast.makeText(this, "名字和地址不可为空", Toast.LENGTH_LONG).show()
+          return@setOnClickListener
         }
+        appData.deviceListAdapter.newDevice(
+          name, address,
+          addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).selectedItem.toString(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).selectedItem.toString()
+            .toInt(),
+          addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
+            .toInt(),
+          resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
+          addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked
+        )
+        dialog.cancel()
       }
       dialog.show()
     }
@@ -194,27 +200,28 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
+  // 读取默认参数
+  private fun readDeviceDefault() {
+    defaultVideoCodec = appData.settings.getString("defaultVideoCodec", "h264").toString()
+    defaultAudioCodec = appData.settings.getString("defaultAudioCodec", "opus").toString()
+    defaultMaxSize = appData.settings.getInt("defaultMaxSize", 1920)
+    defaultFps = appData.settings.getInt("defaultFps", 60)
+    defaultVideoBit = appData.settings.getInt("defaultVideoBit", 8000000)
+    defaultSetResolution = appData.settings.getBoolean("defaultSetResolution", true)
+    defaultFull = appData.settings.getBoolean("defaultFull", false)
+  }
+
   // 检查更新
   private fun checkUpdate() {
-    appData.mainScope.launch {
-      withContext(Dispatchers.IO) {
-        val request: Request = Request.Builder()
-          .url("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest").build()
-        try {
-          appData.okhttpClient.newCall(request).execute().use { response ->
-            val json = JSONObject(response.body!!.string())
-            val newVersionCode = json.getInt("tag_name")
-            if (newVersionCode > appData.versionCode) withContext(Dispatchers.Main) {
-              Toast.makeText(appData.main, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
-            }
-          }
-        } catch (_: Exception) {
-        }
+    appData.netHelper.getJson("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest") {
+      val newVersionCode = it?.getInt("tag_name")
+      if (newVersionCode != null) {
+        if (newVersionCode > appData.versionCode)
+          Toast.makeText(this, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
       }
     }
   }
 
-  // 强制清理
   // ViewModel
   override fun getViewModelStore(): ViewModelStore {
     if (VIEWMODEL_STORE == null) {

@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy.android
+package top.saymzx.scrcpy.android.helper
 
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
@@ -9,6 +9,10 @@ import androidx.lifecycle.ViewModel
 import dev.mobile.dadb.AdbKeyPair
 import kotlinx.coroutines.MainScope
 import okhttp3.OkHttpClient
+import top.saymzx.scrcpy.android.BuildConfig
+import top.saymzx.scrcpy.android.entity.Device
+import top.saymzx.scrcpy.android.FullScreenActivity
+import top.saymzx.scrcpy.android.MainActivity
 import java.io.File
 
 @SuppressLint("Range")
@@ -39,8 +43,11 @@ class AppData : ViewModel() {
   // 数据库管理
   lateinit var dbHelper: DbHelper
 
+  // 网络管理
+  val netHelper= NetHelper()
+
   // 设备列表管理
-  lateinit var deviceListAdapter: DeviceListAdapter
+  val deviceListAdapter = DeviceListAdapter()
 
   // 设备列表
   val devices = ArrayList<Device>()
@@ -67,20 +74,34 @@ class AppData : ViewModel() {
 
   // 初始化数据
   fun init() {
+    // 初始化标志位
     isInit = true
+    // 设置键值对管理
     settings = main.getSharedPreferences("setting", Context.MODE_PRIVATE)
-    // 获取系统分辨率
+    // 读取设备分辨率
+    readDeviceResolution()
+    // 数据库管理
+    dbHelper = DbHelper(main, "scrcpy_android.db", 9)
+    // 读取数据库设备列表
+    readDeviceList()
+    // 读取密钥文件
+    readKeyFiles()
+    // 剪切板管理
+    clipBorad = main.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+  }
+
+  // 读取设备分辨率
+  private fun readDeviceResolution() {
     val metric = DisplayMetrics()
     main.windowManager.defaultDisplay.getRealMetrics(metric)
     deviceWidth = metric.widthPixels
     deviceHeight = metric.heightPixels
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
-    // 数据库管理
-    dbHelper = DbHelper(main, "scrcpy_android.db", 9)
-    // 设备列表管理
-    deviceListAdapter = DeviceListAdapter()
-    // 从数据库获取设备列表
+  }
+
+  // 读取数据库设备列表
+  private fun readDeviceList() {
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
     if (cursor.moveToFirst()) {
       do {
@@ -94,21 +115,21 @@ class AppData : ViewModel() {
             cursor.getInt(cursor.getColumnIndex("maxSize")),
             cursor.getInt(cursor.getColumnIndex("fps")),
             cursor.getInt(cursor.getColumnIndex("videoBit")),
-            cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
-            cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1
+            cursor.getInt(cursor.getColumnIndex("setResolution")) == 1
           )
         )
       } while (cursor.moveToNext())
     }
     cursor.close()
-    // 密钥文件
+  }
+
+  // 读取密钥文件
+  private fun readKeyFiles() {
     privateKey = File(main.applicationContext.filesDir, "private.key")
     publicKey = File(main.applicationContext.filesDir, "public.key")
     if (!privateKey.isFile || !publicKey.isFile) {
       AdbKeyPair.generate(privateKey, publicKey)
     }
-    // 剪切板
-    clipBorad = main.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
   }
 
 }

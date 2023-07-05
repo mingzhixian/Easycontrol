@@ -13,8 +13,16 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
+import dev.mobile.dadb.AdbKeyPair
 import org.json.JSONArray
-import org.json.JSONObject
+import top.saymzx.scrcpy.android.entity.Device
+import top.saymzx.scrcpy.android.entity.defaultAudioCodec
+import top.saymzx.scrcpy.android.entity.defaultFps
+import top.saymzx.scrcpy.android.entity.defaultFull
+import top.saymzx.scrcpy.android.entity.defaultMaxSize
+import top.saymzx.scrcpy.android.entity.defaultSetResolution
+import top.saymzx.scrcpy.android.entity.defaultVideoBit
+import top.saymzx.scrcpy.android.entity.defaultVideoCodec
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -29,42 +37,56 @@ class SetActivity : Activity() {
     setValue()
     // 设置返回按钮监听
     setBackButtonListener()
-    // 设置视频编解码器监听
-    setVideoCodecListener()
-    // 设置音频编解码器监听
-    setAudioCodecListener()
-    // 设置是否修改分辨率监听
-    setSetResolutionListener()
-    // 设置是否修改分辨率监听
+    // 设置默认设置监听
+    setDefaultVideoCodecListener()
+    setDefaultAudioCodecListener()
+    setDefaultMaxSizeListener()
+    setDefaultFpsListener()
+    setDefaultVideoBitListener()
     setDefaultFullListener()
-    // 设置清除默认设备按钮监听
+    setDefaultSetResolutionListener()
+    // 其他
     setClearDefultListener()
-    // 设置导出按钮监听
-    setExportListener()
-    // 设置导入按钮监听
-    setImportListener()
-    // 设置官网按钮监听
+    setRenewKeyListener()
+    // 备份恢复
+    setKeyExportListener()
+    setKeyImportListener()
+    setJsonExportListener()
+    setJsonImportListener()
+    // 关于
     setIndexListener()
+    setPrivacyListener()
   }
 
   // 设置默认值
   private fun setValue() {
-    findViewById<Spinner>(R.id.set_videoCodec).setSelection(
+    findViewById<Spinner>(R.id.set_default_videoCodec).setSelection(
       appData.publicTools.getStringIndex(
-        appData.settings.getString("setVideoCodec", "h264")!!,
-        resources.getStringArray(R.array.videoCodecItems)
+        defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
       )
     )
-    findViewById<Spinner>(R.id.set_audioCodec).setSelection(
+    findViewById<Spinner>(R.id.set_default_audioCodec).setSelection(
       appData.publicTools.getStringIndex(
-        appData.settings.getString("setAudioCodec", "opus")!!,
-        resources.getStringArray(R.array.audioCodecItems)
+        defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
       )
     )
-    findViewById<Switch>(R.id.set_set_resolution).isChecked =
-      appData.settings.getBoolean("setSetResolution", true)
-    findViewById<Switch>(R.id.set_default_full).isChecked =
-      appData.settings.getBoolean("setDefaultFull", true)
+    findViewById<Spinner>(R.id.set_default_max_size).setSelection(
+      appData.publicTools.getStringIndex(
+        defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
+      )
+    )
+    findViewById<Spinner>(R.id.set_default_fps).setSelection(
+      appData.publicTools.getStringIndex(
+        defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
+      )
+    )
+    findViewById<Spinner>(R.id.set_default_video_bit).setSelection(
+      appData.publicTools.getStringIndex(
+        defaultVideoBit.toString(), resources.getStringArray(R.array.videoBitItems1)
+      )
+    )
+    findViewById<Switch>(R.id.set_default_set_resolution).isChecked = defaultSetResolution
+    findViewById<Switch>(R.id.set_default_default_full).isChecked = defaultFull
   }
 
   // 设置返回按钮监听
@@ -75,46 +97,107 @@ class SetActivity : Activity() {
   }
 
   // 设置视频编解码器监听
-  private fun setVideoCodecListener() {
-    val view = findViewById<Spinner>(R.id.set_videoCodec)
-    view.onItemSelectedListener =
-      object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-          appData.settings.edit().apply {
-            putString("setVideoCodec", view.selectedItem.toString())
-            apply()
-          }
+  private fun setDefaultVideoCodecListener() {
+    val view = findViewById<Spinner>(R.id.set_default_videoCodec)
+    view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        val item = view.selectedItem.toString()
+        defaultVideoCodec = item
+        appData.settings.edit().apply {
+          putString("defaultVideoCodec", item)
+          apply()
         }
-
-        override fun onNothingSelected(p0: AdapterView<*>?) {
-        }
-
       }
+
+      override fun onNothingSelected(p0: AdapterView<*>?) {
+      }
+
+    }
   }
 
   // 设置音频编解码器监听
-  private fun setAudioCodecListener() {
-    val view = findViewById<Spinner>(R.id.set_audioCodec)
-    view.onItemSelectedListener =
-      object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-          appData.settings.edit().apply {
-            putString("setAudioCodec", view.selectedItem.toString())
-            apply()
-          }
+  private fun setDefaultAudioCodecListener() {
+    val view = findViewById<Spinner>(R.id.set_default_audioCodec)
+    view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        val item = view.selectedItem.toString()
+        defaultAudioCodec = item
+        appData.settings.edit().apply {
+          putString("defaultAudioCodec", item)
+          apply()
         }
-
-        override fun onNothingSelected(p0: AdapterView<*>?) {
-        }
-
       }
+
+      override fun onNothingSelected(p0: AdapterView<*>?) {
+      }
+
+    }
+  }
+
+  // 设置最大大小监听
+  private fun setDefaultMaxSizeListener() {
+    val view = findViewById<Spinner>(R.id.set_default_max_size)
+    view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        val item = view.selectedItem.toString()
+        defaultMaxSize = item.toInt()
+        appData.settings.edit().apply {
+          putString("defaultMaxSize", item)
+          apply()
+        }
+      }
+
+      override fun onNothingSelected(p0: AdapterView<*>?) {
+      }
+
+    }
+  }
+
+
+  // 设置帧率监听
+  private fun setDefaultFpsListener() {
+    val view = findViewById<Spinner>(R.id.set_default_fps)
+    view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        val item = view.selectedItem.toString()
+        defaultFps = item.toInt()
+        appData.settings.edit().apply {
+          putString("defaultFps", item)
+          apply()
+        }
+      }
+
+      override fun onNothingSelected(p0: AdapterView<*>?) {
+      }
+
+    }
+  }
+
+  // 设置码率监听
+  private fun setDefaultVideoBitListener() {
+    val view = findViewById<Spinner>(R.id.set_default_video_bit)
+    view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        val item = view.selectedItem.toString()
+        defaultVideoBit = item.toInt()
+        appData.settings.edit().apply {
+          putString("defaultVideoBit", item)
+          apply()
+        }
+      }
+
+      override fun onNothingSelected(p0: AdapterView<*>?) {
+      }
+
+    }
   }
 
   // 设置是否修改分辨率监听
-  private fun setSetResolutionListener() {
-    findViewById<Switch>(R.id.set_set_resolution).setOnCheckedChangeListener { _, checked ->
+  private fun setDefaultSetResolutionListener() {
+    findViewById<Switch>(R.id.set_default_set_resolution).setOnCheckedChangeListener { _, checked ->
       appData.settings.edit().apply {
-        putBoolean("setSetResolution", checked)
+        defaultSetResolution = checked
+        putBoolean("defaultSetResolution", checked)
         apply()
       }
     }
@@ -122,9 +205,10 @@ class SetActivity : Activity() {
 
   // 设置是否全屏监听
   private fun setDefaultFullListener() {
-    findViewById<Switch>(R.id.set_default_full).setOnCheckedChangeListener { _, checked ->
+    findViewById<Switch>(R.id.set_default_default_full).setOnCheckedChangeListener { _, checked ->
       appData.settings.edit().apply {
-        putBoolean("setDefaultFull", checked)
+        defaultFull = checked
+        putBoolean("defaultFull", checked)
         apply()
       }
     }
@@ -141,19 +225,53 @@ class SetActivity : Activity() {
     }
   }
 
-  // 设置导出按钮监听
-  private fun setExportListener() {
-    findViewById<TextView>(R.id.set_export).setOnClickListener {
-      openDirectory()
-      fileMode = 1
+  // 设置重新生成密钥按钮监听
+  private fun setRenewKeyListener() {
+    findViewById<TextView>(R.id.set_clear_defult).setOnClickListener {
+      AdbKeyPair.generate(appData.privateKey, appData.publicKey)
     }
   }
 
-  // 设置导入按钮监听
-  private fun setImportListener() {
-    findViewById<TextView>(R.id.set_import).setOnClickListener {
-      openDirectory()
-      fileMode = 2
+  // 设置密钥导出按钮监听
+  private fun setKeyExportListener() {
+    findViewById<TextView>(R.id.set_export_key).setOnClickListener {
+      openDirectory(1)
+    }
+  }
+
+  // 设置密钥导入按钮监听
+  private fun setKeyImportListener() {
+    findViewById<TextView>(R.id.set_import_key).setOnClickListener {
+      openDirectory(2)
+    }
+  }
+
+  // 设置密钥导出按钮监听
+  private fun setJsonExportListener() {
+    findViewById<TextView>(R.id.set_export_json).setOnClickListener {
+      openDirectory(3)
+    }
+  }
+
+  // 设置密钥导入按钮监听
+  private fun setJsonImportListener() {
+    findViewById<TextView>(R.id.set_import_json).setOnClickListener {
+      openDirectory(4)
+    }
+  }
+
+  // 设置隐私政策按钮监听
+  private fun setPrivacyListener() {
+    findViewById<TextView>(R.id.set_privacy).setOnClickListener {
+      try {
+        // 防止没有默认浏览器
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.addCategory(Intent.CATEGORY_BROWSABLE)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.data = Uri.parse("https://github.com/mingzhixian/scrcpy/blob/master/PRIVACY.md")
+        startActivity(intent)
+      } catch (_: Exception) {
+      }
     }
   }
 
@@ -173,117 +291,74 @@ class SetActivity : Activity() {
   }
 
   // 检查存储权限
-  private fun openDirectory() {
+  private fun openDirectory(mode: Int) {
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-    startActivityForResult(intent, 22)
+    // 操作类型(1为密钥导出，2为密钥导入，3为Json导出，4为密钥导入)
+    startActivityForResult(intent, mode)
     Toast.makeText(this, "请不要选择Download或其他隐私位置", Toast.LENGTH_LONG).show()
   }
-
-  // 操作类型(1为导出，2为导入)
-  private var fileMode = 1
 
   @SuppressLint("Range")
   override fun onActivityResult(
     requestCode: Int, resultCode: Int, resultData: Intent?
   ) {
-    if (requestCode == 22 && resultCode == RESULT_OK) {
+    if (resultCode == RESULT_OK) {
       resultData?.data?.also { uri ->
         val documentFile = DocumentFile.fromTreeUri(this, uri)
-        // 显示加载中
-        val alert = appData.publicTools.showLoading("请等待...", this, false, null)
-        // 导出
         if (documentFile == null) {
-          alert.cancel()
           Toast.makeText(this, "空地址", Toast.LENGTH_SHORT).show()
           return
         }
-        if (fileMode == 1) {
-          val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
-          val privateKeyUri =
-            privateKeyDoc?.uri ?: documentFile.createFile("scrcpt/key", "scrcpy_private.key")!!.uri
-          writeToFile(appData.privateKey, privateKeyUri, 2)
-          val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
-          val publicKeyUri =
-            publicKeyDoc?.uri ?: documentFile.createFile("scrcpt/key", "scrcpy_public.key")!!.uri
-          writeToFile(appData.privateKey, publicKeyUri, 2)
-          val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
-          val dataBaseUri =
-            dataBaseDoc?.uri ?: documentFile.createFile("scrcpt/json", "scrcpy_database.json")!!.uri
-          dataBaseUri.let {
-            val jsonArray = JSONArray()
-            // 从数据库获取设备列表
-            val cursor = appData.dbHelper.readableDatabase.query(
-              "DevicesDb",
-              null,
-              null,
-              null,
-              null,
-              null,
-              null
-            )
-            if (cursor.moveToFirst()) {
-              do {
-                val tmpJsonObject = JSONObject()
-                tmpJsonObject.put("name", cursor.getString(cursor.getColumnIndex("name")))
-                tmpJsonObject.put("address", cursor.getString(cursor.getColumnIndex("address")))
-                tmpJsonObject.put("port", cursor.getInt(cursor.getColumnIndex("port")))
-                tmpJsonObject.put(
-                  "videoCodec",
-                  cursor.getString(cursor.getColumnIndex("videoCodec"))
-                )
-                tmpJsonObject.put(
-                  "audioCodec",
-                  cursor.getString(cursor.getColumnIndex("audioCodec"))
-                )
-                tmpJsonObject.put("maxSize", cursor.getInt(cursor.getColumnIndex("maxSize")))
-                tmpJsonObject.put("fps", cursor.getInt(cursor.getColumnIndex("fps")))
-                tmpJsonObject.put("videoBit", cursor.getInt(cursor.getColumnIndex("videoBit")))
-                tmpJsonObject.put(
-                  "setResolution",
-                  cursor.getInt(cursor.getColumnIndex("setResolution"))
-                )
-                tmpJsonObject.put(
-                  "defaultFull",
-                  cursor.getInt(cursor.getColumnIndex("defaultFull"))
-                )
-                jsonArray.put(tmpJsonObject)
-              } while (cursor.moveToNext())
+        when (requestCode) {
+          // 密钥导出
+          1 -> {
+            val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
+            val privateKeyUri = privateKeyDoc?.uri ?: documentFile.createFile(
+              "scrcpy/key", "scrcpy_private.key"
+            )!!.uri
+            writeToFile(appData.privateKey, privateKeyUri, 2)
+            val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
+            val publicKeyUri =
+              publicKeyDoc?.uri ?: documentFile.createFile("scrcpy/key", "scrcpy_public.key")!!.uri
+            writeToFile(appData.publicKey, publicKeyUri, 2)
+          }
+          // 密钥导入
+          2 -> {
+            val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
+            val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
+            // 检查文件是否存在
+            if (privateKeyDoc == null || publicKeyDoc == null) {
+              Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
+              return
             }
-            cursor.close()
-            writeToFile(jsonArray.toString(), it, 1)
+            readFile(appData.privateKey, privateKeyDoc.uri, 2)
+            readFile(appData.publicKey, publicKeyDoc.uri, 2)
           }
-          alert.cancel()
-        }
-        // 导入
-        else if (fileMode == 2) {
-          // 检查文件是否存在
-          val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
-          val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
-          val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
-          if (privateKeyDoc == null || publicKeyDoc == null || dataBaseDoc == null) {
-            alert.cancel()
-            Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
-            return
+          // Json导出
+          3 -> {
+            val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
+            val dataBaseUri = dataBaseDoc?.uri ?: documentFile.createFile(
+              "scrcpt/json", "scrcpy_database.json"
+            )!!.uri
+            val jsonArray = JSONArray()
+            for (i in appData.devices) jsonArray.put(i.toJson())
+            writeToFile(jsonArray.toString(), dataBaseUri, 1)
           }
-          readFile(appData.privateKey, privateKeyDoc.uri, 2)
-          readFile(appData.publicKey, publicKeyDoc.uri, 2)
-          val jsonArray = JSONArray(readFile(null, dataBaseDoc.uri, 1))
-          for (i in 0 until jsonArray.length()) {
-            val tmpJsonObject = jsonArray.getJSONObject(i)
-            appData.deviceListAdapter.newDevice(
-              tmpJsonObject.getString("name"),
-              tmpJsonObject.getString("address"),
-              tmpJsonObject.getInt("port"),
-              tmpJsonObject.getString("videoCodec"),
-              tmpJsonObject.getString("audioCodec"),
-              tmpJsonObject.getInt("maxSize"),
-              tmpJsonObject.getInt("fps"),
-              tmpJsonObject.getInt("videoBit"),
-              tmpJsonObject.getInt("setResolution") == 1,
-              tmpJsonObject.getInt("defaultFull") == 1
-            )
+          // Json导入
+          4 -> {
+            val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
+            // 检查文件是否存在
+            if (dataBaseDoc == null) {
+              Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
+              return
+            }
+            val jsonArray = JSONArray(readFile(null, dataBaseDoc.uri, 1))
+            for (i in 0 until jsonArray.length()) {
+              appData.deviceListAdapter.newDevice(
+                Device(jsonArray.getJSONObject(i))
+              )
+            }
           }
-          alert.cancel()
         }
       }
     }

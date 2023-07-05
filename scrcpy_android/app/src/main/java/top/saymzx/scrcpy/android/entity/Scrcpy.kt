@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy.android
+package top.saymzx.scrcpy.android.entity
 
 import android.app.AlertDialog
 import android.content.ClipData
@@ -9,7 +9,6 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.media.AudioTrack.WRITE_NON_BLOCKING
 import android.media.MediaCodec
-import android.media.MediaCodec.Callback
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.audiofx.LoudnessEnhancer
@@ -29,6 +28,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
+import top.saymzx.scrcpy.android.MainActivity
+import top.saymzx.scrcpy.android.R
+import top.saymzx.scrcpy.android.appData
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
@@ -64,7 +66,7 @@ class Scrcpy(private val device: Device) {
   // 开始投屏
   private lateinit var alert: AlertDialog
   fun start() {
-    device.isFull = device.defaultFull
+    device.isFull = defaultFull
     device.status = 0
     // 显示加载中
     alert = appData.publicTools.showLoading("连接中...", appData.main, true) {
@@ -96,11 +98,19 @@ class Scrcpy(private val device: Device) {
       } catch (e: Exception) {
         stop("启动错误", e)
       }
-      // 视频解码输入
+      // 视频解码
       Thread {
         Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
           decodeInput("video")
+        } catch (e: Exception) {
+          stop("投屏停止", e)
+        }
+      }.start()
+      Thread {
+        Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
+        try {
+          decodeVideoOutput()
         } catch (e: Exception) {
           stop("投屏停止", e)
         }
@@ -116,6 +126,14 @@ class Scrcpy(private val device: Device) {
           }
         }.start()
       }
+      Thread {
+        Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
+        try {
+          decodeAudioOutput()
+        } catch (e: Exception) {
+          stop("投屏停止", e)
+        }
+      }.start()
       // 配置控制输入
       Thread {
         Process.setThreadPriority(THREAD_PRIORITY_LOWEST)
@@ -253,7 +271,6 @@ class Scrcpy(private val device: Device) {
   }
 
   // 视频解码器
-  private val videoDecodecQueue = LinkedBlockingQueue<Int>()
   private var checkRotationNotification = false
   private suspend fun setVideoDecodec() {
     // CodecMeta
@@ -297,48 +314,14 @@ class Scrcpy(private val device: Device) {
       null,
       0
     )
-    // 配置异步
-    videoDecodec.setCallback(object : Callback() {
-      override fun onInputBufferAvailable(p0: MediaCodec, p1: Int) {
-        videoDecodecQueue.offer(p1)
-      }
-
-      override fun onOutputBufferAvailable(
-        decodec: MediaCodec,
-        outIndex: Int,
-        p2: MediaCodec.BufferInfo
-      ) {
-        try {
-          // 是否需要检查旋转(仍需要检查，因为可能是90°和270°的旋转)
-          if (checkRotationNotification) {
-            checkRotationNotification = false
-            floatVideo.checkRotation(
-              decodec.getOutputFormat(outIndex).getInteger("width"),
-              decodec.getOutputFormat(outIndex).getInteger("height")
-            )
-          }
-          decodec.releaseOutputBuffer(outIndex, true)
-        } catch (e: Exception) {
-          stop("投屏停止", e)
-        }
-      }
-
-      override fun onError(p0: MediaCodec, p1: MediaCodec.CodecException) {
-      }
-
-      override fun onOutputFormatChanged(p0: MediaCodec, p1: MediaFormat) {
-      }
-
-    })
     // 启动解码器
     videoDecodec.start()
     // 解析首帧，解决开始黑屏问题
-    decodecQueueBuffer(videoDecodec, videoDecodecQueue, csd0)
-    decodecQueueBuffer(videoDecodec, videoDecodecQueue, csd1)
+    videoFrameList.offer(csd0)
+    videoFrameList.offer(csd1)
   }
 
   // 音频解码器
-  private val audioDecodecQueue = LinkedBlockingQueue<Int>()
   private suspend fun setAudioDecodec() {
     // 创建音频解码器
     val codecMime =
@@ -371,35 +354,6 @@ class Scrcpy(private val device: Device) {
     }
     // 配置解码器
     audioDecodec.configure(mediaFormat, null, null, 0)
-    // 配置异步
-    audioDecodec.setCallback(object : Callback() {
-      override fun onInputBufferAvailable(p0: MediaCodec, p1: Int) {
-        audioDecodecQueue.offer(p1)
-      }
-
-      override fun onOutputBufferAvailable(
-        decodec: MediaCodec,
-        outIndex: Int,
-        bufferInfo: MediaCodec.BufferInfo
-      ) {
-        try {
-          audioTrack.write(
-            decodec.getOutputBuffer(outIndex)!!,
-            bufferInfo.size,
-            WRITE_NON_BLOCKING
-          )
-          decodec.releaseOutputBuffer(outIndex, false)
-        } catch (e: Exception) {
-          stop("投屏停止", e)
-        }
-      }
-
-      override fun onError(p0: MediaCodec, p1: MediaCodec.CodecException) {
-      }
-
-      override fun onOutputFormatChanged(p0: MediaCodec, p1: MediaFormat) {
-      }
-    })
     // 启动解码器
     audioDecodec.start()
   }
@@ -433,66 +387,85 @@ class Scrcpy(private val device: Device) {
   }
 
   // 输入
+  private val videoFrameList = LinkedBlockingQueue<ByteArray>()
+  private val audioFrameList = LinkedBlockingQueue<ByteArray>()
   private fun decodeInput(mode: String) {
-    val stream = if (mode == "video") videoStream else audioStream
+    val frameList = if (mode == "video") videoFrameList else audioFrameList
     val decodec = if (mode == "video") videoDecodec else audioDecodec
-    val queue = if (mode == "video") videoDecodecQueue else audioDecodecQueue
-    val isCheckScreen = mode == "video"
     var zeroFrameNum = 0
+    var outIndex: Int
     // 开始解码
     while (true) {
-      // 向缓冲区输入数据帧
-      val buffer = readFrame(stream)
-      // 连续4个空包检测是否熄屏了
-      if (isCheckScreen) {
-        if (buffer.size < 150) {
-          zeroFrameNum++
-          if (zeroFrameNum > 4) {
-            zeroFrameNum = 0
-            checkScreenOff()
-          }
-        }
-      }
-      decodecQueueBufferThead(decodec, queue, buffer)
-    }
-  }
-
-  // 填充入解码器
-  private fun decodecQueueBufferThead(
-    decodec: MediaCodec,
-    queue: LinkedBlockingQueue<Int>,
-    buffer: ByteArray
-  ) {
-    // 找到一个空的输入缓冲区
-    while (true) {
-      if (queue.isEmpty()) {
+      if (frameList.isEmpty()) {
         Thread.sleep(4)
         continue
       }
-      queue.poll().let {
-        decodec.getInputBuffer(it!!)!!.put(buffer)
-        decodec.queueInputBuffer(it, 0, buffer.size, 0, 0)
+      // 找到空闲的输入缓冲区
+      outIndex = videoDecodec.dequeueInputBuffer(0)
+      if (outIndex >= 0) {
+        // 向缓冲区输入数据帧
+        frameList.poll()?.let {
+          decodec.getInputBuffer(outIndex)!!.put(it)
+          decodec.queueInputBuffer(outIndex, 0, it.size, 0, 0)
+          // 连续4个空包检测是否熄屏了
+          if (it.size < 150) {
+            zeroFrameNum++
+            if (zeroFrameNum > 4) {
+              zeroFrameNum = 0
+              checkScreenOff()
+            }
+          }
+        }
       }
-      break
     }
   }
 
-  private suspend fun decodecQueueBuffer(
-    decodec: MediaCodec,
-    queue: LinkedBlockingQueue<Int>,
-    buffer: ByteArray
-  ) {
-    // 找到一个空的输入缓冲区
+  // 视频解码输出
+  private fun decodeVideoOutput() {
+    var outIndex: Int
+    val bufferInfo = MediaCodec.BufferInfo()
     while (true) {
-      if (queue.isEmpty()) {
-        delay(4)
+      // 找到已完成的输出缓冲区
+      outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, 0)
+      if (outIndex >= 0) {
+        // 是否需要检查旋转(仍需要检查，因为可能是90°和270°的旋转)
+        if (checkRotationNotification) {
+          checkRotationNotification = false
+          appData.mainScope.launch {
+            withContext(Dispatchers.Main) {
+              floatVideo.checkRotation(
+                videoDecodec.getOutputFormat(outIndex).getInteger("width"),
+                videoDecodec.getOutputFormat(outIndex).getInteger("height")
+              )
+            }
+          }
+        }
+        videoDecodec.releaseOutputBuffer(outIndex, true)
+      } else if (outIndex != MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+        Thread.sleep(4)
         continue
       }
-      queue.poll().let {
-        decodec.getInputBuffer(it!!)!!.put(buffer)
-        decodec.queueInputBuffer(it, 0, buffer.size, 0, 0)
+    }
+  }
+
+  // 音频解码输出
+  private fun decodeAudioOutput() {
+    var outIndex: Int
+    val bufferInfo = MediaCodec.BufferInfo()
+    while (true) {
+      // 找到已完成的输出缓冲区
+      outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, 0)
+      if (outIndex >= 0) {
+        audioTrack.write(
+          audioDecodec.getOutputBuffer(outIndex)!!,
+          bufferInfo.size,
+          WRITE_NON_BLOCKING
+        )
+        audioDecodec.releaseOutputBuffer(outIndex, false)
+      } else if (outIndex != MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+        Thread.sleep(4)
+        continue
       }
-      break
     }
   }
 
