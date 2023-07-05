@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy.android
+package top.saymzx.scrcpy.android.helper
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -9,6 +9,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
+import top.saymzx.scrcpy.android.R
+import top.saymzx.scrcpy.android.appData
 
 class PublicTools {
 

@@ -58,7 +58,7 @@
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
-                    android:id="@+id/set_videoCodec"
+                    android:id="@+id/set_default_videoCodec"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -89,11 +89,105 @@
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
-                    android:id="@+id/set_audioCodec"
+                    android:id="@+id/set_default_audioCodec"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:entries="@array/audioCodecItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="视频最大大小:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_max_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:entries="@array/maxSizeItems"
+                    android:foregroundTint="#000000"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="帧率:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_fps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:entries="@array/fpsItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="视频码率:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_video_bit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:entries="@array/videoBitItems2"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
 
@@ -120,7 +214,7 @@
                     android:textSize="@dimen/middleFont" />
 
                 <Switch
-                    android:id="@+id/set_set_resolution"
+                    android:id="@+id/set_default_set_resolution"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -154,7 +248,7 @@
                     android:textSize="@dimen/middleFont" />
 
                 <Switch
-                    android:id="@+id/set_default_full"
+                    android:id="@+id/set_default_default_full"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -193,7 +287,68 @@
                 android:textSize="@dimen/middleFont" />
 
             <TextView
-                android:id="@+id/set_export"
+                android:id="@+id/set_renew_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="重新生成密钥(需重新授权)"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="备份恢复"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/largeFont" />
+
+            <TextView
+                android:id="@+id/set_export_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导出密钥"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_import_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导入密钥"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_export_json"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -210,7 +365,7 @@
                 android:textSize="@dimen/middleFont" />
 
             <TextView
-                android:id="@+id/set_import"
+                android:id="@+id/set_import_json"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -223,6 +378,33 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="导入配置"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="关于"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/largeFont" />
+
+            <TextView
+                android:id="@+id/set_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="隐私政策"
                 android:textColor="@color/ignoreTextColor"
                 android:textSize="@dimen/middleFont" />
 
@@ -243,6 +425,7 @@
                 android:text="前往官网"
                 android:textColor="@color/ignoreTextColor"
                 android:textSize="@dimen/middleFont" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -1,4 +1,4 @@
-package top.saymzx.scrcpy.android
+package top.saymzx.scrcpy.android.entity
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -12,6 +12,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.*
+import top.saymzx.scrcpy.android.FullScreenActivity
+import top.saymzx.scrcpy.android.MainActivity
+import top.saymzx.scrcpy.android.R
+import top.saymzx.scrcpy.android.appData
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.math.sqrt

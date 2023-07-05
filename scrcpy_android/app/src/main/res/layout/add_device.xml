@@ -235,32 +235,6 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="默认全屏显示:"
-                    android:textColor="@color/ignoreTextColor"
-                    android:textSize="@dimen/middleFont" />
-
-                <Switch
-                    android:id="@+id/add_device_default_full"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:checked="true"
-                    android:thumbTint="@color/SwitchBackground"
-                    android:thumbTintMode="multiply"
-                    android:trackTint="@color/buttonBackground"
-                    android:trackTintMode="multiply" />
-
-            </LinearLayout>
-
         </LinearLayout>
 
         <Button
