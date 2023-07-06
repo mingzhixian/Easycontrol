@@ -23,17 +23,12 @@ class NetHelper {
         val request = Request.Builder().url(url)
         try {
           okhttpClient.newCall(request.build()).execute().use { response ->
-            val body = JSONObject(response.body!!.string())
             withContext(Dispatchers.Main) {
-              if (body.getInt("code") != 200) {
-                Toast.makeText(appData.main, body.getString("msg"), Toast.LENGTH_SHORT).show()
-                handle(null)
-              } else
-                handle((body))
+              handle(JSONObject(response.body!!.string()))
             }
           }
         } catch (e: Exception) {
-          Log.e("NetHelper", e.toString())
+          Log.e("Scrcpy", e.toString())
           withContext(Dispatchers.Main) {
             Toast.makeText(appData.main, "网络错误", Toast.LENGTH_SHORT).show()
             handle(null)
@@ -51,17 +46,12 @@ class NetHelper {
         val request = Request.Builder().url(url).post(requestBody)
         try {
           okhttpClient.newCall(request.build()).execute().use { response ->
-            val body = JSONObject(response.body!!.string())
             withContext(Dispatchers.Main) {
-              if (body.getInt("code") != 200) {
-                Toast.makeText(appData.main, body.getString("msg"), Toast.LENGTH_SHORT).show()
-                handle(null)
-              } else
-                handle((body))
+              handle(JSONObject(response.body!!.string()))
             }
           }
         } catch (e: Exception) {
-          Log.e("NetHelper", e.toString())
+          Log.e("Scrcpy", e.toString())
           withContext(Dispatchers.Main) {
             Toast.makeText(appData.main, "网络错误", Toast.LENGTH_SHORT).show()
             handle(null)

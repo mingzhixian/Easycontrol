@@ -6,13 +6,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.DisplayMetrics
 import androidx.lifecycle.ViewModel
-import dev.mobile.dadb.AdbKeyPair
 import kotlinx.coroutines.MainScope
 import okhttp3.OkHttpClient
+import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.BuildConfig
-import top.saymzx.scrcpy.android.entity.Device
 import top.saymzx.scrcpy.android.FullScreenActivity
 import top.saymzx.scrcpy.android.MainActivity
+import top.saymzx.scrcpy.android.entity.Device
 import java.io.File
 
 @SuppressLint("Range")
@@ -44,7 +44,7 @@ class AppData : ViewModel() {
   lateinit var dbHelper: DbHelper
 
   // 网络管理
-  val netHelper= NetHelper()
+  val netHelper = NetHelper()
 
   // 设备列表管理
   val deviceListAdapter = DeviceListAdapter()

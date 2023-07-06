@@ -175,7 +175,7 @@ class FloatVideo(
     val isLandScape = remoteVideoWidth > remoteVideoHeight
     // 进入专注模式
     appData.isFocus = true
-    appData.isFullScreenActivityInit=false
+    appData.isFullScreenActivityInit = false
     val intent = Intent(appData.main, FullScreenActivity::class.java)
     intent.putExtra(
       "isLandScape",
@@ -558,7 +558,7 @@ class FloatVideo(
             barGestureDetector.onTouchEvent(event)
           }
           // 贴边变成小小窗
-          val criticality = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
+          val criticality = appData.publicTools.dp2px(60f).toInt()
           val rawX = event.rawX.toInt()
           if ((rawX <= criticality || rawX >= (deviceWidth - criticality)) && event.rawY.toInt() <= criticality) {
             setSmallSmall()
@@ -624,6 +624,7 @@ class FloatVideo(
     // 手势处理
     var xx = 0
     var yy = 0
+    val floatNavSize = appData.settings.getInt("floatNavSize", 55)
     // 导航悬浮球Layout
     floatNavParams = WindowManager.LayoutParams().apply {
       type =
@@ -632,15 +633,15 @@ class FloatVideo(
       flags =
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
       gravity = Gravity.START or Gravity.TOP
-      width = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
-      height = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
+      width = floatNavSize
+      height = floatNavSize
       x = 40
       y =
         (if (remoteVideoWidth > remoteVideoHeight) appData.deviceWidth else appData.deviceHeight) / 2
       format = PixelFormat.RGBA_8888
     }
     appData.main.windowManager.addView(floatNav, floatNavParams)
-    val width = appData.main.resources.getDimension(R.dimen.floatNav).toInt() / 2
+    val width = floatNavSize / 2
     floatNav.setOnTouchListener { _, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
@@ -706,8 +707,9 @@ class FloatVideo(
 
   // 回到导航球模式
   private fun backFloatNav() {
-    floatNavParams.width = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
-    floatNavParams.height = appData.main.resources.getDimension(R.dimen.floatNav).toInt()
+    val floatNavSize = appData.settings.getInt("floatNavSize", 55)
+    floatNavParams.width = floatNavSize
+    floatNavParams.height = floatNavSize
     appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
     floatNav.findViewById<ImageView>(R.id.float_nav_image).visibility = View.VISIBLE
     floatNav.findViewById<LinearLayout>(R.id.float_nav_menu).visibility = View.GONE

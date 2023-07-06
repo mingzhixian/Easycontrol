@@ -20,14 +20,14 @@ import android.util.Base64
 import android.util.Log
 import android.view.SurfaceView
 import android.widget.Toast
-import dev.mobile.dadb.AdbKeyPair
-import dev.mobile.dadb.Dadb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
+import top.saymzx.scrcpy.adb.Adb
+import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.MainActivity
 import top.saymzx.scrcpy.android.R
 import top.saymzx.scrcpy.android.appData
@@ -50,7 +50,7 @@ class Scrcpy(private val device: Device) {
   private lateinit var loudnessEnhancer: LoudnessEnhancer
 
   // 连接流
-  private lateinit var adb: Dadb
+  private lateinit var adb: Adb
   private lateinit var videoStream: BufferedSource
   private lateinit var audioStream: BufferedSource
   private lateinit var controlOutStream: BufferedSink
@@ -73,7 +73,7 @@ class Scrcpy(private val device: Device) {
       stop("用户停止")
     }
     appData.mainScope.launch {
-      try {
+//      try {
         // 获取IP地址
         ip = withContext(Dispatchers.IO) {
           Inet4Address.getByName(device.address)
@@ -82,9 +82,9 @@ class Scrcpy(private val device: Device) {
         sendServer()
         // 转发端口
         tcpForward()
-      } catch (e: Exception) {
-        stop("连接错误", e)
-      }
+//      } catch (e: Exception) {
+//        stop("连接错误", e)
+//      }
       try {
         alert.cancel()
         // 配置视频解码
@@ -219,8 +219,10 @@ class Scrcpy(private val device: Device) {
   // 发送server
   private suspend fun sendServer() {
     // 连接ADB
-    adb =
-      Dadb.create(ip, device.port, AdbKeyPair.read(appData.privateKey, appData.publicKey))
+    withContext(Dispatchers.IO){
+      adb =
+        Adb(ip, device.port, AdbKeyPair.read(appData.privateKey, appData.publicKey))
+    }
     // 修改分辨率
     if (device.setResolution) runAdbCmd(
       "wm size ${appData.deviceWidth}x${appData.deviceHeight}"
@@ -251,14 +253,14 @@ class Scrcpy(private val device: Device) {
       for (i in 1..100) {
         try {
           if (connect == 0) {
-            videoStream = adb.open("tcp:6006").source
+            videoStream = adb.tcpForward(6006).source
             connect = 1
           }
           if (connect == 1) {
-            audioStream = adb.open("tcp:6006").source
+            audioStream = adb.tcpForward(6006).source
             connect = 2
           }
-          val control = adb.open("tcp:6006")
+          val control = adb.tcpForward(6006)
           controlOutStream = control.sink
           controlInStream = control.source
           break
@@ -596,7 +598,7 @@ class Scrcpy(private val device: Device) {
 
   // 执行adb命令
   private suspend fun runAdbCmd(cmd: String): String {
-    return withContext(Dispatchers.IO) { adb.shell(cmd).allOutput }
+    return withContext(Dispatchers.IO) { adb.runAdbCmd(cmd) }
   }
 
 }
