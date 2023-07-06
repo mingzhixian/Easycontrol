@@ -15,7 +15,7 @@
  *
  */
 
-package dev.mobile.dadb
+package top.saymzx.scrcpy.adb
 
 import android.util.Base64
 import java.security.KeyFactory

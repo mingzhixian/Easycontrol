@@ -15,8 +15,9 @@
  *
  */
 
-package top.saymzx.scrcpy.android.adb
+package top.saymzx.scrcpy.adb
 
+import android.util.Log
 import okio.Source
 import okio.buffer
 
@@ -34,9 +35,7 @@ internal class AdbReader(source: Source) : AutoCloseable {
         val checksum = readIntLe()
         val magic = readIntLe()
         val payload = readByteArray(payloadLength.toLong())
-        return AdbMessage(command, arg0, arg1, payloadLength, checksum, magic, payload).also {
-          log { "(${Thread.currentThread().name}) < $it" }
-        }
+        return AdbMessage(command, arg0, arg1, payloadLength, payload)
       }
     }
   }

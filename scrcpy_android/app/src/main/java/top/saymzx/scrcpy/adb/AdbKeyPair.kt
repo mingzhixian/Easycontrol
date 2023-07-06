@@ -15,7 +15,7 @@
  *
  */
 
-package top.saymzx.scrcpy.android.adb
+package top.saymzx.scrcpy.adb
 
 import android.util.Base64
 import java.io.File
@@ -69,18 +69,6 @@ class AdbKeyPair(
     ).toByteArray()
 
     @JvmStatic
-    fun readDefault(): AdbKeyPair {
-      val privateKeyFile = File(System.getenv("HOME"), ".android/adbkey")
-      val publicKeyFile = File(System.getenv("HOME"), ".android/adbkey.pub")
-
-      if (!privateKeyFile.exists()) {
-        generate(privateKeyFile, publicKeyFile)
-      }
-
-      return read(privateKeyFile, publicKeyFile)
-    }
-
-    @JvmStatic
     @JvmOverloads
     fun read(privateKeyFile: File, publicKeyFile: File? = null): AdbKeyPair {
       val privateKey = PKCS8.parse(privateKeyFile.readBytes())
@@ -113,7 +101,7 @@ class AdbKeyPair(
       publicKeyFile.writer().use { out ->
         val bytes = convertRsaPublicKeyToAdbFormat(keyPair.public as RSAPublicKey)
         out.write(Base64.encodeToString(bytes, Base64.NO_WRAP))
-        out.write(" unknown@unknown")
+        out.write(" scrcpy@saymzx.top")
         out.flush()
       }
     }

@@ -15,13 +15,13 @@
  *
  */
 
-package dev.mobile.dadb
+package top.saymzx.scrcpy.adb
 
 import okio.Sink
 import okio.buffer
 import java.nio.ByteBuffer
 
-internal class AdbWriter(sink: Sink) : AutoCloseable {
+class AdbWriter(sink: Sink) : AutoCloseable {
 
   private val bufferedSink = sink.buffer()
 
@@ -64,7 +64,7 @@ internal class AdbWriter(sink: Sink) : AutoCloseable {
     write(Constants.CMD_OKAY, localId, remoteId, null, 0, 0)
   }
 
-  fun write(
+  private fun write(
     command: Int,
     arg0: Int,
     arg1: Int,
@@ -72,19 +72,6 @@ internal class AdbWriter(sink: Sink) : AutoCloseable {
     offset: Int,
     length: Int
   ) {
-    log {
-      "(${Thread.currentThread().name}) > ${
-        AdbMessage(
-          command,
-          arg0,
-          arg1,
-          length,
-          0,
-          0,
-          payload ?: ByteArray(0)
-        )
-      }"
-    }
     synchronized(bufferedSink) {
       bufferedSink.apply {
         writeIntLe(command)

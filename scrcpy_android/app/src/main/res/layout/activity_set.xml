@@ -225,6 +225,16 @@
                     android:trackTintMode="multiply" />
             </LinearLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="显示"
+                android:textColor="@color/ignoreTextColor"
+                android:textSize="@dimen/largeFont" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -257,6 +267,61 @@
                     android:thumbTintMode="multiply"
                     android:trackTint="@color/buttonBackground"
                     android:trackTintMode="multiply" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="悬浮球大小:"
+                    android:textColor="@color/ignoreTextColor"
+                    android:textSize="@dimen/middleFont" />
+
+                <SeekBar
+                    android:id="@+id/set_float_nav_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:max="55"
+                    android:progressBackgroundTint="@color/alertButtonBackground"
+                    android:progressTint="@color/buttonBackground" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="10dp">
+
+                <ImageView
+                    android:id="@+id/set_float_nav_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:src="@drawable/float_nav" />
             </LinearLayout>
 
             <TextView

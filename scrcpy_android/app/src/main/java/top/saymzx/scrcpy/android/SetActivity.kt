@@ -8,13 +8,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
-import dev.mobile.dadb.AdbKeyPair
 import org.json.JSONArray
+import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.entity.Device
 import top.saymzx.scrcpy.android.entity.defaultAudioCodec
 import top.saymzx.scrcpy.android.entity.defaultFps
@@ -43,8 +44,10 @@ class SetActivity : Activity() {
     setDefaultMaxSizeListener()
     setDefaultFpsListener()
     setDefaultVideoBitListener()
-    setDefaultFullListener()
     setDefaultSetResolutionListener()
+    // 显示
+    setDefaultFullListener()
+    setFloatNavSizeListener()
     // 其他
     setClearDefultListener()
     setRenewKeyListener()
@@ -87,6 +90,13 @@ class SetActivity : Activity() {
     )
     findViewById<Switch>(R.id.set_default_set_resolution).isChecked = defaultSetResolution
     findViewById<Switch>(R.id.set_default_default_full).isChecked = defaultFull
+    val progress = appData.settings.getInt("floatNavSize", 55)
+    findViewById<SeekBar>(R.id.set_float_nav_size).progress = progress - 35
+    val preview = findViewById<ImageView>(R.id.set_float_nav_preview)
+    preview.layoutParams.apply {
+      this.height = appData.publicTools.dp2px(progress.toFloat()).toInt()
+      preview.layoutParams = this
+    }
   }
 
   // 设置返回按钮监听
@@ -142,7 +152,7 @@ class SetActivity : Activity() {
         val item = view.selectedItem.toString()
         defaultMaxSize = item.toInt()
         appData.settings.edit().apply {
-          putString("defaultMaxSize", item)
+          putInt("defaultMaxSize", item.toInt())
           apply()
         }
       }
@@ -162,7 +172,7 @@ class SetActivity : Activity() {
         val item = view.selectedItem.toString()
         defaultFps = item.toInt()
         appData.settings.edit().apply {
-          putString("defaultFps", item)
+          putInt("defaultFps", item.toInt())
           apply()
         }
       }
@@ -178,10 +188,10 @@ class SetActivity : Activity() {
     val view = findViewById<Spinner>(R.id.set_default_video_bit)
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val item = view.selectedItem.toString()
-        defaultVideoBit = item.toInt()
+        defaultVideoBit =
+          resources.getStringArray(R.array.videoBitItems1)[view.selectedItemPosition].toInt()
         appData.settings.edit().apply {
-          putString("defaultVideoBit", item)
+          putInt("defaultVideoBit", defaultVideoBit)
           apply()
         }
       }
@@ -195,8 +205,8 @@ class SetActivity : Activity() {
   // 设置是否修改分辨率监听
   private fun setDefaultSetResolutionListener() {
     findViewById<Switch>(R.id.set_default_set_resolution).setOnCheckedChangeListener { _, checked ->
+      defaultSetResolution = checked
       appData.settings.edit().apply {
-        defaultSetResolution = checked
         putBoolean("defaultSetResolution", checked)
         apply()
       }
@@ -206,12 +216,39 @@ class SetActivity : Activity() {
   // 设置是否全屏监听
   private fun setDefaultFullListener() {
     findViewById<Switch>(R.id.set_default_default_full).setOnCheckedChangeListener { _, checked ->
+      defaultFull = checked
       appData.settings.edit().apply {
-        defaultFull = checked
         putBoolean("defaultFull", checked)
         apply()
       }
     }
+  }
+
+  // 设置悬浮球大小监听
+  private fun setFloatNavSizeListener() {
+    var progress = 0
+    findViewById<SeekBar>(R.id.set_float_nav_size).setOnSeekBarChangeListener(object :
+      SeekBar.OnSeekBarChangeListener {
+      override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+        progress = p1 + 35
+        val preview = findViewById<ImageView>(R.id.set_float_nav_preview)
+        preview.layoutParams.apply {
+          this.height = appData.publicTools.dp2px(progress.toFloat()).toInt()
+          preview.layoutParams = this
+        }
+      }
+
+      override fun onStartTrackingTouch(p0: SeekBar?) {
+      }
+
+      override fun onStopTrackingTouch(p0: SeekBar?) {
+        appData.settings.edit().apply {
+          putInt("floatNavSize", progress)
+          apply()
+        }
+      }
+
+    })
   }
 
   // 设置清除默认设备按钮监听
