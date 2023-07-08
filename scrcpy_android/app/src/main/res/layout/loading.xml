@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background"
-        android:backgroundTint="@color/alertBackground"
+        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical">
 
         <TextView
@@ -22,7 +22,7 @@
             android:text="连接中。。。"
             android:gravity="center"
             android:textSize="@dimen/largeFont"
-            android:textColor="@color/ignoreTextColor" />
+            android:textColor="@color/onCardBackground" />
 
 
         <Button
@@ -33,10 +33,10 @@
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/background"
-            android:backgroundTint="@color/alertButtonBackground"
+            android:backgroundTint="@color/buttonBackground"
             android:text="取消"
             android:textSize="@dimen/largeFont"
-            android:textColor="@color/buttonTextColor" />
+            android:textColor="@color/onButtonBackground" />
 
     </LinearLayout>
 </ScrollView>

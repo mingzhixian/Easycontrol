@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.util.DisplayMetrics
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.MainScope
 import okhttp3.OkHttpClient
 import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.BuildConfig
-import top.saymzx.scrcpy.android.FullScreenActivity
 import top.saymzx.scrcpy.android.MainActivity
 import top.saymzx.scrcpy.android.entity.Device
 import java.io.File
@@ -27,12 +27,9 @@ class AppData : ViewModel() {
   @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity
 
-  @SuppressLint("StaticFieldLeak")
-  lateinit var fullScreenActivity: FullScreenActivity
-
-  var isFullScreenActivityInit = false
-
+  // 是否处于专注模式
   var isFocus = false
+  var fullScreenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
   // 全局协程域
   val mainScope = MainScope()

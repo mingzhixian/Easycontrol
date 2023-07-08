@@ -17,51 +17,73 @@
 
 package top.saymzx.scrcpy.adb
 
+import okhttp3.internal.notify
+import okhttp3.internal.wait
 import okio.Buffer
-import okio.Sink
-import okio.Source
-import okio.Timeout
-import okio.buffer
 
 class AdbStream(
   private val localId: Int,
-  private val maxPayloadSize: Int,
-  private val adbWriter: AdbWriter
+  private val adbWriter: AdbWriter,
+  private val isNeedSource: Boolean
 ) {
-
   var remoteId = 0
 
-  private var sourceBuffer = Buffer()
+  // -1为已关闭，0为连接中，1为等待恢复，2为可读写
+  var status = 0
 
-  fun push(byteArray: ByteArray) {
-    sourceBuffer.write(byteArray)
+  // 可写
+  val canWrite = Object()
+
+  val source = Buffer()
+
+  fun pushToSource(byteArray: ByteArray) {
+    if (isNeedSource) {
+      source.write(byteArray)
+      synchronized(source) {
+        source.notify()
+      }
+    }
   }
 
-  val source = object : Source {
-
-    override fun read(sink: Buffer, byteCount: Long): Long {
-      val tmp = ByteArray(byteCount.toInt())
-      val len = sourceBuffer.read(tmp, 0, byteCount.toInt())
-      sink.write(tmp, 0, maxOf(len, 0))
-      return len.toLong()
+  fun write(byteArray: ByteArray) {
+    if (status == -1) return
+    else if (status != 2) synchronized(canWrite) {
+      canWrite.wait()
     }
+    status = 1
+    adbWriter.writeWrite(localId, remoteId, byteArray, 0, byteArray.size)
+  }
 
-    override fun close() {}
+  fun close() {
+    status = -1
+    adbWriter.writeClose(localId, remoteId)
+  }
 
-    override fun timeout() = Timeout.NONE
-  }.buffer()
+  fun readInt(): Int {
+    require(4)
+    return source.readInt()
+  }
 
-  val sink = object : Sink {
+  fun readByte(): Byte {
+    require(1)
+    return source.readByte()
+  }
 
-    override fun write(source: Buffer, byteCount: Long) {
-      adbWriter.writeWrite()
-      sinkBuffer.write(source, byteCount)
+  fun readByteArray(size: Int): ByteArray {
+    require(size.toLong())
+    return source.readByteArray(size.toLong())
+  }
+
+  fun readLong(): Long {
+    require(8)
+    return source.readLong()
+  }
+
+  private fun require(byteCount: Long) {
+    while (true) {
+      if (!source.request(byteCount)) synchronized(source) {
+        source.wait()
+      } else break
     }
-
-    override fun close() {}
-
-    override fun flush() {}
-
-    override fun timeout() = Timeout.NONE
-  }.buffer()
+  }
 }

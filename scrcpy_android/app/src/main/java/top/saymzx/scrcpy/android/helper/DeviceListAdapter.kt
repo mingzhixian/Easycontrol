@@ -3,20 +3,16 @@ package top.saymzx.scrcpy.android.helper
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.Spinner
-import android.widget.Switch
-import android.widget.TextView
 import android.widget.Toast
 import top.saymzx.scrcpy.android.R
 import top.saymzx.scrcpy.android.appData
+import top.saymzx.scrcpy.android.databinding.AddDeviceBinding
+import top.saymzx.scrcpy.android.databinding.DevicesItemBinding
+import top.saymzx.scrcpy.android.databinding.SetDeviceBinding
 import top.saymzx.scrcpy.android.entity.Device
 import top.saymzx.scrcpy.android.entity.Scrcpy
 
@@ -34,13 +30,16 @@ class DeviceListAdapter : BaseAdapter() {
   override fun getView(position: Int, convertView: View?, viewGroup: ViewGroup?): View {
     var convertView: View? = convertView
     if (convertView == null) {
-      convertView = LayoutInflater.from(viewGroup!!.context).inflate(R.layout.devices_item, null)
+      val devicesItemBinding = DevicesItemBinding.inflate(appData.main.layoutInflater)
+      convertView = devicesItemBinding.root
+      convertView.tag = devicesItemBinding
     }
+    val devicesItemBinding = convertView.tag as DevicesItemBinding
     val device = appData.devices[position]
-    convertView!!.findViewById<TextView>(R.id.device_name).text = device.name
+    devicesItemBinding.deviceName.text = device.name
     val addressID = "${device.address}:${device.port}"
-    convertView.findViewById<TextView>(R.id.device_address).text = addressID
-    val linearLayout = convertView.findViewById<LinearLayout>(R.id.device)
+    devicesItemBinding.deviceAddress.text = addressID
+    val linearLayout = devicesItemBinding.device
     // 单击打开投屏
     linearLayout.setOnClickListener {
       if (device.status != -1) Toast.makeText(appData.main, "此设备正在投屏", Toast.LENGTH_SHORT)
@@ -52,48 +51,46 @@ class DeviceListAdapter : BaseAdapter() {
     }
     // 长按选项
     linearLayout.setOnLongClickListener {
-      val deleteDeviceView =
-        LayoutInflater.from(appData.main).inflate(R.layout.set_device, null, false)
+      val setDeviceBinding = SetDeviceBinding.inflate(appData.main.layoutInflater)
       val builder: AlertDialog.Builder = AlertDialog.Builder(appData.main)
-      builder.setView(deleteDeviceView)
+      builder.setView(setDeviceBinding.root)
       builder.setCancelable(false)
       val dialog = builder.create()
       dialog.setCanceledOnTouchOutside(true)
       dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-      deleteDeviceView.findViewById<Button>(R.id.delete_device_cancel).setOnClickListener {
+      setDeviceBinding.setDeviceCancel.setOnClickListener {
         dialog.cancel()
       }
       // 修改
-      deleteDeviceView.findViewById<Button>(R.id.delete_device_change).setOnClickListener {
+      setDeviceBinding.setDeviceChange.setOnClickListener {
         dialog.cancel()
         // 显示更新框
-        val addDeviceView =
-          LayoutInflater.from(appData.main).inflate(R.layout.add_device, null, false)
+        val addDeviceBinding = AddDeviceBinding.inflate(appData.main.layoutInflater)
         val updateBuilder: AlertDialog.Builder = AlertDialog.Builder(appData.main)
-        updateBuilder.setView(addDeviceView)
+        updateBuilder.setView(addDeviceBinding.root)
         updateBuilder.setCancelable(false)
         val updateDialog = updateBuilder.create()
         updateDialog.setCanceledOnTouchOutside(true)
         updateDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         // 控件
-        val name = addDeviceView.findViewById<EditText>(R.id.add_device_name)
-        val address = addDeviceView.findViewById<EditText>(R.id.add_device_address)
-        val port = addDeviceView.findViewById<EditText>(R.id.add_device_port)
-        val videoCodec = addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec)
-        val audioCodec = addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec)
-        val maxSize = addDeviceView.findViewById<Spinner>(R.id.add_device_max_size)
-        val fps = addDeviceView.findViewById<Spinner>(R.id.add_device_fps)
-        val videoBit = addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit)
-        val setResolution = addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution)
+        val name = addDeviceBinding.addDeviceName
+        val address = addDeviceBinding.addDeviceAddress
+        val port = addDeviceBinding.addDevicePort
+        val videoCodec = addDeviceBinding.addDeviceVideoCodec
+        val audioCodec = addDeviceBinding.addDeviceAudioCodec
+        val maxSize = addDeviceBinding.addDeviceMaxSize
+        val fps = addDeviceBinding.addDeviceFps
+        val videoBit = addDeviceBinding.addDeviceVideoBit
+        val setResolution = addDeviceBinding.addDeviceSetResolution
         // 是否显示高级选项
-        addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
-          addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
-            if (addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).isChecked)
+        addDeviceBinding.addDeviceIsOptions.setOnClickListener {
+          addDeviceBinding.addDeviceOptions.visibility =
+            if (addDeviceBinding.addDeviceIsOptions.isChecked)
               View.VISIBLE
             else View.GONE
         }
         // 确认按钮
-        addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
+        addDeviceBinding.addDeviceOk.setOnClickListener {
           updateDialog.cancel()
           val newAddress = address.text.toString()
           val newPort = port.text.toString().toInt()
@@ -145,11 +142,21 @@ class DeviceListAdapter : BaseAdapter() {
         name.setText(device.name)
         address.setText(device.address)
         port.setText(device.port.toString())
+        videoCodec.adapter = ArrayAdapter(
+          appData.main,
+          R.layout.spinner_item,
+          appData.main.resources.getStringArray(R.array.videoCodecItems)
+        )
         videoCodec.setSelection(
           appData.publicTools.getStringIndex(
             device.videoCodec,
             appData.main.resources.getStringArray(R.array.videoCodecItems)
           )
+        )
+        audioCodec.adapter = ArrayAdapter(
+          appData.main,
+          R.layout.spinner_item,
+          appData.main.resources.getStringArray(R.array.audioCodecItems)
         )
         audioCodec.setSelection(
           appData.publicTools.getStringIndex(
@@ -157,17 +164,32 @@ class DeviceListAdapter : BaseAdapter() {
             appData.main.resources.getStringArray(R.array.audioCodecItems)
           )
         )
+        maxSize.adapter = ArrayAdapter(
+          appData.main,
+          R.layout.spinner_item,
+          appData.main.resources.getStringArray(R.array.maxSizeItems)
+        )
         maxSize.setSelection(
           appData.publicTools.getStringIndex(
             device.maxSize.toString(),
             appData.main.resources.getStringArray(R.array.maxSizeItems)
           )
         )
+        fps.adapter = ArrayAdapter(
+          appData.main,
+          R.layout.spinner_item,
+          appData.main.resources.getStringArray(R.array.fpsItems)
+        )
         fps.setSelection(
           appData.publicTools.getStringIndex(
             device.fps.toString(),
             appData.main.resources.getStringArray(R.array.fpsItems)
           )
+        )
+        videoBit.adapter = ArrayAdapter(
+          appData.main,
+          R.layout.spinner_item,
+          appData.main.resources.getStringArray(R.array.videoBitItems2)
         )
         videoBit.setSelection(
           appData.publicTools.getStringIndex(
@@ -181,7 +203,7 @@ class DeviceListAdapter : BaseAdapter() {
         name.isFocusableInTouchMode = false
       }
       // 删除
-      deleteDeviceView.findViewById<Button>(R.id.delete_device_delete).setOnClickListener {
+      setDeviceBinding.setDeviceDelete.setOnClickListener {
         appData.dbHelper.writableDatabase.delete(
           "DevicesDb", "name = ?", arrayOf(device.name)
         )
@@ -190,7 +212,7 @@ class DeviceListAdapter : BaseAdapter() {
         dialog.cancel()
       }
       // 设为默认
-      deleteDeviceView.findViewById<Button>(R.id.delete_device_defult).setOnClickListener {
+      setDeviceBinding.setDeviceDefult.setOnClickListener {
         appData.settings.edit().apply {
           putString("DefaultDevice", device.name)
           apply()

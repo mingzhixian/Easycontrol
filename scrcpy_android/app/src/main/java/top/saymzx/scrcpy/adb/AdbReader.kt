@@ -17,7 +17,6 @@
 
 package top.saymzx.scrcpy.adb
 
-import android.util.Log
 import okio.Source
 import okio.buffer
 
