@@ -8,14 +8,12 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.*
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.core.view.*
 import top.saymzx.scrcpy.android.FullScreenActivity
-import top.saymzx.scrcpy.android.MainActivity
 import top.saymzx.scrcpy.android.R
 import top.saymzx.scrcpy.android.appData
+import top.saymzx.scrcpy.android.databinding.FloatNavBinding
+import top.saymzx.scrcpy.android.databinding.FloatVideoBinding
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.math.sqrt
@@ -29,7 +27,7 @@ class FloatVideo(
   val touchHandle: (byteArray: ByteArray) -> Unit
 ) {
   // 悬浮窗
-  lateinit var floatVideo: View
+  lateinit var floatVideo: FloatVideoBinding
 
   // 悬浮窗Layout
   private var floatVideoParams: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
@@ -44,7 +42,7 @@ class FloatVideo(
 
   // 导航悬浮球
   @SuppressLint("InflateParams")
-  lateinit var floatNav: View
+  lateinit var floatNav: FloatNavBinding
   private lateinit var floatNavParams: WindowManager.LayoutParams
 
   // 视频大小
@@ -55,11 +53,11 @@ class FloatVideo(
   @SuppressLint("InflateParams")
   fun show() {
     appData.main.runOnUiThread {
-      floatVideo = appData.main.layoutInflater.inflate(R.layout.float_video, null, false)
+      floatVideo = FloatVideoBinding.inflate(appData.main.layoutInflater)
       // 设置视频界面触摸监听
       setSurfaceListener()
       // 全屏or小窗模式
-      appData.main.windowManager.addView(floatVideo, floatVideoParams)
+      appData.main.windowManager.addView(floatVideo.root, floatVideoParams)
       if (device.isFull) setFull() else setSmallWindow()
       update(true)
     }
@@ -69,7 +67,7 @@ class FloatVideo(
   fun hide() {
     try {
       hideFloatNav()
-      appData.main.windowManager.removeView(floatVideo)
+      appData.main.windowManager.removeView(floatVideo.root)
     } catch (_: Exception) {
     }
   }
@@ -78,7 +76,7 @@ class FloatVideo(
   private fun hideFloatNav() {
     try {
       appData.main.windowManager.removeView(
-        floatNav
+        floatNav.root
       )
     } catch (_: Exception) {
     }
@@ -97,72 +95,70 @@ class FloatVideo(
   // 更新悬浮窗
   private fun update(hasChangeSize: Boolean) {
     appData.main.windowManager.updateViewLayout(
-      floatVideo, floatVideoParams
+      floatVideo.root, floatVideoParams
     )
-    if (device.isFull) appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
+    if (device.isFull) appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
     // 减少未修改大小的无用调用
     if (hasChangeSize && !device.isFull) {
       // 等比缩放控件大小
       val tmp =
         sqrt((localVideoWidth * localVideoHeight).toDouble() / (appData.deviceWidth * appData.deviceHeight).toDouble())
       // 整体背景圆角
-      val floatVideoShape = floatVideo.background as GradientDrawable
+      val floatVideoShape = floatVideo.root.background as GradientDrawable
       floatVideoShape.cornerRadius =
         appData.main.resources.getDimension(R.dimen.floatVideoBackground) * tmp.toFloat()
       // 上空白
-      val floatVideoTitle1 = floatVideo.findViewById<LinearLayout>(R.id.float_video_title1)
-      val floatVideoTitle1LayoutParams = floatVideoTitle1.layoutParams
+      val floatVideoTitle1LayoutParams = floatVideo.floatVideoTitle1.layoutParams
       floatVideoTitle1LayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoTitle1.layoutParams = floatVideoTitle1LayoutParams
+      floatVideo.floatVideoTitle1.layoutParams = floatVideoTitle1LayoutParams
       // 下空白
-      val floatVideoTitle2 = floatVideo.findViewById<LinearLayout>(R.id.float_video_title2)
-      val floatVideoTitle2LayoutParams = floatVideoTitle1.layoutParams
+      val floatVideoTitle2LayoutParams = floatVideo.floatVideoTitle2.layoutParams
       floatVideoTitle2LayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoTitle2.layoutParams = floatVideoTitle2LayoutParams
+      floatVideo.floatVideoTitle2.layoutParams = floatVideoTitle2LayoutParams
+      // 全屏按钮
+      val floatVideoFullscreenLayoutParams = floatVideo.floatVideoFullscreen.layoutParams
+      floatVideoFullscreenLayoutParams.height =
+        (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
+      floatVideo.floatVideoFullscreen.layoutParams = floatVideoFullscreenLayoutParams
+      floatVideo.floatVideoFullscreen.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
       // 横条
-      val floatVideoBar = floatVideo.findViewById<View>(R.id.float_video_bar)
-      val floatVideoBarLayoutParams = floatVideoBar.layoutParams
+      val floatVideoBarLayoutParams = floatVideo.floatVideoBar.layoutParams
       floatVideoBarLayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoBar.layoutParams = floatVideoBarLayoutParams
-      floatVideoBar.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoBarPadding) * tmp).toInt())
+      floatVideo.floatVideoBar.layoutParams = floatVideoBarLayoutParams
+      floatVideo.floatVideoBar.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoBarPadding) * tmp).toInt())
       // 停止按钮
-      val floatVideoStop = floatVideo.findViewById<ImageView>(R.id.float_video_stop)
-      val floatVideoStopLayoutParams = floatVideoStop.layoutParams
+      val floatVideoStopLayoutParams = floatVideo.floatVideoStop.layoutParams
       floatVideoStopLayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoStop.layoutParams = floatVideoStopLayoutParams
-      floatVideoStop.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoButtonPadding) * tmp).toInt())
+      floatVideo.floatVideoStop.layoutParams = floatVideoStopLayoutParams
+      floatVideo.floatVideoStop.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoButtonPadding) * tmp).toInt())
       // 最近任务键
-      val floatVideoSwitch = floatVideo.findViewById<ImageView>(R.id.float_video_switch)
-      val floatVideoSwitchLayoutParams = floatVideoSwitch.layoutParams
+      val floatVideoSwitchLayoutParams = floatVideo.floatVideoSwitch.layoutParams
       floatVideoSwitchLayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoSwitch.layoutParams = floatVideoSwitchLayoutParams
-      floatVideoSwitch.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
+      floatVideo.floatVideoSwitch.layoutParams = floatVideoSwitchLayoutParams
+      floatVideo.floatVideoSwitch.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
       // 桌面键
-      val floatVideoHome = floatVideo.findViewById<ImageView>(R.id.float_video_home)
-      val floatVideoHomeLayoutParams = floatVideoHome.layoutParams
+      val floatVideoHomeLayoutParams = floatVideo.floatVideoHome.layoutParams
       floatVideoHomeLayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoHome.layoutParams = floatVideoHomeLayoutParams
-      floatVideoHome.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
+      floatVideo.floatVideoHome.layoutParams = floatVideoHomeLayoutParams
+      floatVideo.floatVideoHome.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
       // 返回键
-      val floatVideoBack = floatVideo.findViewById<ImageView>(R.id.float_video_back)
-      val floatVideoBackLayoutParams = floatVideoBack.layoutParams
+      val floatVideoBackLayoutParams = floatVideo.floatVideoBack.layoutParams
       floatVideoBackLayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoBack.layoutParams = floatVideoBackLayoutParams
-      floatVideoBack.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
+      floatVideo.floatVideoBack.layoutParams = floatVideoBackLayoutParams
+      floatVideo.floatVideoBack.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoNavButtonPadding) * tmp).toInt())
       // 修改大小按钮
-      val floatVideoSetSize = floatVideo.findViewById<ImageView>(R.id.float_video_set_size)
-      val floatVideoSetSizeLayoutParams = floatVideoSetSize.layoutParams
+      val floatVideoSetSizeLayoutParams = floatVideo.floatVideoSetSize.layoutParams
       floatVideoSetSizeLayoutParams.height =
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
-      floatVideoSetSize.layoutParams = floatVideoSetSizeLayoutParams
-      floatVideoSetSize.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoButtonPadding) * tmp).toInt())
+      floatVideo.floatVideoSetSize.layoutParams = floatVideoSetSizeLayoutParams
+      floatVideo.floatVideoSetSize.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoButtonPadding) * tmp).toInt())
     }
   }
 
@@ -175,13 +171,9 @@ class FloatVideo(
     val isLandScape = remoteVideoWidth > remoteVideoHeight
     // 进入专注模式
     appData.isFocus = true
-    appData.isFullScreenActivityInit = false
-    val intent = Intent(appData.main, FullScreenActivity::class.java)
-    intent.putExtra(
-      "isLandScape",
+    appData.fullScreenOrientation =
       if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    )
-    appData.main.startActivity(intent)
+    appData.main.startActivity(Intent(appData.main, FullScreenActivity::class.java))
     floatVideoParams.apply {
       x = 0
       y = 0
@@ -191,35 +183,31 @@ class FloatVideo(
     localVideoWidth = floatVideoParams.width
     localVideoHeight = floatVideoParams.height
     // 隐藏上下栏
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.GONE
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.GONE
+    floatVideo.floatVideoTitle1.visibility = View.GONE
+    floatVideo.floatVideoTitle2.visibility = View.GONE
     // 监听导航悬浮球
     setFloatNavListener()
     // 取消无用监听
-    floatVideo.setOnTouchListener(null)
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener(null)
+    floatVideo.root.setOnTouchListener(null)
+    floatVideo.floatVideoFullscreen.setOnClickListener(null)
+    floatVideo.floatVideoBar.setOnTouchListener(null)
+    floatVideo.floatVideoStop.setOnClickListener(null)
+    floatVideo.floatVideoBack.setOnClickListener(null)
+    floatVideo.floatVideoHome.setOnClickListener(null)
+    floatVideo.floatVideoSwitch.setOnClickListener(null)
+    floatVideo.floatVideoSetSize.setOnTouchListener(null)
   }
 
   // 设置小窗
   private fun setSmallWindow() {
-    // 如果以前是全屏模式先退出专注模式
-    if (device.isFull) {
-      val intent = Intent(appData.main, MainActivity::class.java)
-      intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-      appData.main.startActivity(intent)
-    }
     device.isFull = false
+    appData.isFocus = false
     // 显示上下栏
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_title1).visibility = View.VISIBLE
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_title2).visibility = View.VISIBLE
+    floatVideo.floatVideoTitle1.visibility = View.VISIBLE
+    floatVideo.floatVideoTitle2.visibility = View.VISIBLE
     // 隐藏导航球
     try {
-      floatNav.setOnTouchListener(null)
+      floatNav.root.setOnTouchListener(null)
     } catch (_: Exception) {
     }
     hideFloatNav()
@@ -243,6 +231,7 @@ class FloatVideo(
         y = (appData.deviceHeight - height) / 2
       }
     }
+    setFullScreen()
     setFloatBar()
     setStopListener()
     setNavListener()
@@ -266,14 +255,15 @@ class FloatVideo(
     }
     update(true)
     // 取消无用监听
-    floatVideo.setOnTouchListener(null)
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener(null)
-    floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener(null)
-    floatVideo.findViewById<SurfaceView>(R.id.float_video_surface).setOnTouchListener(null)
+    floatVideo.root.setOnTouchListener(null)
+    floatVideo.floatVideoFullscreen.setOnClickListener(null)
+    floatVideo.floatVideoBar.setOnTouchListener(null)
+    floatVideo.floatVideoStop.setOnClickListener(null)
+    floatVideo.floatVideoBack.setOnClickListener(null)
+    floatVideo.floatVideoHome.setOnClickListener(null)
+    floatVideo.floatVideoSwitch.setOnClickListener(null)
+    floatVideo.floatVideoSetSize.setOnTouchListener(null)
+    floatVideo.floatVideoSurface.setOnTouchListener(null)
     // 取消焦点
     setFocus(false)
     // 设置监听
@@ -282,7 +272,7 @@ class FloatVideo(
         override fun onSingleTapUp(event: MotionEvent): Boolean {
           setSmallWindow()
           update(true)
-          floatVideo.setOnTouchListener(null)
+          floatVideo.root.setOnTouchListener(null)
           setSurfaceListener()
           setFocus(true)
           return super.onDoubleTap(event)
@@ -292,7 +282,7 @@ class FloatVideo(
     var xx = 0
     var yy = 0
     var isMoveVideo = false
-    floatVideo.setOnTouchListener { _, event ->
+    floatVideo.root.setOnTouchListener { _, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           xx = event.x.toInt()
@@ -380,7 +370,7 @@ class FloatVideo(
       // 全屏or小窗
       if (device.isFull) {
         // 旋转屏幕方向
-        appData.fullScreenActivity.requestedOrientation =
+        appData.fullScreenOrientation =
           if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         // 导航球
         floatNavParams.apply {
@@ -421,7 +411,7 @@ class FloatVideo(
 
   // 设置焦点监听
   private fun setFloatVideoListener() {
-    floatVideo.setOnTouchListener { _, event ->
+    floatVideo.root.setOnTouchListener { _, event ->
       when (event.action) {
         MotionEvent.ACTION_OUTSIDE -> {
           setFocus(false)
@@ -437,7 +427,7 @@ class FloatVideo(
     // 视频触摸控制
     val pointerList = ArrayList<Int>(20)
     for (i in 1..20) pointerList.add(0)
-    floatVideo.findViewById<SurfaceView>(R.id.float_video_surface).setOnTouchListener { _, event ->
+    floatVideo.floatVideoSurface.setOnTouchListener { _, event ->
       setFocus(true)
       try {
         when (event.actionMasked) {
@@ -482,15 +472,15 @@ class FloatVideo(
 
   // 设置三大金刚键监听控制
   private fun setNavListener() {
-    floatVideo.findViewById<ImageView>(R.id.float_video_back).setOnClickListener {
+    floatVideo.floatVideoBack.setOnClickListener {
       setFocus(true)
       sendNavKey(4)
     }
-    floatVideo.findViewById<ImageView>(R.id.float_video_home).setOnClickListener {
+    floatVideo.floatVideoHome.setOnClickListener {
       setFocus(true)
       sendNavKey(3)
     }
-    floatVideo.findViewById<ImageView>(R.id.float_video_switch).setOnClickListener {
+    floatVideo.floatVideoSwitch.setOnClickListener {
       setFocus(true)
       sendNavKey(187)
     }
@@ -498,7 +488,7 @@ class FloatVideo(
 
   // 设置悬浮窗大小拖动按钮监听控制
   private fun setSetSizeListener() {
-    floatVideo.findViewById<ImageView>(R.id.float_video_set_size).setOnTouchListener { _, event ->
+    floatVideo.floatVideoSetSize.setOnTouchListener { _, event ->
       setFocus(true)
       if (event.actionMasked == MotionEvent.ACTION_MOVE) {
         // 计算新大小（等比缩放）
@@ -513,21 +503,17 @@ class FloatVideo(
     }
   }
 
+  // 设置全屏按钮监听
+  private fun setFullScreen() {
+    floatVideo.floatVideoFullscreen.setOnClickListener {
+      setFull()
+      update(true)
+    }
+  }
+
   // 设置上横条监听控制
   private fun setFloatBar() {
     // 横条按钮监听
-    val barGestureDetector =
-      GestureDetector(appData.main, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onDoubleTap(event: MotionEvent): Boolean {
-          setFull()
-          update(true)
-          return super.onDoubleTap(event)
-        }
-      })
-    // 记录按下坐标，避免设备过于敏感
-    var xx = 0
-    var yy = 0
-    var isMoveVideoBar = false
     var statusBarHeight = 0
     // 获取状态栏高度
     val resourceId = appData.main.resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -535,30 +521,22 @@ class FloatVideo(
       statusBarHeight = appData.main.resources.getDimensionPixelSize(resourceId)
     }
     var deviceWidth = 0
-    floatVideo.findViewById<LinearLayout>(R.id.float_video_bar).setOnTouchListener { _, event ->
+    val criticality = appData.publicTools.dp2px(60f).toInt()
+    var x = 0
+    var y = 0
+    floatVideo.floatVideoBar.setOnTouchListener { _, event ->
       setFocus(true)
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
-          xx = event.x.toInt()
-          yy = event.y.toInt()
-          barGestureDetector.onTouchEvent(event)
+          x = event.x.toInt()
+          y = event.y.toInt()
           val metric = DisplayMetrics()
           appData.main.windowManager.defaultDisplay.getRealMetrics(metric)
           deviceWidth = metric.widthPixels
         }
 
         MotionEvent.ACTION_MOVE -> {
-          val x = event.x.toInt()
-          val y = event.y.toInt()
-          if (!isMoveVideoBar) {
-            if ((xx - x) * (xx - x) + (yy - y) * (yy - y) < 9) return@setOnTouchListener true
-            isMoveVideoBar = true
-            // 取消点击监控
-            event.action = MotionEvent.ACTION_CANCEL
-            barGestureDetector.onTouchEvent(event)
-          }
           // 贴边变成小小窗
-          val criticality = appData.publicTools.dp2px(60f).toInt()
           val rawX = event.rawX.toInt()
           if ((rawX <= criticality || rawX >= (deviceWidth - criticality)) && event.rawY.toInt() <= criticality) {
             setSmallSmall()
@@ -572,8 +550,8 @@ class FloatVideo(
             update(false)
           } else {
             // 新位置
-            val newX = event.rawX.toInt() - xx - floatVideoParams.width / 4
-            val newY = event.rawY.toInt() - yy
+            val newX = event.rawX.toInt() - x - floatVideoParams.width / 4
+            val newY = event.rawY.toInt() - y
             // 避免移动至状态栏等不可触控区域
             if (newY < statusBarHeight + 10) return@setOnTouchListener true
             // 移动悬浮窗
@@ -584,8 +562,6 @@ class FloatVideo(
         }
 
         MotionEvent.ACTION_UP -> {
-          isMoveVideoBar = false
-          barGestureDetector.onTouchEvent(event)
         }
       }
       return@setOnTouchListener true
@@ -594,7 +570,7 @@ class FloatVideo(
 
   // 设置关闭按钮监听控制
   private fun setStopListener() {
-    floatVideo.findViewById<ImageView>(R.id.float_video_stop).setOnClickListener {
+    floatVideo.floatVideoStop.setOnClickListener {
       exit()
     }
   }
@@ -602,7 +578,7 @@ class FloatVideo(
   // 设置导航悬浮球监听控制
   @SuppressLint("InflateParams")
   private fun setFloatNavListener() {
-    floatNav = appData.main.layoutInflater.inflate(R.layout.float_nav, null)
+    floatNav = FloatNavBinding.inflate(appData.main.layoutInflater)
     // 导航球
     val gestureDetector =
       GestureDetector(appData.main, object : GestureDetector.SimpleOnGestureListener() {
@@ -624,7 +600,8 @@ class FloatVideo(
     // 手势处理
     var xx = 0
     var yy = 0
-    val floatNavSize = appData.settings.getInt("floatNavSize", 55)
+    val floatNavSize =
+      appData.publicTools.dp2px(appData.settings.getInt("floatNavSize", 55).toFloat()).toInt()
     // 导航悬浮球Layout
     floatNavParams = WindowManager.LayoutParams().apply {
       type =
@@ -640,9 +617,9 @@ class FloatVideo(
         (if (remoteVideoWidth > remoteVideoHeight) appData.deviceWidth else appData.deviceHeight) / 2
       format = PixelFormat.RGBA_8888
     }
-    appData.main.windowManager.addView(floatNav, floatNavParams)
+    appData.main.windowManager.addView(floatNav.root, floatNavParams)
     val width = floatNavSize / 2
-    floatNav.setOnTouchListener { _, event ->
+    floatNav.root.setOnTouchListener { _, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
           xx = event.rawX.toInt()
@@ -665,7 +642,7 @@ class FloatVideo(
           }
           floatNavParams.x = x - width
           floatNavParams.y = y - width
-          appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
+          appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
           return@setOnTouchListener true
         }
 
@@ -682,37 +659,38 @@ class FloatVideo(
     // 展示MENU
     floatNavParams.width = appData.main.resources.getDimension(R.dimen.floatNavMenuW).toInt()
     floatNavParams.height = appData.main.resources.getDimension(R.dimen.floatNavMenuH).toInt()
-    appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
-    floatNav.findViewById<LinearLayout>(R.id.float_nav_menu).visibility = View.VISIBLE
-    floatNav.findViewById<ImageView>(R.id.float_nav_image).visibility = View.GONE
+    appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
+    floatNav.floatNavMenu.visibility = View.VISIBLE
+    floatNav.floatNavImage.visibility = View.GONE
     // 返回导航球
-    floatNav.findViewById<TextView>(R.id.float_nav_back).setOnClickListener {
+    floatNav.floatNavBack.setOnClickListener {
       backFloatNav()
     }
     // 发送最近任务键
-    floatNav.findViewById<TextView>(R.id.float_nav_switch).setOnClickListener {
+    floatNav.floatNavSwitch.setOnClickListener {
       sendNavKey(187)
       backFloatNav()
     }
     // 退出全屏
-    floatNav.findViewById<TextView>(R.id.float_nav_exit_full).setOnClickListener {
+    floatNav.floatNavExitFull.setOnClickListener {
       setSmallWindow()
       update(true)
     }
     // 退出
-    floatNav.findViewById<TextView>(R.id.float_nav_exit).setOnClickListener {
+    floatNav.floatNavExit.setOnClickListener {
       exit()
     }
   }
 
   // 回到导航球模式
   private fun backFloatNav() {
-    val floatNavSize = appData.settings.getInt("floatNavSize", 55)
+    val floatNavSize =
+      appData.publicTools.dp2px(appData.settings.getInt("floatNavSize", 55).toFloat()).toInt()
     floatNavParams.width = floatNavSize
     floatNavParams.height = floatNavSize
-    appData.main.windowManager.updateViewLayout(floatNav, floatNavParams)
-    floatNav.findViewById<ImageView>(R.id.float_nav_image).visibility = View.VISIBLE
-    floatNav.findViewById<LinearLayout>(R.id.float_nav_menu).visibility = View.GONE
+    appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
+    floatNav.floatNavImage.visibility = View.VISIBLE
+    floatNav.floatNavMenu.visibility = View.GONE
   }
 
   // 发送导航按键
@@ -729,7 +707,7 @@ class FloatVideo(
         if (newFocus) WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         else WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
       appData.main.windowManager.updateViewLayout(
-        floatVideo, floatVideoParams
+        floatVideo.root, floatVideoParams
       )
       isFocus = newFocus
     }

@@ -15,6 +15,8 @@ import android.widget.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import top.saymzx.scrcpy.android.databinding.ActivityMainBinding
+import top.saymzx.scrcpy.android.databinding.AddDeviceBinding
 import top.saymzx.scrcpy.android.entity.Scrcpy
 import top.saymzx.scrcpy.android.entity.defaultAudioCodec
 import top.saymzx.scrcpy.android.entity.defaultFps
@@ -37,9 +39,11 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   }
 
   // 创建界面
+  private lateinit var mainActivity: ActivityMainBinding
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    mainActivity = ActivityMainBinding.inflate(layoutInflater)
+    setContentView(mainActivity.root)
     // 初始化ViewModel
     appData = ViewModelProvider(this).get(AppData::class.java)
     appData.main = this
@@ -117,59 +121,69 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   // 设置设备列表适配器
   private fun setDevicesList() {
-    val devicesList = findViewById<ListView>(R.id.devices_list)
+    val devicesList = mainActivity.devicesList
     devicesList.adapter = appData.deviceListAdapter
   }
 
   // 添加设备监听
   private fun setAddDeviceListener() {
-    findViewById<TextView>(R.id.add_device).setOnClickListener {
+    mainActivity.addDevice.setOnClickListener {
       // 显示添加界面
-      val addDeviceView = LayoutInflater.from(this).inflate(R.layout.add_device, null, false)
+      val addDeviceView = AddDeviceBinding.inflate(layoutInflater)
       val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-      builder.setView(addDeviceView)
+      builder.setView(addDeviceView.root)
       builder.setCancelable(false)
       val dialog = builder.create()
       dialog.setCanceledOnTouchOutside(true)
       dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
       // 设置默认值
-      addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).setSelection(
+      addDeviceView.addDeviceMaxSize.adapter =
+        ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.maxSizeItems))
+      addDeviceView.addDeviceMaxSize.setSelection(
         appData.publicTools.getStringIndex(
           defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
         )
       )
-      addDeviceView.findViewById<Spinner>(R.id.add_device_fps).setSelection(
+      addDeviceView.addDeviceFps.adapter =
+        ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.fpsItems))
+      addDeviceView.addDeviceFps.setSelection(
         appData.publicTools.getStringIndex(
           defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
         )
       )
-      addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).setSelection(
+      addDeviceView.addDeviceVideoBit.adapter =
+        ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoBitItems2))
+      addDeviceView.addDeviceVideoBit.setSelection(
         appData.publicTools.getStringIndex(
           defaultVideoBit.toString(), resources.getStringArray(R.array.videoBitItems1)
         )
       )
-      addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).setSelection(
+      addDeviceView.addDeviceVideoCodec.adapter =
+        ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoCodecItems))
+      addDeviceView.addDeviceVideoCodec.setSelection(
         appData.publicTools.getStringIndex(
           defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
         )
       )
-      addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).setSelection(
+      addDeviceView.addDeviceAudioCodec.adapter =
+        ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.audioCodecItems))
+      addDeviceView.addDeviceAudioCodec.setSelection(
         appData.publicTools.getStringIndex(
           defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
         )
       )
-      addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked =
+      addDeviceView.addDeviceSetResolution.isChecked =
         defaultSetResolution
       // 是否显示高级选项
-      addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).setOnClickListener {
-        addDeviceView.findViewById<LinearLayout>(R.id.add_device_options).visibility =
-          if (addDeviceView.findViewById<CheckBox>(R.id.add_device_is_options).isChecked) View.VISIBLE
+      addDeviceView.addDeviceIsOptions.setOnClickListener {
+        addDeviceView.addDeviceOptions.visibility =
+          if (addDeviceView.addDeviceIsOptions.isChecked) View.VISIBLE
           else View.GONE
       }
       // 完成添加设备
-      addDeviceView.findViewById<Button>(R.id.add_device_ok).setOnClickListener {
-        val name = addDeviceView.findViewById<EditText>(R.id.add_device_name).text.toString()
-        val address = addDeviceView.findViewById<EditText>(R.id.add_device_address).text.toString()
+      addDeviceView.addDeviceOk.setOnClickListener {
+        val name = addDeviceView.addDeviceName.text.toString()
+        val address = addDeviceView.addDeviceAddress.text.toString()
         // 名字不能为空
         if (name == "" || address == "") {
           Toast.makeText(this, "名字和地址不可为空", Toast.LENGTH_LONG).show()
@@ -177,15 +191,15 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         }
         appData.deviceListAdapter.newDevice(
           name, address,
-          addDeviceView.findViewById<EditText>(R.id.add_device_port).text.toString().toInt(),
-          addDeviceView.findViewById<Spinner>(R.id.add_device_videoCodec).selectedItem.toString(),
-          addDeviceView.findViewById<Spinner>(R.id.add_device_audioCodec).selectedItem.toString(),
-          addDeviceView.findViewById<Spinner>(R.id.add_device_max_size).selectedItem.toString()
+          addDeviceView.addDevicePort.text.toString().toInt(),
+          addDeviceView.addDeviceVideoCodec.selectedItem.toString(),
+          addDeviceView.addDeviceAudioCodec.selectedItem.toString(),
+          addDeviceView.addDeviceMaxSize.selectedItem.toString()
             .toInt(),
-          addDeviceView.findViewById<Spinner>(R.id.add_device_fps).selectedItem.toString()
+          addDeviceView.addDeviceFps.selectedItem.toString()
             .toInt(),
-          resources.getStringArray(R.array.videoBitItems1)[addDeviceView.findViewById<Spinner>(R.id.add_device_video_bit).selectedItemPosition].toInt(),
-          addDeviceView.findViewById<Switch>(R.id.add_device_set_resolution).isChecked
+          resources.getStringArray(R.array.videoBitItems1)[addDeviceView.addDeviceVideoBit.selectedItemPosition].toInt(),
+          addDeviceView.addDeviceSetResolution.isChecked
         )
         dialog.cancel()
       }
@@ -195,7 +209,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   // 设置按钮监听
   private fun setSetButtonListener() {
-    findViewById<ImageView>(R.id.set).setOnClickListener {
+    mainActivity.set.setOnClickListener {
       startActivity(Intent(this, SetActivity::class.java))
     }
   }

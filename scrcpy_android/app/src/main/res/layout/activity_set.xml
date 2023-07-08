@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/appBackground"
+    android:background="@color/background"
     android:orientation="vertical"
     tools:context=".SetActivity">
 
@@ -14,7 +14,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="16dp"
         android:src="@drawable/nav_back"
-        android:tint="@color/ignoreTextColor" />
+        android:tint="@color/onBackground" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -32,7 +32,7 @@
                 android:layout_marginStart="40dp"
                 android:layout_marginEnd="40dp"
                 android:text="默认配置"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onBackground"
                 android:textSize="@dimen/largeFont" />
 
             <LinearLayout
@@ -54,7 +54,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="视频编解码器:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
@@ -62,6 +62,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
                     android:entries="@array/videoCodecItems"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
@@ -85,7 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="音频编解码器:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
@@ -93,6 +94,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
                     android:entries="@array/audioCodecItems"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
@@ -116,7 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="视频最大大小:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
@@ -124,6 +126,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
                     android:entries="@array/maxSizeItems"
                     android:foregroundTint="#000000"
                     android:textSize="@dimen/middleFont" />
@@ -148,7 +151,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="帧率:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
@@ -156,6 +159,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
                     android:entries="@array/fpsItems"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
@@ -179,7 +183,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="视频码率:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Spinner
@@ -187,6 +191,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
                     android:entries="@array/videoBitItems2"
                     android:textSize="@dimen/middleFont" />
             </LinearLayout>
@@ -210,7 +215,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="是否修改分辨率:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Switch
@@ -219,7 +224,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:checked="true"
-                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTint="@color/cardContainerBackground"
                     android:thumbTintMode="multiply"
                     android:trackTint="@color/buttonBackground"
                     android:trackTintMode="multiply" />
@@ -232,7 +237,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="40dp"
                 android:text="显示"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onBackground"
                 android:textSize="@dimen/largeFont" />
 
             <LinearLayout
@@ -254,7 +259,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="默认全屏显示:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <Switch
@@ -263,7 +268,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:checked="true"
-                    android:thumbTint="@color/SwitchBackground"
+                    android:thumbTint="@color/cardContainerBackground"
                     android:thumbTintMode="multiply"
                     android:trackTint="@color/buttonBackground"
                     android:trackTintMode="multiply" />
@@ -288,7 +293,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="悬浮球大小:"
-                    android:textColor="@color/ignoreTextColor"
+                    android:textColor="@color/onCardBackground"
                     android:textSize="@dimen/middleFont" />
 
                 <SeekBar
@@ -297,7 +302,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:max="55"
-                    android:progressBackgroundTint="@color/alertButtonBackground"
+                    android:progressBackgroundTint="@color/buttonBackgroundSecond"
                     android:progressTint="@color/buttonBackground" />
 
             </LinearLayout>
@@ -331,7 +336,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="40dp"
                 android:text="其他"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onBackground"
                 android:textSize="@dimen/largeFont" />
 
             <TextView
@@ -348,7 +353,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="清除默认设备"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -365,7 +370,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="重新生成密钥(需重新授权)"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -375,7 +380,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="40dp"
                 android:text="备份恢复"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onBackground"
                 android:textSize="@dimen/largeFont" />
 
             <TextView
@@ -392,7 +397,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="导出密钥"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -409,7 +414,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="导入密钥"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -426,7 +431,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="导出配置"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -443,7 +448,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="导入配置"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -453,7 +458,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="40dp"
                 android:text="关于"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onBackground"
                 android:textSize="@dimen/largeFont" />
 
             <TextView
@@ -470,7 +475,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="隐私政策"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
             <TextView
@@ -488,7 +493,7 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="14dp"
                 android:text="前往官网"
-                android:textColor="@color/ignoreTextColor"
+                android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
 
         </LinearLayout>

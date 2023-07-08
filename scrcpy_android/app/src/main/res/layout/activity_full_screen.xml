@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/appBackground"
+    android:background="@color/background"
     android:gravity="center_vertical"
     android:orientation="vertical"
     tools:context=".FullScreenActivity">
@@ -17,7 +17,7 @@
         android:layout_marginEnd="30dp"
         android:gravity="center"
         android:text="专注模式中，如未正常退出专注模式，可点击此处文字，强制停止"
-        android:textColor="@color/textColor"
+        android:textColor="@color/onBackground"
         android:textSize="40sp" />
 
 </LinearLayout>

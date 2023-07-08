@@ -15,23 +15,34 @@
         android:gravity="center"
         android:orientation="horizontal">
 
+        <ImageView
+            android:id="@+id/float_video_fullscreen"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/floatVideoTitle"
+            android:layout_weight="13"
+            android:contentDescription="float_video_fullscreen"
+            android:padding="@dimen/floatVideoNavButtonPadding"
+            android:src="@drawable/fullscreen"
+            android:tint="@color/onCardBackground"
+            tools:ignore="HardcodedText" />
+
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="25" />
+            android:layout_weight="12" />
 
         <LinearLayout
             android:id="@+id/float_video_bar"
             android:layout_width="0dp"
             android:layout_height="@dimen/floatVideoTitle"
-            android:padding="@dimen/floatVideoBarPadding"
-            android:layout_weight="50">
+            android:layout_weight="50"
+            android:padding="@dimen/floatVideoBarPadding">
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/background"
-                android:backgroundTint="@color/floatVideoBarColor" />
+                android:backgroundTint="@color/onCardBackgroundSecond" />
         </LinearLayout>
 
         <Space
@@ -43,11 +54,11 @@
             android:id="@+id/float_video_stop"
             android:layout_width="0dp"
             android:layout_height="@dimen/floatVideoTitle"
-            android:padding="@dimen/floatVideoButtonPadding"
             android:layout_weight="13"
             android:contentDescription="float_video_stop"
+            android:padding="@dimen/floatVideoButtonPadding"
             android:src="@drawable/radio_button"
-            android:tint="@color/stopButtonColor"
+            android:tint="@color/error"
             tools:ignore="HardcodedText" />
 
     </LinearLayout>
@@ -75,11 +86,11 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/floatVideoTitle"
             android:layout_weight="12"
-            android:padding="@dimen/floatVideoNavButtonPadding"
             android:contentDescription="float_video_switch"
+            android:padding="@dimen/floatVideoNavButtonPadding"
             android:src="@drawable/nav_switch"
-            tools:ignore="HardcodedText"
-            android:tint="@color/navButtonColor" />
+            android:tint="@color/onCardBackground"
+            tools:ignore="HardcodedText" />
 
         <Space
             android:layout_width="0dp"
@@ -91,11 +102,11 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/floatVideoTitle"
             android:layout_weight="12"
-            android:padding="@dimen/floatVideoNavButtonPadding"
             android:contentDescription="float_video_home"
+            android:padding="@dimen/floatVideoNavButtonPadding"
             android:src="@drawable/nav_home"
-            tools:ignore="HardcodedText"
-            android:tint="@color/navButtonColor" />
+            android:tint="@color/onCardBackground"
+            tools:ignore="HardcodedText" />
 
         <Space
             android:layout_width="0dp"
@@ -107,11 +118,11 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/floatVideoTitle"
             android:layout_weight="12"
-            android:padding="@dimen/floatVideoNavButtonPadding"
             android:contentDescription="float_video_back"
+            android:padding="@dimen/floatVideoNavButtonPadding"
             android:src="@drawable/nav_back"
-            tools:ignore="HardcodedText"
-            android:tint="@color/navButtonColor" />
+            android:tint="@color/onCardBackground"
+            tools:ignore="HardcodedText" />
 
         <Space
             android:layout_width="0dp"
@@ -122,11 +133,11 @@
             android:id="@+id/float_video_set_size"
             android:layout_width="0dp"
             android:layout_height="@dimen/floatVideoTitle"
-            android:padding="@dimen/floatVideoButtonPadding"
             android:layout_weight="13"
             android:contentDescription="float_video_set_size"
+            android:padding="@dimen/floatVideoButtonPadding"
             android:src="@drawable/radio_button"
-            android:tint="@color/setSizeColor"
+            android:tint="@color/buttonBackgroundSecond"
             tools:ignore="HardcodedText" />
 
     </LinearLayout>

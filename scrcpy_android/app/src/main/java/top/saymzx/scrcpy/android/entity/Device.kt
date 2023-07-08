@@ -8,7 +8,7 @@ var defaultMaxSize = 1920
 var defaultFps = 60
 var defaultVideoBit = 8000000
 var defaultSetResolution = true
-var defaultFull=true
+var defaultFull = true
 
 class Device() {
   var name: String = ""

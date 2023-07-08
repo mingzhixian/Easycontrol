@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="appBackground">#f0f4f2</color>
-    <color name="cardBackground">#c4ccc5</color>
-    <color name="buttonBackground">#9aaf85</color>
-    <color name="alertBackground">#bbcdc0</color>
-    <color name="alertButtonBackground">#869879</color>
-    <color name="cancelButtonBackground">#97a797</color>
-    <color name="SwitchBackground">#66864f</color>
-    <!--字体颜色-->
-    <color name="textColor">#000000</color>
-    <color name="ignoreTextColor">#585757</color>
-    <color name="buttonTextColor">#000000</color>
-    <!--悬浮窗相关颜色-->
-    <color name="floatVideoBarColor">#e6e6e6</color>
-    <color name="stopButtonColor">#930f0f</color>
-    <color name="navButtonColor">#3b3636</color>
-    <color name="setSizeColor">#e6e6e6</color>
+    <color name="background">#f2f1f6</color>
+    <color name="onBackground">#1d1d1f</color>
+    <color name="onBackgroundSecond">#626262</color>
+    <color name="cardBackground">#ffffff</color>
+    <color name="onCardBackground">#212121</color>
+    <color name="onCardBackgroundSecond">#737376</color>
+    <color name="cardContainerBackground">#f5f5f5</color>
+    <color name="onCardContainerBackground">#212121</color>
+    <color name="iconColor">#757575</color>
+    <color name="buttonBackground">#699</color>
+    <color name="onButtonBackground">#ffffff</color>
+    <color name="buttonBackgroundSecond">#7f9696</color>
+    <color name="onButtonBackgroundSecond">#ffffff</color>
+    <color name="error">#be2626</color>
 </resources>

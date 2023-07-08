@@ -53,7 +53,16 @@ class AdbWriter(sink: Sink) : AutoCloseable {
   }
 
   fun writeWrite(localId: Int, remoteId: Int, payload: ByteArray, offset: Int, length: Int) {
-    write(Constants.CMD_WRTE, localId, remoteId, payload, offset, length)
+    if (length < maxPayloadSize) {
+      write(Constants.CMD_WRTE, localId, remoteId, payload, offset, length)
+    } else {
+      var tmpOffset = 0
+      while (tmpOffset < payload.size) {
+        val tmpLength = minOf(maxPayloadSize, length - tmpOffset)
+        write(Constants.CMD_WRTE, localId, remoteId, payload, tmpOffset, tmpLength)
+        tmpOffset += tmpLength
+      }
+    }
   }
 
   fun writeClose(localId: Int, remoteId: Int) {
@@ -64,6 +73,8 @@ class AdbWriter(sink: Sink) : AutoCloseable {
     write(Constants.CMD_OKAY, localId, remoteId, null, 0, 0)
   }
 
+
+  var maxPayloadSize = 1024
   private fun write(
     command: Int,
     arg0: Int,

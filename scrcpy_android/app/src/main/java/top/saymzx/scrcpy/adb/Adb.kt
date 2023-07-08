@@ -1,9 +1,14 @@
 package top.saymzx.scrcpy.adb
 
+import okhttp3.internal.notifyAll
+import okhttp3.internal.wait
+import okio.Buffer
 import okio.sink
 import okio.source
 import java.io.IOException
+import java.io.InputStream
 import java.net.Socket
+import java.nio.charset.StandardCharsets
 import java.util.Random
 
 class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
@@ -12,9 +17,8 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
   private val adbWriter: AdbWriter
   private val adbReader: AdbReader
   private val random = Random()
-  private val maxPayloadSize: Int
   private val connectionStreams = HashMap<Int, AdbStream>()
-  private val connectionStatus = HashMap<Int, Int>() // 0为断开，1为等待回复中，2为读写中
+  private var defaultShellStream: AdbStream? = null
 
   init {
     // 连接socket
@@ -37,79 +41,103 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
     // 认证失败
     if (message.command != Constants.CMD_CNXN) throw IOException("Connection failed: $message")
     // 最大承载长度
-    maxPayloadSize = message.arg1
+    adbWriter.maxPayloadSize = message.arg1
     // 开始读写线程
     Thread { readAdb() }.start()
   }
 
   // 打开一个连接流
-  fun open(destination: String): AdbStream {
+  fun open(destination: String, isNeedSource: Boolean): AdbStream {
     val localId = random.nextInt()
     adbWriter.writeOpen(localId, destination)
-    connectionStatus[localId] = 1
-    val stream = AdbStream(maxPayloadSize, adbWriter)
-    stream.localId = localId
+    val stream = AdbStream(localId, adbWriter, isNeedSource)
     connectionStreams[localId] = stream
-    // 等待2秒
-    for (i in 0..200) {
-      when (connectionStatus[localId]) {
-        2 -> {
-          return stream
+    synchronized(stream) {
+      stream.wait()
+    }
+    if (stream.status == -1) throw IOException("连接错误")
+    else return stream
+  }
+
+  fun pushFile(file: InputStream, remotePath: String) {
+    val pushStream = open("sync:", true)
+    val remote = "$remotePath,${33206}"
+    pushStream.write(writePacket("SEND", remote.length))
+    pushStream.write(remote.toByteArray())
+    val byteArray = ByteArray(adbWriter.maxPayloadSize - 512)
+    while (true) {
+      val len = file.read(byteArray, 0, byteArray.size)
+      if (len == -1) break
+      pushStream.write(writePacket("DATA", len))
+      pushStream.write(byteArray.sliceArray(0..len))
+    }
+    pushStream.write(writePacket("DONE", (System.currentTimeMillis() / 1000).toInt()))
+    pushStream.readByte()
+    pushStream.write(writePacket("QUIT", 0))
+  }
+
+  private fun writePacket(id: String, arg: Int): ByteArray {
+    val tmpBuffer = Buffer()
+    tmpBuffer.clear()
+    tmpBuffer.writeString(id, StandardCharsets.UTF_8)
+    tmpBuffer.writeIntLe(arg)
+    return tmpBuffer.readByteArray()
+  }
+
+  fun runAdbCmd(cmd: String, isNeedOutput: Boolean): String {
+    if (!isNeedOutput) {
+      if (defaultShellStream == null) defaultShellStream = open("shell:", false)
+      defaultShellStream!!.write((cmd + "\n").toByteArray())
+      return ""
+    } else {
+      val stream = open("shell:$cmd", true)
+      // 等待8秒
+      for (i in 0..200) {
+        if (stream.status == -1) {
+          return stream.source.readUtf8()
+        } else {
+          Thread.sleep(40)
         }
-
-        else -> {
-          Thread.sleep(10)
-        }
       }
+      return "命令运行超过8秒，未获取命令输出"
     }
-    throw IOException("连接错误")
   }
 
-  fun runAdbCmd(cmd: String): String {
-    val stream = open("shell:$cmd")
-    // 等待4秒
-    for (i in 0..200) {
-      if (connectionStatus[stream.localId] == 0) {
-        return stream.source.readUtf8()
-      } else {
-        Thread.sleep(20)
-      }
-    }
-    return ""
-  }
-
-  fun tcpForward(port: Int): AdbStream {
-    val stream = open("tcp:$port")
-    // 等待4秒
-    for (i in 0..200) {
-      if (connectionStatus[stream.localId] == 2) {
-        return stream
-      } else {
-        Thread.sleep(20)
-      }
-    }
-    throw IOException("连接错误")
-  }
+  fun tcpForward(port: Int, isNeedSource: Boolean): AdbStream = open("tcp:$port", isNeedSource)
 
   // 读取线程
   private fun readAdb() {
     try {
       while (true) {
         val message = adbReader.readMessage()
+        val stream = connectionStreams[message.arg1]!!
         when (message.command) {
           Constants.CMD_OKAY -> {
-            if (connectionStreams[message.arg1]!!.remoteId == 0)
-              connectionStreams[message.arg1]!!.remoteId = message.arg0
-            connectionStreams[message.arg1]?.push(message.payload)
-            connectionStatus[message.arg1] = 2
+            stream.status = 2
+            // 连接成功
+            if (stream.remoteId == 0) {
+              stream.remoteId = message.arg0
+              synchronized(stream) {
+                stream.notifyAll()
+              }
+            }
+            // 可读写
+            synchronized(stream.canWrite) {
+              stream.canWrite.notify()
+            }
           }
 
           Constants.CMD_WRTE -> {
             adbWriter.writeOkay(message.arg1, message.arg0)
-            connectionStreams[message.arg1]?.push(message.payload)
+            stream.pushToSource(message.payload)
           }
 
           Constants.CMD_CLSE -> {
+            // 连接断开
+            stream.status = -1
+            synchronized(stream) {
+              stream.notifyAll()
+            }
           }
         }
       }
@@ -119,8 +147,12 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
   }
 
   fun close() {
-    adbReader.close()
-    adbWriter.close()
-    socket.close()
+    try {
+      defaultShellStream?.close()
+      adbReader.close()
+      adbWriter.close()
+      socket.close()
+    } catch (_: Exception) {
+    }
   }
 }

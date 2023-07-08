@@ -17,10 +17,6 @@
 
 package top.saymzx.scrcpy.adb
 
-import okio.Buffer
-import okio.BufferedSource
-import java.nio.charset.StandardCharsets
-
 internal class AdbMessage(
   val command: Int,
   val arg0: Int,

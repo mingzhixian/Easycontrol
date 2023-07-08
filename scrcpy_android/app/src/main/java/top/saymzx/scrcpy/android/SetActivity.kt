@@ -7,15 +7,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
-import android.widget.ImageView
+import android.widget.ArrayAdapter
 import android.widget.SeekBar
-import android.widget.Spinner
-import android.widget.Switch
-import android.widget.TextView
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import org.json.JSONArray
 import top.saymzx.scrcpy.adb.AdbKeyPair
+import top.saymzx.scrcpy.android.databinding.ActivitySetBinding
 import top.saymzx.scrcpy.android.entity.Device
 import top.saymzx.scrcpy.android.entity.defaultAudioCodec
 import top.saymzx.scrcpy.android.entity.defaultFps
@@ -30,9 +28,11 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 class SetActivity : Activity() {
+  private lateinit var setActivity: ActivitySetBinding
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_set)
+    setActivity = ActivitySetBinding.inflate(layoutInflater)
+    setContentView(setActivity.root)
     appData.publicTools.setStatusAndNavBar(this)
     // 设置默认值
     setValue()
@@ -63,36 +63,46 @@ class SetActivity : Activity() {
 
   // 设置默认值
   private fun setValue() {
-    findViewById<Spinner>(R.id.set_default_videoCodec).setSelection(
+    setActivity.setDefaultVideoCodec.adapter =
+      ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoCodecItems))
+    setActivity.setDefaultVideoCodec.setSelection(
       appData.publicTools.getStringIndex(
         defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
       )
     )
-    findViewById<Spinner>(R.id.set_default_audioCodec).setSelection(
+    setActivity.setDefaultAudioCodec.adapter =
+      ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.audioCodecItems))
+    setActivity.setDefaultAudioCodec.setSelection(
       appData.publicTools.getStringIndex(
         defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
       )
     )
-    findViewById<Spinner>(R.id.set_default_max_size).setSelection(
+    setActivity.setDefaultMaxSize.adapter =
+      ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.maxSizeItems))
+    setActivity.setDefaultMaxSize.setSelection(
       appData.publicTools.getStringIndex(
         defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
       )
     )
-    findViewById<Spinner>(R.id.set_default_fps).setSelection(
+    setActivity.setDefaultFps.adapter =
+      ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.fpsItems))
+    setActivity.setDefaultFps.setSelection(
       appData.publicTools.getStringIndex(
         defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
       )
     )
-    findViewById<Spinner>(R.id.set_default_video_bit).setSelection(
+    setActivity.setDefaultVideoBit.adapter =
+      ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoBitItems2))
+    setActivity.setDefaultVideoBit.setSelection(
       appData.publicTools.getStringIndex(
         defaultVideoBit.toString(), resources.getStringArray(R.array.videoBitItems1)
       )
     )
-    findViewById<Switch>(R.id.set_default_set_resolution).isChecked = defaultSetResolution
-    findViewById<Switch>(R.id.set_default_default_full).isChecked = defaultFull
+    setActivity.setDefaultSetResolution.isChecked = defaultSetResolution
+    setActivity.setDefaultDefaultFull.isChecked = defaultFull
     val progress = appData.settings.getInt("floatNavSize", 55)
-    findViewById<SeekBar>(R.id.set_float_nav_size).progress = progress - 35
-    val preview = findViewById<ImageView>(R.id.set_float_nav_preview)
+    setActivity.setFloatNavSize.progress = progress - 35
+    val preview = setActivity.setFloatNavPreview
     preview.layoutParams.apply {
       this.height = appData.publicTools.dp2px(progress.toFloat()).toInt()
       preview.layoutParams = this
@@ -101,14 +111,14 @@ class SetActivity : Activity() {
 
   // 设置返回按钮监听
   private fun setBackButtonListener() {
-    findViewById<ImageView>(R.id.set_back).setOnClickListener {
+    setActivity.setBack.setOnClickListener {
       finish()
     }
   }
 
   // 设置视频编解码器监听
   private fun setDefaultVideoCodecListener() {
-    val view = findViewById<Spinner>(R.id.set_default_videoCodec)
+    val view = setActivity.setDefaultVideoCodec
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         val item = view.selectedItem.toString()
@@ -127,7 +137,7 @@ class SetActivity : Activity() {
 
   // 设置音频编解码器监听
   private fun setDefaultAudioCodecListener() {
-    val view = findViewById<Spinner>(R.id.set_default_audioCodec)
+    val view = setActivity.setDefaultAudioCodec
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         val item = view.selectedItem.toString()
@@ -146,7 +156,7 @@ class SetActivity : Activity() {
 
   // 设置最大大小监听
   private fun setDefaultMaxSizeListener() {
-    val view = findViewById<Spinner>(R.id.set_default_max_size)
+    val view = setActivity.setDefaultMaxSize
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         val item = view.selectedItem.toString()
@@ -166,7 +176,7 @@ class SetActivity : Activity() {
 
   // 设置帧率监听
   private fun setDefaultFpsListener() {
-    val view = findViewById<Spinner>(R.id.set_default_fps)
+    val view = setActivity.setDefaultFps
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         val item = view.selectedItem.toString()
@@ -185,7 +195,7 @@ class SetActivity : Activity() {
 
   // 设置码率监听
   private fun setDefaultVideoBitListener() {
-    val view = findViewById<Spinner>(R.id.set_default_video_bit)
+    val view = setActivity.setDefaultVideoBit
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         defaultVideoBit =
@@ -204,7 +214,7 @@ class SetActivity : Activity() {
 
   // 设置是否修改分辨率监听
   private fun setDefaultSetResolutionListener() {
-    findViewById<Switch>(R.id.set_default_set_resolution).setOnCheckedChangeListener { _, checked ->
+    setActivity.setDefaultSetResolution.setOnCheckedChangeListener { _, checked ->
       defaultSetResolution = checked
       appData.settings.edit().apply {
         putBoolean("defaultSetResolution", checked)
@@ -215,7 +225,7 @@ class SetActivity : Activity() {
 
   // 设置是否全屏监听
   private fun setDefaultFullListener() {
-    findViewById<Switch>(R.id.set_default_default_full).setOnCheckedChangeListener { _, checked ->
+    setActivity.setDefaultDefaultFull.setOnCheckedChangeListener { _, checked ->
       defaultFull = checked
       appData.settings.edit().apply {
         putBoolean("defaultFull", checked)
@@ -227,11 +237,11 @@ class SetActivity : Activity() {
   // 设置悬浮球大小监听
   private fun setFloatNavSizeListener() {
     var progress = 0
-    findViewById<SeekBar>(R.id.set_float_nav_size).setOnSeekBarChangeListener(object :
+    setActivity.setFloatNavSize.setOnSeekBarChangeListener(object :
       SeekBar.OnSeekBarChangeListener {
       override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
         progress = p1 + 35
-        val preview = findViewById<ImageView>(R.id.set_float_nav_preview)
+        val preview = setActivity.setFloatNavPreview
         preview.layoutParams.apply {
           this.height = appData.publicTools.dp2px(progress.toFloat()).toInt()
           preview.layoutParams = this
@@ -253,7 +263,7 @@ class SetActivity : Activity() {
 
   // 设置清除默认设备按钮监听
   private fun setClearDefultListener() {
-    findViewById<TextView>(R.id.set_clear_defult).setOnClickListener {
+    setActivity.setClearDefult.setOnClickListener {
       appData.settings.edit().apply {
         putString("DefaultDevice", "")
         apply()
@@ -264,42 +274,42 @@ class SetActivity : Activity() {
 
   // 设置重新生成密钥按钮监听
   private fun setRenewKeyListener() {
-    findViewById<TextView>(R.id.set_clear_defult).setOnClickListener {
+    setActivity.setRenewKey.setOnClickListener {
       AdbKeyPair.generate(appData.privateKey, appData.publicKey)
     }
   }
 
   // 设置密钥导出按钮监听
   private fun setKeyExportListener() {
-    findViewById<TextView>(R.id.set_export_key).setOnClickListener {
+    setActivity.setExportKey.setOnClickListener {
       openDirectory(1)
     }
   }
 
   // 设置密钥导入按钮监听
   private fun setKeyImportListener() {
-    findViewById<TextView>(R.id.set_import_key).setOnClickListener {
+    setActivity.setImportKey.setOnClickListener {
       openDirectory(2)
     }
   }
 
   // 设置密钥导出按钮监听
   private fun setJsonExportListener() {
-    findViewById<TextView>(R.id.set_export_json).setOnClickListener {
+    setActivity.setExportJson.setOnClickListener {
       openDirectory(3)
     }
   }
 
   // 设置密钥导入按钮监听
   private fun setJsonImportListener() {
-    findViewById<TextView>(R.id.set_import_json).setOnClickListener {
+    setActivity.setImportJson.setOnClickListener {
       openDirectory(4)
     }
   }
 
   // 设置隐私政策按钮监听
   private fun setPrivacyListener() {
-    findViewById<TextView>(R.id.set_privacy).setOnClickListener {
+    setActivity.setPrivacy.setOnClickListener {
       try {
         // 防止没有默认浏览器
         val intent = Intent(Intent.ACTION_VIEW)
@@ -314,7 +324,7 @@ class SetActivity : Activity() {
 
   // 设置官网按钮监听
   private fun setIndexListener() {
-    findViewById<TextView>(R.id.set_index).setOnClickListener {
+    setActivity.setIndex.setOnClickListener {
       try {
         // 防止没有默认浏览器
         val intent = Intent(Intent.ACTION_VIEW)
