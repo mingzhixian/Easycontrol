@@ -276,6 +276,7 @@ class SetActivity : Activity() {
   private fun setRenewKeyListener() {
     setActivity.setRenewKey.setOnClickListener {
       AdbKeyPair.generate(appData.privateKey, appData.publicKey)
+      Toast.makeText(this, "已刷新", Toast.LENGTH_SHORT).show()
     }
   }
 
