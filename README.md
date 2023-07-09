@@ -28,9 +28,9 @@
 
 ## 截图
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/main.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/addDevice.webp?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/main.webp?raw=true" width="200px">
 <img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallV.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallH.webp?raw=true" width="200px">
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/twoDevices.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.webp?raw=true" width="200px">
+<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/fullV.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/fullH.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.webp?raw=true" width="200px">
 
 ## 鼓励
 
