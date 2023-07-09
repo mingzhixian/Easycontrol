@@ -81,19 +81,19 @@ class Scrcpy(private val device: Device) {
       } catch (e: Exception) {
         stop("连接错误", e)
       }
-//      try {
-      alert.cancel()
-      // 配置视频解码
-      setVideoDecodec()
-      // 配置音频解码
-      setAudioDecodec()
-      // 配置音频播放
-      if (canAudio) setAudioTrack()
-      // 设置被控端熄屏（默认投屏后熄屏）
-      setPowerOff()
-//      } catch (e: Exception) {
-//        stop("启动错误", e)
-//      }
+      try {
+        alert.cancel()
+        // 配置视频解码
+        setVideoDecodec()
+        // 配置音频解码
+        setAudioDecodec()
+        // 配置音频播放
+        if (canAudio) setAudioTrack()
+        // 设置被控端熄屏（默认投屏后熄屏）
+        setPowerOff()
+      } catch (e: Exception) {
+        stop("启动错误", e)
+      }
       // 投屏中
       device.status = 1
       // 视频解码
