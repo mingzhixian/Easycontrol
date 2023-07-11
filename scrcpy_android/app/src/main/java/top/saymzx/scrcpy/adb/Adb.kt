@@ -105,6 +105,8 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
   fun tcpForward(port: Int, isNeedSource: Boolean): AdbStream = open("tcp:$port", isNeedSource)
 
+  fun localSocketForward(socketName: String, isNeedSource: Boolean): AdbStream = open("localabstract:$socketName", isNeedSource)
+
   // 读取线程
   private fun readAdb() {
     try {

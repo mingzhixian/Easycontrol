@@ -1,16 +1,14 @@
 package com.genymobile.scrcpy;
 
+import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public final class DesktopConnection implements Closeable {
@@ -19,20 +17,20 @@ public final class DesktopConnection implements Closeable {
 
   private static final String SOCKET_NAME_PREFIX = "scrcpy";
 
-  private final Socket videoSocket;
+  private final LocalSocket videoSocket;
   private final FileDescriptor videoFd;
 
-  private final Socket audioSocket;
+  private final LocalSocket audioSocket;
   private final FileDescriptor audioFd;
 
-  private final Socket controlSocket;
+  private final LocalSocket controlSocket;
   private final InputStream controlInputStream;
   private final OutputStream controlOutputStream;
 
   private final ControlMessageReader reader = new ControlMessageReader();
   private final DeviceMessageWriter writer = new DeviceMessageWriter();
 
-  private DesktopConnection(Socket videoSocket, Socket audioSocket, Socket controlSocket) throws IOException {
+  private DesktopConnection(LocalSocket videoSocket, LocalSocket audioSocket, LocalSocket controlSocket) throws IOException {
     this.videoSocket = videoSocket;
     this.controlSocket = controlSocket;
     this.audioSocket = audioSocket;
@@ -43,8 +41,8 @@ public final class DesktopConnection implements Closeable {
       controlInputStream = null;
       controlOutputStream = null;
     }
-    videoFd = videoSocket != null ? ((FileOutputStream) videoSocket.getOutputStream()).getFD() : null;
-    audioFd = audioSocket != null ? ((FileOutputStream) audioSocket.getOutputStream()).getFD() : null;
+    videoFd = videoSocket != null ? videoSocket.getFileDescriptor() : null;
+    audioFd = audioSocket != null ? audioSocket.getFileDescriptor() : null;
   }
 
   private static LocalSocket connect(String abstractName) throws IOException {
@@ -64,13 +62,13 @@ public final class DesktopConnection implements Closeable {
 
   public static DesktopConnection open(int scid, boolean tunnelForward, boolean video, boolean audio, boolean control, boolean sendDummyByte)
       throws IOException {
-    String socketName = getSocketName(scid);
+//    String socketName = getSocketName(scid);
 
-    Socket videoSocket = null;
-    Socket audioSocket = null;
-    Socket controlSocket = null;
+    LocalSocket videoSocket = null;
+    LocalSocket audioSocket = null;
+    LocalSocket controlSocket = null;
     try {
-      try (ServerSocket localServerSocket = new ServerSocket(6006)) {
+      try (LocalServerSocket localServerSocket = new LocalServerSocket("scrcpy_android")) {
         if (video) {
           videoSocket = localServerSocket.accept();
           if (sendDummyByte) {
@@ -112,7 +110,7 @@ public final class DesktopConnection implements Closeable {
     return new DesktopConnection(videoSocket, audioSocket, controlSocket);
   }
 
-  private Socket getFirstSocket() {
+  private LocalSocket getFirstSocket() {
     if (videoSocket != null) {
       return videoSocket;
     }
@@ -148,7 +146,7 @@ public final class DesktopConnection implements Closeable {
     System.arraycopy(deviceNameBytes, 0, buffer, 0, len);
     // byte[] are always 0-initialized in java, no need to set '\0' explicitly
 
-    FileDescriptor fd = ((FileOutputStream) getFirstSocket().getOutputStream()).getFD();
+    FileDescriptor fd = getFirstSocket().getFileDescriptor();
     IO.writeFully(fd, buffer, 0, buffer.length);
   }
 

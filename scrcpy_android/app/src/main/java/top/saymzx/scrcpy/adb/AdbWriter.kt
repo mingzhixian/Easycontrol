@@ -108,14 +108,11 @@ class AdbWriter(sink: Sink) : AutoCloseable {
     bufferedSink.close()
   }
 
-  companion object {
-
-    private fun payloadChecksum(payload: ByteArray): Int {
-      var checksum = 0
-      for (byte in payload) {
-        checksum += byte.toUByte().toInt()
-      }
-      return checksum
+  private fun payloadChecksum(payload: ByteArray): Int {
+    var checksum = 0
+    for (byte in payload) {
+      checksum += byte.toUByte().toInt()
     }
+    return checksum
   }
 }

@@ -1,22 +1,27 @@
 package top.saymzx.scrcpy.android
 
-import android.annotation.SuppressLint
-import android.app.*
-import android.content.*
-import android.content.Intent.*
-import android.media.*
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
 import android.net.Uri
-import android.os.*
+import android.os.Bundle
 import android.provider.Settings
-import android.view.*
-import android.view.KeyEvent.*
-import android.view.MotionEvent.*
-import android.widget.*
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import top.saymzx.scrcpy.adb.Adb
+import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.databinding.ActivityMainBinding
 import top.saymzx.scrcpy.android.databinding.AddDeviceBinding
+import top.saymzx.scrcpy.android.databinding.EditPortBinding
 import top.saymzx.scrcpy.android.entity.Scrcpy
 import top.saymzx.scrcpy.android.entity.defaultAudioCodec
 import top.saymzx.scrcpy.android.entity.defaultFps
@@ -26,10 +31,7 @@ import top.saymzx.scrcpy.android.entity.defaultSetResolution
 import top.saymzx.scrcpy.android.entity.defaultVideoBit
 import top.saymzx.scrcpy.android.entity.defaultVideoCodec
 import top.saymzx.scrcpy.android.helper.AppData
-import java.io.*
-import java.util.*
 
-@SuppressLint("StaticFieldLeak")
 lateinit var appData: AppData
 
 class MainActivity : Activity(), ViewModelStoreOwner {
@@ -56,6 +58,33 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         this, ShowAppActivity::class.java
       ), 1
     )
+    else readMode()
+  }
+
+  // 其他页面回调
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    // ShowApp页面回调
+    if (requestCode == 1) {
+      readMode()
+    }
+    super.onActivityResult(requestCode, resultCode, data)
+  }
+
+  // 选择模式
+  private fun readMode() {
+    if (appData.settings.getInt("appMode", 1) == 1) {
+      asMaster()
+    } else {
+      asSlave()
+    }
+  }
+
+  // 作为控制端
+  private fun asMaster() {
+    // 检查权限
+    checkPermission()
+    // 启动默认设备
+    startDefault()
     // 设置设备列表适配器
     setDevicesList()
     // 添加按钮监听
@@ -68,42 +97,20 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     checkUpdate()
   }
 
-  override fun onResume() {
-    // 检查权限
-    if (checkPermission()) {
-      // 仅在第一次启动默认设备
-      if (!appData.isShowDefultDevice) {
-        appData.isShowDefultDevice = true
-        // 启动默认设备
-        val defalueDevice = appData.settings.getString("DefaultDevice", "")
-        if (defalueDevice != "") {
-          for (i in appData.devices) {
-            if (i.name == defalueDevice) {
-              if (i.status == -1) {
-                i.scrcpy = Scrcpy(i)
-                i.scrcpy!!.start()
-              }
-              break
-            }
+  // 启动默认设备
+  private fun startDefault() {
+    val defalueDevice = appData.settings.getString("DefaultDevice", "")
+    if (defalueDevice != "") {
+      for (i in appData.devices) {
+        if (i.name == defalueDevice) {
+          if (i.status == -1) {
+            i.scrcpy = Scrcpy(i)
+            i.scrcpy!!.start()
           }
+          break
         }
       }
     }
-    super.onResume()
-  }
-
-  // 其他页面回调
-  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    // ShowApp页面回调
-    if (requestCode == 1) {
-      if (resultCode == 1) {
-        appData.settings.edit().apply {
-          putBoolean("FirstUse", false)
-          apply()
-        }
-      }
-    }
-    super.onActivityResult(requestCode, resultCode, data)
   }
 
   // 检查权限
@@ -232,6 +239,73 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       if (newVersionCode != null) {
         if (newVersionCode > appData.versionCode)
           Toast.makeText(this, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+      }
+    }
+  }
+
+  // 作为被控端
+  private fun asSlave() {
+    // 防止多次调用
+    if (mainActivity.addDevice.visibility == View.GONE) return
+    // 取消画面
+    mainActivity.addDevice.visibility = View.GONE
+    mainActivity.set.visibility = View.GONE
+    // 要求用户输入ADB端口
+    if (!appData.settings.getBoolean("isSetSlaveAdbPort", false)) setSlaveAdbPort()
+    else slaveBack()
+  }
+
+  // 弹窗输入adb端口
+  private fun setSlaveAdbPort() {
+    val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+    builder.setCancelable(false)
+    val editPortDialog = builder.create()
+    editPortDialog.setCanceledOnTouchOutside(false)
+    editPortDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    val editPortBinding = EditPortBinding.inflate(LayoutInflater.from(this))
+    editPortDialog.setView(editPortBinding.root)
+    // 设置监听
+    editPortBinding.editPortOk.setOnClickListener {
+      appData.settings.edit().apply {
+        putBoolean("isSetSlaveAdbPort", true)
+        putInt(
+          "slaveAdbPort",
+          editPortBinding.editPortPort.text.toString().toInt()
+        )
+        apply()
+      }
+      editPortDialog.cancel()
+      slaveBack()
+    }
+    editPortDialog.show()
+  }
+
+  // 恢复
+  private fun slaveBack() {
+    appData.mainScope.launch {
+      withContext(Dispatchers.IO) {
+        try {
+          val adb = Adb(
+            "127.0.0.1",
+            appData.settings.getInt("slaveAdbPort", 5555),
+            AdbKeyPair.read(appData.privateKey, appData.publicKey)
+          )
+          adb.runAdbCmd(
+            "ps aux | grep scrcpy | grep -v grep | awk '{print \$2}' | xargs kill -9", false
+          )
+          adb.runAdbCmd("wm size reset", false)
+          adb.close()
+          withContext(Dispatchers.Main) {
+            Toast.makeText(appData.main, "恢复程序执行完毕，将自动退出", Toast.LENGTH_LONG).show()
+            delay(1000)
+            finishAndRemoveTask()
+            Runtime.getRuntime().exit(0)
+          }
+        } catch (_: Exception) {
+          withContext(Dispatchers.Main) {
+            Toast.makeText(appData.main, "连接失败", Toast.LENGTH_LONG).show()
+          }
+        }
       }
     }
   }

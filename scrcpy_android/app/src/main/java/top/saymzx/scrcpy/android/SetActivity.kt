@@ -1,6 +1,5 @@
 package top.saymzx.scrcpy.android
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -23,9 +22,7 @@ import top.saymzx.scrcpy.android.entity.defaultSetResolution
 import top.saymzx.scrcpy.android.entity.defaultVideoBit
 import top.saymzx.scrcpy.android.entity.defaultVideoCodec
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import java.io.IOException
 
 class SetActivity : Activity() {
   private lateinit var setActivity: ActivitySetBinding
@@ -346,7 +343,6 @@ class SetActivity : Activity() {
     Toast.makeText(this, "请不要选择Download或其他隐私位置", Toast.LENGTH_LONG).show()
   }
 
-  @SuppressLint("Range")
   override fun onActivityResult(
     requestCode: Int, resultCode: Int, resultData: Intent?
   ) {
@@ -430,10 +426,7 @@ class SetActivity : Activity() {
           }
         }
       }
-    } catch (e: FileNotFoundException) {
-      e.printStackTrace()
-    } catch (e: IOException) {
-      e.printStackTrace()
+    } catch (_: Exception) {
     }
   }
 
@@ -461,10 +454,7 @@ class SetActivity : Activity() {
           }
         }
       }
-    } catch (e: FileNotFoundException) {
-      e.printStackTrace()
-    } catch (e: IOException) {
-      e.printStackTrace()
+    } catch (_: Exception) {
     }
     return ""
   }

@@ -4,11 +4,11 @@
     <dimen name="largeFont">24sp</dimen>
     <dimen name="middleFont">18sp</dimen>
     <!--floatVideo界面-->
-    <dimen name="floatVideoBackground">24dp</dimen>
+    <dimen name="floatVideoBackground">20dp</dimen>
     <dimen name="floatVideoTitle">34dp</dimen>
     <dimen name="floatVideoBarPadding">10dp</dimen>
     <dimen name="floatVideoButtonPadding">9dp</dimen>
-    <dimen name="floatVideoNavButtonPadding">6dp</dimen>
+    <dimen name="floatVideoNavButtonPadding">8dp</dimen>
     <dimen name="floatNavMenuW">200dp</dimen>
     <dimen name="floatNavMenuH">300dp</dimen>
     <dimen name="floatVideoSmallSmall">80dp</dimen>
