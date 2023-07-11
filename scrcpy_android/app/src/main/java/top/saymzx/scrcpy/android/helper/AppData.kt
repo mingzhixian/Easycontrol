@@ -15,16 +15,11 @@ import top.saymzx.scrcpy.android.MainActivity
 import top.saymzx.scrcpy.android.entity.Device
 import java.io.File
 
-@SuppressLint("Range")
 class AppData : ViewModel() {
 
   // 是否初始化
   var isInit = false
 
-  // 是否显示默认设备
-  var isShowDefultDevice = false
-
-  @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity
 
   // 是否处于专注模式
@@ -37,10 +32,10 @@ class AppData : ViewModel() {
   // 公共工具库
   val publicTools = PublicTools()
 
-  // 数据库管理
+  // 数据库工具
   lateinit var dbHelper: DbHelper
 
-  // 网络管理
+  // 网络工具
   val netHelper = NetHelper()
 
   // 设备列表管理
@@ -98,6 +93,7 @@ class AppData : ViewModel() {
   }
 
   // 读取数据库设备列表
+  @SuppressLint("Range")
   private fun readDeviceList() {
     val cursor = dbHelper.readableDatabase.query("DevicesDb", null, null, null, null, null, null)
     if (cursor.moveToFirst()) {

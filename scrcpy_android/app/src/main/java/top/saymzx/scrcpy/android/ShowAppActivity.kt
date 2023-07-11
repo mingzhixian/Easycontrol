@@ -1,10 +1,14 @@
 package top.saymzx.scrcpy.android
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.Toast
 import top.saymzx.scrcpy.android.databinding.ActivityShowAppBinding
+import top.saymzx.scrcpy.android.databinding.ModeSelectBinding
 
 
 class ShowAppActivity : Activity() {
@@ -14,6 +18,14 @@ class ShowAppActivity : Activity() {
     showAppActivity = ActivityShowAppBinding.inflate(layoutInflater)
     setContentView(showAppActivity.root)
     appData.publicTools.setStatusAndNavBar(this)
+    // 设置隐私用户政策
+    setUserPriListener()
+    // 设置同意按钮
+    setAgreeListener()
+  }
+
+  // 设置隐私用户政策
+  private fun setUserPriListener() {
     // 设置隐私政策链接
     showAppActivity.showAppPrivacy.setOnClickListener {
       try {
@@ -36,10 +48,43 @@ class ShowAppActivity : Activity() {
       } catch (_: Exception) {
       }
     }
-    // 设置下一步按钮
+  }
+
+  // 设置同意按钮
+  private lateinit var modeSelectDialog: AlertDialog
+  private fun setAgreeListener() {
     showAppActivity.showAppAgree.setOnClickListener {
-      setResult(1)
-      finish()
+      // 弹窗选择模式
+      val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+      builder.setCancelable(false)
+      modeSelectDialog = builder.create()
+      modeSelectDialog.setCanceledOnTouchOutside(false)
+      modeSelectDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+      val modeSelectBinding = ModeSelectBinding.inflate(LayoutInflater.from(this))
+      modeSelectDialog.setView(modeSelectBinding.root)
+      modeSelectBinding.modeSelectMaster.setOnClickListener {
+        saveSet(1)
+      }
+      modeSelectBinding.modeSelectSlave.setOnClickListener {
+        saveSet(0)
+      }
+      modeSelectDialog.show()
     }
+  }
+
+  // 保存设置
+  private fun saveSet(mode: Int) {
+    appData.settings.edit().apply {
+      putInt("appMode", mode)
+      putBoolean("FirstUse", false)
+      apply()
+    }
+    modeSelectDialog.cancel()
+    finish()
+  }
+
+  // 禁止返回上一级
+  override fun onBackPressed() {
+    Toast.makeText(this, "请先同意用户及隐私协议", Toast.LENGTH_SHORT).show()
   }
 }

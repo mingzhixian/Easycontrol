@@ -57,7 +57,7 @@ class PublicTools {
     val builder: AlertDialog.Builder = AlertDialog.Builder(context)
     builder.setCancelable(false)
     val loadingDialog = builder.create()
-    loadingDialog.setCanceledOnTouchOutside(false)
+    loadingDialog.setCanceledOnTouchOutside(isCanCancel)
     loadingDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     val loadingBinding = LoadingBinding.inflate(LayoutInflater.from(context))
     loadingDialog.setView(loadingBinding.root)

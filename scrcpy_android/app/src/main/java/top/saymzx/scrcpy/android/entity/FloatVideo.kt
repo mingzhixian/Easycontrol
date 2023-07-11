@@ -16,8 +16,8 @@ import top.saymzx.scrcpy.android.databinding.FloatNavBinding
 import top.saymzx.scrcpy.android.databinding.FloatVideoBinding
 import java.nio.ByteBuffer
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.sqrt
-
 
 @SuppressLint("ClickableViewAccessibility", "InternalInsetResource", "DiscouragedApi")
 class FloatVideo(
@@ -488,16 +488,31 @@ class FloatVideo(
 
   // 设置悬浮窗大小拖动按钮监听控制
   private fun setSetSizeListener() {
+    var width = 0f
+    val maxCal = appData.publicTools.dp2px(30f)
     floatVideo.floatVideoSetSize.setOnTouchListener { _, event ->
       setFocus(true)
-      if (event.actionMasked == MotionEvent.ACTION_MOVE) {
-        // 计算新大小（等比缩放）
-        val tmpWidth = event.rawX - floatVideoParams.x
-        val tmpHeight = tmpWidth * remoteVideoHeight / remoteVideoWidth
-        // 最小300个像素
-        if (tmpWidth < 300 || tmpHeight < 300) return@setOnTouchListener true
-        calculateFloatSize(tmpWidth.toInt(), tmpHeight.toInt())
-        update(true)
+      when (event.actionMasked) {
+        MotionEvent.ACTION_DOWN -> {
+          width = event.rawX - floatVideoParams.x
+        }
+
+        MotionEvent.ACTION_MOVE -> {
+          // 计算新大小（等比缩放）
+          val tmpWidth = event.rawX - floatVideoParams.x
+          val tmpHeight = tmpWidth * remoteVideoHeight / remoteVideoWidth
+          // 最小300个像素
+          if (tmpWidth < 300 || tmpHeight < 300) return@setOnTouchListener true
+          calculateFloatSize(tmpWidth.toInt(), tmpHeight.toInt())
+          if (abs(tmpWidth - width) > maxCal) {
+            width = tmpWidth
+            update(true)
+          } else update(false)
+        }
+
+        MotionEvent.ACTION_UP -> {
+          update(true)
+        }
       }
       return@setOnTouchListener true
     }

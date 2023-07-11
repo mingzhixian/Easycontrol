@@ -1,6 +1,5 @@
 package top.saymzx.scrcpy.android.helper
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.view.View
@@ -226,7 +225,6 @@ class DeviceListAdapter : BaseAdapter() {
   }
 
   //新建数据
-  @SuppressLint("NotifyDataSetChanged")
   fun newDevice(
     name: String,
     address: String,

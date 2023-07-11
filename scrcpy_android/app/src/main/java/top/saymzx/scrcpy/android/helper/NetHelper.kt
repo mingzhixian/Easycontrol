@@ -12,7 +12,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import top.saymzx.scrcpy.android.appData
 
-
 class NetHelper {
   private val okhttpClient = OkHttpClient()
 

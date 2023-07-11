@@ -22,6 +22,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.notify
+import okhttp3.internal.wait
+import okio.Buffer
 import top.saymzx.scrcpy.adb.Adb
 import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.adb.AdbStream
@@ -31,7 +34,6 @@ import top.saymzx.scrcpy.android.appData
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.LinkedBlockingQueue
 
 class Scrcpy(private val device: Device) {
 
@@ -132,7 +134,7 @@ class Scrcpy(private val device: Device) {
           stop("投屏停止", e)
         }
       }.start()
-      // 控制报文
+      // 控制
       Thread {
         android.os.Process.setThreadPriority(THREAD_PRIORITY_LOWEST)
         try {
@@ -141,7 +143,6 @@ class Scrcpy(private val device: Device) {
           stop("投屏停止", e)
         }
       }.start()
-      // 控制报文
       Thread {
         android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
@@ -154,10 +155,13 @@ class Scrcpy(private val device: Device) {
   }
 
   // 停止投屏
+  private val stopSetStatus = Object()
   fun stop(scrcpyError: String, e: Exception? = null) {
     // 防止多次调用
-    if (device.status == -1) return
-    device.status = -1
+    synchronized(stopSetStatus) {
+      if (device.status == -1) return
+      device.status = -1
+    }
     appData.isFocus = false
     appData.mainScope.launch {
       withContext(Dispatchers.Main) {
@@ -289,14 +293,14 @@ class Scrcpy(private val device: Device) {
         if (device.status == -1) return@withContext
         try {
           if (connect == 0) {
-            videoStream = adb.tcpForward(6006, true)
+            videoStream = adb.localSocketForward("scrcpy_android", true)
             connect = 1
           }
           if (connect == 1) {
-            audioStream = adb.tcpForward(6006, true)
+            audioStream = adb.localSocketForward("scrcpy_android", true)
             connect = 2
           }
-          controlStream = adb.tcpForward(6006, true)
+          controlStream = adb.localSocketForward("scrcpy_android", true)
           break
         } catch (_: Exception) {
           Log.i("Scrcpy", "连接失败，再次尝试")
@@ -317,8 +321,10 @@ class Scrcpy(private val device: Device) {
       // 显示悬浮窗
       floatVideo =
         FloatVideo(device, remoteVideoWidth, remoteVideoHeight) {
-          hasControls = true
-          controls.offer(it)
+          controls.write(it)
+          synchronized(controls) {
+            controls.notify()
+          }
         }
     }
     floatVideo.show()
@@ -353,8 +359,12 @@ class Scrcpy(private val device: Device) {
     // 启动解码器
     videoDecodec.start()
     // 解析首帧，解决开始黑屏问题
-    pushCodec(videoDecodec, csd0)
-    pushCodec(videoDecodec, csd1)
+    var inIndex = videoDecodec.dequeueInputBuffer(-1)
+    videoDecodec.getInputBuffer(inIndex)!!.put(csd0)
+    videoDecodec.queueInputBuffer(inIndex, 0, csd0.size, 0, 0)
+    inIndex = videoDecodec.dequeueInputBuffer(-1)
+    videoDecodec.getInputBuffer(inIndex)!!.put(csd1)
+    videoDecodec.queueInputBuffer(inIndex, 0, csd1.size, 0, 0)
   }
 
   // 音频解码器
@@ -397,7 +407,7 @@ class Scrcpy(private val device: Device) {
   // 初始化音频播放器
   private fun setAudioTrack() {
     val audioDecodecBuild = AudioTrack.Builder()
-    val sampleRate = 48000
+    val sampleRate = 44100
     val minBufferSize = AudioTrack.getMinBufferSize(
       sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT
     )
@@ -430,13 +440,18 @@ class Scrcpy(private val device: Device) {
     // 开始解码
     while (device.status == 1) {
       val buffer = readFrame(stream)
-      pushCodec(codec, buffer)
-      // 连续4个空包检测是否熄屏了
-      if (buffer.size < 150) {
-        zeroFrameNum++
-        if (zeroFrameNum > 4) {
-          zeroFrameNum = 0
-          checkScreenOff()
+      val inIndex = codec.dequeueInputBuffer(-1)
+      if (inIndex >= 0) {
+        codec.getInputBuffer(inIndex)!!.put(buffer)
+        // 提交解码器解码
+        codec.queueInputBuffer(inIndex, 0, buffer.size, 0, 0)
+        // 连续4个空包检测是否熄屏了
+        if (buffer.size < 150) {
+          zeroFrameNum++
+          if (zeroFrameNum > 4) {
+            zeroFrameNum = 0
+            checkScreenOff()
+          }
         }
       }
     }
@@ -448,7 +463,7 @@ class Scrcpy(private val device: Device) {
     val bufferInfo = MediaCodec.BufferInfo()
     while (device.status == 1) {
       // 找到已完成的输出缓冲区
-      outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, 0)
+      outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, -1)
       if (outIndex >= 0) {
         // 是否需要检查旋转(仍需要检查，因为可能是90°和270°的旋转)
         if (checkRotationNotification) {
@@ -462,9 +477,6 @@ class Scrcpy(private val device: Device) {
           }
         }
         videoDecodec.releaseOutputBuffer(outIndex, true)
-      } else if (outIndex != MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-        Thread.sleep(4)
-        continue
       }
     }
   }
@@ -473,7 +485,13 @@ class Scrcpy(private val device: Device) {
   private fun decodeAudioOutput() {
     var outIndex: Int
     val bufferInfo = MediaCodec.BufferInfo()
+    var loopNum = 0
     while (device.status == 1) {
+      loopNum++
+      if (loopNum > 200) {
+        loopNum = 0
+        checkClipBoard()
+      }
       // 找到已完成的输出缓冲区
       outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, 0)
       if (outIndex >= 0) {
@@ -534,39 +552,14 @@ class Scrcpy(private val device: Device) {
   }
 
   // 控制报文输出
-  private val controls = LinkedBlockingQueue<ByteArray>()
-  private var hasControls = false
+  private val controls = Buffer()
   private fun setControlOutput() {
-    var loopNum = 0
     while (device.status == 1) {
-      loopNum++
-      if (loopNum > 200) {
-        loopNum = 0
-        checkClipBoard()
+      if (!controls.request(1)) synchronized(controls) {
+        controls.wait()
       }
-      if (!hasControls) {
-        Thread.sleep(4)
-        continue
-      }
-      val buffer = controls.poll()
-      if (buffer == null) {
-        hasControls = false
-        continue
-      }
-      controlStream.write(buffer)
+      controlStream.write(controls.readByteArray())
     }
-  }
-
-  // 向解码器输入
-  private fun pushCodec(codec: MediaCodec, buffer: ByteArray) {
-    var inIndex: Int
-    // 找到一个空的输入缓冲区
-    do {
-      inIndex = codec.dequeueInputBuffer(0)
-    } while (inIndex <= 0)
-    codec.getInputBuffer(inIndex)!!.put(buffer)
-    // 提交解码器解码
-    codec.queueInputBuffer(inIndex, 0, buffer.size, 0, 0)
   }
 
   // 防止被控端熄屏
@@ -579,7 +572,8 @@ class Scrcpy(private val device: Device) {
           if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn", true).contains("mScreenOn=true")) {
             isScreenOning = true
             runAdbCmd("input keyevent 26", false)
-            delay(500)
+            delay(1000)
+            setPowerOff()
             isScreenOning = false
           }
         } catch (_: Exception) {
@@ -591,8 +585,10 @@ class Scrcpy(private val device: Device) {
 
   // 被控端熄屏
   private fun setPowerOff() {
-    hasControls = true
-    controls.offer(byteArrayOf(10, 0))
+    controls.write(byteArrayOf(10, 0))
+    synchronized(controls) {
+      controls.notify()
+    }
   }
 
   // 同步本机剪切板至被控端
@@ -617,8 +613,10 @@ class Scrcpy(private val device: Device) {
     byteBuffer.putInt(textByteArray.size)
     byteBuffer.put(textByteArray)
     byteBuffer.flip()
-    hasControls = true
-    controls.offer(byteBuffer.array())
+    controls.write(byteBuffer)
+    synchronized(controls) {
+      controls.notify()
+    }
   }
 
   // 从socket流中解析数据
