@@ -9,6 +9,10 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.*
 import androidx.core.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import top.saymzx.scrcpy.android.FullScreenActivity
 import top.saymzx.scrcpy.android.R
 import top.saymzx.scrcpy.android.appData
@@ -104,7 +108,7 @@ class FloatVideo(
       val tmp =
         sqrt((localVideoWidth * localVideoHeight).toDouble() / (appData.deviceWidth * appData.deviceHeight).toDouble())
       // 整体背景圆角
-      val floatVideoShape = floatVideo.root.background as GradientDrawable
+      val floatVideoShape = floatVideo.floatVideo.background as GradientDrawable
       floatVideoShape.cornerRadius =
         appData.main.resources.getDimension(R.dimen.floatVideoBackground) * tmp.toFloat()
       // 上空白
@@ -135,6 +139,8 @@ class FloatVideo(
         (appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt()
       floatVideo.floatVideoStop.layoutParams = floatVideoStopLayoutParams
       floatVideo.floatVideoStop.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoButtonPadding) * tmp).toInt())
+      // 刷新率
+      floatVideo.floatVideoFps.setPadding((appData.main.resources.getDimension(R.dimen.floatVideoTitle) * tmp).toInt())
       // 最近任务键
       val floatVideoSwitchLayoutParams = floatVideo.floatVideoSwitch.layoutParams
       floatVideoSwitchLayoutParams.height =
@@ -616,7 +622,7 @@ class FloatVideo(
     var xx = 0
     var yy = 0
     val floatNavSize =
-      appData.publicTools.dp2px(appData.settings.getInt("floatNavSize", 55).toFloat()).toInt()
+      appData.publicTools.dp2px(appData.setValue.floatNavSize.toFloat()).toInt()
     // 导航悬浮球Layout
     floatNavParams = WindowManager.LayoutParams().apply {
       type =
@@ -637,6 +643,7 @@ class FloatVideo(
     floatNav.root.setOnTouchListener { _, event ->
       when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
+          floatNav.floatNavImage.alpha = 1f
           xx = event.rawX.toInt()
           yy = event.rawY.toInt()
           gestureDetector.onTouchEvent(event)
@@ -663,6 +670,12 @@ class FloatVideo(
 
         else -> {
           gestureDetector.onTouchEvent(event)
+          appData.mainScope.launch {
+            delay(2000)
+            withContext(Dispatchers.Main) {
+              floatNav.floatNavImage.alpha = 0.4f
+            }
+          }
           return@setOnTouchListener true
         }
       }
@@ -700,7 +713,7 @@ class FloatVideo(
   // 回到导航球模式
   private fun backFloatNav() {
     val floatNavSize =
-      appData.publicTools.dp2px(appData.settings.getInt("floatNavSize", 55).toFloat()).toInt()
+      appData.publicTools.dp2px(appData.setValue.floatNavSize.toFloat()).toInt()
     floatNavParams.width = floatNavSize
     floatNavParams.height = floatNavSize
     appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)

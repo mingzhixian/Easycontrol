@@ -1,27 +1,20 @@
 package top.saymzx.scrcpy.android.entity
 
 import org.json.JSONObject
-
-var defaultVideoCodec = "h264"
-var defaultAudioCodec = "opus"
-var defaultMaxSize = 1920
-var defaultFps = 60
-var defaultVideoBit = 8000000
-var defaultSetResolution = true
-var defaultFull = true
+import top.saymzx.scrcpy.android.appData
 
 class Device() {
   var name: String = ""
   var address: String = ""
   var port: Int = 0
-  var videoCodec: String = defaultVideoCodec
-  var audioCodec: String = defaultAudioCodec
-  var maxSize: Int = defaultMaxSize
-  var fps: Int = defaultFps
-  var videoBit: Int = defaultVideoBit
-  var setResolution: Boolean = defaultSetResolution
+  var videoCodec: String = appData.setValue.defaultVideoCodec
+  var audioCodec: String = appData.setValue.defaultAudioCodec
+  var maxSize: Int = appData.setValue.defaultMaxSize
+  var fps: Int = appData.setValue.defaultFps
+  var videoBit: Int = appData.setValue.defaultVideoBit
+  var setResolution: Boolean = appData.setValue.defaultSetResolution
 
-  var isFull = defaultFull
+  var isFull = appData.setValue.defaultFull
   var status = -1 // -1为停止状态，0为准备中，1为投屏中
   var scrcpy: Scrcpy? = null
 

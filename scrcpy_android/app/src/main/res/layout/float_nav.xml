@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/float_nav"
+        android:alpha="0.4"
         android:visibility="visible" />
 
     <LinearLayout

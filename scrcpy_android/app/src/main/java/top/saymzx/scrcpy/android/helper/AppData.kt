@@ -8,11 +8,11 @@ import android.content.pm.ActivityInfo
 import android.util.DisplayMetrics
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.MainScope
-import okhttp3.OkHttpClient
 import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.BuildConfig
 import top.saymzx.scrcpy.android.MainActivity
 import top.saymzx.scrcpy.android.entity.Device
+import top.saymzx.scrcpy.android.entity.SetValue
 import java.io.File
 
 class AppData : ViewModel() {
@@ -20,6 +20,7 @@ class AppData : ViewModel() {
   // 是否初始化
   var isInit = false
 
+  @SuppressLint("StaticFieldLeak")
   lateinit var main: MainActivity
 
   // 是否处于专注模式
@@ -57,9 +58,7 @@ class AppData : ViewModel() {
 
   // 设置值
   lateinit var settings: SharedPreferences
-
-  // OKHTTP
-  var okhttpClient = OkHttpClient()
+  val setValue = SetValue()
 
   // 当前版本号
   val versionCode = BuildConfig.VERSION_CODE
@@ -78,6 +77,8 @@ class AppData : ViewModel() {
     readDeviceList()
     // 读取密钥文件
     readKeyFiles()
+    // 读取设置值
+    setValue.readSetValue()
     // 剪切板管理
     clipBorad = main.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
   }

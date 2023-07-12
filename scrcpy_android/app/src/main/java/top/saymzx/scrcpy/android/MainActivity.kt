@@ -23,13 +23,6 @@ import top.saymzx.scrcpy.android.databinding.ActivityMainBinding
 import top.saymzx.scrcpy.android.databinding.AddDeviceBinding
 import top.saymzx.scrcpy.android.databinding.EditPortBinding
 import top.saymzx.scrcpy.android.entity.Scrcpy
-import top.saymzx.scrcpy.android.entity.defaultAudioCodec
-import top.saymzx.scrcpy.android.entity.defaultFps
-import top.saymzx.scrcpy.android.entity.defaultFull
-import top.saymzx.scrcpy.android.entity.defaultMaxSize
-import top.saymzx.scrcpy.android.entity.defaultSetResolution
-import top.saymzx.scrcpy.android.entity.defaultVideoBit
-import top.saymzx.scrcpy.android.entity.defaultVideoCodec
 import top.saymzx.scrcpy.android.helper.AppData
 
 lateinit var appData: AppData
@@ -72,11 +65,13 @@ class MainActivity : Activity(), ViewModelStoreOwner {
 
   // 选择模式
   private fun readMode() {
-    if (appData.settings.getInt("appMode", 1) == 1) {
+    if (appData.setValue.appMode== 1) {
       asMaster()
     } else {
       asSlave()
     }
+    // 检查更新
+    if (appData.setValue.checkUpdate) checkUpdate()
   }
 
   // 作为控制端
@@ -91,18 +86,13 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     setAddDeviceListener()
     // 设置按钮监听
     setSetButtonListener()
-    // 读取默认参数
-    readDeviceDefault()
-    // 检查更新
-    checkUpdate()
   }
 
   // 启动默认设备
   private fun startDefault() {
-    val defalueDevice = appData.settings.getString("DefaultDevice", "")
-    if (defalueDevice != "") {
+    if (appData.setValue.defaultDevice != "") {
       for (i in appData.devices) {
-        if (i.name == defalueDevice) {
+        if (i.name == appData.setValue.defaultDevice) {
           if (i.status == -1) {
             i.scrcpy = Scrcpy(i)
             i.scrcpy!!.start()
@@ -148,39 +138,40 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.maxSizeItems))
       addDeviceView.addDeviceMaxSize.setSelection(
         appData.publicTools.getStringIndex(
-          defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
+          appData.setValue.defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
         )
       )
       addDeviceView.addDeviceFps.adapter =
         ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.fpsItems))
       addDeviceView.addDeviceFps.setSelection(
         appData.publicTools.getStringIndex(
-          defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
+          appData.setValue.defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
         )
       )
       addDeviceView.addDeviceVideoBit.adapter =
         ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoBitItems2))
       addDeviceView.addDeviceVideoBit.setSelection(
         appData.publicTools.getStringIndex(
-          defaultVideoBit.toString(), resources.getStringArray(R.array.videoBitItems1)
+          appData.setValue.defaultVideoBit.toString(),
+          resources.getStringArray(R.array.videoBitItems1)
         )
       )
       addDeviceView.addDeviceVideoCodec.adapter =
         ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoCodecItems))
       addDeviceView.addDeviceVideoCodec.setSelection(
         appData.publicTools.getStringIndex(
-          defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
+          appData.setValue.defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
         )
       )
       addDeviceView.addDeviceAudioCodec.adapter =
         ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.audioCodecItems))
       addDeviceView.addDeviceAudioCodec.setSelection(
         appData.publicTools.getStringIndex(
-          defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
+          appData.setValue.defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
         )
       )
       addDeviceView.addDeviceSetResolution.isChecked =
-        defaultSetResolution
+        appData.setValue.defaultSetResolution
       // 是否显示高级选项
       addDeviceView.addDeviceIsOptions.setOnClickListener {
         addDeviceView.addDeviceOptions.visibility =
@@ -221,17 +212,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     }
   }
 
-  // 读取默认参数
-  private fun readDeviceDefault() {
-    defaultVideoCodec = appData.settings.getString("defaultVideoCodec", "h264").toString()
-    defaultAudioCodec = appData.settings.getString("defaultAudioCodec", "opus").toString()
-    defaultMaxSize = appData.settings.getInt("defaultMaxSize", 1920)
-    defaultFps = appData.settings.getInt("defaultFps", 60)
-    defaultVideoBit = appData.settings.getInt("defaultVideoBit", 8000000)
-    defaultSetResolution = appData.settings.getBoolean("defaultSetResolution", true)
-    defaultFull = appData.settings.getBoolean("defaultFull", false)
-  }
-
   // 检查更新
   private fun checkUpdate() {
     appData.netHelper.getJson("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest") {
@@ -251,7 +231,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     mainActivity.addDevice.visibility = View.GONE
     mainActivity.set.visibility = View.GONE
     // 要求用户输入ADB端口
-    if (!appData.settings.getBoolean("isSetSlaveAdbPort", false)) setSlaveAdbPort()
+    if (!appData.setValue.isSetSlaveAdbPort) setSlaveAdbPort()
     else slaveBack()
   }
 
@@ -266,14 +246,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     editPortDialog.setView(editPortBinding.root)
     // 设置监听
     editPortBinding.editPortOk.setOnClickListener {
-      appData.settings.edit().apply {
-        putBoolean("isSetSlaveAdbPort", true)
-        putInt(
-          "slaveAdbPort",
-          editPortBinding.editPortPort.text.toString().toInt()
-        )
-        apply()
-      }
+      appData.setValue.putIsSetSlaveAdbPort(true)
+      appData.setValue.putSlaveAdbPort(editPortBinding.editPortPort.text.toString().toInt())
       editPortDialog.cancel()
       slaveBack()
     }
@@ -287,7 +261,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
         try {
           val adb = Adb(
             "127.0.0.1",
-            appData.settings.getInt("slaveAdbPort", 5555),
+            appData.setValue.slaveAdbPort,
             AdbKeyPair.read(appData.privateKey, appData.publicKey)
           )
           adb.runAdbCmd(

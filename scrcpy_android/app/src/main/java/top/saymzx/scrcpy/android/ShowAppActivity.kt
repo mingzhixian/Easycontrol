@@ -75,10 +75,10 @@ class ShowAppActivity : Activity() {
   // 保存设置
   private fun saveSet(mode: Int) {
     appData.settings.edit().apply {
-      putInt("appMode", mode)
       putBoolean("FirstUse", false)
       apply()
     }
+    appData.setValue.putAppMode(mode)
     modeSelectDialog.cancel()
     finish()
   }
