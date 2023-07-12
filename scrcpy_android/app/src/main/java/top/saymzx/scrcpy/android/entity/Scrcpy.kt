@@ -61,10 +61,13 @@ class Scrcpy(private val device: Device) {
   // 剪切板
   private var clipBoardText = ""
 
+  // 刷新率
+  private var fps = 0
+
   // 开始投屏
   private lateinit var alert: AlertDialog
   fun start() {
-    device.isFull = defaultFull
+    device.isFull = appData.setValue.defaultFull
     device.status = 0
     // 显示加载中
     alert = appData.publicTools.showLoading("连接中...", appData.main, true) {
@@ -151,6 +154,20 @@ class Scrcpy(private val device: Device) {
           stop("投屏停止", e)
         }
       }.start()
+      // 显示刷新率
+      if (appData.setValue.showFps) {
+        launch {
+          try {
+            floatVideo.floatVideo.floatVideoFps.text = "0"
+            while (device.status == 1) {
+              delay(1000)
+              floatVideo.floatVideo.floatVideoFps.text = fps.toString()
+              fps = 0
+            }
+          } catch (_: Exception) {
+          }
+        }
+      }
     }
   }
 
@@ -461,6 +478,7 @@ class Scrcpy(private val device: Device) {
   private fun decodeVideoOutput() {
     var outIndex: Int
     val bufferInfo = MediaCodec.BufferInfo()
+    val showFps = appData.setValue.showFps
     while (device.status == 1) {
       // 找到已完成的输出缓冲区
       outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, -1)
@@ -477,6 +495,7 @@ class Scrcpy(private val device: Device) {
           }
         }
         videoDecodec.releaseOutputBuffer(outIndex, true)
+        if (showFps) fps++
       }
     }
   }
@@ -585,9 +604,11 @@ class Scrcpy(private val device: Device) {
 
   // 被控端熄屏
   private fun setPowerOff() {
-    controls.write(byteArrayOf(10, 0))
-    synchronized(controls) {
-      controls.notify()
+    if (appData.setValue.slaveTurnOffScreen) {
+      controls.write(byteArrayOf(10, 0))
+      synchronized(controls) {
+        controls.notify()
+      }
     }
   }
 

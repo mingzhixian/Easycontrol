@@ -11,16 +11,10 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import org.json.JSONArray
+import org.json.JSONObject
 import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.databinding.ActivitySetBinding
 import top.saymzx.scrcpy.android.entity.Device
-import top.saymzx.scrcpy.android.entity.defaultAudioCodec
-import top.saymzx.scrcpy.android.entity.defaultFps
-import top.saymzx.scrcpy.android.entity.defaultFull
-import top.saymzx.scrcpy.android.entity.defaultMaxSize
-import top.saymzx.scrcpy.android.entity.defaultSetResolution
-import top.saymzx.scrcpy.android.entity.defaultVideoBit
-import top.saymzx.scrcpy.android.entity.defaultVideoCodec
 import java.io.File
 import java.io.FileOutputStream
 
@@ -43,9 +37,12 @@ class SetActivity : Activity() {
     setDefaultVideoBitListener()
     setDefaultSetResolutionListener()
     // 显示
+    setSlaveTurnOffScreenListener()
     setDefaultFullListener()
     setFloatNavSizeListener()
+    setShowFps()
     // 其他
+    setCheckUpdateListener()
     setClearDefultListener()
     setRenewKeyListener()
     // 备份恢复
@@ -64,46 +61,50 @@ class SetActivity : Activity() {
       ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoCodecItems))
     setActivity.setDefaultVideoCodec.setSelection(
       appData.publicTools.getStringIndex(
-        defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
+        appData.setValue.defaultVideoCodec, resources.getStringArray(R.array.videoCodecItems)
       )
     )
     setActivity.setDefaultAudioCodec.adapter =
       ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.audioCodecItems))
     setActivity.setDefaultAudioCodec.setSelection(
       appData.publicTools.getStringIndex(
-        defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
+        appData.setValue.defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
       )
     )
     setActivity.setDefaultMaxSize.adapter =
       ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.maxSizeItems))
     setActivity.setDefaultMaxSize.setSelection(
       appData.publicTools.getStringIndex(
-        defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
+        appData.setValue.defaultMaxSize.toString(), resources.getStringArray(R.array.maxSizeItems)
       )
     )
     setActivity.setDefaultFps.adapter =
       ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.fpsItems))
     setActivity.setDefaultFps.setSelection(
       appData.publicTools.getStringIndex(
-        defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
+        appData.setValue.defaultFps.toString(), resources.getStringArray(R.array.fpsItems)
       )
     )
     setActivity.setDefaultVideoBit.adapter =
       ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoBitItems2))
     setActivity.setDefaultVideoBit.setSelection(
       appData.publicTools.getStringIndex(
-        defaultVideoBit.toString(), resources.getStringArray(R.array.videoBitItems1)
+        appData.setValue.defaultVideoBit.toString(),
+        resources.getStringArray(R.array.videoBitItems1)
       )
     )
-    setActivity.setDefaultSetResolution.isChecked = defaultSetResolution
-    setActivity.setDefaultDefaultFull.isChecked = defaultFull
-    val progress = appData.settings.getInt("floatNavSize", 55)
+    setActivity.setDefaultSetResolution.isChecked = appData.setValue.defaultSetResolution
+    setActivity.setSlaveTurnOffScreen.isChecked = appData.setValue.slaveTurnOffScreen
+    setActivity.setDefaultDefaultFull.isChecked = appData.setValue.defaultFull
+    val progress = appData.setValue.floatNavSize
     setActivity.setFloatNavSize.progress = progress - 35
     val preview = setActivity.setFloatNavPreview
     preview.layoutParams.apply {
       this.height = appData.publicTools.dp2px(progress.toFloat()).toInt()
       preview.layoutParams = this
     }
+    setActivity.setShowFps.isChecked = appData.setValue.showFps
+    setActivity.setCheckUpdate.isChecked = appData.setValue.checkUpdate
   }
 
   // 设置返回按钮监听
@@ -118,12 +119,7 @@ class SetActivity : Activity() {
     val view = setActivity.setDefaultVideoCodec
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val item = view.selectedItem.toString()
-        defaultVideoCodec = item
-        appData.settings.edit().apply {
-          putString("defaultVideoCodec", item)
-          apply()
-        }
+        appData.setValue.putDefaultVideoCodec(view.selectedItem.toString())
       }
 
       override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -137,12 +133,7 @@ class SetActivity : Activity() {
     val view = setActivity.setDefaultAudioCodec
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val item = view.selectedItem.toString()
-        defaultAudioCodec = item
-        appData.settings.edit().apply {
-          putString("defaultAudioCodec", item)
-          apply()
-        }
+        appData.setValue.putDefaultAudioCodec(view.selectedItem.toString())
       }
 
       override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -156,12 +147,7 @@ class SetActivity : Activity() {
     val view = setActivity.setDefaultMaxSize
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val item = view.selectedItem.toString()
-        defaultMaxSize = item.toInt()
-        appData.settings.edit().apply {
-          putInt("defaultMaxSize", item.toInt())
-          apply()
-        }
+        appData.setValue.putDefaultMaxSize(view.selectedItem.toString().toInt())
       }
 
       override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -176,12 +162,7 @@ class SetActivity : Activity() {
     val view = setActivity.setDefaultFps
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        val item = view.selectedItem.toString()
-        defaultFps = item.toInt()
-        appData.settings.edit().apply {
-          putInt("defaultFps", item.toInt())
-          apply()
-        }
+        appData.setValue.putDefaultFps(view.selectedItem.toString().toInt())
       }
 
       override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -195,12 +176,7 @@ class SetActivity : Activity() {
     val view = setActivity.setDefaultVideoBit
     view.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        defaultVideoBit =
-          resources.getStringArray(R.array.videoBitItems1)[view.selectedItemPosition].toInt()
-        appData.settings.edit().apply {
-          putInt("defaultVideoBit", defaultVideoBit)
-          apply()
-        }
+        appData.setValue.putDefaultVideoBit(resources.getStringArray(R.array.videoBitItems1)[view.selectedItemPosition].toInt())
       }
 
       override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -212,22 +188,21 @@ class SetActivity : Activity() {
   // 设置是否修改分辨率监听
   private fun setDefaultSetResolutionListener() {
     setActivity.setDefaultSetResolution.setOnCheckedChangeListener { _, checked ->
-      defaultSetResolution = checked
-      appData.settings.edit().apply {
-        putBoolean("defaultSetResolution", checked)
-        apply()
-      }
+      appData.setValue.putDefaultSetResolution(checked)
+    }
+  }
+
+  // 设置被控端是否熄屏
+  private fun setSlaveTurnOffScreenListener() {
+    setActivity.setSlaveTurnOffScreen.setOnCheckedChangeListener { _, checked ->
+      appData.setValue.putSlaveTurnOffScreen(checked)
     }
   }
 
   // 设置是否全屏监听
   private fun setDefaultFullListener() {
     setActivity.setDefaultDefaultFull.setOnCheckedChangeListener { _, checked ->
-      defaultFull = checked
-      appData.settings.edit().apply {
-        putBoolean("defaultFull", checked)
-        apply()
-      }
+      appData.setValue.putDefaultFull(checked)
     }
   }
 
@@ -249,22 +224,30 @@ class SetActivity : Activity() {
       }
 
       override fun onStopTrackingTouch(p0: SeekBar?) {
-        appData.settings.edit().apply {
-          putInt("floatNavSize", progress)
-          apply()
-        }
+        appData.setValue.putFloatNavSize(progress)
       }
 
     })
   }
 
+  // 是否显示刷新率
+  private fun setShowFps() {
+    setActivity.setShowFps.setOnCheckedChangeListener { _, checked ->
+      appData.setValue.putShowFps(checked)
+    }
+  }
+
+  // 设置是否检查更新
+  private fun setCheckUpdateListener() {
+    setActivity.setCheckUpdate.setOnCheckedChangeListener { _, checked ->
+      appData.setValue.putCheckUpdate(checked)
+    }
+  }
+
   // 设置清除默认设备按钮监听
   private fun setClearDefultListener() {
     setActivity.setClearDefult.setOnClickListener {
-      appData.settings.edit().apply {
-        putString("DefaultDevice", "")
-        apply()
-      }
+      appData.setValue.putDefaultDevice("")
       Toast.makeText(this, "已清除", Toast.LENGTH_SHORT).show()
     }
   }
@@ -353,56 +336,69 @@ class SetActivity : Activity() {
           Toast.makeText(this, "空地址", Toast.LENGTH_SHORT).show()
           return
         }
-        when (requestCode) {
-          // 密钥导出
-          1 -> {
-            val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
-            val privateKeyUri = privateKeyDoc?.uri ?: documentFile.createFile(
-              "scrcpy/key", "scrcpy_private.key"
-            )!!.uri
-            writeToFile(appData.privateKey, privateKeyUri, 2)
-            val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
-            val publicKeyUri =
-              publicKeyDoc?.uri ?: documentFile.createFile("scrcpy/key", "scrcpy_public.key")!!.uri
-            writeToFile(appData.publicKey, publicKeyUri, 2)
-          }
-          // 密钥导入
-          2 -> {
-            val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
-            val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
-            // 检查文件是否存在
-            if (privateKeyDoc == null || publicKeyDoc == null) {
-              Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
-              return
+        try {
+          when (requestCode) {
+            // 密钥导出
+            1 -> {
+              val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
+              val privateKeyUri = privateKeyDoc?.uri ?: documentFile.createFile(
+                "scrcpy/key", "scrcpy_private.key"
+              )!!.uri
+              writeToFile(appData.privateKey, privateKeyUri, 2)
+              val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
+              val publicKeyUri =
+                publicKeyDoc?.uri ?: documentFile.createFile(
+                  "scrcpy/key",
+                  "scrcpy_public.key"
+                )!!.uri
+              writeToFile(appData.publicKey, publicKeyUri, 2)
             }
-            readFile(appData.privateKey, privateKeyDoc.uri, 2)
-            readFile(appData.publicKey, publicKeyDoc.uri, 2)
-          }
-          // Json导出
-          3 -> {
-            val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
-            val dataBaseUri = dataBaseDoc?.uri ?: documentFile.createFile(
-              "scrcpt/json", "scrcpy_database.json"
-            )!!.uri
-            val jsonArray = JSONArray()
-            for (i in appData.devices) jsonArray.put(i.toJson())
-            writeToFile(jsonArray.toString(), dataBaseUri, 1)
-          }
-          // Json导入
-          4 -> {
-            val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
-            // 检查文件是否存在
-            if (dataBaseDoc == null) {
-              Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
-              return
+            // 密钥导入
+            2 -> {
+              val privateKeyDoc = documentFile.findFile("scrcpy_private.key")
+              val publicKeyDoc = documentFile.findFile("scrcpy_public.key")
+              // 检查文件是否存在
+              if (privateKeyDoc == null || publicKeyDoc == null) {
+                Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
+                return
+              }
+              readFile(appData.privateKey, privateKeyDoc.uri, 2)
+              readFile(appData.publicKey, publicKeyDoc.uri, 2)
             }
-            val jsonArray = JSONArray(readFile(null, dataBaseDoc.uri, 1))
-            for (i in 0 until jsonArray.length()) {
-              appData.deviceListAdapter.newDevice(
-                Device(jsonArray.getJSONObject(i))
-              )
+            // Json导出
+            3 -> {
+              val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
+              val dataBaseUri = dataBaseDoc?.uri ?: documentFile.createFile(
+                "scrcpt/json", "scrcpy_database.json"
+              )!!.uri
+              val devicesJson = JSONArray()
+              for (i in appData.devices) devicesJson.put(i.toJson())
+              val setVlaueJson = appData.setValue.toJson()
+              val json = JSONObject()
+              json.put("setVlaue", setVlaueJson)
+              json.put("devices", devicesJson)
+              writeToFile(json.toString(), dataBaseUri, 1)
+            }
+            // Json导入
+            4 -> {
+              val dataBaseDoc = documentFile.findFile("scrcpy_database.json")
+              // 检查文件是否存在
+              if (dataBaseDoc == null) {
+                Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show()
+                return
+              }
+              val json = JSONObject(readFile(null, dataBaseDoc.uri, 1))
+              val devicesJson = json.getJSONArray("devices")
+              val setVlaueJson = json.getJSONObject("setVlaue")
+              for (i in 0 until devicesJson.length()) {
+                appData.deviceListAdapter.newDevice(
+                  Device(devicesJson.getJSONObject(i))
+                )
+              }
+              appData.setValue.fromJson(setVlaueJson)
             }
           }
+        } catch (_: Exception) {
         }
       }
     }

@@ -212,10 +212,7 @@ class DeviceListAdapter : BaseAdapter() {
       }
       // 设为默认
       setDeviceBinding.setDeviceDefult.setOnClickListener {
-        appData.settings.edit().apply {
-          putString("DefaultDevice", device.name)
-          apply()
-        }
+        appData.setValue.putDefaultDevice(device.name)
         dialog.cancel()
       }
       dialog.show()
