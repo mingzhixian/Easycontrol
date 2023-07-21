@@ -11,6 +11,7 @@ import kotlinx.coroutines.MainScope
 import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.BuildConfig
 import top.saymzx.scrcpy.android.MainActivity
+import top.saymzx.scrcpy.android.appData
 import top.saymzx.scrcpy.android.entity.Device
 import top.saymzx.scrcpy.android.entity.SetValue
 import java.io.File
@@ -46,6 +47,7 @@ class AppData : ViewModel() {
   val devices = ArrayList<Device>()
 
   // 密钥文件
+  lateinit var keyPair: AdbKeyPair
   lateinit var privateKey: File
   lateinit var publicKey: File
 
@@ -124,6 +126,7 @@ class AppData : ViewModel() {
     if (!privateKey.isFile || !publicKey.isFile) {
       AdbKeyPair.generate(privateKey, publicKey)
     }
+    keyPair = AdbKeyPair.read(appData.privateKey, appData.publicKey)
   }
 
 }

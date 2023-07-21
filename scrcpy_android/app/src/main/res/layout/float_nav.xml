@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/float_nav"
-        android:alpha="0.4"
+        android:alpha="0.7"
         android:visibility="visible" />
 
     <LinearLayout
@@ -38,7 +38,7 @@
 
                 <TextView
                     android:id="@+id/float_nav_back"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
                     android:paddingBottom="6dp"
@@ -48,7 +48,7 @@
 
                 <TextView
                     android:id="@+id/float_nav_switch"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
                     android:paddingBottom="6dp"
@@ -58,7 +58,7 @@
 
                 <TextView
                     android:id="@+id/float_nav_exit_full"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
                     android:paddingBottom="6dp"
@@ -68,7 +68,7 @@
 
                 <TextView
                     android:id="@+id/float_nav_exit"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
                     android:paddingBottom="6dp"

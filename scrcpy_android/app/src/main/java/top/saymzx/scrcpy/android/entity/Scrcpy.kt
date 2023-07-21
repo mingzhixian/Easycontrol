@@ -15,7 +15,6 @@ import android.media.audiofx.LoudnessEnhancer
 import android.os.Build
 import android.os.Process.THREAD_PRIORITY_LOWEST
 import android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +25,6 @@ import okhttp3.internal.notify
 import okhttp3.internal.wait
 import okio.Buffer
 import top.saymzx.scrcpy.adb.Adb
-import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.adb.AdbStream
 import top.saymzx.scrcpy.android.MainActivity
 import top.saymzx.scrcpy.android.R
@@ -36,9 +34,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 class Scrcpy(private val device: Device) {
-
-  // ip地址
-  private var ip = ""
 
   // 视频悬浮窗
   private lateinit var floatVideo: FloatVideo
@@ -74,38 +69,35 @@ class Scrcpy(private val device: Device) {
       stop("用户停止")
     }
     appData.mainScope.launch {
+      // 连接ADB
+      connectADB()
+      // 发送server
+      sendServer()
+      // 启动server
+      startServer()
+      // 连接server
+      connectServer()
+      alert.cancel()
       try {
-        // 获取IP地址
-        ip = withContext(Dispatchers.IO) {
-          Inet4Address.getByName(device.address)
-        }.hostAddress!!
-        // 发送server
-        sendServer()
-        // 转发端口
-        tcpForward()
-      } catch (e: Exception) {
-        stop("连接错误", e)
-      }
-      try {
-        alert.cancel()
         // 配置视频解码
         setVideoDecodec()
         // 配置音频解码
         setAudioDecodec()
         // 配置音频播放
         if (canAudio) setAudioTrack()
-        // 设置被控端熄屏（默认投屏后熄屏）
-        setPowerOff()
       } catch (e: Exception) {
         stop("启动错误", e)
       }
       // 投屏中
+      if (device.status < 0) return@launch
       device.status = 1
+      // 设置被控端熄屏
+      setPowerOff()
       // 视频解码
       Thread {
         android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
-          decodeInput("video")
+          decodeInputThread("video")
         } catch (e: Exception) {
           stop("投屏停止", e)
         }
@@ -113,7 +105,7 @@ class Scrcpy(private val device: Device) {
       Thread {
         android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
-          decodeVideoOutput()
+          decodeVideoOutputThread()
         } catch (e: Exception) {
           stop("投屏停止", e)
         }
@@ -123,25 +115,25 @@ class Scrcpy(private val device: Device) {
         Thread {
           android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
           try {
-            decodeInput("audio")
+            decodeInputThread("audio")
+          } catch (e: Exception) {
+            stop("投屏停止", e)
+          }
+        }.start()
+        Thread {
+          android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
+          try {
+            decodeAudioOutputThread()
           } catch (e: Exception) {
             stop("投屏停止", e)
           }
         }.start()
       }
-      Thread {
-        android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
-        try {
-          decodeAudioOutput()
-        } catch (e: Exception) {
-          stop("投屏停止", e)
-        }
-      }.start()
       // 控制
       Thread {
         android.os.Process.setThreadPriority(THREAD_PRIORITY_LOWEST)
         try {
-          setControlInput()
+          controlInputThread()
         } catch (e: Exception) {
           stop("投屏停止", e)
         }
@@ -149,7 +141,7 @@ class Scrcpy(private val device: Device) {
       Thread {
         android.os.Process.setThreadPriority(THREAD_PRIORITY_MORE_FAVORABLE)
         try {
-          setControlOutput()
+          controlOutputThread()
         } catch (e: Exception) {
           stop("投屏停止", e)
         }
@@ -230,99 +222,112 @@ class Scrcpy(private val device: Device) {
     device.scrcpy = null
     if (device.isFull) {
       val intent = Intent(appData.main, MainActivity::class.java)
+      intent.putExtra("startDefault", false)
       intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
       appData.main.startActivity(intent)
     }
   }
 
-  // 发送server
-  private suspend fun sendServer() {
-    // 连接ADB
-    withContext(Dispatchers.IO) {
-      adb =
-        Adb(ip, device.port, AdbKeyPair.read(appData.privateKey, appData.publicKey))
+  // 连接ADB
+  private suspend fun connectADB() {
+    val ip = try {
+      // 获取IP地址
+      withContext(Dispatchers.IO) {
+        Inet4Address.getByName(device.address)
+      }.hostAddress!!
+    } catch (e: Exception) {
+      stop("解析域名失败", e)
+      return
     }
-    // 修改分辨率
-    if (device.setResolution) {
-      runAdbCmd(
-        "wm size ${appData.deviceWidth}x${appData.deviceHeight}", false
-      )
-    }
-    // 停止旧服务
-    runAdbCmd(
-      "ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9",
-      false
-    )
-    // 快速启动
-    val isHaveServer =
-      runAdbCmd(" ls -l /data/local/tmp/scrcpy_server${appData.versionCode}.jar ", true)
-    if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
-      runAdbCmd("rm /data/local/tmp/scrcpy_server* ", false)
-      runAdbCmd("rm /data/local/tmp/scrcpy_server_base64 ", false)
-      val serverFileBase64 = Base64.encode(withContext(Dispatchers.IO) {
-        val server = appData.main.resources.openRawResource(R.raw.scrcpy_server)
-        val buffer = ByteArray(server.available())
-        server.read(buffer)
-        server.close()
-        buffer
-      }, 2)
-      var serverBase64part: String
-      val len: Int = serverFileBase64.size
-      var sourceOffset = 0
-      while (sourceOffset < len) {
-        if (len - sourceOffset >= 4056) {
-          val filePart = ByteArray(4056)
-          System.arraycopy(serverFileBase64!!, sourceOffset, filePart, 0, 4056)
-          sourceOffset += 4056
-          serverBase64part = String(filePart, StandardCharsets.US_ASCII)
-        } else {
-          val rem = len - sourceOffset
-          val remPart = ByteArray(rem)
-          System.arraycopy(serverFileBase64!!, sourceOffset, remPart, 0, rem)
-          sourceOffset += rem
-          serverBase64part = String(remPart, StandardCharsets.US_ASCII)
-        }
-        runAdbCmd(" echo $serverBase64part >> /data/local/tmp/scrcpy_server_base64", false)
+    try {
+      // 连接ADB
+      withContext(Dispatchers.IO) {
+        adb = Adb(ip, device.port, appData.keyPair)
       }
-      delay(100)
-      runAdbCmd(
-        "base64 -d < /data/local/tmp/scrcpy_server_base64 > /data/local/tmp/scrcpy_server${appData.versionCode}.jar && rm /data/local/tmp/scrcpy_server_base64",
-        true
-      )
-//      withContext(Dispatchers.IO) {
-//        adb.pushFile(
-//          appData.main.resources.openRawResource(R.raw.scrcpy_server),
-//          "/data/local/tmp/scrcpy_server${appData.versionCode}.jar"
-//        )
-//      }
+    } catch (e: Exception) {
+      stop("连接ADB失败", e)
+      return
     }
-    runAdbCmd(
-      "CLASSPATH=/data/local/tmp/scrcpy_server${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} audio_codec=${device.audioCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 & ",
-      false
-    )
   }
 
-  // 转发端口
-  private suspend fun tcpForward() {
+  // 发送server
+  private suspend fun sendServer() {
+    if (device.status < 0) return
+    // 尝试3次
+    var isHaveServer =
+      runAdbCmd(" ls -l /data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar ", true)
+    for (i in 0..2) {
+      if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
+        runAdbCmd("rm /data/local/tmp/scrcpy_android_server_* ", false)
+        withContext(Dispatchers.IO) {
+          adb.pushFile(
+            appData.main.resources.openRawResource(R.raw.scrcpy_server),
+            "/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar"
+          )
+        }
+        // 检查是否传送完成
+        isHaveServer =
+          runAdbCmd(
+            " ls -l /data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar ",
+            true
+          )
+        if (!(isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument"))) return
+      }
+    }
+    stop("发送Server失败")
+  }
+
+  // 启动Server
+  private suspend fun startServer() {
+    if (device.status < 0) return
+    try {
+      // 修改分辨率
+      if (device.setResolution) {
+        runAdbCmd(
+          "wm size ${appData.deviceWidth}x${appData.deviceHeight}", false
+        )
+      }
+      // 停止旧服务
+      runAdbCmd(
+        "ps -ef | grep scrcpy_android_server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9",
+        false
+      )
+      // 启动Server
+      runAdbCmd(
+        "CLASSPATH=/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} audio_codec=${device.audioCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 & ",
+        false
+      )
+    } catch (e: Exception) {
+      stop("ADB连接中断", e)
+      return
+    }
+  }
+
+  // 连接Server
+  private suspend fun connectServer() {
+    if (device.status < 0) return
     var connect = 0
     withContext(Dispatchers.IO) {
       for (i in 1..100) {
-        if (device.status == -1) return@withContext
         try {
           if (connect == 0) {
-            videoStream = adb.localSocketForward("scrcpy_android", true)
+            videoStream = adb.tcpForward(6007, true)
             connect = 1
           }
           if (connect == 1) {
-            audioStream = adb.localSocketForward("scrcpy_android", true)
+            audioStream = adb.tcpForward(6007, true)
             connect = 2
           }
-          controlStream = adb.localSocketForward("scrcpy_android", true)
+          controlStream = adb.tcpForward(6007, true)
+          connect = 3
           break
         } catch (_: Exception) {
-          Log.i("Scrcpy", "连接失败，再次尝试")
           delay(100)
         }
+      }
+      if (connect != 3) {
+        stop("连接Server失败", null)
+        return@withContext
       }
     }
   }
@@ -338,9 +343,13 @@ class Scrcpy(private val device: Device) {
       // 显示悬浮窗
       floatVideo =
         FloatVideo(device, remoteVideoWidth, remoteVideoHeight) {
-          controls.write(it)
-          synchronized(controls) {
-            controls.notify()
+          try {
+            controls.write(it)
+            synchronized(controls) {
+              controls.notify()
+            }
+          } catch (e: Exception) {
+            stop("连接断开", e)
           }
         }
     }
@@ -357,8 +366,8 @@ class Scrcpy(private val device: Device) {
     // 获取视频标识头
     val csd0 = withContext(Dispatchers.IO) { readFrame(videoStream) }
     val csd1 = withContext(Dispatchers.IO) { readFrame(videoStream) }
-    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0))
-    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1))
+    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.third))
+    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1.third))
     // 配置低延迟解码
     val codeInfo = videoDecodec.codecInfo
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -377,11 +386,11 @@ class Scrcpy(private val device: Device) {
     videoDecodec.start()
     // 解析首帧，解决开始黑屏问题
     var inIndex = videoDecodec.dequeueInputBuffer(-1)
-    videoDecodec.getInputBuffer(inIndex)!!.put(csd0)
-    videoDecodec.queueInputBuffer(inIndex, 0, csd0.size, 0, 0)
+    videoDecodec.getInputBuffer(inIndex)!!.put(csd0.third)
+    videoDecodec.queueInputBuffer(inIndex, 0, csd0.second, csd0.first, 0)
     inIndex = videoDecodec.dequeueInputBuffer(-1)
-    videoDecodec.getInputBuffer(inIndex)!!.put(csd1)
-    videoDecodec.queueInputBuffer(inIndex, 0, csd1.size, 0, 0)
+    videoDecodec.getInputBuffer(inIndex)!!.put(csd1.third)
+    videoDecodec.queueInputBuffer(inIndex, 0, csd1.second, csd1.first, 0)
   }
 
   // 音频解码器
@@ -406,7 +415,7 @@ class Scrcpy(private val device: Device) {
     // 获取音频标识头
     mediaFormat.setByteBuffer(
       "csd-0",
-      ByteBuffer.wrap(withContext(Dispatchers.IO) { readFrame(audioStream) })
+      ByteBuffer.wrap(withContext(Dispatchers.IO) { readFrame(audioStream).third })
     )
     if (device.audioCodec == "opus") {
       // csd1和csd2暂时没用到，所以默认全是用0
@@ -450,7 +459,7 @@ class Scrcpy(private val device: Device) {
   }
 
   // 输入
-  private fun decodeInput(mode: String) {
+  private fun decodeInputThread(mode: String) {
     val stream = if (mode == "video") videoStream else audioStream
     val codec = if (mode == "video") videoDecodec else audioDecodec
     var zeroFrameNum = 0
@@ -459,11 +468,11 @@ class Scrcpy(private val device: Device) {
       val buffer = readFrame(stream)
       val inIndex = codec.dequeueInputBuffer(-1)
       if (inIndex >= 0) {
-        codec.getInputBuffer(inIndex)!!.put(buffer)
+        codec.getInputBuffer(inIndex)!!.put(buffer.third)
         // 提交解码器解码
-        codec.queueInputBuffer(inIndex, 0, buffer.size, 0, 0)
+        codec.queueInputBuffer(inIndex, 0, buffer.second, buffer.first, 0)
         // 连续4个空包检测是否熄屏了
-        if (buffer.size < 150) {
+        if (buffer.second < 150) {
           zeroFrameNum++
           if (zeroFrameNum > 4) {
             zeroFrameNum = 0
@@ -475,7 +484,7 @@ class Scrcpy(private val device: Device) {
   }
 
   // 视频解码输出
-  private fun decodeVideoOutput() {
+  private fun decodeVideoOutputThread() {
     var outIndex: Int
     val bufferInfo = MediaCodec.BufferInfo()
     val showFps = appData.setValue.showFps
@@ -501,7 +510,7 @@ class Scrcpy(private val device: Device) {
   }
 
   // 音频解码输出
-  private fun decodeAudioOutput() {
+  private fun decodeAudioOutputThread() {
     var outIndex: Int
     val bufferInfo = MediaCodec.BufferInfo()
     var loopNum = 0
@@ -528,7 +537,7 @@ class Scrcpy(private val device: Device) {
   }
 
   // 检测报文输入
-  private fun setControlInput() {
+  private fun controlInputThread() {
     while (device.status == 1) {
       // 检测被控端剪切板变化
       val type =
@@ -572,7 +581,7 @@ class Scrcpy(private val device: Device) {
 
   // 控制报文输出
   private val controls = Buffer()
-  private fun setControlOutput() {
+  private fun controlOutputThread() {
     while (device.status == 1) {
       if (!controls.request(1)) synchronized(controls) {
         controls.wait()
@@ -641,17 +650,26 @@ class Scrcpy(private val device: Device) {
   }
 
   // 从socket流中解析数据
-  private fun readFrame(stream: AdbStream): ByteArray {
+  private fun readFrame(stream: AdbStream): Triple<Long, Int, ByteArray> {
     return try {
-      stream.readByteArray(stream.readInt())
+      val pts = stream.readLong()
+      val size = stream.readInt()
+      val frame = stream.readByteArray(size)
+      return Triple(pts, size, frame)
     } catch (_: IllegalStateException) {
-      ByteArray(1)
+      Triple(System.currentTimeMillis() * 1000, 1, ByteArray(1))
     }
   }
 
   // 执行adb命令
   private suspend fun runAdbCmd(cmd: String, isNeedOutput: Boolean): String {
-    return withContext(Dispatchers.IO) { adb.runAdbCmd(cmd, isNeedOutput) }
+    return withContext(Dispatchers.IO) {
+      try {
+        adb.runAdbCmd(cmd, isNeedOutput)
+      } catch (_: Exception) {
+        ""
+      }
+    }
   }
 
 }

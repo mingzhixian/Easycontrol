@@ -3,7 +3,6 @@ package top.saymzx.scrcpy.android
 import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
-import android.os.Message
 import android.widget.Toast
 import top.saymzx.scrcpy.android.databinding.ActivityFullScreenBinding
 
@@ -28,10 +27,10 @@ class FullScreenActivity : Activity() {
     val handler = Handler(this.mainLooper)
     val runnable: Runnable = object : Runnable {
       override fun run() {
-        if (appData.isFocus){
+        if (appData.isFocus) {
           if (requestedOrientation != appData.fullScreenOrientation)
             requestedOrientation = appData.fullScreenOrientation
-        }else{
+        } else {
           finish()
         }
         handler.postDelayed(this, 200)
