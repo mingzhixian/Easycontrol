@@ -18,7 +18,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.saymzx.scrcpy.adb.Adb
-import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.databinding.ActivityMainBinding
 import top.saymzx.scrcpy.android.databinding.AddDeviceBinding
 import top.saymzx.scrcpy.android.databinding.EditPortBinding
@@ -45,6 +44,8 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     if (!appData.isInit) appData.init()
     // 设置状态栏导航栏颜色沉浸
     appData.publicTools.setStatusAndNavBar(this)
+    // 获取是否需要启动默认设备
+    startDefault = intent.getBooleanExtra("startDefault", true)
     // 如果第一次使用进入软件展示页
     if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
       Intent(
@@ -52,6 +53,20 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       ), 1
     )
     else readMode()
+  }
+
+  // 进入页面
+  private var startDefault = true
+  override fun onResume() {
+    // 启动默认设备
+    if (startDefault) {
+      if (!appData.settings.getBoolean("FirstUse", true) && appData.setValue.appMode == 1) {
+        startDefault()
+      }
+    } else {
+      startDefault = true
+    }
+    super.onResume()
   }
 
   // 其他页面回调
@@ -63,9 +78,9 @@ class MainActivity : Activity(), ViewModelStoreOwner {
     super.onActivityResult(requestCode, resultCode, data)
   }
 
-  // 选择模式
+  // 软件模式
   private fun readMode() {
-    if (appData.setValue.appMode== 1) {
+    if (appData.setValue.appMode == 1) {
       asMaster()
     } else {
       asSlave()
@@ -78,8 +93,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   private fun asMaster() {
     // 检查权限
     checkPermission()
-    // 启动默认设备
-    startDefault()
     // 设置设备列表适配器
     setDevicesList()
     // 添加按钮监听
@@ -262,7 +275,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
           val adb = Adb(
             "127.0.0.1",
             appData.setValue.slaveAdbPort,
-            AdbKeyPair.read(appData.privateKey, appData.publicKey)
+            appData.keyPair
           )
           adb.runAdbCmd(
             "ps aux | grep scrcpy | grep -v grep | awk '{print \$2}' | xargs kill -9", false

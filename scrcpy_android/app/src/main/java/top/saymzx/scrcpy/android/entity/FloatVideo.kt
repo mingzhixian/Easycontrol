@@ -653,9 +653,9 @@ class FloatVideo(
         MotionEvent.ACTION_MOVE -> {
           val x = event.rawX.toInt()
           val y = event.rawY.toInt()
-          // 取消手势识别,适配一些机器将点击视作小范围移动(小于3的圆内不做处理)
+          // 取消手势识别,适配一些机器将点击视作小范围移动(小于4的圆内不做处理)
           if (xx != -1) {
-            if ((xx - x) * (xx - x) + (yy - y) * (yy - y) < 9) {
+            if ((xx - x) * (xx - x) + (yy - y) * (yy - y) < 16) {
               return@setOnTouchListener true
             }
             xx = -1
@@ -673,7 +673,7 @@ class FloatVideo(
           appData.mainScope.launch {
             delay(2000)
             withContext(Dispatchers.Main) {
-              floatNav.floatNavImage.alpha = 0.4f
+              floatNav.floatNavImage.alpha = 0.7f
             }
           }
           return@setOnTouchListener true

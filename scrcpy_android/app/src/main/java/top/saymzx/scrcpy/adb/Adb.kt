@@ -1,5 +1,10 @@
+/*
+ * 本项目为适用于安卓的ADB库，本项目大量借鉴学习了开源ADB库：Dadb，在此对该项目表示感谢
+ */
+
 package top.saymzx.scrcpy.adb
 
+import android.util.Log
 import okhttp3.internal.notifyAll
 import okhttp3.internal.wait
 import okio.Buffer
@@ -43,7 +48,9 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
     // 最大承载长度
     adbWriter.maxPayloadSize = message.arg1
     // 开始读写线程
-    Thread { readAdb() }.start()
+    val thread = Thread { readAdbThread() }
+    thread.priority = Thread.MAX_PRIORITY
+    thread.start()
   }
 
   // 打开一个连接流
@@ -60,23 +67,26 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
   }
 
   fun pushFile(file: InputStream, remotePath: String) {
-    val pushStream = open("sync:", true)
-    val remote = "$remotePath,${33206}"
-    pushStream.write(writePacket("SEND", remote.length))
-    pushStream.write(remote.toByteArray())
-    val byteArray = ByteArray(adbWriter.maxPayloadSize - 512)
-    while (true) {
-      val len = file.read(byteArray, 0, byteArray.size)
-      if (len == -1) break
-      pushStream.write(writePacket("DATA", len))
-      pushStream.write(byteArray.sliceArray(0..len))
+    val pushStream = open("sync:start a SYNC service", true)
+    val sendString = "$remotePath,33206"
+    pushStream.write(createSendPacket("SEND", sendString.length) + sendString.toByteArray())
+    val byteArray = ByteArray(60000)
+    var len = file.read(byteArray, 0, byteArray.size)
+    do {
+      var tmpByteArray = createSendPacket("DATA", len) + byteArray.sliceArray(0 until len)
+      if (len < byteArray.size) {
+        tmpByteArray += createSendPacket("DONE", System.currentTimeMillis().toInt())
+      }
+      pushStream.write(tmpByteArray)
+      len = file.read(byteArray, 0, byteArray.size)
+    } while (len > 0)
+    pushStream.write(createSendPacket("QUIT", 0))
+    synchronized(pushStream) {
+      pushStream.wait()
     }
-    pushStream.write(writePacket("DONE", (System.currentTimeMillis() / 1000).toInt()))
-    pushStream.readByte()
-    pushStream.write(writePacket("QUIT", 0))
   }
 
-  private fun writePacket(id: String, arg: Int): ByteArray {
+  private fun createSendPacket(id: String, arg: Int): ByteArray {
     val tmpBuffer = Buffer()
     tmpBuffer.clear()
     tmpBuffer.writeString(id, StandardCharsets.UTF_8)
@@ -105,10 +115,11 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
   fun tcpForward(port: Int, isNeedSource: Boolean): AdbStream = open("tcp:$port", isNeedSource)
 
-  fun localSocketForward(socketName: String, isNeedSource: Boolean): AdbStream = open("localabstract:$socketName", isNeedSource)
+  fun localSocketForward(socketName: String, isNeedSource: Boolean): AdbStream =
+    open("localabstract:$socketName", isNeedSource)
 
   // 读取线程
-  private fun readAdb() {
+  private fun readAdbThread() {
     try {
       while (true) {
         val message = adbReader.readMessage()
@@ -123,10 +134,7 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
                 stream.notifyAll()
               }
             }
-            // 可读写
-            synchronized(stream.canWrite) {
-              stream.canWrite.notify()
-            }
+            synchronized(stream.canWrite) { stream.canWrite.notify() }
           }
 
           Constants.CMD_WRTE -> {

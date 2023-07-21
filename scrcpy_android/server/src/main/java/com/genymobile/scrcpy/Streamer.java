@@ -95,6 +95,7 @@ public final class Streamer {
 //        }
 //
 //        headerBuffer.putLong(ptsAndFlags);
+    headerBuffer.putLong(pts);
     headerBuffer.putInt(packetSize);
     headerBuffer.flip();
     IO.writeFully(fd, headerBuffer);
