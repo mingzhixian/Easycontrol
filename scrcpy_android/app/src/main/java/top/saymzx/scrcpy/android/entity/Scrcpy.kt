@@ -271,7 +271,8 @@ class Scrcpy(private val device: Device) {
             " ls -l /data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar ",
             true
           )
-        if (!(isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument"))) return
+      } else {
+        return
       }
     }
     stop("发送Server失败")
