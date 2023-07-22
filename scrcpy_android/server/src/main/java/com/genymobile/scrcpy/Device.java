@@ -206,9 +206,13 @@ public final class Device {
     }
     Rect contentRect = screenInfo.getContentRect();
     Point point = devicePosition.getPoint();
-    int convertedX = contentRect.left + point.getX() * contentRect.width() / unlockedVideoSize.getWidth();
-    int convertedY = contentRect.top + point.getY() * contentRect.height() / unlockedVideoSize.getHeight();
-    return new Point(convertedX, convertedY);
+    try {
+      int convertedX = contentRect.left + point.getX() * contentRect.width() / unlockedVideoSize.getWidth();
+      int convertedY = contentRect.top + point.getY() * contentRect.height() / unlockedVideoSize.getHeight();
+      return new Point(convertedX, convertedY);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   public static String getDeviceName() {
