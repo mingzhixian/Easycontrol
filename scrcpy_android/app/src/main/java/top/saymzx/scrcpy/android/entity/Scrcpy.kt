@@ -472,10 +472,10 @@ class Scrcpy(private val device: Device) {
         codec.getInputBuffer(inIndex)!!.put(buffer.third)
         // 提交解码器解码
         codec.queueInputBuffer(inIndex, 0, buffer.second, buffer.first, 0)
-        // 连续4个空包检测是否熄屏了
+        // 连续8个空包检测是否熄屏了
         if (buffer.second < 150) {
           zeroFrameNum++
-          if (zeroFrameNum > 4) {
+          if (zeroFrameNum > 7) {
             zeroFrameNum = 0
             checkScreenOff()
           }
@@ -598,13 +598,14 @@ class Scrcpy(private val device: Device) {
     if (!isScreenOning) {
       appData.mainScope.launch {
         try {
+          isScreenOning = true
           if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn", true).contains("mScreenOn=true")) {
-            isScreenOning = true
             runAdbCmd("input keyevent 26", false)
             delay(1000)
             setPowerOff()
-            isScreenOning = false
+            delay(1000)
           }
+          isScreenOning = false
         } catch (_: Exception) {
 
         }
