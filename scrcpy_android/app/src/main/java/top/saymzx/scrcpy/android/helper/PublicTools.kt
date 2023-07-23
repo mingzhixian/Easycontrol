@@ -7,6 +7,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import top.saymzx.scrcpy.android.R
 import top.saymzx.scrcpy.android.appData
 import top.saymzx.scrcpy.android.databinding.LoadingBinding
@@ -73,4 +74,17 @@ class PublicTools {
 
   // DP转PX
   fun dp2px(dp: Float): Float = dp * appData.main.resources.displayMetrics.density
+
+  // 检查更新
+  fun checkUpdate(context: Context, isNeedShowWhenLatest: Boolean) {
+    appData.netHelper.getJson("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest") {
+      val newVersionCode = it?.getInt("tag_name")
+      if (newVersionCode != null) {
+        if (newVersionCode > appData.versionCode)
+          Toast.makeText(context, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
+        else if (isNeedShowWhenLatest)
+          Toast.makeText(context, "当前已是最新版本", Toast.LENGTH_LONG).show()
+      }
+    }
+  }
 }

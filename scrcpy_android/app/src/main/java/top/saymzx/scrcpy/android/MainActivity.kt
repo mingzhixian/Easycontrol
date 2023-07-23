@@ -86,7 +86,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       asSlave()
     }
     // 检查更新
-    if (appData.setValue.checkUpdate) checkUpdate()
+    if (appData.setValue.checkUpdate) appData.publicTools.checkUpdate(this,false)
   }
 
   // 作为控制端
@@ -222,17 +222,6 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   private fun setSetButtonListener() {
     mainActivity.set.setOnClickListener {
       startActivity(Intent(this, SetActivity::class.java))
-    }
-  }
-
-  // 检查更新
-  private fun checkUpdate() {
-    appData.netHelper.getJson("https://github.saymzx.top/api/repos/mingzhixian/scrcpy/releases/latest") {
-      val newVersionCode = it?.getInt("tag_name")
-      if (newVersionCode != null) {
-        if (newVersionCode > appData.versionCode)
-          Toast.makeText(this, "已发布新版本，可前往更新", Toast.LENGTH_LONG).show()
-      }
     }
   }
 
