@@ -33,25 +33,25 @@ class FloatVideo(
   // 悬浮窗
   lateinit var floatVideo: FloatVideoBinding
 
-  // 悬浮窗Layout
-  private var floatVideoParams: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
-    type =
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-      else WindowManager.LayoutParams.TYPE_PHONE
-    flags = smallLayoutParamsFlagNoFocus
-    gravity = Gravity.START or Gravity.TOP
-    format = PixelFormat.TRANSLUCENT
-  }
-
   // 悬浮设置
   private val baseLayoutParamsFlag =
-    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
   private val smallLayoutParamsFlagNoFocus =
     baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
   private val smallLayoutParamsFlagFocus =
     baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
   private val fullLayoutParamsFlag =
-    smallLayoutParamsFlagNoFocus or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+    smallLayoutParamsFlagNoFocus or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+
+  // 悬浮窗Layout
+  private var floatVideoParams: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
+    type =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+      else WindowManager.LayoutParams.TYPE_PHONE
+    flags = smallLayoutParamsFlagFocus
+    gravity = Gravity.START or Gravity.TOP
+    format = PixelFormat.TRANSLUCENT
+  }
 
   // 导航悬浮球
   @SuppressLint("InflateParams")
@@ -190,14 +190,15 @@ class FloatVideo(
     appData.fullScreenOrientation =
       if (isLandScape) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     appData.main.startActivity(Intent(appData.main, FullScreenActivity::class.java))
+    localVideoWidth = if (isLandScape) appData.deviceHeight else appData.deviceWidth
+    localVideoHeight = if (isLandScape) appData.deviceWidth else appData.deviceHeight
+    // 更新悬浮窗
     floatVideoParams.apply {
-      x = 0
-      y = 0
-      width = if (isLandScape) appData.deviceHeight else appData.deviceWidth
-      height = if (isLandScape) appData.deviceWidth else appData.deviceHeight
+      x = -(add2DpPx / 2)
+      y = -(add2DpPx / 2)
+      width = localVideoWidth + add2DpPx
+      height = localVideoHeight + add2DpPx
     }
-    localVideoWidth = floatVideoParams.width
-    localVideoHeight = floatVideoParams.height
     // 隐藏上下栏
     floatVideo.floatVideoTitle1.visibility = View.GONE
     floatVideo.floatVideoTitle2.visibility = View.GONE

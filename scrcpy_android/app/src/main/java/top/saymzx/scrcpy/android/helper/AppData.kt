@@ -10,6 +10,7 @@ import kotlinx.coroutines.MainScope
 import top.saymzx.scrcpy.adb.AdbKeyPair
 import top.saymzx.scrcpy.android.BuildConfig
 import top.saymzx.scrcpy.android.MainActivity
+import top.saymzx.scrcpy.android.appData
 import top.saymzx.scrcpy.android.entity.Device
 import top.saymzx.scrcpy.android.entity.SetValue
 import java.io.File
@@ -69,8 +70,8 @@ class AppData : ViewModel() {
     isInit = true
     // 设置键值对管理
     settings = main.getSharedPreferences("setting", Context.MODE_PRIVATE)
-    // 读取设备分辨率
-    readDeviceResolution()
+    // 读取设备大小
+    readDeviceSize()
     // 数据库管理
     dbHelper = DbHelper(main, "scrcpy_android.db", 9)
     // 读取数据库设备列表
@@ -84,7 +85,8 @@ class AppData : ViewModel() {
   }
 
   // 读取设备分辨率
-  private fun readDeviceResolution() {
+  @SuppressLint("InternalInsetResource", "DiscouragedApi")
+  private fun readDeviceSize() {
     val size = publicTools.getScreenSize(main)
     deviceWidth = size.first
     deviceHeight = size.second
