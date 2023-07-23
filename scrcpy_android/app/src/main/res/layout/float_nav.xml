@@ -20,9 +20,9 @@
         android:background="@drawable/background"
         android:backgroundTint="@color/cardContainerBackground"
         android:orientation="vertical"
-        android:paddingStart="20dp"
+        android:paddingStart="18dp"
         android:paddingTop="14dp"
-        android:paddingEnd="20dp"
+        android:paddingEnd="14dp"
         android:paddingBottom="14dp"
         android:visibility="gone">
 
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="6dp"
                     android:paddingBottom="6dp"
-                    android:text="发送最近任务键"
+                    android:text="发送任务键"
                     android:textColor="@color/onCardContainerBackground"
                     android:textSize="@dimen/middleFont" />
 

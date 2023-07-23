@@ -10,7 +10,7 @@
     <dimen name="floatVideoBarPadding">10dp</dimen>
     <dimen name="floatVideoButtonPadding">9dp</dimen>
     <dimen name="floatVideoNavButtonPadding">8dp</dimen>
-    <dimen name="floatNavMenuW">200dp</dimen>
+    <dimen name="floatNavMenuW">140dp</dimen>
     <dimen name="floatNavMenuH">300dp</dimen>
     <dimen name="floatVideoSmallSmall">80dp</dimen>
     <dimen name="floatVideoSmallSmallPadding">16dp</dimen>
