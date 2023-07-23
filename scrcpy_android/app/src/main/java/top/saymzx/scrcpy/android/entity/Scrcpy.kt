@@ -146,18 +146,18 @@ class Scrcpy(private val device: Device) {
           stop("投屏停止", e)
         }
       }.start()
-      // 显示刷新率
-      if (appData.setValue.showFps) {
-        launch {
-          try {
-            floatVideo.floatVideo.floatVideoFps.text = "0"
-            while (device.status == 1) {
-              delay(1000)
-              floatVideo.floatVideo.floatVideoFps.text = fps.toString()
-              fps = 0
-            }
-          } catch (_: Exception) {
+      launch {
+        // 显示刷新率
+        if (appData.setValue.showFps) floatVideo.floatVideo.floatVideoFps.text = "0"
+        while (device.status == 1) {
+          delay(1000)
+          // 显示刷新率
+          if (appData.setValue.showFps) {
+            floatVideo.floatVideo.floatVideoFps.text = fps.toString()
+            fps = 0
           }
+          // 熄屏检测
+          checkScreenOff()
         }
       }
     }
@@ -463,7 +463,6 @@ class Scrcpy(private val device: Device) {
   private fun decodeInputThread(mode: String) {
     val stream = if (mode == "video") videoStream else audioStream
     val codec = if (mode == "video") videoDecodec else audioDecodec
-    var zeroFrameNum = 0
     // 开始解码
     while (device.status == 1) {
       val buffer = readFrame(stream)
@@ -472,14 +471,6 @@ class Scrcpy(private val device: Device) {
         codec.getInputBuffer(inIndex)!!.put(buffer.third)
         // 提交解码器解码
         codec.queueInputBuffer(inIndex, 0, buffer.second, buffer.first, 0)
-        // 连续8个空包检测是否熄屏了
-        if (buffer.second < 150) {
-          zeroFrameNum++
-          if (zeroFrameNum > 7) {
-            zeroFrameNum = 0
-            checkScreenOff()
-          }
-        }
       }
     }
   }
@@ -607,7 +598,6 @@ class Scrcpy(private val device: Device) {
           }
           isScreenOning = false
         } catch (_: Exception) {
-
         }
       }
     }

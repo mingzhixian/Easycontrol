@@ -235,8 +235,11 @@ public final class Device {
     if (displayId != 0 && !InputManager.setDisplayId(inputEvent, displayId)) {
       return false;
     }
-
-    return ServiceManager.getInputManager().injectInputEvent(inputEvent, injectMode);
+    try {
+      return ServiceManager.getInputManager().injectInputEvent(inputEvent, injectMode);
+    } catch (Exception ignored) {
+      return false;
+    }
   }
 
   public boolean injectEvent(InputEvent event, int injectMode) {

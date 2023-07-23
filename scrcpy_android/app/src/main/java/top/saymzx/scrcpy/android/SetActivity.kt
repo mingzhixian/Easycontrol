@@ -1,5 +1,6 @@
 package top.saymzx.scrcpy.android
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -53,9 +54,12 @@ class SetActivity : Activity() {
     // 关于
     setIndexListener()
     setPrivacyListener()
+    // 底栏
+    setVersionName()
   }
 
   // 设置默认值
+  @SuppressLint("SetTextI18n")
   private fun setValue() {
     setActivity.setDefaultVideoCodec.adapter =
       ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.videoCodecItems))
@@ -105,6 +109,7 @@ class SetActivity : Activity() {
     }
     setActivity.setShowFps.isChecked = appData.setValue.showFps
     setActivity.setCheckUpdate.isChecked = appData.setValue.checkUpdate
+    setActivity.setVersionName.text = "当前版本: ${BuildConfig.VERSION_NAME}"
   }
 
   // 设置返回按钮监听
@@ -316,6 +321,13 @@ class SetActivity : Activity() {
         startActivity(intent)
       } catch (_: Exception) {
       }
+    }
+  }
+
+  // 底栏
+  private fun setVersionName() {
+    setActivity.setVersionName.setOnClickListener {
+      appData.publicTools.checkUpdate(this,true)
     }
   }
 

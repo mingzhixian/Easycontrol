@@ -578,7 +578,6 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="20dp"
-                android:layout_marginBottom="40dp"
                 android:background="@drawable/background"
                 android:backgroundTint="@color/cardBackground"
                 android:paddingStart="20dp"
@@ -588,6 +587,19 @@
                 android:text="前往官网"
                 android:textColor="@color/onCardBackground"
                 android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_version_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="当前版本:1.1.1"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/smallFont" />
 
         </LinearLayout>
     </ScrollView>
