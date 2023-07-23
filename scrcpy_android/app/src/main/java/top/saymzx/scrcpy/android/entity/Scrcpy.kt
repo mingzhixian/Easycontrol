@@ -583,20 +583,20 @@ class Scrcpy(private val device: Device) {
   }
 
   // 防止被控端熄屏
-  private var isScreenOning = false
+  private var isCheckScreening = false
   private fun checkScreenOff() {
     // 避免短时重复操作
-    if (!isScreenOning) {
+    if (!isCheckScreening) {
       appData.mainScope.launch {
         try {
-          isScreenOning = true
-          if (!runAdbCmd("dumpsys deviceidle | grep mScreenOn", true).contains("mScreenOn=true")) {
+          isCheckScreening = true
+          if (runAdbCmd("dumpsys deviceidle | grep mScreenOn", true).contains("mScreenOn=false")) {
             runAdbCmd("input keyevent 26", false)
             delay(1000)
             setPowerOff()
             delay(1000)
           }
-          isScreenOning = false
+          isCheckScreening = false
         } catch (_: Exception) {
         }
       }
