@@ -41,7 +41,7 @@ class FloatVideo(
     flags =
       WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
     gravity = Gravity.START or Gravity.TOP
-    format = PixelFormat.RGBA_8888
+    format = PixelFormat.TRANSLUCENT
   }
 
   // 导航悬浮球
@@ -636,7 +636,7 @@ class FloatVideo(
       x = 40
       y =
         (if (remoteVideoWidth > remoteVideoHeight) appData.deviceWidth else appData.deviceHeight) / 2
-      format = PixelFormat.RGBA_8888
+      format = PixelFormat.TRANSLUCENT
     }
     appData.main.windowManager.addView(floatNav.root, floatNavParams)
     val width = floatNavSize / 2
