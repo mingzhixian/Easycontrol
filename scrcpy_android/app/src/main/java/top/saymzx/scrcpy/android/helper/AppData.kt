@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
-import android.util.DisplayMetrics
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.MainScope
 import top.saymzx.scrcpy.adb.AdbKeyPair
@@ -86,10 +85,9 @@ class AppData : ViewModel() {
 
   // 读取设备分辨率
   private fun readDeviceResolution() {
-    val metric = DisplayMetrics()
-    main.windowManager.defaultDisplay.getRealMetrics(metric)
-    deviceWidth = metric.widthPixels
-    deviceHeight = metric.heightPixels
+    val size = publicTools.getScreenSize(main)
+    deviceWidth = size.first
+    deviceHeight = size.second
     if (deviceWidth > deviceHeight) deviceWidth =
       deviceWidth xor deviceHeight xor deviceWidth.also { deviceHeight = it }
   }

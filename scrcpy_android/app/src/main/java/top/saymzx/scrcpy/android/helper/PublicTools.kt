@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -86,5 +87,12 @@ class PublicTools {
           Toast.makeText(context, "当前已是最新版本", Toast.LENGTH_LONG).show()
       }
     }
+  }
+
+  // 获取当前界面宽高
+  fun getScreenSize(context: Activity):Pair<Int,Int>{
+    val metric = DisplayMetrics()
+    context.windowManager.defaultDisplay.getRealMetrics(metric)
+    return Pair(metric.widthPixels,metric.heightPixels)
   }
 }

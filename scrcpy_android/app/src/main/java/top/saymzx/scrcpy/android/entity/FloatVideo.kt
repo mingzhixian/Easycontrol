@@ -38,11 +38,20 @@ class FloatVideo(
     type =
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
       else WindowManager.LayoutParams.TYPE_PHONE
-    flags =
-      WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+    flags = smallLayoutParamsFlagNoFocus
     gravity = Gravity.START or Gravity.TOP
     format = PixelFormat.TRANSLUCENT
   }
+
+  // 悬浮设置
+  private val baseLayoutParamsFlag =
+    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+  private val smallLayoutParamsFlagNoFocus =
+    baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+  private val smallLayoutParamsFlagFocus =
+    baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+  private val fullLayoutParamsFlag =
+    smallLayoutParamsFlagNoFocus or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
 
   // 导航悬浮球
   @SuppressLint("InflateParams")
@@ -171,7 +180,8 @@ class FloatVideo(
   // 设置全屏
   private fun setFull() {
     // 取消焦点
-    setFocus(false)
+    isFocus = false
+    floatVideoParams.flags = fullLayoutParamsFlag
     device.isFull = true
     // 旋转屏幕方向
     val isLandScape = remoteVideoWidth > remoteVideoHeight
@@ -366,6 +376,7 @@ class FloatVideo(
   }
 
   // 检测旋转
+  private val add2DpPx = appData.publicTools.dp2px(2f).toInt()
   fun checkRotation(newWidth: Int, newHeight: Int) {
     if ((newWidth > newHeight) xor (localVideoWidth > localVideoHeight)) {
       val isLandScape = newWidth > newHeight
@@ -383,13 +394,13 @@ class FloatVideo(
           x = 40
           y = (if (isLandScape) appData.deviceWidth else appData.deviceHeight) / 2
         }
+        localVideoWidth = if (isLandScape) appData.deviceHeight else appData.deviceWidth
+        localVideoHeight = if (isLandScape) appData.deviceWidth else appData.deviceHeight
         // 更新悬浮窗
         floatVideoParams.apply {
-          width = if (isLandScape) appData.deviceHeight else appData.deviceWidth
-          height = if (isLandScape) appData.deviceWidth else appData.deviceHeight
+          width = localVideoWidth + add2DpPx
+          height = localVideoHeight + add2DpPx
         }
-        localVideoWidth = floatVideoParams.width
-        localVideoHeight = floatVideoParams.height
       } else {
         // 更新悬浮窗
         floatVideoParams.apply {
@@ -534,13 +545,6 @@ class FloatVideo(
 
   // 设置上横条监听控制
   private fun setFloatBar() {
-    // 横条按钮监听
-    var statusBarHeight = 0
-    // 获取状态栏高度
-    val resourceId = appData.main.resources.getIdentifier("status_bar_height", "dimen", "android")
-    if (resourceId > 0) {
-      statusBarHeight = appData.main.resources.getDimensionPixelSize(resourceId)
-    }
     var deviceWidth = 0
     val criticality = appData.publicTools.dp2px(60f).toInt()
     var x = 0
@@ -573,8 +577,6 @@ class FloatVideo(
             // 新位置
             val newX = event.rawX.toInt() - x - floatVideoParams.width / 4
             val newY = event.rawY.toInt() - y
-            // 避免移动至状态栏等不可触控区域
-            if (newY < statusBarHeight + 10) return@setOnTouchListener true
             // 移动悬浮窗
             floatVideoParams.x = newX
             floatVideoParams.y = newY
@@ -628,8 +630,7 @@ class FloatVideo(
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         else WindowManager.LayoutParams.TYPE_PHONE
-      flags =
-        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+      flags = smallLayoutParamsFlagNoFocus
       gravity = Gravity.START or Gravity.TOP
       width = floatNavSize
       height = floatNavSize
@@ -683,13 +684,22 @@ class FloatVideo(
   }
 
   // 设置导航球菜单监听
+  private var floatNavSite = Pair(false, 0)
   private fun setFloatNavMenuListener() {
     // 展示MENU
-    floatNavParams.width = appData.main.resources.getDimension(R.dimen.floatNavMenuW).toInt()
+    val menuWidth = appData.main.resources.getDimension(R.dimen.floatNavMenuW).toInt()
+    floatNavParams.width = menuWidth
     floatNavParams.height = appData.main.resources.getDimension(R.dimen.floatNavMenuH).toInt()
     appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
     floatNav.floatNavMenu.visibility = View.VISIBLE
     floatNav.floatNavImage.visibility = View.GONE
+    // 获取系统宽高
+    val size = appData.publicTools.getScreenSize(appData.main)
+    if (floatNavParams.x + menuWidth > size.first) {
+      floatNavSite = Pair(true, floatNavParams.x)
+      floatNavParams.x = size.first - menuWidth
+      appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
+    }
     // 返回导航球
     floatNav.floatNavBack.setOnClickListener {
       backFloatNav()
@@ -716,6 +726,10 @@ class FloatVideo(
       appData.publicTools.dp2px(appData.setValue.floatNavSize.toFloat()).toInt()
     floatNavParams.width = floatNavSize
     floatNavParams.height = floatNavSize
+    if (floatNavSite.first) {
+      floatNavParams.x = floatNavSite.second
+      floatNavSite = Pair(false, 0)
+    }
     appData.main.windowManager.updateViewLayout(floatNav.root, floatNavParams)
     floatNav.floatNavImage.visibility = View.VISIBLE
     floatNav.floatNavMenu.visibility = View.GONE
@@ -732,8 +746,7 @@ class FloatVideo(
   private fun setFocus(newFocus: Boolean) {
     if (!device.isFull && newFocus != isFocus) {
       floatVideoParams.flags =
-        if (newFocus) WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-        else WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        if (newFocus) smallLayoutParamsFlagFocus else smallLayoutParamsFlagNoFocus
       appData.main.windowManager.updateViewLayout(
         floatVideo.root, floatVideoParams
       )
