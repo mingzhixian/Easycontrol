@@ -36,10 +36,12 @@ class FloatVideo(
   // 悬浮设置
   private val baseLayoutParamsFlag =
     WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-  private val smallLayoutParamsFlagNoFocus =
-    baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-  private val smallLayoutParamsFlagFocus =
+  private val floatNavLayoutParamsFlag =
     baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+  private val smallLayoutParamsFlagNoFocus =
+    baseLayoutParamsFlag or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+  private val smallLayoutParamsFlagFocus =
+    floatNavLayoutParamsFlag or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
   private val fullLayoutParamsFlag =
     smallLayoutParamsFlagNoFocus or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
 
@@ -228,25 +230,20 @@ class FloatVideo(
     } catch (_: Exception) {
     }
     hideFloatNav()
-    // 竖屏打开
-    if (remoteVideoHeight > remoteVideoWidth) {
-      floatVideoParams.apply {
-        val tmpHeight = appData.deviceHeight * 3 / 4
-        val tmpWidth = tmpHeight * remoteVideoWidth / remoteVideoHeight
-        calculateFloatSize(tmpWidth, tmpHeight)
-        x = (appData.deviceWidth - width) / 2
-        y = (appData.deviceHeight - height) / 2
-      }
+    // 缩放大小
+    val size = appData.publicTools.getScreenSize(appData.main)
+    if ((size.first.toFloat() / size.second.toFloat()) >= (remoteVideoWidth.toFloat() / remoteVideoHeight.toFloat())) {
+      val tmpHeight = appData.deviceHeight * 3 / 4
+      val tmpWidth = tmpHeight * remoteVideoWidth / remoteVideoHeight
+      calculateFloatSize(tmpWidth, tmpHeight)
+    } else {
+      val tmpWidth = appData.deviceWidth * 3 / 4
+      val tmpHeight = tmpWidth * remoteVideoHeight / remoteVideoWidth
+      calculateFloatSize(tmpWidth, tmpHeight)
     }
-    // 横屏打开
-    else {
-      floatVideoParams.apply {
-        val tmpWidth = appData.deviceWidth * 3 / 4
-        val tmpHeight = tmpWidth * remoteVideoHeight / remoteVideoWidth
-        calculateFloatSize(tmpWidth, tmpHeight)
-        x = (appData.deviceWidth - width) / 2
-        y = (appData.deviceHeight - height) / 2
-      }
+    floatVideoParams.apply {
+      x = (size.first - width) / 2
+      y = (size.second - height) / 2
     }
     setFullScreen()
     setFloatBar()
@@ -404,23 +401,19 @@ class FloatVideo(
         }
       } else {
         // 更新悬浮窗
-        floatVideoParams.apply {
-          // 防止旋转后超出界面
-          val tmpWidth: Int
-          val tmpHeight: Int
-          // 竖屏
-          if (remoteVideoHeight > remoteVideoWidth) {
-            tmpHeight = appData.deviceHeight * 3 / 4
-            tmpWidth = tmpHeight * remoteVideoWidth / remoteVideoHeight
-          }
-          // 横屏
-          else {
-            tmpWidth = appData.deviceWidth * 3 / 4
-            tmpHeight = tmpWidth * remoteVideoHeight / remoteVideoWidth
-          }
+        val size = appData.publicTools.getScreenSize(appData.main)
+        if ((size.first.toFloat() / size.second.toFloat()) >= (remoteVideoWidth.toFloat() / remoteVideoHeight.toFloat())) {
+          val tmpHeight = appData.deviceHeight * 3 / 4
+          val tmpWidth = tmpHeight * remoteVideoWidth / remoteVideoHeight
           calculateFloatSize(tmpWidth, tmpHeight)
-          x = (appData.deviceWidth - width) / 2
-          y = (appData.deviceHeight - height) / 2
+        } else {
+          val tmpWidth = appData.deviceWidth * 3 / 4
+          val tmpHeight = tmpWidth * remoteVideoHeight / remoteVideoWidth
+          calculateFloatSize(tmpWidth, tmpHeight)
+        }
+        floatVideoParams.apply {
+          x = (size.first - width) / 2
+          y = (size.second - height) / 2
         }
       }
       update(true)
@@ -546,6 +539,12 @@ class FloatVideo(
 
   // 设置上横条监听控制
   private fun setFloatBar() {
+    var statusBarHeight = 0
+    // 获取状态栏高度
+    val resourceId = appData.main.resources.getIdentifier("status_bar_height", "dimen", "android")
+    if (resourceId > 0) {
+      statusBarHeight = appData.main.resources.getDimensionPixelSize(resourceId)
+    }
     var deviceWidth = 0
     val criticality = appData.publicTools.dp2px(60f).toInt()
     var x = 0
@@ -578,6 +577,8 @@ class FloatVideo(
             // 新位置
             val newX = event.rawX.toInt() - x - floatVideoParams.width / 4
             val newY = event.rawY.toInt() - y
+            // 避免移动至状态栏等不可触控区域
+            if (newY < statusBarHeight + 10) return@setOnTouchListener true
             // 移动悬浮窗
             floatVideoParams.x = newX
             floatVideoParams.y = newY
@@ -631,7 +632,7 @@ class FloatVideo(
       type =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         else WindowManager.LayoutParams.TYPE_PHONE
-      flags = smallLayoutParamsFlagNoFocus
+      flags = floatNavLayoutParamsFlag
       gravity = Gravity.START or Gravity.TOP
       width = floatNavSize
       height = floatNavSize
