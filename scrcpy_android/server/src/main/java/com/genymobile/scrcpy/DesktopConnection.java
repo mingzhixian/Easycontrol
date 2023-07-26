@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -69,7 +70,10 @@ public final class DesktopConnection implements Closeable {
     Socket audioSocket = null;
     Socket controlSocket = null;
     try {
-      try (ServerSocket localServerSocket = new ServerSocket(6007)) {
+      try (ServerSocket localServerSocket = new ServerSocket()) {
+        localServerSocket.setReceiveBufferSize(8192);
+        localServerSocket.setPerformancePreferences(0, 2, 1);
+        localServerSocket.bind(new InetSocketAddress("0.0.0.0", 6007));
         if (video) {
           videoSocket = localServerSocket.accept();
         }

@@ -4,7 +4,6 @@
 
 package top.saymzx.scrcpy.adb
 
-import android.util.Log
 import okhttp3.internal.notifyAll
 import okhttp3.internal.wait
 import okio.Buffer
@@ -12,13 +11,14 @@ import okio.sink
 import okio.source
 import java.io.IOException
 import java.io.InputStream
+import java.net.InetSocketAddress
 import java.net.Socket
 import java.nio.charset.StandardCharsets
 import java.util.Random
 
 class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
-  private val socket: Socket
+  private val socket: Socket = Socket()
   private val adbWriter: AdbWriter
   private val adbReader: AdbReader
   private val random = Random()
@@ -27,7 +27,9 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
   init {
     // 连接socket
-    socket = Socket(host, port)
+    socket.receiveBufferSize = 8192
+    socket.setPerformancePreferences(0, 2, 1)
+    socket.connect(InetSocketAddress(host, port))
     // 读写工具
     adbReader = AdbReader(socket.source())
     adbWriter = AdbWriter(socket.sink())
