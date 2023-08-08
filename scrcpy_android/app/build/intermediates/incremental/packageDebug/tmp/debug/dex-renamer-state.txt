@@ -1,0 +1,19 @@
+#Tue Aug 08 08:50:15 CST 2023
+base.0=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.2=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\14\\classes.dex
+base.3=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
+base.4=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
+base.5=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\6\\classes.dex
+path.0=classes.dex
+path.1=0/classes.dex
+path.2=14/classes.dex
+path.3=4/classes.dex
+path.4=5/classes.dex
+path.5=6/classes.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex
+renamed.3=classes4.dex
+renamed.4=classes5.dex
+renamed.5=classes6.dex

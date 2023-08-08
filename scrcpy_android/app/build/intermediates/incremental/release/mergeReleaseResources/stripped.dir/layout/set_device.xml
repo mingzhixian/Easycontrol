@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="350dp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="25dp"
+            android:text="干什么◔ ‸◔？ "
+            android:textColor="@color/onCardBackground"
+            android:textSize="@dimen/largeFont" />
+
+        <Button
+            android:id="@+id/set_device_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/background"
+            android:backgroundTint="@color/buttonBackground"
+            android:text="取消"
+            android:textColor="@color/onButtonBackground"
+            android:textSize="@dimen/largeFont" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/set_device_change"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/buttonBackgroundSecond"
+                android:text="修改"
+                android:textColor="@color/onButtonBackgroundSecond"
+                android:textSize="@dimen/middleFont" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/set_device_delete"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/buttonBackgroundSecond"
+                android:text="删除"
+                android:textColor="@color/onButtonBackgroundSecond"
+                android:textSize="@dimen/middleFont" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/set_device_defult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/background"
+            android:backgroundTint="@color/buttonBackground"
+            android:text="设为默认打开"
+            android:textColor="@color/onButtonBackground"
+            android:textSize="@dimen/middleFont" />
+
+    </LinearLayout>
+</ScrollView>

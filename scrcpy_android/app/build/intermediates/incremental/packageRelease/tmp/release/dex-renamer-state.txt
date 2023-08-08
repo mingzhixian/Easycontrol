@@ -1,0 +1,4 @@
+#Sat Aug 05 09:22:13 CST 2023
+base.0=E\:\\Code\\scrcpy\\scrcpy_android\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

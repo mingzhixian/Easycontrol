@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical"
+    tools:context=".SetActivity">
+
+    <ImageView
+        android:id="@+id/set_back"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/nav_back"
+        android:tint="@color/onBackground" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:text="默认配置"
+                android:textColor="@color/onBackground"
+                android:textSize="@dimen/largeFont" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="视频编解码器:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_videoCodec"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
+                    android:entries="@array/videoCodecItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="音频编解码器:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_audioCodec"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
+                    android:entries="@array/audioCodecItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="视频最大大小:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_max_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
+                    android:entries="@array/maxSizeItems"
+                    android:foregroundTint="#000000"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="帧率:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_fps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
+                    android:entries="@array/fpsItems"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="视频码率:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Spinner
+                    android:id="@+id/set_default_video_bit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/onCardContainerBackground"
+                    android:entries="@array/videoBitItems2"
+                    android:textSize="@dimen/middleFont" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否修改分辨率:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Switch
+                    android:id="@+id/set_default_set_resolution"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"
+                    android:thumbTint="@color/cardContainerBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="显示"
+                android:textColor="@color/onBackground"
+                android:textSize="@dimen/largeFont" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="被控端熄屏:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Switch
+                    android:id="@+id/set_slave_turn_off_screen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"
+                    android:thumbTint="@color/cardContainerBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="默认全屏显示:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Switch
+                    android:id="@+id/set_default_default_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"
+                    android:thumbTint="@color/cardContainerBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="悬浮球大小:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <SeekBar
+                    android:id="@+id/set_float_nav_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:max="55"
+                    android:progressBackgroundTint="@color/buttonBackgroundSecond"
+                    android:progressTint="@color/buttonBackground" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/set_float_nav_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:src="@drawable/float_nav" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="显示刷新率:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Switch
+                    android:id="@+id/set_show_fps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="false"
+                    android:thumbTint="@color/cardContainerBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="其他"
+                android:textColor="@color/onBackground"
+                android:textSize="@dimen/largeFont" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="检查更新:"
+                    android:textColor="@color/onCardBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <Switch
+                    android:id="@+id/set_check_update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:checked="true"
+                    android:thumbTint="@color/cardContainerBackground"
+                    android:thumbTintMode="multiply"
+                    android:trackTint="@color/buttonBackground"
+                    android:trackTintMode="multiply" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/set_clear_defult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="清除默认设备"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_renew_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="重新生成密钥(需重新授权)"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="备份恢复"
+                android:textColor="@color/onBackground"
+                android:textSize="@dimen/largeFont" />
+
+            <TextView
+                android:id="@+id/set_export_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导出密钥"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_import_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导入密钥"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_export_json"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导出配置"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_import_json"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="导入配置"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="40dp"
+                android:text="关于"
+                android:textColor="@color/onBackground"
+                android:textSize="@dimen/largeFont" />
+
+            <TextView
+                android:id="@+id/set_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="隐私政策"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_index"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/background"
+                android:backgroundTint="@color/cardBackground"
+                android:paddingStart="20dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="14dp"
+                android:text="前往官网"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/middleFont" />
+
+            <TextView
+                android:id="@+id/set_version_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="当前版本:1.1.1"
+                android:textColor="@color/onCardBackground"
+                android:textSize="@dimen/smallFont" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

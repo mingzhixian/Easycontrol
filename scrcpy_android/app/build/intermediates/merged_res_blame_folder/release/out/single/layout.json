@@ -1,0 +1,54 @@
+[
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/activity_full_screen.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/activity/layout/activity_full_screen.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/set_device.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/set_device.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/float_nav.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/float_nav.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/devices_item.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/item/layout/devices_item.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/mode_select.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/mode_select.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/spinner_item.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/item/layout/spinner_item.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/loading.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/loading.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/activity_main.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/activity/layout/activity_main.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/add_device.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/add_device.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/activity_show_app.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/activity/layout/activity_show_app.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/float_video.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/float_video.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/activity_set.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/activity/layout/activity_set.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-mergeReleaseResources-23:/layout/edit_port.xml",
+        "source": "top.saymzx.scrcpy.android.app-main-25:/layout/module/layout/edit_port.xml"
+    }
+]

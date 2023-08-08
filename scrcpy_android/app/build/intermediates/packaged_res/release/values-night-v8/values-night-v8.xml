@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#101010</color>
+    <color name="buttonBackground">#96afaf</color>
+    <color name="buttonBackgroundSecond">#7b9393</color>
+    <color name="cardBackground">#3d4043</color>
+    <color name="cardContainerBackground">#0a0a0a</color>
+    <color name="error">#e64337</color>
+    <color name="iconColor">#757575</color>
+    <color name="onBackground">#c8c8c8</color>
+    <color name="onBackgroundSecond">#a9a9a9</color>
+    <color name="onButtonBackground">#1b3232</color>
+    <color name="onButtonBackgroundSecond">#313f3f</color>
+    <color name="onCardBackground">#c7c7c7</color>
+    <color name="onCardBackgroundSecond">#606060</color>
+    <color name="onCardContainerBackground">#cbcbcb</color>
+    <color name="outLine">#d8d8d8</color>
+</resources>

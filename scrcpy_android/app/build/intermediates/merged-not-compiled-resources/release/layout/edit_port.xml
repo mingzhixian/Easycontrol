@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="5dp"
+            android:gravity="left"
+            android:text="输入端口："
+            android:textColor="@color/onCardBackground"
+            android:textSize="@dimen/largeFont" />
+
+        <EditText
+            android:id="@+id/edit_port_port"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginBottom="25dp"
+            android:digits="1234567890"
+            android:text="5555"
+            android:textColor="@color/onCardBackground"
+            android:textColorHint="@color/onCardBackgroundSecond" />
+
+
+        <Button
+            android:id="@+id/edit_port_ok"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/background"
+            android:backgroundTint="@color/buttonBackground"
+            android:text="确认"
+            android:textColor="@color/onButtonBackground"
+            android:textSize="@dimen/largeFont" />
+
+    </LinearLayout>
+</ScrollView>

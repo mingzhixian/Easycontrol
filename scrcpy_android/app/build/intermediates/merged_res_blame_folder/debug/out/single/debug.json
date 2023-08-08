@@ -1,0 +1,102 @@
+[
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_icon.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\icon.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_mode_select.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\mode_select.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_float_nav.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\float_nav.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_radio_button.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\radio_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_loading.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\loading.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\activity\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_nav_back.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\nav_back.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_add_device.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\add_device.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_fullscreen.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\fullscreen.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_activity_set.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\activity\\layout\\activity_set.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_set_device.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\set_device.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_nav_switch.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\nav_switch.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_activity_show_app.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\activity\\layout\\activity_show_app.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_float_video.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\float_video.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_set.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\set.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_float_nav.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\float_nav.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_nav_home.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\nav_home.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_activity_full_screen.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\activity\\layout\\activity_full_screen.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_spinner_item.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\item\\layout\\spinner_item.xml"
+    },
+    {
+        "merged": "top.saymzx.scrcpy.android.app-merged_res-24:/raw_scrcpy_server.jar.flat",
+        "source": "top.saymzx.scrcpy.android.app-main-26:/raw/scrcpy_server.jar"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\raw_scrcpy_server.jar.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\raw\\scrcpy_server.jar"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_background_for_float_video.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\background_for_float_video.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\drawable_background.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\drawable\\background.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_devices_item.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\item\\layout\\devices_item.xml"
+    },
+    {
+        "merged": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-merged_res-24:\\layout_edit_port.xml.flat",
+        "source": "C:\\Users\\kic\\.gradle\\daemon\\7.5\\top.saymzx.scrcpy.android.app-main-26:\\layout\\module\\layout\\edit_port.xml"
+    }
+]

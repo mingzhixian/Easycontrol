@@ -1,0 +1,18 @@
+<lint-module
+    format="1"
+    dir="E:\Code\scrcpy\scrcpy_android\app"
+    name=":app"
+    type="APP"
+    maven="scrcpy_android:app:"
+    gradle="7.4.1"
+    buildFolder="build"
+    bootClassPath="C:\Users\kic\AppData\Local\Android\Sdk\platforms\android-33\android.jar;C:\Users\kic\AppData\Local\Android\Sdk\build-tools\30.0.3\core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-33">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>
