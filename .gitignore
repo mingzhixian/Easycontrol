@@ -9,12 +9,10 @@ scrcpy_android/.idea/navEditor.xml
 scrcpy_android/.idea/assetWizardSettings.xml
 scrcpy_android/.DS_Store
 scrcpy_android/build
-scrcpy_android/app/release
-scrcpy_android/app/debug
-scrcpy_android/captures
-scrcpy_android/.externalNativeBuild
-scrcpy_android/.cxx
-scrcpy_android/app/.cxx
 scrcpy_android/local.properties
-scrcpy_android/app/src/main/assets/scrcpy-server.jar
+
+scrcpy_android/app/release
 scrcpy_android/app/src/main/res/raw/scrcpy-server.jar
+
+scrcpy_android/server/build
+scrcpy_android/server/.gradle
