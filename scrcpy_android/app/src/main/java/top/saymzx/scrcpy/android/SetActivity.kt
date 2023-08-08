@@ -327,7 +327,7 @@ class SetActivity : Activity() {
   // 底栏
   private fun setVersionName() {
     setActivity.setVersionName.setOnClickListener {
-      appData.publicTools.checkUpdate(this,true)
+      appData.publicTools.checkUpdate(this, true)
     }
   }
 

@@ -86,7 +86,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       asSlave()
     }
     // 检查更新
-    if (appData.setValue.checkUpdate) appData.publicTools.checkUpdate(this,false)
+    if (appData.setValue.checkUpdate) appData.publicTools.checkUpdate(this, false)
   }
 
   // 作为控制端
@@ -183,8 +183,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
           appData.setValue.defaultAudioCodec, resources.getStringArray(R.array.audioCodecItems)
         )
       )
-      addDeviceView.addDeviceSetResolution.isChecked =
-        appData.setValue.defaultSetResolution
+      addDeviceView.addDeviceSetResolution.isChecked = appData.setValue.defaultSetResolution
       // 是否显示高级选项
       addDeviceView.addDeviceIsOptions.setOnClickListener {
         addDeviceView.addDeviceOptions.visibility =
@@ -201,14 +200,13 @@ class MainActivity : Activity(), ViewModelStoreOwner {
           return@setOnClickListener
         }
         appData.deviceListAdapter.newDevice(
-          name, address,
+          name,
+          address,
           addDeviceView.addDevicePort.text.toString().toInt(),
           addDeviceView.addDeviceVideoCodec.selectedItem.toString(),
           addDeviceView.addDeviceAudioCodec.selectedItem.toString(),
-          addDeviceView.addDeviceMaxSize.selectedItem.toString()
-            .toInt(),
-          addDeviceView.addDeviceFps.selectedItem.toString()
-            .toInt(),
+          addDeviceView.addDeviceMaxSize.selectedItem.toString().toInt(),
+          addDeviceView.addDeviceFps.selectedItem.toString().toInt(),
           resources.getStringArray(R.array.videoBitItems1)[addDeviceView.addDeviceVideoBit.selectedItemPosition].toInt(),
           addDeviceView.addDeviceSetResolution.isChecked
         )
@@ -262,9 +260,7 @@ class MainActivity : Activity(), ViewModelStoreOwner {
       withContext(Dispatchers.IO) {
         try {
           val adb = Adb(
-            "127.0.0.1",
-            appData.setValue.slaveAdbPort,
-            appData.keyPair
+            "127.0.0.1", appData.setValue.slaveAdbPort, appData.keyPair
           )
           adb.runAdbCmd(
             "ps aux | grep scrcpy | grep -v grep | awk '{print \$2}' | xargs kill -9", false
@@ -287,11 +283,10 @@ class MainActivity : Activity(), ViewModelStoreOwner {
   }
 
   // ViewModel
-  override fun getViewModelStore(): ViewModelStore {
-    if (VIEWMODEL_STORE == null) {
+  override val viewModelStore: ViewModelStore
+    get() = if (VIEWMODEL_STORE == null) {
       VIEWMODEL_STORE = ViewModelStore()
-    }
-    return VIEWMODEL_STORE!!
-  }
+      VIEWMODEL_STORE!!
+    } else VIEWMODEL_STORE!!
 
 }

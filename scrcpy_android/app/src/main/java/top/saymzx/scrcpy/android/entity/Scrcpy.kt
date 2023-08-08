@@ -146,20 +146,22 @@ class Scrcpy(private val device: Device) {
           stop("投屏停止", e)
         }
       }.start()
-      launch {
-        // 显示刷新率
-        if (appData.setValue.showFps) floatVideo.floatVideo.floatVideoFps.text = "0"
-        while (device.status == 1) {
-          delay(1000)
-          // 显示刷新率
-          if (appData.setValue.showFps) {
-            floatVideo.floatVideo.floatVideoFps.text = fps.toString()
-            fps = 0
-          }
-          // 熄屏检测
-          checkScreenOff()
-        }
-      }
+//      launch {
+//        // 显示刷新率
+//        if (appData.setValue.showFps) floatVideo.floatVideo.floatVideoFps.text = "0"
+//        while (device.status == 1) {
+//          delay(500)
+//          // 显示刷新率
+//          if (appData.setValue.showFps) {
+//            floatVideo.floatVideo.floatVideoFps.text = (fps * 2).toString()
+//            fps = 0
+//          }
+//          // 熄屏检测
+//          checkScreenOff()
+//          // 剪切板检测
+//          checkClipBoard()
+//        }
+//      }
     }
   }
 
@@ -183,7 +185,7 @@ class Scrcpy(private val device: Device) {
       try {
         if (device.setResolution) runAdbCmd("wm size reset", false)
         runAdbCmd(
-          "ps -ef | grep scrcpy | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9",
+          "sleep 5 && ps -ef | grep top.saymzx.scrcpy.server.Server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9 &",
           false
         )
         adb.close()
@@ -253,11 +255,13 @@ class Scrcpy(private val device: Device) {
   // 发送server
   private suspend fun sendServer() {
     if (device.status < 0) return
+    runAdbCmd("rm /data/local/tmp/scrcpy_android_server_* ", false)
     // 尝试3次
-    var isHaveServer =
-      runAdbCmd(" ls -l /data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar ", true)
     for (i in 0..2) {
-      if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
+      val isHaveServer =
+        runAdbCmd(" ls -l /data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar ", true)
+      if (isHaveServer.contains("命令运行超过8秒，未获取命令输出")) continue
+      else if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
         runAdbCmd("rm /data/local/tmp/scrcpy_android_server_* ", false)
         withContext(Dispatchers.IO) {
           adb.pushFile(
@@ -265,12 +269,6 @@ class Scrcpy(private val device: Device) {
             "/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar"
           )
         }
-        // 检查是否传送完成
-        isHaveServer =
-          runAdbCmd(
-            " ls -l /data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar ",
-            true
-          )
       } else {
         return
       }
@@ -288,16 +286,16 @@ class Scrcpy(private val device: Device) {
           "wm size ${appData.deviceWidth}x${appData.deviceHeight}", false
         )
       }
-      // 停止旧服务
-      runAdbCmd(
-        "ps -ef | grep scrcpy_android_server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9",
-        false
-      )
-      // 启动Server
-      runAdbCmd(
-        "CLASSPATH=/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar app_process / com.genymobile.scrcpy.Server 2.1 video_codec=${device.videoCodec} audio_codec=${device.audioCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 & ",
-        false
-      )
+//      // 停止旧服务
+//      runAdbCmd(
+//        "ps -ef | grep top.saymzx.scrcpy.server.Server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9",
+//        false
+//      )
+//      // 启动Server
+//      runAdbCmd(
+//        "CLASSPATH=/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar app_process / top.saymzx.scrcpy.server.Server video_codec=${device.videoCodec} audio_codec=${device.audioCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 & ",
+//        false
+//      )
     } catch (e: Exception) {
       stop("ADB连接中断", e)
       return
@@ -312,14 +310,14 @@ class Scrcpy(private val device: Device) {
       for (i in 1..100) {
         try {
           if (connect == 0) {
-            videoStream = adb.tcpForward(6007, true)
+            videoStream = adb.localSocketForward("scrcpy_android", true)
             connect = 1
           }
           if (connect == 1) {
-            audioStream = adb.tcpForward(6007, true)
+            audioStream = adb.localSocketForward("scrcpy_android", true)
             connect = 2
           }
-          controlStream = adb.tcpForward(6007, true)
+          controlStream = adb.localSocketForward("scrcpy_android", true)
           connect = 3
           break
         } catch (_: Exception) {
@@ -338,7 +336,6 @@ class Scrcpy(private val device: Device) {
   private suspend fun setVideoDecodec() {
     // CodecMeta
     withContext(Dispatchers.IO) {
-      videoStream.readInt()
       val remoteVideoWidth = videoStream.readInt()
       val remoteVideoHeight = videoStream.readInt()
       // 显示悬浮窗
@@ -365,10 +362,10 @@ class Scrcpy(private val device: Device) {
       floatVideo.remoteVideoHeight
     )
     // 获取视频标识头
-    val csd0 = withContext(Dispatchers.IO) { readFrame(videoStream) }
-    val csd1 = withContext(Dispatchers.IO) { readFrame(videoStream) }
-    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.third))
-    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1.third))
+    val csd0 = withContext(Dispatchers.IO) { readFrame(videoStream)!! }
+    val csd1 = withContext(Dispatchers.IO) { readFrame(videoStream)!! }
+    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.second))
+    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1.second))
     // 配置低延迟解码
     val codeInfo = videoDecodec.codecInfo
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -387,11 +384,11 @@ class Scrcpy(private val device: Device) {
     videoDecodec.start()
     // 解析首帧，解决开始黑屏问题
     var inIndex = videoDecodec.dequeueInputBuffer(-1)
-    videoDecodec.getInputBuffer(inIndex)!!.put(csd0.third)
-    videoDecodec.queueInputBuffer(inIndex, 0, csd0.second, csd0.first, 0)
+    videoDecodec.getInputBuffer(inIndex)!!.put(csd0.second)
+    videoDecodec.queueInputBuffer(inIndex, 0, csd0.first, 0, 0)
     inIndex = videoDecodec.dequeueInputBuffer(-1)
-    videoDecodec.getInputBuffer(inIndex)!!.put(csd1.third)
-    videoDecodec.queueInputBuffer(inIndex, 0, csd1.second, csd1.first, 0)
+    videoDecodec.getInputBuffer(inIndex)!!.put(csd1.second)
+    videoDecodec.queueInputBuffer(inIndex, 0, csd1.first, 0, 0)
   }
 
   // 音频解码器
@@ -416,7 +413,7 @@ class Scrcpy(private val device: Device) {
     // 获取音频标识头
     mediaFormat.setByteBuffer(
       "csd-0",
-      ByteBuffer.wrap(withContext(Dispatchers.IO) { readFrame(audioStream).third })
+      ByteBuffer.wrap(withContext(Dispatchers.IO) { readFrame(audioStream)!!.second })
     )
     if (device.audioCodec == "opus") {
       // csd1和csd2暂时没用到，所以默认全是用0
@@ -465,12 +462,14 @@ class Scrcpy(private val device: Device) {
     val codec = if (mode == "video") videoDecodec else audioDecodec
     // 开始解码
     while (device.status == 1) {
-      val buffer = readFrame(stream)
-      val inIndex = codec.dequeueInputBuffer(-1)
-      if (inIndex >= 0) {
-        codec.getInputBuffer(inIndex)!!.put(buffer.third)
-        // 提交解码器解码
-        codec.queueInputBuffer(inIndex, 0, buffer.second, buffer.first, 0)
+      val frame = readFrame(stream)
+      if (frame != null) {
+        val inIndex = codec.dequeueInputBuffer(-1)
+        if (inIndex >= 0) {
+          codec.getInputBuffer(inIndex)!!.put(frame.second)
+          // 提交解码器解码
+          codec.queueInputBuffer(inIndex, 0, frame.first, 0, 0)
+        }
       }
     }
   }
@@ -505,15 +504,9 @@ class Scrcpy(private val device: Device) {
   private fun decodeAudioOutputThread() {
     var outIndex: Int
     val bufferInfo = MediaCodec.BufferInfo()
-    var loopNum = 0
     while (device.status == 1) {
-      loopNum++
-      if (loopNum > 200) {
-        loopNum = 0
-        checkClipBoard()
-      }
       // 找到已完成的输出缓冲区
-      outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, 0)
+      outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, -1)
       if (outIndex >= 0) {
         audioTrack.write(
           audioDecodec.getOutputBuffer(outIndex)!!,
@@ -521,9 +514,6 @@ class Scrcpy(private val device: Device) {
           WRITE_NON_BLOCKING
         )
         audioDecodec.releaseOutputBuffer(outIndex, false)
-      } else if (outIndex != MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-        Thread.sleep(4)
-        continue
       }
     }
   }
@@ -540,7 +530,7 @@ class Scrcpy(private val device: Device) {
         }
       when (type) {
         // 剪切板报告报文
-        0 -> {
+        20 -> {
           val newClipBoardText = String(
             controlStream.readByteArray(
               controlStream.readInt()
@@ -557,12 +547,8 @@ class Scrcpy(private val device: Device) {
             )
           }
         }
-        // 设置剪切板回应报文
-        1 -> {
-          controlStream.readLong()
-        }
         // 设置旋转报文
-        2 -> {
+        21 -> {
           // 延迟0.5秒等待画面稳定
           Thread.sleep(500)
           checkRotationNotification = true
@@ -606,7 +592,7 @@ class Scrcpy(private val device: Device) {
   // 被控端熄屏
   private fun setPowerOff() {
     if (appData.setValue.slaveTurnOffScreen) {
-      controls.write(byteArrayOf(10, 0))
+      controls.write(byteArrayOf(3, 0))
       synchronized(controls) {
         controls.notify()
       }
@@ -627,11 +613,9 @@ class Scrcpy(private val device: Device) {
   // 设置剪切板文本
   private fun setClipBoard(text: String) {
     val textByteArray = text.toByteArray(StandardCharsets.UTF_8)
-    val byteBuffer = ByteBuffer.allocate(14 + textByteArray.size)
-    byteBuffer.clear()
-    byteBuffer.put(9)
-    byteBuffer.putLong(101)
-    byteBuffer.put(0)
+    if (textByteArray.size > 5000) return
+    val byteBuffer = ByteBuffer.allocate(5 + textByteArray.size)
+    byteBuffer.put(2)
     byteBuffer.putInt(textByteArray.size)
     byteBuffer.put(textByteArray)
     byteBuffer.flip()
@@ -642,14 +626,14 @@ class Scrcpy(private val device: Device) {
   }
 
   // 从socket流中解析数据
-  private fun readFrame(stream: AdbStream): Triple<Long, Int, ByteArray> {
+  private fun readFrame(stream: AdbStream): Pair<Int, ByteArray>? {
     return try {
-      val pts = stream.readLong()
       val size = stream.readInt()
+      val pts = stream.readLong()
       val frame = stream.readByteArray(size)
-      return Triple(pts, size, frame)
+      return Pair(size, frame)
     } catch (_: IllegalStateException) {
-      Triple(System.currentTimeMillis() * 1000, 1, ByteArray(1))
+      Pair(1, ByteArray(1))
     }
   }
 

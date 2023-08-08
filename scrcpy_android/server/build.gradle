@@ -1,50 +1,39 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    namespace 'com.genymobile.scrcpy'
-    compileSdkVersion 33
+    namespace 'top.saymzx.scrcpy.server'
+    compileSdk 33
+
     defaultConfig {
-        applicationId "com.genymobile.scrcpy"
-        minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 20100
-        versionName "2.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdk 23
+        targetSdk 33
+        applicationId 'top.saymzx.scrcpy.server'
+        versionCode 1
+        versionName '1'
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources false
+            proguardFiles 'proguard-rules.pro'
         }
     }
-    task copyRelease(dependsOn: 'deleteServer', type: Copy){
+    task copyRelease(type: Copy){
+        dependsOn 'assembleRelease'
         from file('build/outputs/apk/release/server-release-unsigned.apk')
         into file('../app/src/main/res/raw/')
         rename('server-release-unsigned.apk', 'scrcpy_server.jar')
     }
-
-    task deleteServer(type: Delete){
-        delete "../app/src/main/assets/scrcpy-server.jar"
-    }
-
-    task copyDebug (dependsOn: 'deleteServer', type: Copy){
+    task copyDebug(type: Copy){
+        dependsOn 'assembleDebug'
         from file("build/outputs/apk/debug/server-debug.apk")
-        into file("../app/src/main/res/raw/")
+        into file('../app/src/main/res/raw/')
         rename('server-debug.apk', 'scrcpy_server.jar')
     }
-
-    afterEvaluate {
-        packageRelease.finalizedBy(copyRelease)
-    }
-
-    afterEvaluate {
-        packageDebug.finalizedBy(copyDebug)
-    }
+    ext.kotlin_version = '1.9.0'
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.13.2'
+    implementation 'com.squareup.okio:okio:2.10.0'
 }
-
-apply from: "$project.rootDir/config/android-checkstyle.gradle"

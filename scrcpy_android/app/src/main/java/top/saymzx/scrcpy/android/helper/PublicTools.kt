@@ -90,9 +90,9 @@ class PublicTools {
   }
 
   // 获取当前界面宽高
-  fun getScreenSize(context: Activity):Pair<Int,Int>{
+  fun getScreenSize(context: Activity): Pair<Int, Int> {
     val metric = DisplayMetrics()
     context.windowManager.defaultDisplay.getRealMetrics(metric)
-    return Pair(metric.widthPixels,metric.heightPixels)
+    return Pair(metric.widthPixels, metric.heightPixels)
   }
 }

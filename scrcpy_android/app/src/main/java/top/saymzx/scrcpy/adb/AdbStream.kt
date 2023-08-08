@@ -4,7 +4,6 @@
 
 package top.saymzx.scrcpy.adb
 
-import android.util.Log
 import okhttp3.internal.notify
 import okhttp3.internal.wait
 import okio.Buffer
@@ -12,7 +11,7 @@ import okio.Buffer
 class AdbStream(
   private val localId: Int,
   private val adbWriter: AdbWriter,
-  private val isNeedSource: Boolean
+  val isNeedSource: Boolean
 ) {
   var remoteId = 0
 
@@ -25,11 +24,9 @@ class AdbStream(
   val source = Buffer()
 
   fun pushToSource(byteArray: ByteArray) {
-    if (isNeedSource) {
-      source.write(byteArray)
-      synchronized(source) {
-        source.notify()
-      }
+    source.write(byteArray)
+    synchronized(source) {
+      source.notify()
     }
   }
 
@@ -58,6 +55,11 @@ class AdbStream(
   fun readByteArray(size: Int): ByteArray {
     require(size.toLong())
     return source.readByteArray(size.toLong())
+  }
+
+  fun readShort(): Short {
+    require(2)
+    return source.readShort()
   }
 
   fun readLong(): Long {
