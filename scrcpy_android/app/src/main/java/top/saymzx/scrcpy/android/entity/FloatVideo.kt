@@ -279,41 +279,33 @@ class FloatVideo(
 
   // 组装触控报文
   private fun packTouchControl(action: Int, p: Int, x: Int, y: Int) {
-    val touchByteBuffer = ByteBuffer.allocate(32)
-    touchByteBuffer.clear()
+    val touchByteBuffer = ByteBuffer.allocate(25)
     // 触摸事件
-    touchByteBuffer.put(2)
+    touchByteBuffer.put(0)
     // 触摸类型
-    touchByteBuffer.put(action.toByte())
+    touchByteBuffer.putInt(action)
     // pointerId
-    touchByteBuffer.putLong(p.toLong())
+    touchByteBuffer.putInt(p)
     // 坐标位置
     touchByteBuffer.putInt(x * remoteVideoWidth / localVideoWidth)
     touchByteBuffer.putInt(y * remoteVideoHeight / localVideoHeight)
     // 屏幕尺寸
-    touchByteBuffer.putShort(remoteVideoWidth.toShort())
-    touchByteBuffer.putShort(remoteVideoHeight.toShort())
-    // 按压力度presureInt和buttons
-    touchByteBuffer.putShort(1)
-    touchByteBuffer.putInt(0)
-    touchByteBuffer.putInt(0)
+    touchByteBuffer.putInt(remoteVideoWidth)
+    touchByteBuffer.putInt(remoteVideoHeight)
     touchByteBuffer.flip()
     touchHandle(touchByteBuffer.array())
   }
 
   // 组装导航报文
   private fun packNavControl(action: Int, key: Int) {
-    val navByteBuffer = ByteBuffer.allocate(14)
+    val navByteBuffer = ByteBuffer.allocate(9)
     navByteBuffer.clear()
     // 输入事件
-    navByteBuffer.put(0)
+    navByteBuffer.put(1)
     // 事件类型
-    navByteBuffer.put(action.toByte())
+    navByteBuffer.putInt(action)
     // 按键类型
     navByteBuffer.putInt(key)
-    // 重复次数
-    navByteBuffer.putInt(0)
-    navByteBuffer.putInt(0)
     navByteBuffer.flip()
     touchHandle(navByteBuffer.array())
   }

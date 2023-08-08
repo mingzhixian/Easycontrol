@@ -14,4 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "scrcpy_android"
 include ':app'
+include ':oldserver'
 include ':server'

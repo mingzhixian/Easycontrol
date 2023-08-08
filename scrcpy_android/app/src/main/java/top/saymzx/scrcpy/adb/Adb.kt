@@ -15,6 +15,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.nio.charset.StandardCharsets
 import java.util.Random
+import java.util.concurrent.ConcurrentHashMap
 
 class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
@@ -22,13 +23,12 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
   private val adbWriter: AdbWriter
   private val adbReader: AdbReader
   private val random = Random()
-  private val connectionStreams = HashMap<Int, AdbStream>()
+  private val connectionStreams = ConcurrentHashMap<Int, AdbStream>()
   private var defaultShellStream: AdbStream? = null
 
   init {
     // 连接socket
-    socket.receiveBufferSize = 8192
-    socket.setPerformancePreferences(0, 2, 1)
+    socket.tcpNoDelay = true
     socket.connect(InetSocketAddress(host, port))
     // 读写工具
     adbReader = AdbReader(socket.source())
@@ -141,7 +141,9 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
           Constants.CMD_WRTE -> {
             adbWriter.writeOkay(message.arg1, message.arg0)
-            stream.pushToSource(message.payload)
+            if (stream.isNeedSource) {
+              stream.pushToSource(message.payload)
+            }
           }
 
           Constants.CMD_CLSE -> {
@@ -167,4 +169,5 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
     } catch (_: Exception) {
     }
   }
+
 }

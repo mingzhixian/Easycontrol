@@ -11,12 +11,12 @@ android {
         applicationId "top.saymzx.scrcpy.android"
         minSdk 23
         targetSdk 33
-        versionCode 1281
-        versionName "12.8.1"
+        versionCode 1300
+        versionName "13.0.0"
         resConfigs "zh"
         resConfigs "xhdpi"
         ndk {
-            abiFilters "arm64-v8a" , "x86"
+            abiFilters "arm64-v8a", "x86"
         }
     }
     viewBinding {
@@ -29,7 +29,7 @@ android {
             }
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-rules.pro'
         }
     }
     compileOptions {
@@ -43,6 +43,17 @@ android {
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
+    sourceSets {
+        main {
+            res.srcDirs = [
+                    'src/main/res/layout/module',
+                    'src/main/res/layout/activity',
+                    'src/main/res/layout/item',
+                    'src/main/res'
+            ]
+        }
+    }
+    ext.kotlin_version = '1.9.0'
 }
 
 dependencies {
@@ -50,6 +61,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'androidx.documentfile:documentfile:1.0.1'
 }
