@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application' version '8.0.2'
+}
+
+android {
+    namespace 'top.saymzx.easycontrol.server'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 23
+        targetSdk 33
+        applicationId 'top.saymzx.easycontrol.server'
+        versionCode 1
+        versionName '1'
+    }
+
+    buildTypes {
+        release {
+            ndk {
+                abiFilter "arm64-v8a"
+            }
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    task copyRelease(type: Copy) {
+        dependsOn 'assembleRelease'
+        from file('build/outputs/apk/release/server-release-unsigned.apk')
+        into file('../app/src/main/res/raw/')
+        rename('server-release-unsigned.apk', 'scrcpy_server.jar')
+    }
+
+    task copyDebug(type: Copy) {
+        dependsOn 'assembleDebug'
+        from file("build/outputs/apk/debug/server-debug.apk")
+        into file('../app/src/main/res/raw/')
+        rename('server-debug.apk', 'scrcpy_server.jar')
+    }
+    buildFeatures {
+        aidl true
+    }
+}
+
+dependencies {
+}
