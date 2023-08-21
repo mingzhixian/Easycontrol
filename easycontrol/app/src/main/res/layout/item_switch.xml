@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/cardBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:id="@+id/item_switch_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="是否修改分辨率:"
+        android:textColor="@color/onCardBackground"
+        android:textSize="@dimen/middleFont"
+        tools:ignore="HardcodedText" />
+
+    <Switch
+        android:id="@+id/item_switch_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:thumbTint="@color/cardContainerBackground"
+        android:thumbTintMode="multiply"
+        android:trackTint="@color/buttonBackground"
+        android:trackTintMode="multiply"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+</LinearLayout>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/device"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/background_cron"
+    android:backgroundTint="@color/cardBackground"
+    android:elevation="1dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/device_name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_weight="1"
+        android:text="设备名称"
+        android:textColor="@color/onCardBackground"
+        android:textSize="@dimen/largeFont"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/device_address"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_weight="1"
+        android:text="192.168.43.1:5555"
+        android:textColor="@color/onCardBackgroundSecond"
+        android:textSize="@dimen/middleFont"
+        tools:ignore="HardcodedText" />
+</LinearLayout>

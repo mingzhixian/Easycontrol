@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--字体-->
+    <dimen name="largeFont">24sp</dimen>
+    <dimen name="middleFont">18sp</dimen>
+    <dimen name="smallFont">14sp</dimen>
+    <!--floatVideo界面-->
+    <dimen name="floatVideoBackground">20dp</dimen>
+    <dimen name="floatVideoTitle">34dp</dimen>
+    <dimen name="floatVideoBarPadding">9.5dp</dimen>
+    <dimen name="floatVideoButtonPadding">8dp</dimen>
+    <dimen name="floatNavMenuW">140dp</dimen>
+    <dimen name="floatNavMenuH">300dp</dimen>
+    <dimen name="floatVideoSmallSmall">80dp</dimen>
+    <dimen name="floatVideoSmallSmallPadding">16dp</dimen>
+</resources>
