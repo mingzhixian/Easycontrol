@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/float_nav_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.7"
+        android:src="@drawable/float_ball"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/float_nav_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_cron"
+            android:backgroundTint="@color/cardContainerBackground"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="14dp">
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="16" />
+
+            <ImageView
+                android:id="@+id/float_video_switch"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/floatVideoTitle"
+                android:layout_weight="12"
+                android:contentDescription="float_video_switch"
+                android:padding="@dimen/floatVideoButtonPadding"
+                android:src="@drawable/icon_switch"
+                android:tag="float_video_button"
+                android:tint="@color/onCardBackground"
+                tools:ignore="HardcodedText" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="16" />
+
+            <ImageView
+                android:id="@+id/float_video_home"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/floatVideoTitle"
+                android:layout_weight="12"
+                android:contentDescription="float_video_home"
+                android:padding="@dimen/floatVideoButtonPadding"
+                android:src="@drawable/icon_home"
+                android:tag="float_video_button"
+                android:tint="@color/onCardBackground"
+                tools:ignore="HardcodedText" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="16" />
+
+            <ImageView
+                android:id="@+id/float_video_back"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/floatVideoTitle"
+                android:layout_weight="12"
+                android:contentDescription="float_video_back"
+                android:padding="@dimen/floatVideoButtonPadding"
+                android:src="@drawable/icon_back"
+                android:tag="float_video_button"
+                android:tint="@color/onCardBackground"
+                tools:ignore="HardcodedText" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="16" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="UselessParent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/background_cron"
+                android:backgroundTint="@color/cardContainerBackground"
+                android:orientation="vertical"
+                android:paddingStart="18dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:id="@+id/float_nav_exit_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:text="退出全屏"
+                    android:textColor="@color/onCardContainerBackground"
+                    android:textSize="@dimen/middleFont" />
+
+                <TextView
+                    android:id="@+id/float_nav_exit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:text="退出投屏"
+                    android:textColor="@color/onCardContainerBackground"
+                    android:textSize="@dimen/middleFont" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</LinearLayout>

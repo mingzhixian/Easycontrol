@@ -1,0 +1,145 @@
+[
+  {
+    "level_": 0,
+    "message_": "Start JSON generation. Platform version: 23 min SDK version: x86",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "rebuilding JSON E:\\Code\\easycontrol\\easycontrol\\app\\.cxx\\Debug\\3n585v19\\x86\\android_gradle_build.json due to:",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "- force flag, will remove stale configuration folder",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "removing stale contents from \u0027E:\\Code\\easycontrol\\easycontrol\\app\\.cxx\\Debug\\3n585v19\\x86\u0027",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "created folder \u0027E:\\Code\\easycontrol\\easycontrol\\app\\.cxx\\Debug\\3n585v19\\x86\u0027",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "executing cmake @echo off\n\"C:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.22.1\\\\bin\\\\cmake.exe\" ^\n  \"-HE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\src\\\\main\\\\cpp\" ^\n  \"-DCMAKE_SYSTEM_NAME\u003dAndroid\" ^\n  \"-DCMAKE_EXPORT_COMPILE_COMMANDS\u003dON\" ^\n  \"-DCMAKE_SYSTEM_VERSION\u003d23\" ^\n  \"-DANDROID_PLATFORM\u003dandroid-23\" ^\n  \"-DANDROID_ABI\u003dx86\" ^\n  \"-DCMAKE_ANDROID_ARCH_ABI\u003dx86\" ^\n  \"-DANDROID_NDK\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\25.1.8937393\" ^\n  \"-DCMAKE_ANDROID_NDK\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\25.1.8937393\" ^\n  \"-DCMAKE_TOOLCHAIN_FILE\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\25.1.8937393\\\\build\\\\cmake\\\\android.toolchain.cmake\" ^\n  \"-DCMAKE_MAKE_PROGRAM\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.22.1\\\\bin\\\\ninja.exe\" ^\n  \"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY\u003dE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3n585v19\\\\obj\\\\x86\" ^\n  \"-DCMAKE_RUNTIME_OUTPUT_DIRECTORY\u003dE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3n585v19\\\\obj\\\\x86\" ^\n  \"-DCMAKE_BUILD_TYPE\u003dDebug\" ^\n  \"-BE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\.cxx\\\\Debug\\\\3n585v19\\\\x86\" ^\n  -GNinja\n",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "@echo off\n\"C:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.22.1\\\\bin\\\\cmake.exe\" ^\n  \"-HE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\src\\\\main\\\\cpp\" ^\n  \"-DCMAKE_SYSTEM_NAME\u003dAndroid\" ^\n  \"-DCMAKE_EXPORT_COMPILE_COMMANDS\u003dON\" ^\n  \"-DCMAKE_SYSTEM_VERSION\u003d23\" ^\n  \"-DANDROID_PLATFORM\u003dandroid-23\" ^\n  \"-DANDROID_ABI\u003dx86\" ^\n  \"-DCMAKE_ANDROID_ARCH_ABI\u003dx86\" ^\n  \"-DANDROID_NDK\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\25.1.8937393\" ^\n  \"-DCMAKE_ANDROID_NDK\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\25.1.8937393\" ^\n  \"-DCMAKE_TOOLCHAIN_FILE\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\ndk\\\\25.1.8937393\\\\build\\\\cmake\\\\android.toolchain.cmake\" ^\n  \"-DCMAKE_MAKE_PROGRAM\u003dC:\\\\Users\\\\kic\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\cmake\\\\3.22.1\\\\bin\\\\ninja.exe\" ^\n  \"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY\u003dE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3n585v19\\\\obj\\\\x86\" ^\n  \"-DCMAKE_RUNTIME_OUTPUT_DIRECTORY\u003dE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\build\\\\intermediates\\\\cxx\\\\Debug\\\\3n585v19\\\\obj\\\\x86\" ^\n  \"-DCMAKE_BUILD_TYPE\u003dDebug\" ^\n  \"-BE:\\\\Code\\\\easycontrol\\\\easycontrol\\\\app\\\\.cxx\\\\Debug\\\\3n585v19\\\\x86\" ^\n  -GNinja\n",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "Exiting generation of E:\\Code\\easycontrol\\easycontrol\\app\\.cxx\\Debug\\3n585v19\\x86\\compile_commands.json.bin normally",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "done executing cmake",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "hard linked E:\\Code\\easycontrol\\easycontrol\\app\\.cxx\\Debug\\3n585v19\\x86\\compile_commands.json to E:\\Code\\easycontrol\\easycontrol\\app\\.cxx\\tools\\debug\\x86\\compile_commands.json",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  },
+  {
+    "level_": 0,
+    "message_": "JSON generation completed without problems",
+    "file_": "E:\\Code\\easycontrol\\easycontrol\\app\\src\\main\\cpp\\CMakeLists.txt",
+    "tag_": "debug|x86",
+    "diagnosticCode_": 0,
+    "memoizedIsInitialized": 1,
+    "unknownFields": {
+      "fields": {}
+    },
+    "memoizedSize": -1,
+    "memoizedHashCode": 0
+  }
+]
