@@ -1,15 +1,14 @@
 package top.saymzx.easycontrol.app.client;
 
-import static top.saymzx.easycontrol.app.MasterActivityKt.appData;
+import static top.saymzx.easycontrol.app.MainActivityKt.appData;
 
-import android.content.ClipData;
 import android.view.Surface;
 import android.widget.Toast;
 
 import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import kotlin.Pair;
 import top.saymzx.easycontrol.adb.Adb;
@@ -21,13 +20,13 @@ public class Client extends Thread {
   public final Device device;
   public final Surface surface;
   public final HandleUi handleUi;
-  public boolean isNormal;
+  public AtomicBoolean isNormal = new AtomicBoolean(true);
 
   // 连接流
   private Adb adb;
-  public AdbStream videoStream;
-  public AdbStream audioStream;
-  public AdbStream controlStream;
+  public AdbStream videoStream = null;
+  public AdbStream audioStream = null;
+  public AdbStream controlStream = null;
 
   // 子服务
   public VideoDecode videoDecode;
@@ -46,53 +45,56 @@ public class Client extends Thread {
   public void run() {
     // 连接ADB
     connectADB();
-    if (isNormal) return;
+    if (!isNormal.get()) return;
     // 发送server
     sendServer();
-    if (isNormal) return;
+    if (!isNormal.get()) return;
     // 启动server
     startServer();
-    if (isNormal) return;
+    if (!isNormal.get()) return;
     // 连接server
     connectServer();
-    if (isNormal) return;
+    if (!isNormal.get()) return;
     // 创建子服务
     createSubService();
-    if (isNormal) return;
+    if (!isNormal.get()) return;
     // 启动子服务
     startSubService();
     // 更新UI
     handleUi.handle(HandleUi.StartControl, 0);
-    // 其他服务
-    startOtherService();
   }
 
-  private void stop(String de, Exception e) {
+  public void stop(String de, Exception e) {
+    if (!isNormal.getAndSet(false)) return;
     // 更新UI
     handleUi.handle(HandleUi.StopControl, 0);
-    Toast.makeText(appData.main, de, Toast.LENGTH_SHORT).show();
-    if (e != null) Toast.makeText(appData.main, e.toString(), Toast.LENGTH_SHORT).show();
+    appData.getMain().runOnUiThread(() -> Toast.makeText(appData.getMain(), de, Toast.LENGTH_SHORT).show());
+    if (e != null)
+      appData.getMain().runOnUiThread(() -> Toast.makeText(appData.getMain(), e.toString(), Toast.LENGTH_SHORT).show());
     // 关闭资源
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
       try {
         switch (i) {
           case 1:
-            videoStream.close();
+            if (device.getSetResolution()) adb.runAdbCmd("wm size reset", false);
           case 2:
-            audioStream.close();
+            videoStream.close();
           case 3:
-            controlStream.close();
+            audioStream.close();
           case 4:
+            controlStream.close();
+          case 5:
             videoDecode.videoDecodec.stop();
             videoDecode.videoDecodec.release();
-          case 5:
+          case 6:
             audioDecode.audioTrack.stop();
             audioDecode.audioTrack.release();
-          case 6:
             audioDecode.loudnessEnhancer.release();
           case 7:
             audioDecode.audioDecodec.stop();
             audioDecode.audioDecodec.release();
+          case 8:
+            adb.close();
         }
       } catch (Exception ignored) {
       }
@@ -109,13 +111,10 @@ public class Client extends Thread {
       stop("解析域名失败", e);
       return;
     }
-    if (ip == null) {
-      stop("地址错误", null);
-      return;
-    }
     try {
       // 连接ADB
-      adb = new Adb(ip, device.getPort(), appData.keyPair);
+      assert ip != null;
+      adb = new Adb(ip, device.getPort(), appData.getKeyPair());
     } catch (Exception e) {
       stop("连接ADB失败", e);
     }
@@ -126,14 +125,13 @@ public class Client extends Thread {
     // 尝试发送Server
     try {
       for (int i = 0; i < 3; i++) {
-        String isHaveServer = runAdbCmd(" ls -l /data/local/tmp/easycontrol_server_${appData.versionCode}.jar ", true);
-        if (isHaveServer.contains("命令运行超过8秒，未获取命令输出")) continue;
-        else if (isHaveServer.contains("No such file or directory") || isHaveServer.contains("Invalid argument")) {
+        String isHaveServer = runAdbCmd(" ls -l /data/local/tmp/", true);
+        if (isHaveServer.contains("easycontrol_server_" + appData.getVersionCode() + ".jar"))
+          return;
+        else {
           // 删除旧Server
           runAdbCmd("rm /data/local/tmp/easycontrol_server_* ", false);
-          adb.pushFile(appData.main.getResources().openRawResource(R.raw.scrcpy_server), "/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar");
-        } else {
-          return;
+          adb.pushFile(appData.getMain().getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/easycontrol_server_" + appData.getVersionCode() + ".jar");
         }
       }
     } catch (Exception ignored) {
@@ -145,15 +143,15 @@ public class Client extends Thread {
   private void startServer() {
     try {
       // 修改分辨率
-      if (device.getSetResolution())
-        runAdbCmd("wm size ${appData.deviceWidth}x${appData.deviceHeight}", false);
+      if (device.getSetResolution()) {
+        Pair<Integer, Integer> tmpDeviceSize = appData.getPublicTools().getScreenSize(appData.getMain());
+        runAdbCmd("wm size " + tmpDeviceSize.getFirst() + "x" + tmpDeviceSize.getSecond(), false);
+      }
       // 停止旧服务
       runAdbCmd("ps -ef | grep top.saymzx.easycontrol.server.Server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9", false);
       // 启动Server
-      runAdbCmd("CLASSPATH=/data/local/tmp/scrcpy_android_server_${appData.versionCode}.jar app_process / top.saymzx.easycontrol.server.Server video_codec=${device.videoCodec} audio_codec=${device.audioCodec} max_size=${device.maxSize} video_bit_rate=${device.videoBit} max_fps=${device.fps} > /dev/null 2>&1 & ", false);
-      // 检查启动状态
-      String out = runAdbCmd("ps -ef | grep top.saymzx.easycontrol.server.Server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o", true);
-      if (!out.isEmpty()) return;
+      runAdbCmd("CLASSPATH=/data/local/tmp/easycontrol_server_" + appData.getVersionCode() + ".jar app_process / top.saymzx.easycontrol.server.Server video_codec=" + device.getVideoCodec() + " audio_codec=" + device.getAudioCodec() + " max_size=" + device.getMaxSize() + " max_fps=" + device.getMaxFps() + " video_bit_rate=" + device.getMaxVideoBit() + "  > /dev/null 2>&1 & ", false);
+      return;
     } catch (Exception ignored) {
     }
     stop("启动Server失败", null);
@@ -162,18 +160,11 @@ public class Client extends Thread {
   // 连接Server
   private void connectServer() {
     // 尝试连接
-    int connect = 0;
     for (int i = 0; i < 100; i++) {
       try {
-        if (connect == 0) {
-          videoStream = adb.localSocketForward("scrcpy_android", true);
-          connect = 1;
-        }
-        if (connect == 1) {
-          audioStream = adb.localSocketForward("scrcpy_android", true);
-          connect = 2;
-        }
-        controlStream = adb.localSocketForward("scrcpy_android", true);
+        if (videoStream == null) videoStream = adb.localSocketForward("easycontrol", true);
+        if (audioStream == null) audioStream = adb.localSocketForward("easycontrol", true);
+        if (controlStream == null) controlStream = adb.localSocketForward("easycontrol", true);
         return;
       } catch (Exception ignored) {
         try {
@@ -201,71 +192,24 @@ public class Client extends Thread {
   private void startSubService() {
     try {
       List<Thread> workThreads = new ArrayList<>();
-      Pair<Thread, Thread> videoThreads = videoDecode.stream();
+      Pair<Thread, Thread> videoThreads = videoDecode.start();
       workThreads.add(videoThreads.getFirst());
       workThreads.add(videoThreads.getSecond());
-      Pair<Thread, Thread> audioThreads = audioDecode.stream();
+      Pair<Thread, Thread> audioThreads = audioDecode.start();
       workThreads.add(audioThreads.getFirst());
       workThreads.add(audioThreads.getSecond());
-      workThreads.add(controller.handle());
+      workThreads.add(controller.start());
       for (Thread thread : workThreads) {
         if (thread != null) thread.start();
       }
+      controller.startHandleInThread();
     } catch (Exception e) {
       stop("启动Client失败", e);
     }
   }
 
-  // 其余服务
-  private void startOtherService() {
-    while (isNormal) {
-      try {
-        Thread.sleep(500);
-        // 更新刷新率
-        handleUi.handle(HandleUi.UpdateFps, videoDecode.fps * 2);
-        videoDecode.fps = 0;
-        // 更新延迟
-        handleUi.handle(HandleUi.UpdateDelay, videoDecode.avgDelay / 60);
-        // 熄屏检测
-        checkScreenOff();
-        // 剪切板检测
-        checkClipBoard();
-      } catch (Exception ignored) {
-        stop("运行错误", null);
-      }
-    }
-  }
-
-  // 防止被控端熄屏
-  private long lastSendCmdTime = 0;
-
-  private void checkScreenOff() {
-    long nowTime = System.currentTimeMillis();
-    if (nowTime - lastSendCmdTime > 1000) {
-      if (runAdbCmd("dumpsys deviceidle | grep mScreenOn", true).contains("mScreenOn=false")) {
-        lastSendCmdTime = nowTime;
-        runAdbCmd("input keyevent 26", false);
-        if (appData.getSetValue().getSlaveTurnOffScreen()) {
-          controller.sendScreenModeEvent(0);
-        }
-      }
-    }
-  }
-
-  // 同步本机剪切板至被控端
-  private void checkClipBoard() {
-    ClipData clipBoard = appData.clipBoard.getPrimaryClip();
-    if (clipBoard != null && clipBoard.getItemCount() > 0) {
-      String newClipBoardText = clipBoard.getItemAt(0).getText().toString();
-      if (!Objects.equals(controller.nowClipboardText, newClipBoardText)) {
-        controller.nowClipboardText = newClipBoardText;
-        controller.sendClipboardEvent();
-      }
-    }
-  }
-
   // 运行ADB命令
-  private String runAdbCmd(String cmd, Boolean isNeedOutput) {
+  public String runAdbCmd(String cmd, Boolean isNeedOutput) {
     String out;
     try {
       out = adb.runAdbCmd(cmd, isNeedOutput);

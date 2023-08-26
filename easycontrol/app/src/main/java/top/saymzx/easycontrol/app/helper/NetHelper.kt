@@ -1,6 +1,5 @@
 package top.saymzx.easycontrol.app.helper
 
-import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +26,6 @@ class NetHelper {
             }
           }
         } catch (e: Exception) {
-          Log.e("Scrcpy", e.toString())
           withContext(Dispatchers.Main) {
             Toast.makeText(appData.main, "网络错误", Toast.LENGTH_SHORT).show()
             handle(null)
@@ -50,7 +48,6 @@ class NetHelper {
             }
           }
         } catch (e: Exception) {
-          Log.e("Scrcpy", e.toString())
           withContext(Dispatchers.Main) {
             Toast.makeText(appData.main, "网络错误", Toast.LENGTH_SHORT).show()
             handle(null)

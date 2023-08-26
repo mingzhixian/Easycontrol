@@ -87,7 +87,7 @@ class AdbKeyPair(
       publicKeyFile.writer().use { out ->
         val bytes = convertRsaPublicKeyToAdbFormat(keyPair.public as RSAPublicKey)
         out.write(Base64.encodeToString(bytes, Base64.NO_WRAP))
-        out.write(" scrcpy@saymzx.top")
+        out.write(" easycontrol@saymzx.top")
         out.flush()
       }
     }

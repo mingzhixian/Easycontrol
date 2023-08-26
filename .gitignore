@@ -1,18 +1,19 @@
-scrcpy_android/*.iml
-scrcpy_android/.gradle
-scrcpy_android/local.properties
-scrcpy_android/.idea/caches
-scrcpy_android/.idea/libraries
-scrcpy_android/.idea/modules.xml
-scrcpy_android/.idea/workspace.xml
-scrcpy_android/.idea/navEditor.xml
-scrcpy_android/.idea/assetWizardSettings.xml
-scrcpy_android/.DS_Store
-scrcpy_android/build
-scrcpy_android/local.properties
+easycontrol/*.iml
+easycontrol/.gradle
+easycontrol/local.properties
+easycontrol/.idea/caches
+easycontrol/.idea/libraries
+easycontrol/.idea/modules.xml
+easycontrol/.idea/workspace.xml
+easycontrol/.idea/navEditor.xml
+easycontrol/.idea/assetWizardSettings.xml
+easycontrol/.DS_Store
+easycontrol/build
+easycontrol/local.properties
 
-scrcpy_android/app/release
-scrcpy_android/app/src/main/res/raw/scrcpy-server.jar
+easycontrol/app/build
+easycontrol/app/release
+easycontrol/app/src/main/res/raw/easycontrol_server.jar
 
-scrcpy_android/server/build
-scrcpy_android/server/.gradle
+easycontrol/server/build
+easycontrol/server/.gradle
