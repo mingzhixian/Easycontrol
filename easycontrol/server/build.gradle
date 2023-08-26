@@ -10,8 +10,8 @@ android {
         minSdk 23
         targetSdk 33
         applicationId 'top.saymzx.easycontrol.server'
-        versionCode 1
-        versionName '1'
+        versionCode 10000
+        versionName '1.0.0'
     }
 
     buildTypes {
@@ -35,15 +35,16 @@ android {
         dependsOn 'assembleRelease'
         from file('build/outputs/apk/release/server-release-unsigned.apk')
         into file('../app/src/main/res/raw/')
-        rename('server-release-unsigned.apk', 'scrcpy_server.jar')
+        rename('server-release-unsigned.apk', 'easycontrol_server.jar')
     }
 
     task copyDebug(type: Copy) {
         dependsOn 'assembleDebug'
         from file("build/outputs/apk/debug/server-debug.apk")
         into file('../app/src/main/res/raw/')
-        rename('server-debug.apk', 'scrcpy_server.jar')
+        rename('server-debug.apk', 'easycontrol_server.jar')
     }
+
     buildFeatures {
         aidl true
     }

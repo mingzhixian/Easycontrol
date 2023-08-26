@@ -1,3 +1,6 @@
+/*
+ * 本项目大量借鉴学习了开源投屏软件：Scrcpy，在此对该项目表示感谢
+ */
 package top.saymzx.easycontrol.server.wrappers;
 
 import android.annotation.SuppressLint;
@@ -66,7 +69,7 @@ public final class SurfaceControl {
         return (IBinder) getBuiltInDisplayMethod.invoke(null, 0);
       }
       return (IBinder) getBuiltInDisplayMethod.invoke(null);
-    } catch (InvocationTargetException | IllegalAccessException e) {
+    } catch (Exception e) {
       return null;
     }
   }
@@ -74,7 +77,7 @@ public final class SurfaceControl {
   public static IBinder getPhysicalDisplayToken(long physicalDisplayId) {
     try {
       return (IBinder) getPhysicalDisplayTokenMethod.invoke(null, physicalDisplayId);
-    } catch (InvocationTargetException | IllegalAccessException e) {
+    } catch (Exception e) {
       return null;
     }
   }
@@ -82,17 +85,15 @@ public final class SurfaceControl {
   public static long[] getPhysicalDisplayIds() {
     try {
       return (long[]) getPhysicalDisplayIdsMethod.invoke(null);
-    } catch (InvocationTargetException | IllegalAccessException e) {
+    } catch (Exception e) {
       return null;
     }
   }
 
-  public static boolean setDisplayPowerMode(IBinder displayToken, int mode) {
+  public static void setDisplayPowerMode(IBinder displayToken, int mode) {
     try {
       setDisplayPowerModeMethod.invoke(null, displayToken, mode);
-      return true;
-    } catch (InvocationTargetException | IllegalAccessException e) {
-      return false;
+    } catch (Exception ignored) {
     }
   }
 

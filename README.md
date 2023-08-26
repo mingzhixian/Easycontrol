@@ -1,4 +1,4 @@
-# 投屏(scrcpy_android)
+# 易控(Easycontrol)
 
 ## 简介
 
@@ -14,32 +14,31 @@
 - 超快启动
 - 较低的延迟
 - 支持小窗显示
-- 支持小小窗显示
 - 支持多设备同时连接
 - 支持主控端以及多个被控端之间剪切板同步
 
 ## 使用说明
 
-请前往[此处](https://scrcpy.saymzx.top/?art=HOW_TO_USE.md)查看。
+请前往[此处](https://github.com/mingzhixian/Easycontrol/blob/master/HOW_TO_USE.md)查看。
 
-## 下载
-
-- [scrcpy_android](https://github.saymzx.top/mingzhixian/scrcpy/releases/latest/download/scrcpy_android.apk)
+## [下载地址](https://github.com/mingzhixian/Easycontrol/releases/latest/download/Easycontrol.apk)
 
 ## 截图
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/main.webp?raw=true" width="200px">
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallV.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallH.webp?raw=true" width="200px">
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/fullV.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/fullH.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/screenshot/smallSmall.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/screenshot/main.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/screenshot/small.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/screenshot/mini.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/screenshot/full.webp?raw=true" width="200px">
 
 ## 鼓励
 
 如果您觉得我的软件对您有帮助，可以赞助我一个硬币，十分感谢！
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/wechat.webp?raw=true" width="200px"><img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/alipay.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/other/wechat.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/other/alipay.webp?raw=true" width="200px">
 
 ## 反馈
 
 请在Github或QQ群反馈BUG或建议。
 
-<img src="https://github.saymzx.top/mingzhixian/scrcpy/blob/master/pic/other/qq.webp?raw=true" width="200px">
+<img src="https://github.com/mingzhixian/Easycontrol/blob/master/pic/other/qq.webp?raw=true" width="200px">

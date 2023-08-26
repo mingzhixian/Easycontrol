@@ -12,7 +12,7 @@ class AdbWriter(sink: Sink) : AutoCloseable {
 
   private val bufferedSink = sink.buffer()
 
-  fun writeConnect() = writeCommand(
+  fun writeConnect() = write(
     Constants.CMD_CNXN,
     Constants.CONNECT_VERSION,
     Constants.CONNECT_MAXDATA,
@@ -21,7 +21,7 @@ class AdbWriter(sink: Sink) : AutoCloseable {
     Constants.CONNECT_PAYLOAD.size
   )
 
-  fun writeAuth(authType: Int, authPayload: ByteArray) = writeCommand(
+  fun writeAuth(authType: Int, authPayload: ByteArray) = write(
     Constants.CMD_AUTH,
     authType,
     0,
@@ -36,39 +36,39 @@ class AdbWriter(sink: Sink) : AutoCloseable {
     buffer.put(destinationBytes)
     buffer.put(0)
     val payload = buffer.array()
-    writeCommand(Constants.CMD_OPEN, localId, 0, payload)
+    write(Constants.CMD_OPEN, localId, 0, payload, 0, payload.size)
   }
 
   fun writeWrite(localId: Int, remoteId: Int, payload: ByteArray, offset: Int, length: Int) {
     if (length < maxPayloadSize) {
-      writeCommand(Constants.CMD_WRTE, localId, remoteId, payload, offset, length)
+      write(Constants.CMD_WRTE, localId, remoteId, payload, offset, length)
     } else {
-      var tmpOffset = offset
-      while (tmpOffset < offset + length) {
-        val tmpLength = minOf(maxPayloadSize, offset + length - tmpOffset)
-        writeCommand(Constants.CMD_WRTE, localId, remoteId, payload, tmpOffset, tmpLength)
+      var tmpOffset = 0
+      while (tmpOffset < payload.size) {
+        val tmpLength = minOf(maxPayloadSize, length - tmpOffset)
+        write(Constants.CMD_WRTE, localId, remoteId, payload, tmpOffset, tmpLength)
         tmpOffset += tmpLength
       }
     }
   }
 
   fun writeClose(localId: Int, remoteId: Int) {
-    writeCommand(Constants.CMD_CLSE, localId, remoteId)
+    write(Constants.CMD_CLSE, localId, remoteId, null, 0, 0)
   }
 
   fun writeOkay(localId: Int, remoteId: Int) {
-    writeCommand(Constants.CMD_OKAY, localId, remoteId)
+    write(Constants.CMD_OKAY, localId, remoteId, null, 0, 0)
   }
 
 
   var maxPayloadSize = 1024
-  private inline fun writeCommand(
+  private fun write(
     command: Int,
     arg0: Int,
     arg1: Int,
-    payload: ByteArray? = null,
-    payloadOffset: Int = 0,
-    payloadLength: Int = 0
+    payload: ByteArray?,
+    offset: Int,
+    length: Int
   ) {
     synchronized(bufferedSink) {
       bufferedSink.apply {
@@ -79,11 +79,13 @@ class AdbWriter(sink: Sink) : AutoCloseable {
           writeIntLe(0)
           writeIntLe(0)
         } else {
-          writeIntLe(payloadLength)
-          writeIntLe(payloadChecksum(payload, payloadOffset, payloadLength))
+          writeIntLe(length)
+          writeIntLe(payloadChecksum(payload))
         }
         writeIntLe(command xor -0x1)
-        payload?.let { write(it, payloadOffset, payloadLength) }
+        if (payload != null) {
+          write(payload, offset, length)
+        }
         flush()
       }
     }
@@ -93,10 +95,10 @@ class AdbWriter(sink: Sink) : AutoCloseable {
     bufferedSink.close()
   }
 
-  private fun payloadChecksum(payload: ByteArray, offset: Int, length: Int): Int {
+  private fun payloadChecksum(payload: ByteArray): Int {
     var checksum = 0
-    for (i in offset until offset + length) {
-      checksum += payload[i].toUByte().toInt()
+    for (byte in payload) {
+      checksum += byte.toUByte().toInt()
     }
     return checksum
   }

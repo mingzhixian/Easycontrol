@@ -19,11 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep,allowobfuscation public class top.saymzx.easycontrol.server.**{
-*;
-}
 -keep public class top.saymzx.easycontrol.server.Server {
     main(java.lang.String[]);
 }
--keep class android.content.IOnPrimaryClipChangedListener
--keep class android.view.IRotationWatcher
+-keep class android.content.IOnPrimaryClipChangedListener{*;}
+-keep class android.view.IRotationWatcher{*;}
+-keep class top.saymzx.easycontrol.server.helper.FakeContext{*;}

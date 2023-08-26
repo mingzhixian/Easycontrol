@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.helper
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Build
@@ -10,10 +11,6 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Switch
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import top.saymzx.easycontrol.app.R
 import top.saymzx.easycontrol.app.appData
 import top.saymzx.easycontrol.app.databinding.ItemAddDeviceBinding
@@ -22,15 +19,19 @@ import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding
 import top.saymzx.easycontrol.app.databinding.ModuleDialogBinding
 import top.saymzx.easycontrol.app.entity.Device
-import kotlin.math.max
 
-class PublicTools {
+class PublicTools(context: Context) {
 
   // 设置全面屏
   fun setFullScreen(context: Activity) {
     // 全屏显示
     context.window.decorView.systemUiVisibility =
-      (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+      View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+          View.SYSTEM_UI_FLAG_FULLSCREEN or
+          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     // 设置异形屏
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       context.window.attributes.layoutInDisplayCutoutMode =
@@ -45,7 +46,7 @@ class PublicTools {
     // 状态栏
     context.window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
     context.window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-    context.window.statusBarColor = context.resources.getColor(R.color.background)
+    context.window.statusBarColor = context.resources.getColor(R.color.cardContainerBackground)
     context.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
   }
 
@@ -63,10 +64,12 @@ class PublicTools {
   fun createDialog(context: Context, view: View): Dialog {
     val builder: AlertDialog.Builder = AlertDialog.Builder(context)
     builder.setCancelable(false)
+    val dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).root
+    dialogView.addView(view)
+    builder.setView(dialogView)
     val dialog = builder.create()
     dialog.setCanceledOnTouchOutside(true)
     dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-    ModuleDialogBinding.inflate(LayoutInflater.from(context)).dialogView.addView(view)
     return dialog
   }
 
@@ -81,7 +84,7 @@ class PublicTools {
     // 设置值
     itemAddDeviceBinding.addDeviceName.setText(device.name)
     itemAddDeviceBinding.addDeviceAddress.setText(device.address)
-    itemAddDeviceBinding.addDevicePort.setText(device.port)
+    itemAddDeviceBinding.addDevicePort.setText(device.port.toString())
     // 创建View
     val videoCodec =
       createSpinnerCard(context, "视频编解码器", videoCodecAdapter, device.videoCodec)
@@ -111,12 +114,11 @@ class PublicTools {
         itemAddDeviceBinding.addDeviceName.text.toString(),
         itemAddDeviceBinding.addDeviceAddress.text.toString(),
         itemAddDeviceBinding.addDevicePort.text.toString().toInt(),
-        videoCodec.itemSpinnerSpinner.toString(),
+        videoCodec.itemSpinnerSpinner.selectedItem.toString(),
         audioCodec.itemSpinnerSpinner.selectedItem.toString(),
         maxSize.itemSpinnerSpinner.selectedItem.toString().toInt(),
         maxFps.itemSpinnerSpinner.selectedItem.toString().toInt(),
-        maxVideoBit.itemSpinnerSpinner.selectedItem.toString()
-          .toInt() * 1000000,
+        maxVideoBit.itemSpinnerSpinner.selectedItem.toString().toInt(),
         setResolution.itemSwitchSwitch.isChecked
       )
       if (newDevice.id != null) deviceListAdapter.updateDevice(newDevice)
@@ -163,15 +165,15 @@ class PublicTools {
   private val maxFpsList = arrayOf("120", "90", "60", "30", "24", "10")
   private val videoBitList = arrayOf("20", "16", "12", "8", "4", "2", "1")
   val videoCodecAdapter =
-    ArrayAdapter(appData.main, android.R.layout.simple_spinner_dropdown_item, videoCodecList)
+    ArrayAdapter(context, R.layout.item_spinner_item, videoCodecList)
   val audioCodecAdapter =
-    ArrayAdapter(appData.main, android.R.layout.simple_spinner_dropdown_item, audioCodecList)
+    ArrayAdapter(context, R.layout.item_spinner_item, audioCodecList)
   val maxSizeAdapter =
-    ArrayAdapter(appData.main, android.R.layout.simple_spinner_dropdown_item, maxSizeList)
+    ArrayAdapter(context, R.layout.item_spinner_item, maxSizeList)
   val maxFpsAdapter =
-    ArrayAdapter(appData.main, android.R.layout.simple_spinner_dropdown_item, maxFpsList)
+    ArrayAdapter(context, R.layout.item_spinner_item, maxFpsList)
   val videoBitAdapter =
-    ArrayAdapter(appData.main, android.R.layout.simple_spinner_dropdown_item, videoBitList)
+    ArrayAdapter(context, R.layout.item_spinner_item, videoBitList)
 
   fun createSpinnerCard(
     context: Context,

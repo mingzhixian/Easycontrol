@@ -1,3 +1,6 @@
+/*
+ * 本项目大量借鉴学习了开源投屏软件：Scrcpy，在此对该项目表示感谢
+ */
 package top.saymzx.easycontrol.server.entity;
 
 import android.view.MotionEvent;
@@ -82,7 +85,6 @@ public final class PointersState {
 
       coords[i].x = pointer.x;
       coords[i].y = pointer.y;
-      coords[i].pressure = pointer.pressure;
     }
     cleanUp();
     return count;
