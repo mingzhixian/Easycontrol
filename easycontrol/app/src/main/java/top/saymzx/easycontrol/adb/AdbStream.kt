@@ -4,7 +4,6 @@
 
 package top.saymzx.easycontrol.adb
 
-import okhttp3.internal.notify
 import okhttp3.internal.wait
 import okio.Buffer
 
@@ -22,13 +21,6 @@ class AdbStream(
   val canWrite = Object()
 
   val source = Buffer()
-
-  fun pushToSource(byteArray: ByteArray) {
-    source.write(byteArray)
-    synchronized(source) {
-      source.notify()
-    }
-  }
 
   fun write(byteArray: ByteArray) {
     if (status == -1) return

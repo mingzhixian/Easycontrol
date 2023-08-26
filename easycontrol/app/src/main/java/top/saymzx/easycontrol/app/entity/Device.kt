@@ -3,7 +3,7 @@ package top.saymzx.easycontrol.app.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "Device")
+@Entity
 data class Device(
   @PrimaryKey(autoGenerate = true)
   var id: Int? = null,

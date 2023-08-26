@@ -6,40 +6,33 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
 
     <application
         android:icon="@drawable/app_icon"
-        android:label="投屏"
+        android:label="易控"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:theme="@android:style/Theme.Material.NoActionBar"
         tools:targetApi="31">
-        <activity
-            android:name=".SlaveActivity"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".FullScreenActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
-        <activity
-            android:name=".SetActivity"
-            android:exported="false" />
         <activity
             android:name=".ShowAppActivity"
             android:exported="false" />
         <activity
             android:name=".MasterActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".SlaveActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SetActivity"
             android:exported="false" />
     </application>
 

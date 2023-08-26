@@ -1,15 +1,19 @@
+/*
+ * 本项目大量借鉴学习了开源投屏软件：Scrcpy，在此对该项目表示感谢
+ */
 package top.saymzx.easycontrol.server.helper;
 
 import android.util.Pair;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
 
 public final class Controller {
 
-  public static Thread handle() {
+  public static Thread start() {
     Thread thread = new HandleThread();
     thread.setPriority(Thread.MAX_PRIORITY);
     return thread;
@@ -19,7 +23,7 @@ public final class Controller {
     @Override
     public void run() {
       try {
-        while (Server.isNormal) {
+        while (Server.isNormal.get()) {
           switch (Server.controlStreamIn.readByte()) {
             case 0:
               handleTouchEvent();
@@ -35,8 +39,8 @@ public final class Controller {
               break;
           }
         }
-      } catch (IOException ignored) {
-        Server.isNormal = false;
+      } catch (Exception ignored) {
+        Server.isNormal.set(false);
       }
     }
   }
@@ -44,8 +48,9 @@ public final class Controller {
   private static void handleTouchEvent() throws IOException {
     int action = Server.controlStreamIn.readInt();
     int pointerId = Server.controlStreamIn.readInt();
-    Pair<Integer, Integer> position = new Pair<>(Server.controlStreamIn.readInt(), Server.controlStreamIn.readInt());
-    Device.touchEvent(action, position, pointerId);
+    Pair<Float, Float> position = new Pair<>(Server.controlStreamIn.readFloat(), Server.controlStreamIn.readFloat());
+    int vertical = Server.controlStreamIn.read();
+    Device.touchEvent(action, position, pointerId, vertical);
   }
 
   private static void handleKeyEvent() throws IOException {
@@ -56,13 +61,14 @@ public final class Controller {
   private static void handleClipboardEvent() throws IOException {
     int size = Server.controlStreamIn.readInt();
     byte[] textBytes = new byte[size];
-    Server.controlStreamIn.readFully(textBytes, 0, size);
-    String text = new String(textBytes);
+    Server.controlStreamIn.readFully(textBytes);
+    String text = new String(textBytes, StandardCharsets.UTF_8);
     Device.setClipboardText(text);
   }
 
   private static void handleSetScreenPowerModeEvent() throws IOException {
-    Device.setScreenPowerMode(Server.controlStreamIn.readByte());
+    int mode = Server.controlStreamIn.readByte();
+    Device.setScreenPowerMode(mode);
   }
 }
 

@@ -1,15 +1,12 @@
 package top.saymzx.easycontrol.app.entity
 
 import android.content.SharedPreferences
-import kotlinx.serialization.Serializable
-import top.saymzx.easycontrol.app.appData
 
-@Serializable
 class Setting(private val sharedPreferences: SharedPreferences) {
 
-  var appMode = 1
+  var appMode = -1
     get() {
-      return sharedPreferences.getInt("appMode", 1)
+      return sharedPreferences.getInt("appMode", -1)
     }
     set(value) {
       field = value
@@ -66,9 +63,9 @@ class Setting(private val sharedPreferences: SharedPreferences) {
         apply()
       }
     }
-  var defaultVideoBit = 8000000
+  var defaultVideoBit = 8
     get() {
-      return sharedPreferences.getInt("defaultVideoBit", 8000000)
+      return sharedPreferences.getInt("defaultVideoBit", 8)
     }
     set(value) {
       field = value
@@ -77,9 +74,9 @@ class Setting(private val sharedPreferences: SharedPreferences) {
         apply()
       }
     }
-  var defaultSetResolution = true
+  var defaultSetResolution = false
     get() {
-      return sharedPreferences.getBoolean("defaultSetResolution", true)
+      return sharedPreferences.getBoolean("defaultSetResolution", false)
     }
     set(value) {
       field = value
@@ -112,14 +109,14 @@ class Setting(private val sharedPreferences: SharedPreferences) {
         apply()
       }
     }
-  var floatNavSize = 55
+  var floatBallSize = 55
     get() {
-      return sharedPreferences.getInt("floatNavSize", 55)
+      return sharedPreferences.getInt("floatBallSize", 55)
     }
     set(value) {
       field = value
       sharedPreferences.edit().apply {
-        putInt("floatNavSize", value)
+        putInt("floatBallSize", value)
         apply()
       }
     }
@@ -158,6 +155,18 @@ class Setting(private val sharedPreferences: SharedPreferences) {
       field = value
       sharedPreferences.edit().apply {
         putInt("slaveAdbPort", value)
+        apply()
+      }
+    }
+
+  var slaveAutoBack = false
+    get() {
+      return sharedPreferences.getBoolean("slaveAutoBack", false)
+    }
+    set(value) {
+      field = value
+      sharedPreferences.edit().apply {
+        putBoolean("slaveAutoBack", value)
         apply()
       }
     }

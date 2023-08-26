@@ -1,3 +1,6 @@
+/*
+ * 本项目大量借鉴学习了开源投屏软件：Scrcpy，在此对该项目表示感谢
+ */
 package top.saymzx.easycontrol.server;
 
 import android.annotation.SuppressLint;
@@ -18,6 +21,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
@@ -39,7 +43,7 @@ public final class Server {
   public static FileDescriptor audioStream;
   public static FileDescriptor controlStream;
   public static DataInputStream controlStreamIn;
-  public static boolean isNormal = true;
+  public static AtomicBoolean isNormal = new AtomicBoolean(true);
 
   public static void main(String... args) throws IOException, InterruptedException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     // 初始化
@@ -50,12 +54,12 @@ public final class Server {
     // 连接
     connectClient();
     // 启动
-    if (isNormal) {
-      workThreads.add(VideoEncode.stream());
-      Pair<Thread, Thread> audioThreads = AudioEncode.stream();
+    if (isNormal.get()) {
+      workThreads.add(VideoEncode.start());
+      Pair<Thread, Thread> audioThreads = AudioEncode.start();
       workThreads.add(audioThreads.first);
       workThreads.add(audioThreads.second);
-      workThreads.add(Controller.handle());
+      workThreads.add(Controller.start());
       for (Thread thread : workThreads) {
         if (thread != null) thread.start();
       }
@@ -67,6 +71,7 @@ public final class Server {
 
   // 关闭
   private static void stop() {
+    System.out.print("停止");
     for (int i = 0; i < 8; i++) {
       try {
         switch (i) {
@@ -128,7 +133,7 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    LocalServerSocket serverSocket = new LocalServerSocket("scrcpy_android");
+    LocalServerSocket serverSocket = new LocalServerSocket("easycontrol");
     videoStreamSocket = serverSocket.accept();
     audioStreamSocket = serverSocket.accept();
     controlStreamSocket = serverSocket.accept();
@@ -156,7 +161,7 @@ public final class Server {
     }
   }
 
-  public static void writeFully(FileDescriptor fd, byte[] buffer, int offset, int len) throws IOException {
-    writeFully(fd, ByteBuffer.wrap(buffer, offset, len));
+  public static void writeFully(FileDescriptor fd, byte[] buffer) throws IOException {
+    writeFully(fd, ByteBuffer.wrap(buffer, 0, buffer.length));
   }
 }

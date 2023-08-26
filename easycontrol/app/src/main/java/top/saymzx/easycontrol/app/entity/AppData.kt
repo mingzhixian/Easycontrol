@@ -1,22 +1,24 @@
-package top.saymzx.easycontrol.app.helper
+package top.saymzx.easycontrol.app.entity
 
+import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.room.Room
 import kotlinx.coroutines.MainScope
 import top.saymzx.easycontrol.adb.AdbKeyPair
 import top.saymzx.easycontrol.app.BuildConfig
-import top.saymzx.easycontrol.app.MainActivity
-import top.saymzx.easycontrol.app.entity.Setting
+import top.saymzx.easycontrol.app.helper.NetHelper
+import top.saymzx.easycontrol.app.helper.PublicTools
+import top.saymzx.easycontrol.app.helper.SQLDatabase
 import java.io.File
 
-class AppData(var main: MainActivity) {
+class AppData(var main: Activity) {
 
   // 全局协程域
   val mainScope = MainScope()
 
   // 公共工具库
-  val publicTools = PublicTools()
+  val publicTools = PublicTools(main)
 
   // 数据库工具
   val dbHelper = Room.databaseBuilder(main, SQLDatabase::class.java, "app").build()
