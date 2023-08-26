@@ -31,7 +31,7 @@ public class AudioDecode {
     }
   }
 
-  public Pair<Thread, Thread> stream() {
+  public Pair<Thread, Thread> start() {
     Thread streamInThread = new StreamInThread();
     Thread streamOutThread = new StreamOutThread();
     streamInThread.setPriority(Thread.MAX_PRIORITY);
@@ -45,19 +45,16 @@ public class AudioDecode {
       try {
         // 开始解码
         int inIndex;
-        while (client.isNormal) {
+        while (client.isNormal.get()) {
           Pair<Integer, byte[]> frame = readFrame();
-          if (frame != null) {
-            inIndex = audioDecodec.dequeueInputBuffer(-1);
-            if (inIndex >= 0) {
-              audioDecodec.getInputBuffer(inIndex).put(frame.getSecond());
-              // 提交解码器解码
-              audioDecodec.queueInputBuffer(inIndex, 0, frame.getFirst(), 0, 0);
-            }
-          }
+          inIndex = audioDecodec.dequeueInputBuffer(-1);
+          if (inIndex < 0) continue;
+          audioDecodec.getInputBuffer(inIndex).put(frame.getSecond());
+          // 提交解码器解码
+          audioDecodec.queueInputBuffer(inIndex, 0, frame.getFirst(), 0, 0);
         }
       } catch (Exception ignored) {
-        client.isNormal = false;
+        client.stop("连接中断", null);
       }
     }
   }
@@ -68,16 +65,15 @@ public class AudioDecode {
       try {
         int outIndex;
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-        while (client.isNormal) {
+        while (client.isNormal.get()) {
           // 找到已完成的输出缓冲区
           outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, -1);
-          if (outIndex >= 0) {
-            audioTrack.write(audioDecodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
-            audioDecodec.releaseOutputBuffer(outIndex, false);
-          }
+          if (outIndex < 0) continue;
+          audioTrack.write(audioDecodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
+          audioDecodec.releaseOutputBuffer(outIndex, false);
         }
       } catch (Exception ignored) {
-        client.isNormal = false;
+        client.stop("连接中断", null);
       }
     }
   }
@@ -135,14 +131,14 @@ public class AudioDecode {
   // 创建音频放大器
   private void setLoudnessEnhancer() {
     loudnessEnhancer = new LoudnessEnhancer(audioTrack.getAudioSessionId());
-    loudnessEnhancer.setTargetGain(3000);
+    loudnessEnhancer.setTargetGain(3500);
     loudnessEnhancer.setEnabled(true);
   }
 
   // 从socket流中解析数据
   private Pair<Integer, byte[]> readFrame() {
-    int size = client.videoStream.readInt();
-    byte[] frame = client.videoStream.readByteArray(size);
+    int size = client.audioStream.readInt();
+    byte[] frame = client.audioStream.readByteArray(size);
     return new Pair<>(size, frame);
   }
 }

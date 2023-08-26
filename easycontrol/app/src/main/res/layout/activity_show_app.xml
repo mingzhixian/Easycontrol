@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
@@ -9,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="80dp"
         android:gravity="center"
         android:text="易控"
         android:textColor="@color/onBackground"
@@ -23,7 +22,7 @@
         android:gravity="center"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:text="一款简单易用的远程控制软件\n\n(请注意本软件需要被控端开启ADB无线调试)"
+        android:text="一款简单易用的远程控制软件\n(请注意本软件需要被控端开启ADB无线调试)"
         android:textColor="@color/onBackgroundSecond"
         android:textSize="20sp" />
 
@@ -37,12 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="60dp"
         android:background="@drawable/background_cron"
         android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
-        android:padding="20dp"
-        app:layout_constraintBottom_toTopOf="@id/show_app_how_to_use">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -63,6 +61,7 @@
             android:background="@drawable/background_cron"
             android:backgroundTint="@color/buttonBackground"
             android:gravity="center"
+            android:padding="6dp"
             android:text="作为控制端"
             android:textColor="@color/onButtonBackground"
             android:textSize="@dimen/largeFont" />
@@ -76,6 +75,7 @@
             android:background="@drawable/background_cron"
             android:backgroundTint="@color/buttonBackground"
             android:gravity="center"
+            android:padding="6dp"
             android:text="作为被控端"
             android:textColor="@color/onButtonBackground"
             android:textSize="@dimen/largeFont" />
@@ -98,7 +98,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="40dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="40dp"
         android:text="隐私政策"
         android:textColor="@color/onBackgroundSecond"
         android:textSize="17sp"

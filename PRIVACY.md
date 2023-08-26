@@ -1,6 +1,6 @@
 # 隐私政策
 
-Scrcpy_android（投屏）软件由mingzhixian开发并构建，此页面用于告知访问者有关本软件收集、使用和披露个人信息的政策。
+易控（Easycontrol）软件由mingzhixian开发并构建，此页面用于告知访问者有关本软件收集、使用和披露个人信息的政策。
 如果您决定使用本软件提供的服务，则代表您同意收集和使用与本政策相关的信息。
 
 ## 信息的收集和使用
@@ -9,4 +9,4 @@ Scrcpy_android（投屏）软件由mingzhixian开发并构建，此页面用于�
 
 ## 联系我们
 
-如果您对我们的隐私政策有任何疑问或建议，请随时通过[此处](https://github.com/mingzhixian/scrcpy)与我联系
+如果您对我们的隐私政策有任何疑问或建议，请随时通过[此处](https://github.com/mingzhixian/Easycontrol)与我联系

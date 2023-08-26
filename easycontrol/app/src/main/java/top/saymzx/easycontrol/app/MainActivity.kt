@@ -1,19 +1,16 @@
 package top.saymzx.easycontrol.app
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.lifecycleScope
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding
-import top.saymzx.easycontrol.app.helper.AppData
+import top.saymzx.easycontrol.app.entity.AppData
 
+@SuppressLint("StaticFieldLeak")
 lateinit var appData: AppData
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
   private lateinit var mainActivity: ActivityMainBinding
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     // 设置状态栏导航栏颜色沉浸
     appData.publicTools.setStatusAndNavBar(this)
     // 如果第一次使用进入软件展示页
-    if (appData.settings.getBoolean("FirstUse", true)) startActivityForResult(
+    if (appData.setting.appMode == -1) startActivityForResult(
       Intent(
         this, ShowAppActivity::class.java
       ), 1
@@ -44,11 +41,12 @@ class MainActivity : AppCompatActivity() {
 
   // 软件模式
   private fun readMode() {
-    if (appData.setValue.appMode == 1) {
+    if (appData.setting.appMode == 1) {
       startActivity(Intent(this, MasterActivity::class.java))
     } else {
       startActivity(Intent(this, SlaveActivity::class.java))
     }
+    finish()
   }
 
 }

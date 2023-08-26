@@ -4,6 +4,7 @@
 
 package top.saymzx.easycontrol.adb
 
+import okhttp3.internal.notify
 import okhttp3.internal.notifyAll
 import okhttp3.internal.wait
 import okio.Buffer
@@ -28,7 +29,6 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
 
   init {
     // 连接socket
-    socket.tcpNoDelay = true
     socket.connect(InetSocketAddress(host, port))
     // 读写工具
     adbReader = AdbReader(socket.source())
@@ -56,7 +56,7 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
   }
 
   // 打开一个连接流
-  fun open(destination: String, isNeedSource: Boolean): AdbStream {
+  private fun open(destination: String, isNeedSource: Boolean): AdbStream {
     val localId = random.nextInt()
     adbWriter.writeOpen(localId, destination)
     val stream = AdbStream(localId, adbWriter, isNeedSource)
@@ -65,14 +65,14 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
       stream.wait()
     }
     if (stream.status == -1) throw IOException("连接错误")
-    else return stream
+    return stream
   }
 
   fun pushFile(file: InputStream, remotePath: String) {
     val pushStream = open("sync:start a SYNC service", true)
     val sendString = "$remotePath,33206"
     pushStream.write(createSendPacket("SEND", sendString.length) + sendString.toByteArray())
-    val byteArray = ByteArray(60000)
+    val byteArray = ByteArray(51200)
     var len = file.read(byteArray, 0, byteArray.size)
     do {
       var tmpByteArray = createSendPacket("DATA", len) + byteArray.sliceArray(0 until len)
@@ -99,7 +99,7 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
   fun runAdbCmd(cmd: String, isNeedOutput: Boolean): String {
     if (!isNeedOutput) {
       if (defaultShellStream == null) defaultShellStream = open("shell:", false)
-      defaultShellStream!!.write((cmd + "\n").toByteArray())
+      defaultShellStream!!.write("$cmd\n".toByteArray())
       return ""
     } else {
       val stream = open("shell:$cmd", true)
@@ -108,10 +108,10 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
         if (stream.status == -1) {
           return stream.source.readUtf8()
         } else {
-          Thread.sleep(40)
+          Thread.sleep(50)
         }
       }
-      return "命令运行超过8秒，未获取命令输出"
+      return "命令运行超过10秒，未获取命令输出"
     }
   }
 
@@ -142,7 +142,10 @@ class Adb(host: String, port: Int, keyPair: AdbKeyPair) {
           Constants.CMD_WRTE -> {
             adbWriter.writeOkay(message.arg1, message.arg0)
             if (stream.isNeedSource) {
-              stream.pushToSource(message.payload)
+              stream.source.write(message.payload)
+              synchronized(stream.source) {
+                stream.source.notify()
+              }
             }
           }
 
