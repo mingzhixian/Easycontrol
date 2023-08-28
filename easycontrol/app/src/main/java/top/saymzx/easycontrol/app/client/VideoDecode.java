@@ -115,28 +115,20 @@ public class VideoDecode {
   }
 
   // 从socket流中解析数据
-  private final int[] delays = new int[60];
-  private int currentIndex = 0;
-  public int avgDelay = 0;
-  private Boolean has60 = false;
+  int netDelay = 0;
+  Integer deviceDiffDelay = null;
 
   private Pair<Integer, byte[]> readFrame() {
     int size = client.videoStream.readInt();
     int sendMs = client.videoStream.readInt();
     int isKeyFrame = client.videoStream.readByte();
     byte[] frame = client.videoStream.readByteArray(size);
-    // 丢帧处理
-    int oldDelay = delays[currentIndex];
-    int nowMs = (int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL);
-    int nowDelay = nowMs - sendMs;
-    // 取正，两个设备时间可能相差较大
-    nowDelay = (nowDelay + (nowDelay >> 31)) ^ (nowDelay >> 31);
-    delays[currentIndex] = nowDelay;
-    avgDelay = avgDelay - oldDelay + nowDelay;
-    currentIndex = (currentIndex + 1) % 60;
-    // 大于1.25倍的平均延迟则丢帧，只丢弃非关键帧
-    if (has60) if (isKeyFrame == 0 && nowDelay > (avgDelay / 48)) return null;
-    else if (currentIndex == 59) has60 = true;
+    // 丢帧处理--大于1.25倍的延迟则丢帧，只丢弃非关键帧
+//    if (isKeyFrame == 0 && deviceDiffDelay != null) {
+//      int nowMs = (int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL);
+//      int frameDelay = nowMs - (sendMs - deviceDiffDelay);
+//      if (frameDelay > netDelay * 1.25) return null;
+//    }
     return new Pair<>(size, frame);
   }
 }

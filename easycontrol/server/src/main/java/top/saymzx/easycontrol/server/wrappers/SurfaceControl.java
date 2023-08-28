@@ -29,8 +29,10 @@ public final class SurfaceControl {
     } else {
       getBuiltInDisplayMethod = CLASS.getMethod("getInternalDisplayToken");
     }
-    getPhysicalDisplayTokenMethod = CLASS.getMethod("getPhysicalDisplayToken", long.class);
-    getPhysicalDisplayIdsMethod = CLASS.getMethod("getPhysicalDisplayIds");
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      getPhysicalDisplayTokenMethod = CLASS.getMethod("getPhysicalDisplayToken", long.class);
+      getPhysicalDisplayIdsMethod = CLASS.getMethod("getPhysicalDisplayIds");
+    }
     setDisplayPowerModeMethod = CLASS.getMethod("setDisplayPowerMode", IBinder.class, int.class);
   }
 

@@ -6,6 +6,7 @@ package top.saymzx.easycontrol.server.helper;
 import android.util.Pair;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import top.saymzx.easycontrol.server.Server;
@@ -36,6 +37,9 @@ public final class Controller {
               break;
             case 3:
               handleSetScreenPowerModeEvent();
+              break;
+            case 4:
+              handleDelayEvent();
               break;
           }
         }
@@ -69,6 +73,16 @@ public final class Controller {
   private static void handleSetScreenPowerModeEvent() throws IOException {
     int mode = Server.controlStreamIn.readByte();
     Device.setScreenPowerMode(mode);
+  }
+
+  private static void handleDelayEvent() throws IOException {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+    byteBuffer.put((byte) 22);
+    byteBuffer.putInt((int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL));
+    byteBuffer.flip();
+    synchronized (Server.controlStream) {
+      Server.writeFully(Server.controlStream, byteBuffer);
+    }
   }
 }
 
