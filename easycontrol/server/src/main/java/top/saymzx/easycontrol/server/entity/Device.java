@@ -94,7 +94,9 @@ public final class Device {
           videoSize = new Pair<>(videoSize.second, videoSize.first);
           try {
             byte[] bytes = new byte[]{21};
-            Server.writeFully(Server.controlStream, bytes);
+            synchronized (Server.controlStream) {
+              Server.writeFully(Server.controlStream, bytes);
+            }
           } catch (Exception ignored) {
             Server.isNormal.set(false);
             return;
@@ -121,8 +123,10 @@ public final class Device {
             byteBuffer.put((byte) 20);
             byteBuffer.putInt(tmpTextByte.length);
             byteBuffer.flip();
-            Server.writeFully(Server.controlStream, byteBuffer);
-            Server.writeFully(Server.controlStream, tmpTextByte);
+            synchronized (Server.controlStream) {
+              Server.writeFully(Server.controlStream, byteBuffer);
+              Server.writeFully(Server.controlStream, tmpTextByte);
+            }
           } catch (IOException ignored) {
             Server.isNormal.set(false);
           }

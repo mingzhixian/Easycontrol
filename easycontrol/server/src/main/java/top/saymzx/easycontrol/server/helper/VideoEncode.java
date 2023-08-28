@@ -40,38 +40,43 @@ public final class VideoEncode {
     public void run() {
       // 旋转
       Surface surface;
-      for (int i = 0; i < 2; i++) {
-        try {
-          Device.rotationListener = this;
-          // 创建Codec
-          setVideoEncodec();
-          // 创建显示器
-          display = createDisplay();
-          // 写入视频宽高
-          ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-          byteBuffer.putInt(Device.videoSize.first);
-          byteBuffer.putInt(Device.videoSize.second);
-          byteBuffer.flip();
-          Server.writeFully(Server.videoStream, byteBuffer);
-          while (Server.isNormal.get()) {
-            // 重配置编码器宽高
-            encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
-            encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
-            encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-            // 绑定Display和Surface
-            surface = encedec.createInputSurface();
-            setDisplaySurface(display, surface);
-            // 启动编码
-            encedec.start();
-            encode();
-            encedec.stop();
-            encedec.reset();
-            surface.release();
+
+      try {
+        Device.rotationListener = this;
+        // 创建Codec
+        for (int i = 0; i < 2; i++) {
+          try {
+            setVideoEncodec();
+            break;
+          } catch (Exception ignored) {
+            tryCbr = false;
           }
-        } catch (Exception ignored) {
-          if (i == 0) tryCbr = false;
-          else Server.isNormal.set(false);
         }
+        // 创建显示器
+        display = createDisplay();
+        // 写入视频宽高
+        ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+        byteBuffer.putInt(Device.videoSize.first);
+        byteBuffer.putInt(Device.videoSize.second);
+        byteBuffer.flip();
+        Server.writeFully(Server.videoStream, byteBuffer);
+        while (Server.isNormal.get()) {
+          // 重配置编码器宽高
+          encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
+          encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
+          encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+          // 绑定Display和Surface
+          surface = encedec.createInputSurface();
+          setDisplaySurface(display, surface);
+          // 启动编码
+          encedec.start();
+          encode();
+          encedec.stop();
+          encedec.reset();
+          surface.release();
+        }
+      } catch (Exception ignored) {
+        Server.isNormal.set(false);
       }
     }
 
@@ -106,8 +111,7 @@ public final class VideoEncode {
   }
 
   private static IBinder createDisplay() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    boolean secure = Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S"
-        .equals(Build.VERSION.CODENAME));
+    boolean secure = Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME));
     return SurfaceControl.createDisplay("easycontrol", secure);
   }
 

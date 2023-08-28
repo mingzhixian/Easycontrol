@@ -57,12 +57,12 @@ public final class Server {
     if (isNormal.get()) {
       workThreads.add(VideoEncode.start());
       Pair<Thread, Thread> audioThreads = AudioEncode.start();
-      workThreads.add(audioThreads.first);
-      workThreads.add(audioThreads.second);
-      workThreads.add(Controller.start());
-      for (Thread thread : workThreads) {
-        if (thread != null) thread.start();
+      if (audioThreads!=null){
+        workThreads.add(audioThreads.first);
+        workThreads.add(audioThreads.second);
       }
+      workThreads.add(Controller.start());
+      for (Thread thread : workThreads) thread.start();
       workThreads.get(0).join();
     }
     // 关闭

@@ -128,7 +128,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/float_window_title1"
         android:layout_marginStart="10dp"
-        android:text="0\n0ms"
         android:textColor="@color/error"
         android:textSize="@dimen/largeFont"
         tools:ignore="HardcodedText" />
