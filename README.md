@@ -17,9 +17,7 @@
 - 支持多设备同时连接
 - 支持主控端以及多个被控端之间剪切板同步
 
-## 使用说明
-
-请前往[此处](https://github.com/mingzhixian/Easycontrol/blob/master/HOW_TO_USE.md)查看。
+## [使用说明](https://github.com/mingzhixian/Easycontrol/blob/master/HOW_TO_USE.md)
 
 ## [下载地址](https://github.com/mingzhixian/Easycontrol/releases/latest/download/Easycontrol.apk)
 

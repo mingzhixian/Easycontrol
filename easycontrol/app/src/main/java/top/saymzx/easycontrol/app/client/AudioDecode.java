@@ -17,6 +17,7 @@ public class AudioDecode {
   public MediaCodec audioDecodec;
   public AudioTrack audioTrack;
   public LoudnessEnhancer loudnessEnhancer;
+  private boolean canAudio = true;
 
   public AudioDecode(Client c) throws IOException {
     client = c;
@@ -28,15 +29,17 @@ public class AudioDecode {
       setAudioTrack();
       // 创建音频放大器
       setLoudnessEnhancer();
-    }
+    } else canAudio = false;
   }
 
   public Pair<Thread, Thread> start() {
-    Thread streamInThread = new StreamInThread();
-    Thread streamOutThread = new StreamOutThread();
-    streamInThread.setPriority(Thread.MAX_PRIORITY);
-    streamOutThread.setPriority(Thread.MAX_PRIORITY);
-    return new Pair<>(streamInThread, streamOutThread);
+    if (canAudio) {
+      Thread streamInThread = new StreamInThread();
+      Thread streamOutThread = new StreamOutThread();
+      streamInThread.setPriority(Thread.MAX_PRIORITY);
+      streamOutThread.setPriority(Thread.MAX_PRIORITY);
+      return new Pair<>(streamInThread, streamOutThread);
+    } else return null;
   }
 
   class StreamInThread extends Thread {

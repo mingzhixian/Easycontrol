@@ -196,12 +196,12 @@ public class Client extends Thread {
       workThreads.add(videoThreads.getFirst());
       workThreads.add(videoThreads.getSecond());
       Pair<Thread, Thread> audioThreads = audioDecode.start();
-      workThreads.add(audioThreads.getFirst());
-      workThreads.add(audioThreads.getSecond());
-      workThreads.add(controller.start());
-      for (Thread thread : workThreads) {
-        if (thread != null) thread.start();
+      if (audioThreads != null) {
+        workThreads.add(audioThreads.getFirst());
+        workThreads.add(audioThreads.getSecond());
       }
+      workThreads.add(controller.start());
+      for (Thread thread : workThreads) thread.start();
       controller.startHandleInThread();
     } catch (Exception e) {
       stop("启动Client失败", e);

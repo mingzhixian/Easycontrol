@@ -54,7 +54,7 @@ class Setting(private val sharedPreferences: SharedPreferences) {
     }
   var defaultMaxFps = 60
     get() {
-      return sharedPreferences.getInt("defaultFps", 60)
+      return sharedPreferences.getInt("defaultMaxFps", 60)
     }
     set(value) {
       field = value

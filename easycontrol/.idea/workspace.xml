@@ -12,37 +12,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e9885394-353d-4a17-b1d3-7799c45328f8" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/raw/easycontrol_server.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HOW_TO_USE.md" beforeDir="false" afterPath="$PROJECT_DIR$/../HOW_TO_USE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../PRIVACY.md" beforeDir="false" afterPath="$PROJECT_DIR$/../PRIVACY.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/checksums/checksums.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/checksums/md5-checksums.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/checksums/sha1-checksums.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/dependencies-accessors/dependencies-accessors.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/dependencies-accessors/gc.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/executionHistory/executionHistory.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/executionHistory/executionHistory.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/fileChanges/last-build.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/fileHashes/fileHashes.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/fileHashes/fileHashes.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/fileHashes/resourceHashesCache.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.4/gc.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/checksums/checksums.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/checksums/md5-checksums.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/checksums/sha1-checksums.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/dependencies-accessors/dependencies-accessors.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/dependencies-accessors/gc.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/executionHistory/executionHistory.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/executionHistory/executionHistory.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/fileChanges/last-build.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/fileHashes/fileHashes.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/fileHashes/fileHashes.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/fileHashes/resourceHashesCache.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.5/gc.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.0/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/checksums/checksums.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.0/checksums/md5-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/checksums/md5-checksums.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.0/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/checksums/sha1-checksums.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.lock" afterDir="false" />
@@ -50,153 +20,26 @@
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetDropDown.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetDropDown.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/app/Scrcpy.app.androidTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/app/Scrcpy.app.unitTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/app/scrcpy_android.app.androidTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/app/scrcpy_android.app.unitTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/oldServer/scrcpy_android.oldServer.androidTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/oldServer/scrcpy_android.oldServer.unitTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/server/scrcpy_android.server.androidTest.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/server/scrcpy_android.server.unitTest.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/hash_key.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/query/client-agp/cache-v2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/query/client-agp/cmakeFiles-v1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/query/client-agp/codemodel-v2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/reply/cache-v2-52640b124cc326af6f31.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/reply/cmakeFiles-v1-229910c6f57c68522aa2.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/reply/codemodel-v2-f911f2f7007f699f6c2b.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/reply/directory-.-Debug-d0094a50bb2071803777.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/reply/index-2023-08-17T04-22-35-0284.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/.cmake/api/v1/reply/target-native-lib-Debug-9ef0fd1a18b56cbe3cd4.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeCache.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCXXCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CMakeDetermineCompilerABI_C.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CMakeSystem.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdC/CMakeCCompilerId.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdC/CMakeCCompilerId.o" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdCXX/CMakeCXXCompilerId.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdCXX/CMakeCXXCompilerId.o" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/CMakeOutput.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/TargetDirectories.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/cmake.check_cache" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/CMakeFiles/rules.ninja" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/additional_project_files.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/android_gradle_build.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/android_gradle_build_mini.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/build.ninja" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/build_file_index.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/cmake_install.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/compile_commands.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/compile_commands.json.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/configure_fingerprint.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/metadata_generation_command.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/prefab_config.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/Debug/3n585v19/x86/symbol_folder_index.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/.cxx/tools/debug/x86/compile_commands.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/build_model.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/configure_command.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/configure_stderr.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/configure_stdout.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/generate_cxx_metadata_254_timing.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/generate_cxx_metadata_32_timing.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/generate_cxx_metadata_645_timing.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/Debug/3n585v19/logs/x86/metadata_generation_record.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/abi_configuration_63176a36.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/abi_configuration_63176a36.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/abi_configuration_63176a36_key.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/abi_configuration_6v21131l.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/abi_configuration_6v21131l.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/abi_configuration_6v21131l_key.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/create_cxx_tasks_254_timing.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/create_cxx_tasks_32_timing.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/create_cxx_tasks_645_timing.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/ndk_locator_record_y1b3n5m5.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/ndk_locator_record_y1b3n5m5.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/cxx/ndk_locator_record_y1b3n5m5_key.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/Adb.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/Adb.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/AdbKeyPair.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/AdbKeyPair.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/AdbStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/AdbStream.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/AdbWriter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/adb/AdbWriter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/FullScreenActivity.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/MasterActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/MasterActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/SetActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/SetActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/ShowAppActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/ShowAppActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/SlaveActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/SlaveActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/AudioDecode.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/AudioDecode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/HandleUi.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/HandleUi.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/VideoDecode.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/VideoDecode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/Device.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/Device.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/FloatBall.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/FloatBall.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/FloatWindow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/FloatWindow.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/Setting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/Setting.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/AppData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/AppData.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/DeviceListAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/DeviceListAdapter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/NetHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/NetHelper.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/PublicTools.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/helper/PublicTools.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/background_cron.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/background_cron.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/background_cron_for_float_window.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/background_cron_for_float_window.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/float_ball.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/float_ball.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_add.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/icon_add.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_fullscreen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/icon_fullscreen.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_home.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_minscreen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/icon_minscreen.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_radio.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/icon_radio.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/icon_setting.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/icon_setting.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_full_screen.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_master.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_master.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_set.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_set.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_show_app.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_show_app.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_slave.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_slave.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_add_device.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_add_device.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_devices_item.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_devices_item.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_set_device.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_set_device.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_spinner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_spinner.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_switch.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_switch.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_text.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_text.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/module_dialog.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/module_dialog.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/module_float_ball.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/module_float_ball.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/module_float_window.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/module_float_window.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/raw/scrcpy_server.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-night/color.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-night/color.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/color.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/color.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/size.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/size.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/server/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/proguard-rules.pro" beforeDir="false" afterPath="$PROJECT_DIR$/server/proguard-rules.pro" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/Server.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Device.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/DisplayInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/DisplayInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Options.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Options.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Pointer.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Pointer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/PointersState.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/PointersState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/AudioCapture.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/AudioCapture.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/AudioEncode.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/AudioEncode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/Command.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/Command.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/FakeContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/FakeContext.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/VideoEncode.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/VideoEncode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/ClipboardManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/ClipboardManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/DisplayManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/DisplayManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/InputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/InputManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/SurfaceControl.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/SurfaceControl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/WindowManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/WindowManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pic/screenshot/fullH.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pic/screenshot/fullV.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pic/screenshot/main.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../pic/screenshot/main.webp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pic/screenshot/smallH.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pic/screenshot/smallSmall.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pic/screenshot/smallV.webp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -221,27 +64,30 @@
         <task path="$PROJECT_DIR$/oldServer">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/server">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="easycontrol" type="f1a62948:ProjectNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="easycontrol" type="f1a62948:ProjectNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
                 <item name="server" type="2d1252cf:ModuleNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="easycontrol" type="f1a62948:ProjectNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
                 <item name="server" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="easycontrol" type="f1a62948:ProjectNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
                 <item name="server" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="other" type="c8890929:TasksNode$1" />
@@ -283,31 +129,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ApkExportedModule&quot;: &quot;easycontrol.app&quot;,
-    &quot;ExportApk.ApkPathForeasycontrol.app&quot;: &quot;E:\\Code\\easycontrol\\easycontrol\\app&quot;,
-    &quot;ExportApk.ApkPathForscrcpy_android.app&quot;: &quot;E:\\Code\\scrcpy\\scrcpy_android\\app&quot;,
-    &quot;ResourceManagerPrefKey.ModuleName&quot;: &quot;easycontrol.app.main&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable&quot;: &quot;ALL&quot;,
-    &quot;last_directory_selection&quot;: &quot;E:/Code/scrcpy/scrcpy_android/server/src/main/java&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Code/easycontrol/easycontrol/app/src/main/res/drawable&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Build Variants&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ApkExportedModule": "Easycontrol.app",
+    "ExportApk.ApkPathForEasycontrol.app": "E:\\Code\\Easycontrol\\easycontrol\\app",
+    "ExportApk.ApkPathForeasycontrol.app": "E:\\Code\\easycontrol\\easycontrol\\app",
+    "ExportApk.ApkPathForscrcpy_android.app": "E:\\Code\\scrcpy\\scrcpy_android\\app",
+    "ResourceManagerPrefKey.ModuleName": "easycontrol.app.main",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cidr.known.project.marker": "true",
+    "com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable": "ALL",
+    "last_directory_selection": "E:/Code/scrcpy/scrcpy_android/server/src/main/java",
+    "last_opened_file_path": "E:/Code/easycontrol/easycontrol/app/src/main/res/drawable",
+    "project.structure.last.edited": "Build Variants",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;ExportApk.BuildVariants&quot;: [
-      &quot;release&quot;
+  "keyToStringList": {
+    "ExportApk.BuildVariants": [
+      "release"
     ]
   }
-}</component>
+}]]></component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Properties" />
     <option name="BUILD_VARIANTS_TAB" value="Build Types" />
@@ -355,9 +202,9 @@
       <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Gradle.easycontrol:server [copyRelease]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
-      <module name="easycontrol.app.main" />
+      <module name="Easycontrol.app.main" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
       <option name="DEPLOY_AS_INSTANT" value="false" />
@@ -413,7 +260,7 @@
       </method>
     </configuration>
     <configuration name="server" type="AndroidRunConfigurationType" factoryName="Android App">
-      <module name="easycontrol.server.main" />
+      <module name="Easycontrol.server.main" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
       <option name="DEPLOY_AS_INSTANT" value="false" />
@@ -468,6 +315,48 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="easycontrol:server [copyDebug]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="copyDebug" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="easycontrol:server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="copyRelease" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="scrcpy_android:server [copyDebug]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -513,11 +402,15 @@
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
+      <item itemvalue="Gradle.easycontrol:server [copyDebug]" />
+      <item itemvalue="Gradle.easycontrol:server [copyRelease]" />
       <item itemvalue="Gradle.scrcpy_android:server [copyRelease]" />
       <item itemvalue="Gradle.scrcpy_android:server [copyDebug]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.easycontrol:server [copyRelease]" />
+        <item itemvalue="Gradle.easycontrol:server [copyDebug]" />
         <item itemvalue="Gradle.scrcpy_android:server [copyRelease]" />
         <item itemvalue="Gradle.scrcpy_android:server [copyDebug]" />
       </list>
