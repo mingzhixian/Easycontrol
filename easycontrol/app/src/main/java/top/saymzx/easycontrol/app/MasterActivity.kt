@@ -69,7 +69,9 @@ class MasterActivity : Activity() {
       appData.mainScope.launch {
         withContext(Dispatchers.IO) {
           val devices = appData.dbHelper.devices().getById(appData.setting.defaultDevice)
-          if (devices.isNotEmpty()) FloatWindow(devices[0])
+          withContext(Dispatchers.Main){
+            if (devices.isNotEmpty()) FloatWindow(devices[0])
+          }
         }
       }
     }
