@@ -12,34 +12,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e9885394-353d-4a17-b1d3-7799c45328f8" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.0/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.0/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetDropDown.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetDropDown.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/SetActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/SetActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/AudioDecode.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/AudioDecode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Client.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/VideoDecode.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/client/VideoDecode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/Setting.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/entity/Setting.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/module_float_window.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/module_float_window.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/MasterActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/top/saymzx/easycontrol/app/MasterActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/server/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Device.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/entity/Device.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/AudioEncode.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/AudioEncode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/VideoEncode.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/helper/VideoEncode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/InputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/InputManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/SurfaceControl.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/top/saymzx/easycontrol/server/wrappers/SurfaceControl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,32 +111,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ApkExportedModule": "Easycontrol.app",
-    "ExportApk.ApkPathForEasycontrol.app": "E:\\Code\\Easycontrol\\easycontrol\\app",
-    "ExportApk.ApkPathForeasycontrol.app": "E:\\Code\\easycontrol\\easycontrol\\app",
-    "ExportApk.ApkPathForscrcpy_android.app": "E:\\Code\\scrcpy\\scrcpy_android\\app",
-    "ResourceManagerPrefKey.ModuleName": "easycontrol.app.main",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "cidr.known.project.marker": "true",
-    "com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable": "ALL",
-    "last_directory_selection": "E:/Code/scrcpy/scrcpy_android/server/src/main/java",
-    "last_opened_file_path": "E:/Code/easycontrol/easycontrol/app/src/main/res/drawable",
-    "project.structure.last.edited": "Build Variants",
-    "project.structure.proportion": "0.17",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ApkExportedModule&quot;: &quot;Easycontrol.app&quot;,
+    &quot;ExportApk.ApkPathForEasycontrol.app&quot;: &quot;E:\\Code\\Easycontrol\\easycontrol\\app&quot;,
+    &quot;ExportApk.ApkPathForeasycontrol.app&quot;: &quot;E:\\Code\\easycontrol\\easycontrol\\app&quot;,
+    &quot;ExportApk.ApkPathForscrcpy_android.app&quot;: &quot;E:\\Code\\scrcpy\\scrcpy_android\\app&quot;,
+    &quot;ResourceManagerPrefKey.ModuleName&quot;: &quot;easycontrol.app.main&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable&quot;: &quot;ALL&quot;,
+    &quot;last_directory_selection&quot;: &quot;E:/Code/scrcpy/scrcpy_android/server/src/main/java&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Code/easycontrol/easycontrol/app/src/main/res/drawable&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Build Variants&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   },
-  "keyToStringList": {
-    "ExportApk.BuildVariants": [
-      "release"
+  &quot;keyToStringList&quot;: {
+    &quot;ExportApk.BuildVariants&quot;: [
+      &quot;release&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Properties" />
     <option name="BUILD_VARIANTS_TAB" value="Build Types" />
@@ -202,7 +184,7 @@
       <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.easycontrol:server [copyRelease]">
+  <component name="RunManager" selected="Gradle.easycontrol:server [copyRelease] (1)">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="Easycontrol.app.main" />
       <option name="DEPLOY" value="true" />
@@ -315,6 +297,27 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="copyRelease" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="easycontrol:server [copyDebug]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -336,7 +339,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="easycontrol:server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="easycontrol:server [copyRelease] (1)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
@@ -357,18 +360,18 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="scrcpy_android:server [copyDebug]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="easycontrol:server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
+        <option name="scriptParameters" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value="copyDebug" />
+            <option value="copyRelease" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -402,17 +405,19 @@
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
+      <item itemvalue="Gradle.easycontrol:server [copyRelease] (1)" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
       <item itemvalue="Gradle.easycontrol:server [copyDebug]" />
       <item itemvalue="Gradle.easycontrol:server [copyRelease]" />
       <item itemvalue="Gradle.scrcpy_android:server [copyRelease]" />
-      <item itemvalue="Gradle.scrcpy_android:server [copyDebug]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.easycontrol:server [copyRelease] (1)" />
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
         <item itemvalue="Gradle.easycontrol:server [copyRelease]" />
         <item itemvalue="Gradle.easycontrol:server [copyDebug]" />
         <item itemvalue="Gradle.scrcpy_android:server [copyRelease]" />
-        <item itemvalue="Gradle.scrcpy_android:server [copyDebug]" />
       </list>
     </recent_temporary>
   </component>
