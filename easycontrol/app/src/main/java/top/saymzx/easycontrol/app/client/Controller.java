@@ -6,6 +6,7 @@ import static top.saymzx.easycontrol.app.MainActivityKt.appData;
 import android.content.ClipData;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +48,9 @@ public class Controller {
           case 21:
             handleRotationNotification();
             break;
+          case 22:
+            handleDelayEvent();
+            break;
         }
       }
       // 下次200毫秒后运行
@@ -60,15 +64,19 @@ public class Controller {
   private void otherService() {
     if (client.isNormal.get()) {
       try {
-        // 更新刷新率
-        client.handleUi.handle(HandleUi.UpdateFps, client.videoDecode.fps);
+        if (appData.getSetting().getShowMoreInfo()) {
+          // 更新刷新率
+          client.handleUi.handle(HandleUi.UpdateFps, client.videoDecode.fps);
+          // 更新延迟
+          client.handleUi.handle(HandleUi.UpdateDelay, client.videoDecode.netDelay);
+        }
         client.videoDecode.fps = 0;
-        // 更新延迟
-        client.handleUi.handle(HandleUi.UpdateDelay, client.videoDecode.avgDelay / 60);
         // 熄屏检测
         checkScreenOff();
         // 剪切板检测
         checkClipBoard();
+        // 延迟检测
+        checkDelay();
         // 下次1秒后运行
         handler.postDelayed(this::otherService, 1000);
       } catch (Exception ignored) {
@@ -106,6 +114,14 @@ public class Controller {
     }
   }
 
+  // 延迟检测
+
+  private void checkDelay() {
+    sendDelayEventTime = (int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL);
+    byte[] bytes = new byte[]{4};
+    writeControlStream(bytes);
+  }
+
   private final Buffer controlOutBuffer = new Buffer();
 
   class HandleOutThread extends Thread {
@@ -113,10 +129,10 @@ public class Controller {
     public void run() {
       try {
         while (client.isNormal.get()) {
-          if (!controlOutBuffer.request(1)) synchronized (controlOutBuffer) {
-            controlOutBuffer.wait();
+          synchronized (controlOutBuffer) {
+            if (!controlOutBuffer.request(1)) controlOutBuffer.wait();
+            client.controlStream.write(controlOutBuffer.readByteArray());
           }
-          client.controlStream.write(controlOutBuffer.readByteArray());
         }
       } catch (Exception ignored) {
         client.stop("连接中断", null);
@@ -137,6 +153,16 @@ public class Controller {
     client.videoDecode.videoSize = new Pair<>(client.videoDecode.videoSize.getSecond(), client.videoDecode.videoSize.getFirst());
     client.videoDecode.videoPortrait = !client.videoDecode.videoPortrait;
     client.handleUi.handle(HandleUi.ChangeRotation, 1);
+  }
+
+  // 处理延迟事件
+  private int sendDelayEventTime;
+
+  private void handleDelayEvent() {
+    int recvDelayEventTime = (int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL);
+    int serverRecvDelayEventTime = client.controlStream.readInt();
+    client.videoDecode.netDelay = (recvDelayEventTime - sendDelayEventTime) / 2;
+    client.videoDecode.deviceDiffDelay = serverRecvDelayEventTime - (sendDelayEventTime + client.videoDecode.netDelay);
   }
 
   // 发送触摸事件
@@ -188,8 +214,8 @@ public class Controller {
   }
 
   private void writeControlStream(byte[] bytes) {
-    controlOutBuffer.write(bytes);
     synchronized (controlOutBuffer) {
+      controlOutBuffer.write(bytes);
       controlOutBuffer.notify();
     }
   }

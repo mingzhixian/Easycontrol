@@ -6,6 +6,7 @@ package top.saymzx.easycontrol.server.helper;
 import android.media.AudioRecord;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.os.Build;
 import android.util.Pair;
 
 import java.io.IOException;
@@ -17,11 +18,20 @@ import top.saymzx.easycontrol.server.entity.Options;
 
 public final class AudioEncode {
   public static MediaCodec encedec;
-  public static final AudioRecord audioCapture = AudioCapture.start();
+  public static AudioRecord audioCapture;
 
-  public static Pair<Thread, Thread> start() throws IOException {
+  public static Pair<Thread, Thread> start() {
     byte[] bytes = new byte[1];
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+      try {
+        Server.writeFully(Server.audioStream, bytes);
+      } catch (IOException ignored) {
+        Server.isNormal.set(false);
+      }
+      return null;
+    }
     try {
+      audioCapture = AudioCapture.start();
       setAudioEncodec();
       encedec.start();
       Thread threadIn = new EncodeInThread();
@@ -31,10 +41,8 @@ public final class AudioEncode {
       bytes[0] = 1;
       Server.writeFully(Server.audioStream, bytes);
       return new Pair<>(threadIn, threadOut);
-    } catch (Exception e) {
-      bytes[0] = 0;
-      Server.writeFully(Server.audioStream, bytes);
-      return new Pair<>(new Thread((Runnable) null), new Thread((Runnable) null));
+    } catch (Exception ignored) {
+      return null;
     }
   }
 
