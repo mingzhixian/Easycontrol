@@ -21,10 +21,7 @@ public final class InputManager {
   }
 
 
-  public static void injectInputEvent(InputEvent inputEvent, int mode) {
-    try {
-      injectInputEventMethod.invoke(manager, inputEvent, mode);
-    } catch (InvocationTargetException | IllegalAccessException ignored) {
-    }
+  public static void injectInputEvent(InputEvent inputEvent, int mode) throws InvocationTargetException, IllegalAccessException {
+    injectInputEventMethod.invoke(manager, inputEvent, mode);
   }
 }

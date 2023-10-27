@@ -1,13 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/background"
+  android:orientation="vertical">
+
+  <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/cardContainerBackground"
+    android:elevation="6dp"
     android:gravity="center_vertical"
-    tools:context=".MainActivity">
+    android:orientation="horizontal"
+    android:padding="5dp">
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:src="@drawable/app_icon" />
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_marginStart="10dp"
+      android:src="@drawable/app_icon" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="易控"
+      android:textColor="@color/onCardContainerBackground"
+      android:textSize="@dimen/largeFont"
+      android:textStyle="bold" />
+
+    <Space
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1" />
+
+    <ImageView
+      android:id="@+id/master_add"
+      android:layout_width="25dp"
+      android:layout_height="25dp"
+      android:layout_marginEnd="4dp"
+      android:src="@drawable/add"
+      android:tint="@color/onBackground" />
+
+    <ImageView
+      android:id="@+id/master_set"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
+      android:layout_marginEnd="12dp"
+      android:src="@drawable/more"
+      android:tint="@color/onBackground" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/linked_device"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="20dp"
+    android:layout_marginEnd="20dp"
+    android:background="@drawable/background_cron"
+    android:backgroundTint="@color/cardBackground"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="10dp"
+    android:visibility="gone">
+
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:maxLines="1"
+      android:text="有线设备"
+      android:textColor="@color/onCardBackground"
+      android:textSize="@dimen/largeFont"
+      tools:ignore="HardcodedText" />
+
+    <ImageView
+      android:layout_width="35dp"
+      android:layout_height="35dp"
+      android:layout_gravity="center"
+      android:layout_marginEnd="10dp"
+      android:src="@drawable/link"
+      android:tint="@color/primary" />
+
+  </LinearLayout>
+
+  <ListView
+    android:id="@+id/master_devices_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="20dp"
+    android:layout_marginEnd="20dp"
+    android:divider="#00000000"
+    android:dividerHeight="12dp"
+    tools:listitem="@layout/item_devices_item" />
+
+  <LinearLayout
+    android:id="@+id/ww"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" />
+
 </LinearLayout>

@@ -3,86 +3,64 @@
  */
 package top.saymzx.easycontrol.server.helper;
 
-import android.util.Pair;
-
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
+import top.saymzx.easycontrol.server.entity.Options;
 
 public final class Controller {
 
-  public static Thread start() {
-    Thread thread = new HandleThread();
-    thread.setPriority(Thread.MAX_PRIORITY);
-    return thread;
-  }
-
-  static class HandleThread extends Thread {
-    @Override
-    public void run() {
-      try {
-        while (Server.isNormal.get()) {
-          switch (Server.controlStreamIn.readByte()) {
-            case 0:
-              handleTouchEvent();
-              break;
-            case 1:
-              handleKeyEvent();
-              break;
-            case 2:
-              handleClipboardEvent();
-              break;
-            case 3:
-              handleSetScreenPowerModeEvent();
-              break;
-            case 4:
-              handleDelayEvent();
-              break;
-          }
-        }
-      } catch (Exception ignored) {
-        Server.isNormal.set(false);
+  public static void handleIn() throws IOException {
+    boolean hasData = true;
+    while (hasData) {
+      switch (Server.streamIn.readByte()) {
+        case 1:
+          handleTouchEvent();
+          break;
+        case 2:
+          handleKeyEvent();
+          break;
+        case 3:
+          handleClipboardEvent();
+          break;
       }
+      hasData = Server.streamIn.available() > 0;
     }
   }
 
   private static void handleTouchEvent() throws IOException {
-    int action = Server.controlStreamIn.readInt();
-    int pointerId = Server.controlStreamIn.readInt();
-    Pair<Float, Float> position = new Pair<>(Server.controlStreamIn.readFloat(), Server.controlStreamIn.readFloat());
-    int vertical = Server.controlStreamIn.read();
-    Device.touchEvent(action, position, pointerId, vertical);
+    int action = Server.streamIn.readByte();
+    int pointerId = Server.streamIn.readByte();
+    float x = Server.streamIn.readFloat();
+    float y = Server.streamIn.readFloat();
+    Device.touchEvent(action, x, y, pointerId);
   }
 
   private static void handleKeyEvent() throws IOException {
-    int keyCode = Server.controlStreamIn.readInt();
+    int keyCode = Server.streamIn.readInt();
     Device.keyEvent(keyCode);
   }
 
   private static void handleClipboardEvent() throws IOException {
-    int size = Server.controlStreamIn.readInt();
+    int size = Server.streamIn.readInt();
     byte[] textBytes = new byte[size];
-    Server.controlStreamIn.readFully(textBytes);
+    Server.streamIn.readFully(textBytes);
     String text = new String(textBytes, StandardCharsets.UTF_8);
     Device.setClipboardText(text);
   }
 
-  private static void handleSetScreenPowerModeEvent() throws IOException {
-    int mode = Server.controlStreamIn.readByte();
-    Device.setScreenPowerMode(mode);
+  public static void checkScreenOff(boolean turnOn) throws IOException {
+    Process process = new ProcessBuilder().command("bash", "-c", "dumpsys deviceidle | grep mScreenOn").start();
+    boolean isScreenOn = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine().contains("mScreenOn=true");
+    // 如果屏幕状态和要求状态不同，则模拟按下电源键
+    if (isScreenOn ^ turnOn) Device.keyEvent(26);
+    // 只有需要打开屏幕，且要求关闭背光时才设置为0
+    Device.setScreenPowerMode((turnOn && Options.turnOffScreen) ? 0 : 1);
   }
 
-  private static void handleDelayEvent() throws IOException {
-    ByteBuffer byteBuffer = ByteBuffer.allocate(5);
-    byteBuffer.put((byte) 22);
-    byteBuffer.putInt((int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL));
-    byteBuffer.flip();
-    synchronized (Server.controlStream) {
-      Server.writeFully(Server.controlStream, byteBuffer);
-    }
-  }
 }
 

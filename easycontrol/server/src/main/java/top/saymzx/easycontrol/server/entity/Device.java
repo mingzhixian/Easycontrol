@@ -15,11 +15,11 @@ import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import top.saymzx.easycontrol.server.Server;
+import top.saymzx.easycontrol.server.helper.VideoEncode;
 import top.saymzx.easycontrol.server.wrappers.ClipboardManager;
 import top.saymzx.easycontrol.server.wrappers.DisplayManager;
 import top.saymzx.easycontrol.server.wrappers.InputManager;
@@ -33,11 +33,6 @@ public final class Device {
   public static Pair<Integer, Integer> videoSize;
 
   private static String nowClipboardText = "";
-  public static RotationListener rotationListener;
-
-  public interface RotationListener {
-    void onRotationChanged();
-  }
 
   public static int displayId = 0;
   public static int layerStack;
@@ -49,12 +44,12 @@ public final class Device {
     // 计算视频大小
     computeVideoSize();
     layerStack = displayInfo.layerStack;
+    // 初始化指针
+    initPointers();
     // 旋转监听
     setRotationListener();
     // 剪切板监听
     setClipBoardListener();
-    // 初始化指针
-    initPointers();
   }
 
   // 初始化指针
@@ -74,38 +69,16 @@ public final class Device {
   }
 
   private static void computeVideoSize() {
-    // h264只接受8的倍数，所以需要缩放至最近参数
+    // h264只接受16的倍数，所以需要缩放至最近参数
     boolean isPortrait = deviceSize.first < deviceSize.second;
     int major = isPortrait ? deviceSize.second : deviceSize.first;
     int minor = isPortrait ? deviceSize.first : deviceSize.second;
     if (major > Options.maxSize) {
       int minorExact = minor * Options.maxSize / major;
-      minor = minorExact + 4 & ~7;
+      minor = minorExact + 8 & ~15;
       major = Options.maxSize;
     }
     videoSize = isPortrait ? new Pair<>(minor, major) : new Pair<>(major, minor);
-  }
-
-  private static void setRotationListener() {
-    WindowManager.registerRotationWatcher(new IRotationWatcher.Stub() {
-      public void onRotationChanged(int rotation) {
-        if ((deviceRotation + rotation) % 2 != 0) {
-          deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
-          videoSize = new Pair<>(videoSize.second, videoSize.first);
-          try {
-            byte[] bytes = new byte[]{21};
-            synchronized (Server.controlStream) {
-              Server.writeFully(Server.controlStream, bytes);
-            }
-          } catch (Exception ignored) {
-            Server.isNormal.set(false);
-            return;
-          }
-        }
-        deviceRotation = rotation;
-        rotationListener.onRotationChanged();
-      }
-    }, displayId);
   }
 
   private static void setClipBoardListener() {
@@ -118,21 +91,42 @@ public final class Device {
           byte[] tmpTextByte = newClipboardText.getBytes(StandardCharsets.UTF_8);
           if (tmpTextByte.length > 5000) return;
           nowClipboardText = newClipboardText;
+          ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
+          byteBuffer.put((byte) 3);
+          byteBuffer.putInt(tmpTextByte.length);
+          byteBuffer.put(tmpTextByte);
+          byteBuffer.flip();
           try {
-            ByteBuffer byteBuffer = ByteBuffer.allocate(5);
-            byteBuffer.put((byte) 20);
-            byteBuffer.putInt(tmpTextByte.length);
-            byteBuffer.flip();
-            synchronized (Server.controlStream) {
-              Server.writeFully(Server.controlStream, byteBuffer);
-              Server.writeFully(Server.controlStream, tmpTextByte);
+            Server.write(byteBuffer);
+          } catch (Exception ignored) {
+            synchronized (Server.object) {
+              Server.object.notify();
             }
-          } catch (IOException ignored) {
-            Server.isNormal.set(false);
           }
         }
       }
     });
+  }
+
+  private static void setRotationListener() {
+    WindowManager.registerRotationWatcher(new IRotationWatcher.Stub() {
+      public void onRotationChanged(int rotation) {
+        if ((deviceRotation + rotation) % 2 != 0) {
+          deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
+          videoSize = new Pair<>(videoSize.second, videoSize.first);
+          byte[] bytes = new byte[]{4};
+          try {
+            Server.write(ByteBuffer.wrap(bytes));
+          } catch (Exception ignored) {
+            synchronized (Server.object) {
+              Server.object.notify();
+            }
+          }
+        }
+        deviceRotation = rotation;
+        VideoEncode.isHasChangeRotation = true;
+      }
+    }, displayId);
   }
 
   public static void setClipboardText(String text) {
@@ -146,21 +140,14 @@ public final class Device {
   private static final MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[PointersState.MAX_POINTERS];
 
   @SuppressLint({"Recycle"})
-  public static void touchEvent(int action, Pair<Float, Float> position, int pointerId, int vertical) {
-    // 旋转中的触摸事件
-    if (vertical > 0 ^ videoSize.first > videoSize.second) if (action == MotionEvent.ACTION_UP)
-      pointersState.get(pointersState.getPointerIndex(pointerId)).isUp = true;
-    else return;
-    // 正常触摸
+  public static void touchEvent(int action, Float x, Float y, int pointerId) {
     pointerProperties[pointerId].id = pointerId;
     long now = SystemClock.uptimeMillis();
     int pointerIndex = pointersState.getPointerIndex(pointerId);
-    if (pointerIndex == -1) {
-      return;
-    }
+    if (pointerIndex == -1) return;
     Pointer pointer = pointersState.get(pointerIndex);
-    pointer.x = position.first * deviceSize.first;
-    pointer.y = position.second * deviceSize.second;
+    pointer.x = x * deviceSize.first;
+    pointer.y = y * deviceSize.second;
 
     pointer.isUp = action == MotionEvent.ACTION_UP;
 
