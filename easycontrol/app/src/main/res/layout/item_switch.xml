@@ -25,7 +25,7 @@
         android:layout_marginStart="10dp"
         android:thumbTint="@color/cardContainerBackground"
         android:thumbTintMode="multiply"
-        android:trackTint="@color/buttonBackground"
+        android:trackTint="@color/primary"
         android:trackTintMode="multiply"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 

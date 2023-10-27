@@ -1,126 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@drawable/background_cron"
+  android:backgroundTint="@color/cardBackground"
+  android:orientation="vertical"
+  android:paddingStart="20dp"
+  android:paddingTop="20dp"
+  android:paddingEnd="20dp"
+  android:paddingBottom="20dp">
+
+  <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/cardBackground"
-    android:orientation="vertical"
-    android:paddingStart="20dp"
-    android:paddingTop="20dp"
-    android:paddingEnd="20dp"
-    android:paddingBottom="20dp">
+    android:text="设备名称:"
+    android:textColor="@color/onCardBackground"
+    android:textSize="@dimen/largeFont" />
 
-    <TextView
+  <EditText
+    android:id="@+id/add_device_name"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:hint="不可为空"
+    android:textColor="@color/onCardBackground"
+    android:textColorHint="@color/onCardBackgroundSecond"
+    android:textSize="@dimen/middleFont" />
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <LinearLayout
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="4"
+      android:orientation="vertical">
+
+      <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="设备名称:"
+        android:layout_marginTop="8dp"
+        android:text="设备地址(地址:端口号):"
         android:textColor="@color/onCardBackground"
         android:textSize="@dimen/largeFont" />
 
-    <EditText
-        android:id="@+id/add_device_name"
+      <EditText
+        android:id="@+id/add_device_address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:hint="不可为空"
+        android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[].:"
+        android:hint="支持IPv4/v6地址、域名"
         android:textColor="@color/onCardBackground"
         android:textColorHint="@color/onCardBackgroundSecond"
         android:textSize="@dimen/middleFont" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="设备地址:"
-                android:textColor="@color/onCardBackground"
-                android:textSize="@dimen/largeFont" />
-
-            <EditText
-                android:id="@+id/add_device_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.:"
-                android:hint="支持IPv4/v6地址、域名"
-                android:textColor="@color/onCardBackground"
-                android:textColorHint="@color/onCardBackgroundSecond"
-                android:textSize="@dimen/middleFont" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="端口:"
-                android:textColor="@color/onCardBackground"
-                android:textSize="@dimen/largeFont"
-                tools:ignore="HardcodedText" />
-
-            <EditText
-                android:id="@+id/add_device_port"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:digits="1234567890"
-                android:text="5555"
-                android:textColor="@color/onCardBackground"
-                android:textColorHint="@color/onCardBackgroundSecond"
-                android:textSize="@dimen/middleFont"
-                tools:ignore="HardcodedText" />
-        </LinearLayout>
-
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/add_device_is_options"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:buttonTint="@color/onCardBackground"
-        android:text="高级选项"
-        android:textColor="@color/onCardBackgroundSecond"
-        android:textSize="@dimen/middleFont" />
+  </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/add_device_options"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:visibility="gone" />
+  <CheckBox
+    android:id="@+id/add_device_is_options"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:buttonTint="@color/onCardBackground"
+    android:text="高级选项"
+    android:textColor="@color/onCardBackgroundSecond"
+    android:textSize="@dimen/middleFont" />
 
-    <Button
-        android:id="@+id/add_device_ok"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="50dp"
-        android:background="@drawable/background_cron"
-        android:backgroundTint="@color/buttonBackground"
-        android:gravity="center"
-        android:padding="6dp"
-        android:text="确认"
-        android:textColor="@color/onButtonBackground"
-        android:textSize="@dimen/largeFont" />
+  <LinearLayout
+    android:id="@+id/add_device_options"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:visibility="gone" />
+
+  <Button
+    android:id="@+id/add_device_ok"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="50dp"
+    android:layout_marginTop="25dp"
+    android:layout_marginEnd="50dp"
+    android:background="@drawable/background_cron"
+    android:backgroundTint="@color/button"
+    android:gravity="center"
+    android:padding="6dp"
+    android:text="确认"
+    android:textColor="@color/onButton"
+    android:textSize="@dimen/largeFont" />
 
 </LinearLayout>

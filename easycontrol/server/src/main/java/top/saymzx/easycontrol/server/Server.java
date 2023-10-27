@@ -10,18 +10,14 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.OsConstants;
-import android.util.Pair;
 
 import java.io.DataInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
@@ -34,64 +30,90 @@ import top.saymzx.easycontrol.server.wrappers.InputManager;
 import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
-
+// 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static LocalSocket videoStreamSocket;
-  private static LocalSocket audioStreamSocket;
-  private static LocalSocket controlStreamSocket;
-  public static FileDescriptor videoStream;
-  public static FileDescriptor audioStream;
-  public static FileDescriptor controlStream;
-  public static DataInputStream controlStreamIn;
-  public static AtomicBoolean isNormal = new AtomicBoolean(true);
+  private static LocalSocket socket;
+  private static FileDescriptor fileDescriptor;
+  public static DataInputStream streamIn;
 
-  public static void main(String... args) throws IOException, InterruptedException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    // 初始化
-    Options.parse(args);
-    setManagers();
-    Device.init();
-    List<Thread> workThreads = new ArrayList<>();
-    // 连接
-    connectClient();
-    // 启动
-    if (isNormal.get()) {
-      workThreads.add(VideoEncode.start());
-      Pair<Thread, Thread> audioThreads = AudioEncode.start();
-      if (audioThreads!=null){
-        workThreads.add(audioThreads.first);
-        workThreads.add(audioThreads.second);
+  public static final Object object = new Object();
+
+  public static void main(String... args) {
+    try {
+      // 解析参数
+      Options.parse(args);
+      // 修改分辨率
+      if (Options.setWidth != -1)
+        new ProcessBuilder().command("bash", "-c", "wm size " + Options.setWidth + "x" + Options.setHeight).start();
+      // 初始化
+      setManagers();
+      Device.init();
+      // 连接
+      connectClient();
+      // 初始化子服务
+      VideoEncode.init();
+      boolean canAudio = AudioEncode.init();
+      // 启动
+      Thread videoOutThread = new Thread(Server::executeVideoOut);
+      videoOutThread.setPriority(Thread.MAX_PRIORITY);
+      Thread audioInThread = new Thread(Server::executeAudioIn);
+      audioInThread.setPriority(Thread.MAX_PRIORITY);
+      Thread audioOutThread = new Thread(Server::executeAudioOut);
+      audioOutThread.setPriority(Thread.MAX_PRIORITY);
+      Thread controlInThread = new Thread(Server::executeControlIn);
+      controlInThread.setPriority(Thread.MAX_PRIORITY);
+      videoOutThread.start();
+      controlInThread.start();
+      if (canAudio) {
+        audioInThread.start();
+        audioOutThread.start();
       }
-      workThreads.add(Controller.start());
-      for (Thread thread : workThreads) thread.start();
-      workThreads.get(0).join();
+      // 程序运行
+      synchronized (object) {
+        object.wait();
+      }
+      // 终止子服务
+      videoOutThread.interrupt();
+      controlInThread.interrupt();
+      if (canAudio) {
+        audioInThread.interrupt();
+        audioOutThread.interrupt();
+      }
+      // 恢复分辨率
+      if (Options.setWidth != -1)
+        new ProcessBuilder().command("bash", "-c", "wm size reset").start();
+    } catch (Exception ignored) {
+    } finally {
+      // 释放资源
+      stop();
     }
-    // 关闭
-    stop();
   }
 
   // 关闭
   private static void stop() {
-    System.out.print("停止");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 5; i++) {
       try {
         switch (i) {
+          case 0:
+            streamIn.close();
+            socket.close();
+            break;
           case 1:
-            videoStreamSocket.close();
-          case 2:
-            audioStreamSocket.close();
-          case 3:
-            controlStreamSocket.close();
-          case 4:
             SurfaceControl.destroyDisplay(VideoEncode.display);
-          case 5:
+            break;
+          case 2:
+            Controller.checkScreenOff(false);
+            break;
+          case 3:
             VideoEncode.encedec.stop();
             VideoEncode.encedec.release();
-          case 6:
+            break;
+          case 4:
             AudioEncode.audioCapture.stop();
             AudioEncode.audioCapture.release();
-          case 7:
             AudioEncode.encedec.stop();
             AudioEncode.encedec.release();
+            break;
         }
       } catch (Exception ignored) {
       }
@@ -133,35 +155,71 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    LocalServerSocket serverSocket = new LocalServerSocket("easycontrol");
-    videoStreamSocket = serverSocket.accept();
-    audioStreamSocket = serverSocket.accept();
-    controlStreamSocket = serverSocket.accept();
-    videoStream = videoStreamSocket.getFileDescriptor();
-    audioStream = audioStreamSocket.getFileDescriptor();
-    controlStream = controlStreamSocket.getFileDescriptor();
-    controlStreamIn = new DataInputStream(controlStreamSocket.getInputStream());
-    serverSocket.close();
+    try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
+      socket = serverSocket.accept();
+      fileDescriptor = socket.getFileDescriptor();
+      streamIn = new DataInputStream(socket.getInputStream());
+    }
   }
 
-  public static void writeFully(FileDescriptor fd, ByteBuffer from) throws IOException {
-    int remaining = from.remaining();
-    while (remaining > 0) {
-      try {
-        int len = Os.write(fd, from);
-        if (len < 0) {
-          throw new IOException("网络错误");
+  private static void executeVideoOut() {
+    try {
+      while (!Thread.interrupted()) {
+        if (VideoEncode.isHasChangeRotation) {
+          VideoEncode.isHasChangeRotation = false;
+          VideoEncode.stopEncode();
+          VideoEncode.initEncode();
         }
-        remaining -= len;
-      } catch (ErrnoException e) {
-        if (e.errno != OsConstants.EINTR) {
-          throw new IOException(e);
-        }
+        VideoEncode.encodeOut();
+      }
+    } catch (Exception ignored) {
+      synchronized (object) {
+        object.notify();
       }
     }
   }
 
-  public static void writeFully(FileDescriptor fd, byte[] buffer) throws IOException {
-    writeFully(fd, ByteBuffer.wrap(buffer, 0, buffer.length));
+  private static int audioInLoopNum = 100;
+
+  private static void executeAudioIn() {
+    try {
+      while (!Thread.interrupted()) {
+        AudioEncode.encodeIn();
+        audioInLoopNum++;
+        if (audioInLoopNum > 100) {
+          Controller.checkScreenOff(true);
+          audioInLoopNum = 0;
+        }
+      }
+    } catch (Exception ignored) {
+      synchronized (object) {
+        object.notify();
+      }
+    }
   }
+
+  private static void executeAudioOut() {
+    try {
+      while (!Thread.interrupted()) AudioEncode.encodeOut();
+    } catch (Exception ignored) {
+      synchronized (object) {
+        object.notify();
+      }
+    }
+  }
+
+  private static void executeControlIn() {
+    try {
+      while (!Thread.interrupted()) Controller.handleIn();
+    } catch (Exception ignored) {
+      synchronized (object) {
+        object.notify();
+      }
+    }
+  }
+
+  public synchronized static void write(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
+    while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
+  }
+
 }

@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--字体-->
-    <dimen name="largeFont">24sp</dimen>
-    <dimen name="middleFont">18sp</dimen>
-    <dimen name="smallFont">14sp</dimen>
-    <!--floatWindow界面-->
-    <dimen name="floatWindowCron">20dp</dimen>
-    <dimen name="floatWindowTitle">34dp</dimen>
-    <dimen name="floatWindowSmallSmall">80dp</dimen>
-    <dimen name="floatWindowSmallSmallPadding">16dp</dimen>
-    <dimen name="floatWindowMini">70dp</dimen>
-    <!--floatBall界面-->
-    <dimen name="floatBallNav">40dp</dimen>
-    <dimen name="floatBallW">200dp</dimen>
-    <dimen name="floatBallH">240dp</dimen>
+  <dimen name="round">14dp</dimen>
+  <!--字体-->
+  <dimen name="largeFont">24sp</dimen>
+  <dimen name="middleFont">18sp</dimen>
+  <dimen name="smallFont">14sp</dimen>
 </resources>

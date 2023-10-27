@@ -1,8 +1,6 @@
 plugins {
     id 'com.android.application' version '8.0.2'
-    id 'org.jetbrains.kotlin.android' version '1.9.0'
 }
-apply plugin: 'kotlin-kapt'
 
 android {
     namespace 'top.saymzx.easycontrol.app'
@@ -12,18 +10,10 @@ android {
         applicationId "top.saymzx.easycontrol.app"
         minSdk 23
         targetSdk 33
-        versionCode 10003
-        versionName "1.0.3_dev"
+        versionCode 10004
+        versionName "1.0.4_dev"
         resConfigs "zh"
         resConfigs "xhdpi"
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [
-                        "room.schemaLocation"  : "$projectDir/schemas".toString(),
-                        "room.incremental"     : "true",
-                        "room.expandProjection": "true"]
-            }
-        }
     }
 
     viewBinding {
@@ -47,25 +37,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
-
-    ext.kotlin_version = '1.9.0'
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.10.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
-
-    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
-
-    def room_version = "2.5.2"
-    implementation "androidx.room:room-ktx:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
-
 }

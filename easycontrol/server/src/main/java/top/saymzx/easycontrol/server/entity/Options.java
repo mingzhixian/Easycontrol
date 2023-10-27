@@ -5,10 +5,11 @@ package top.saymzx.easycontrol.server.entity;
 
 public final class Options {
   public static int maxSize;
-  public static String videoCodec;
-  public static String audioCodec;
   public static int videoBitRate;
   public static int maxFps;
+  public static boolean turnOffScreen;
+  public static int setWidth;
+  public static int setHeight;
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -19,12 +20,6 @@ public final class Options {
       String key = arg.substring(0, equalIndex);
       String value = arg.substring(equalIndex + 1);
       switch (key) {
-        case "video_codec":
-          videoCodec = value;
-          break;
-        case "audio_codec":
-          audioCodec = value;
-          break;
         case "max_size":
           maxSize = Integer.parseInt(value) & ~7;
           break;
@@ -33,6 +28,15 @@ public final class Options {
           break;
         case "video_bit_rate":
           videoBitRate = Integer.parseInt(value) * 1000000;
+          break;
+        case "turn_off_screen":
+          turnOffScreen = Integer.parseInt(value) == 1;
+          break;
+        case "set_width":
+          setWidth = Integer.parseInt(value);
+          break;
+        case "set_height":
+          setHeight = Integer.parseInt(value);
           break;
       }
     }
