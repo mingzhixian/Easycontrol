@@ -24,18 +24,18 @@ import java.lang.reflect.Method;
 
 public final class AudioCapture {
 
-  public static final int SAMPLE_RATE = 44100;
+  public static final int SAMPLE_RATE = 48000;
   public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
   public static final int CHANNELS = 2;
   public static final int CHANNEL_MASK = AudioFormat.CHANNEL_IN_LEFT | AudioFormat.CHANNEL_IN_RIGHT;
   public static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
   public static final int BYTES_PER_SAMPLE = 2;
 
-  public static AudioRecord start() {
+  public static AudioRecord init() {
     AudioRecord recorder;
     try {
       recorder = createAudioRecord();
-    } catch (NullPointerException var3) {
+    } catch (NullPointerException ignored) {
       recorder = createAudioRecordVivo();
     }
     recorder.startRecording();
@@ -43,15 +43,13 @@ public final class AudioCapture {
   }
 
   public static int millisToBytes(int millis) {
-    return SAMPLE_RATE * CHANNELS * BYTES_PER_SAMPLE * millis / 1000;
+    return (SAMPLE_RATE * CHANNELS * BYTES_PER_SAMPLE / 1000) * millis;
   }
 
   @SuppressLint({"WrongConstant", "MissingPermission"})
   private static AudioRecord createAudioRecord() {
     AudioRecord.Builder audioRecordBuilder = new AudioRecord.Builder();
-    if (VERSION.SDK_INT >= 31) {
-      audioRecordBuilder.setContext(FakeContext.get());
-    }
+    if (VERSION.SDK_INT >= 31) audioRecordBuilder.setContext(FakeContext.get());
 
     audioRecordBuilder.setAudioSource(MediaRecorder.AudioSource.REMOTE_SUBMIX);
     AudioFormat.Builder audioFormatBuilder = new AudioFormat.Builder();
@@ -59,9 +57,7 @@ public final class AudioCapture {
     audioFormatBuilder.setSampleRate(SAMPLE_RATE);
     audioFormatBuilder.setChannelMask(CHANNEL_CONFIG);
     audioRecordBuilder.setAudioFormat(audioFormatBuilder.build());
-    audioRecordBuilder.setBufferSizeInBytes(AudioRecord.getMinBufferSize(SAMPLE_RATE,
-        CHANNEL_CONFIG,
-        ENCODING));
+    audioRecordBuilder.setBufferSizeInBytes(8 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
     return audioRecordBuilder.build();
   }
 
@@ -104,8 +100,8 @@ public final class AudioCapture {
       Method audioParamCheckMethod = AudioRecord.class.getDeclaredMethod("audioParamCheck", int.class, int.class, int.class);
       audioParamCheckMethod.setAccessible(true);
       audioParamCheckMethod.invoke(audioRecord, MediaRecorder.AudioSource.REMOTE_SUBMIX,
-          SAMPLE_RATE,
-          ENCODING);
+        SAMPLE_RATE,
+        ENCODING);
 
       // audioRecord.mChannelCount = channels
       Field mChannelCountField = AudioRecord.class.getDeclaredField("mChannelCount");
@@ -138,11 +134,11 @@ public final class AudioCapture {
         // int buffSizeInBytes, int[] sessionId, String opPackageName,
         // long nativeRecordInJavaObj);
         Method nativeSetupMethod = AudioRecord.class.getDeclaredMethod("native_setup", Object.class, Object.class, int[].class, int.class,
-            int.class, int.class, int.class, int[].class, String.class, long.class);
+          int.class, int.class, int.class, int[].class, String.class, long.class);
         nativeSetupMethod.setAccessible(true);
         initResult = (int) nativeSetupMethod.invoke(audioRecord, new WeakReference<AudioRecord>(audioRecord), attributes, sampleRateArray,
-            CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), bufferSizeInBytes, session, FakeContext.get().getOpPackageName(),
-            0L);
+          CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), bufferSizeInBytes, session, FakeContext.get().getOpPackageName(),
+          0L);
       } else {
         // Assume `context` is never `null`
         AttributionSource attributionSource = FakeContext.get().getAttributionSource();
@@ -163,10 +159,10 @@ public final class AudioCapture {
           // int buffSizeInBytes, int[] sessionId, @NonNull Parcel attributionSource,
           // long nativeRecordInJavaObj, int maxSharedAudioHistoryMs);
           Method nativeSetupMethod = AudioRecord.class.getDeclaredMethod("native_setup", Object.class, Object.class, int[].class, int.class,
-              int.class, int.class, int.class, int[].class, Parcel.class, long.class, int.class);
+            int.class, int.class, int.class, int[].class, Parcel.class, long.class, int.class);
           nativeSetupMethod.setAccessible(true);
           initResult = (int) nativeSetupMethod.invoke(audioRecord, new WeakReference<AudioRecord>(audioRecord), attributes, sampleRateArray,
-              CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), bufferSizeInBytes, session, attributionSourceParcel, 0L, 0);
+            CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), bufferSizeInBytes, session, attributionSourceParcel, 0L, 0);
         }
       }
 
