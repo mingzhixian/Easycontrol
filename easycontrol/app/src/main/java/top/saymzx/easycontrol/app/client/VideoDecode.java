@@ -4,131 +4,88 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
+import android.util.Pair;
+import android.view.Surface;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import kotlin.Pair;
-
 public class VideoDecode {
-  private final Client client;
-  public MediaCodec videoDecodec;
-  public Pair<Integer, Integer> videoSize;
-  public Boolean videoPortrait;
 
-  public VideoDecode(Client c) throws IOException {
-    client = c;
-    // 读取画面大小
-    readVideoSize();
+  private MediaCodec videoDecodec;
+
+  public VideoDecode(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) throws IOException {
+    this.csd0 = csd0.array();
+    this.csd1 = csd1.array();
     // 创建Codec
-    setVideoDecodec();
+    setVideoDecodec(videoSize, csd0, csd1);
   }
 
-  public Pair<Thread, Thread> start() {
-    Thread streamInThread = new StreamInThread();
-    Thread streamOutThread = new StreamOutThread();
-    streamInThread.setPriority(Thread.MAX_PRIORITY);
-    streamOutThread.setPriority(Thread.MAX_PRIORITY);
-    return new Pair<>(streamInThread, streamOutThread);
-  }
-
-  class StreamInThread extends Thread {
-    @Override
-    public void run() {
-      try {
-        // 开始解码
-        int inIndex;
-        while (client.isNormal.get()) {
-          Pair<Integer, byte[]> frame = readFrame();
-          if (frame != null) {
-            inIndex = videoDecodec.dequeueInputBuffer(-1);
-            if (inIndex >= 0) {
-              videoDecodec.getInputBuffer(inIndex).put(frame.getSecond());
-              // 提交解码器解码
-              videoDecodec.queueInputBuffer(inIndex, 0, frame.getFirst(), 0, 0);
-            }
-          }
-        }
-      } catch (Exception ignored) {
-        client.stop("连接中断", null);
-      }
+  public void release() {
+    try {
+      videoDecodec.stop();
+      videoDecodec.release();
+    } catch (Exception ignored) {
     }
   }
 
-  public int fps = 0;
-
-  class StreamOutThread extends Thread {
-    @Override
-    public void run() {
-      try {
-        int outIndex;
-        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-        while (client.isNormal.get()) {
-          // 找到已完成的输出缓冲区
-          outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, -1);
-          if (outIndex < 0) continue;
-          videoDecodec.releaseOutputBuffer(outIndex, true);
-          fps++;
-        }
-      } catch (Exception ignored) {
-        client.stop("连接中断", null);
-      }
+  public synchronized void decodeIn(ByteBuffer data) {
+    try {
+      int inIndex = videoDecodec.dequeueInputBuffer(0);
+      // 缓冲区已满丢帧
+      if (inIndex < 0) return;
+      int size = data.remaining();
+      videoDecodec.getInputBuffer(inIndex).put(data);
+      // 提交解码器解码
+      videoDecodec.queueInputBuffer(inIndex, 0, size, 0, 0);
+    } catch (IllegalStateException ignored) {
     }
   }
 
-  // 读取画面大小
-  private void readVideoSize() {
-    int remoteVideoWidth = client.videoStream.readInt();
-    int remoteVideoHeight = client.videoStream.readInt();
-    videoPortrait = remoteVideoHeight > remoteVideoWidth;
-    videoSize = new Pair<>(remoteVideoWidth, remoteVideoHeight);
+  private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+
+  public void decodeOut(boolean isNormalPlay) {
+    try {
+      int outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, -1);
+      if (outIndex >= 0) videoDecodec.releaseOutputBuffer(outIndex, isNormalPlay);
+    } catch (IllegalStateException ignored) {
+    }
   }
 
   // 创建Codec
-  private void setVideoDecodec() throws IOException {
+  private void setVideoDecodec(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) throws IOException {
     // 创建解码器
-    String codecMime;
-    if (client.device.getVideoCodec().equals("h265")) codecMime = MediaFormat.MIMETYPE_VIDEO_HEVC;
-    else codecMime = MediaFormat.MIMETYPE_VIDEO_AVC;
+    String codecMime = MediaFormat.MIMETYPE_VIDEO_AVC;
     videoDecodec = MediaCodec.createDecoderByType(codecMime);
-    MediaFormat mediaFormat = MediaFormat.createVideoFormat(codecMime, videoSize.getFirst(), videoSize.getSecond());
+    MediaFormat mediaFormat = MediaFormat.createVideoFormat(codecMime, videoSize.first, videoSize.second);
     // 获取视频标识头
-    Pair<Integer, byte[]> csd0 = readFrame();
-    Pair<Integer, byte[]> csd1 = readFrame();
-    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.getSecond()));
-    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1.getSecond()));
+    mediaFormat.setByteBuffer("csd-0", csd0);
+    mediaFormat.setByteBuffer("csd-1", csd1);
     // 配置低延迟解码
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-      if (videoDecodec.getCodecInfo().getCapabilitiesForType(codecMime).isFeatureSupported(MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency))
-        mediaFormat.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && videoDecodec.getCodecInfo().getCapabilitiesForType(codecMime).isFeatureSupported(MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency))
+      mediaFormat.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
     // 配置解码器
-    videoDecodec.configure(mediaFormat, client.surface, null, 0);
+    videoDecodec.configure(mediaFormat, null, null, 0);
     // 启动解码器
     videoDecodec.start();
     // 解析首帧，解决开始黑屏问题
-    int inIndex = videoDecodec.dequeueInputBuffer(-1);
-    videoDecodec.getInputBuffer(inIndex).put(csd0.getSecond());
-    videoDecodec.queueInputBuffer(inIndex, 0, csd0.getFirst(), 0, 0);
-    inIndex = videoDecodec.dequeueInputBuffer(-1);
-    videoDecodec.getInputBuffer(inIndex).put(csd1.getSecond());
-    videoDecodec.queueInputBuffer(inIndex, 0, csd0.getFirst(), 0, 0);
+    decodeIn(csd0);
+    decodeIn(csd1);
   }
 
-  // 从socket流中解析数据
-  int netDelay = 0;
-  Integer deviceDiffDelay = null;
+  // 初始化Surface
+  private final byte[] csd0;
+  private final byte[] csd1;
 
-  private Pair<Integer, byte[]> readFrame() {
-    int size = client.videoStream.readInt();
-    int sendMs = client.videoStream.readInt();
-    int isKeyFrame = client.videoStream.readByte();
-    byte[] frame = client.videoStream.readByteArray(size);
-    // 丢帧处理--大于1.25倍的延迟则丢帧，只丢弃非关键帧
-//    if (isKeyFrame == 0 && deviceDiffDelay != null) {
-//      int nowMs = (int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL);
-//      int frameDelay = nowMs - (sendMs - deviceDiffDelay);
-//      if (frameDelay > netDelay * 1.25) return null;
-//    }
-    return new Pair<>(size, frame);
+  // 更新Surface
+  public void updateSurface(Surface surface) {
+    MediaFormat mediaFormat = videoDecodec.getInputFormat();
+    mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0));
+    mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1));
+    videoDecodec.stop();
+    videoDecodec.reset();
+    videoDecodec.configure(mediaFormat, surface, null, 0);
+    videoDecodec.start();
   }
+
 }

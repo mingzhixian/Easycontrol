@@ -9,13 +9,13 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.IBinder;
+import android.system.ErrnoException;
 import android.view.Surface;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
@@ -25,94 +25,44 @@ import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 public final class VideoEncode {
   public static MediaCodec encedec;
   private static MediaFormat encodecFormat;
-  private static final AtomicBoolean isHasChangeRotation = new AtomicBoolean(false);
+  public static boolean isHasChangeRotation = false;
 
   public static IBinder display;
 
-  public static Thread start() {
-    Thread thread = new StreamThread();
-    thread.setPriority(Thread.MAX_PRIORITY);
-    return thread;
+  public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
+    // 创建Codec
+    try {
+      setVideoEncodec(true);
+    } catch (Exception ignored) {
+      setVideoEncodec(false);
+    }
+    // 创建显示器
+    display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
+    // 写入视频宽高
+    ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+    byteBuffer.putInt(Device.videoSize.first);
+    byteBuffer.putInt(Device.videoSize.second);
+    byteBuffer.flip();
+    Server.write(byteBuffer);
+    initEncode();
+    encodeOut();
+    encodeOut();
   }
 
-  static class StreamThread extends Thread implements Device.RotationListener {
-    @Override
-    public void run() {
-      // 旋转
-      Surface surface;
-
-      try {
-        Device.rotationListener = this;
-        // 创建Codec
-        for (int i = 0; i < 2; i++) {
-          try {
-            setVideoEncodec();
-            break;
-          } catch (Exception ignored) {
-            tryCbr = false;
-          }
-        }
-        // 创建显示器
-        display = createDisplay();
-        // 写入视频宽高
-        ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-        byteBuffer.putInt(Device.videoSize.first);
-        byteBuffer.putInt(Device.videoSize.second);
-        byteBuffer.flip();
-        Server.writeFully(Server.videoStream, byteBuffer);
-        while (Server.isNormal.get()) {
-          // 重配置编码器宽高
-          encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
-          encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
-          encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-          // 绑定Display和Surface
-          surface = encedec.createInputSurface();
-          setDisplaySurface(display, surface);
-          // 启动编码
-          encedec.start();
-          encode();
-          encedec.stop();
-          encedec.reset();
-          surface.release();
-        }
-      } catch (Exception ignored) {
-        Server.isNormal.set(false);
-      }
-    }
-
-    @Override
-    public void onRotationChanged() {
-      isHasChangeRotation.set(true);
-    }
-  }
-
-  private static boolean tryCbr = true;
-
-  private static void setVideoEncodec() throws IOException {
-    String codecMime = Objects.equals(Options.videoCodec, "h265") ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
+  private static void setVideoEncodec(boolean tryCbr) throws IOException {
+    String codecMime = MediaFormat.MIMETYPE_VIDEO_AVC;
     encedec = MediaCodec.createEncoderByType(codecMime);
     encodecFormat = new MediaFormat();
 
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
-    encodecFormat.setInteger(
-        MediaFormat.KEY_COLOR_FORMAT,
-        MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface
-    );
-    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
-    encodecFormat.setLong(
-        MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER,
-        100_000 // 100ms
-    );
-    if (tryCbr)
+    encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
+    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100000);
+    if (tryCbr) // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
       encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
     encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
-  }
-
-  private static IBinder createDisplay() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    boolean secure = Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME));
-    return SurfaceControl.createDisplay("easycontrol", secure);
   }
 
   private static void setDisplaySurface(IBinder display, Surface surface) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
@@ -126,22 +76,42 @@ public final class VideoEncode {
     }
   }
 
-  private static void encode() throws IOException {
-    int outIndex;
-    MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-    while (!isHasChangeRotation.getAndSet(false) && Server.isNormal.get()) {
+  // 初始化编码器
+  private static Surface surface;
+
+  public static void initEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    // 重配置编码器宽高
+    encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
+    encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
+    encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+    // 绑定Display和Surface
+    surface = encedec.createInputSurface();
+    setDisplaySurface(display, surface);
+    // 启动编码
+    encedec.start();
+  }
+
+  public static void stopEncode() {
+    encedec.stop();
+    encedec.reset();
+    surface.release();
+  }
+
+  private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+
+  public static void encodeOut() throws InterruptedIOException, ErrnoException {
+    try {
       // 找到已完成的输出缓冲区
-      outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1);
-      if (outIndex < 0) continue;
-      ByteBuffer byteBuffer = ByteBuffer.allocate(9);
+      int outIndex;
+      do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
+      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + bufferInfo.size);
+      byteBuffer.put((byte) 1);
       byteBuffer.putInt(bufferInfo.size);
-      byteBuffer.putInt((int) (System.currentTimeMillis() & 0x00000000FFFFFFFFL));
-      if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) byteBuffer.put((byte) 1);
-      else byteBuffer.put((byte) 0);
+      byteBuffer.put(encedec.getOutputBuffer(outIndex));
       byteBuffer.flip();
-      Server.writeFully(Server.videoStream, byteBuffer);
-      Server.writeFully(Server.videoStream, encedec.getOutputBuffer(outIndex));
+      Server.write(byteBuffer);
       encedec.releaseOutputBuffer(outIndex, false);
+    } catch (IllegalStateException ignored) {
     }
   }
 
