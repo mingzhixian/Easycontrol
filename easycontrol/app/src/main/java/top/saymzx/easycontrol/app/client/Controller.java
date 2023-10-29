@@ -10,14 +10,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import top.saymzx.easycontrol.adb.AdbStream;
+import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.entity.AppData;
 
 public class Controller {
-  private final Client.MyFunctionInt myFunctionInt;
+  private final ClientView clientView;
   private final AdbStream stream;
 
-  public Controller(Client.MyFunctionInt myFunctionInt, AdbStream stream) {
-    this.myFunctionInt = myFunctionInt;
+  public Controller(ClientView clientView, AdbStream stream) {
+    this.clientView = clientView;
     this.stream = stream;
   }
 
@@ -36,13 +37,14 @@ public class Controller {
   }
 
   public void handleClipboardEvent() throws InterruptedException, IOException {
-    nowClipboardText = stream.readByteArray(stream.readInt()).toString();
+    int size = stream.readInt();
+    nowClipboardText = new String(stream.readByteArray(size).array());
     AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, nowClipboardText));
   }
 
   // 处理旋转
   public void handleRotationNotification() {
-    myFunctionInt.handleEvent(Client.Event_CHANGE_ROTATION);
+    AppData.main.runOnUiThread(clientView::changeRotation);
   }
 
   // 发送触摸事件
@@ -89,7 +91,7 @@ public class Controller {
     try {
       stream.write(byteBuffer);
     } catch (IOException | InterruptedException ignored) {
-      myFunctionInt.handleEvent(Client.Event_CLOSE);
+      clientView.hide(true);
     }
   }
 

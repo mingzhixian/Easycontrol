@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.app.client;
+package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
 import android.graphics.PixelFormat;
@@ -6,28 +6,27 @@ import android.os.Build;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
+import android.view.animation.OvershootInterpolator;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 
 public class SmallView {
-  private final Client.MyFunctionInt myFunctionInt;
-
-  public Pair<Integer, Integer> maxSize;
+  private final ClientView clientView;
 
   private boolean isShow = false;
 
   // 悬浮窗
-  public final ModuleSmallViewBinding smallView = ModuleSmallViewBinding.inflate(AppData.main.getLayoutInflater());
+  private final ModuleSmallViewBinding smallView = ModuleSmallViewBinding.inflate(AppData.main.getLayoutInflater());
   private final WindowManager.LayoutParams smallViewParams =
     new WindowManager.LayoutParams(
       WindowManager.LayoutParams.WRAP_CONTENT,
@@ -39,12 +38,12 @@ public class SmallView {
       PixelFormat.TRANSLUCENT
     );
 
-  private static final int baseLayoutParamsFlag = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-  private static final int LayoutParamsFlagFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+  private static final int baseLayoutParamsFlag = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+  private static final int LayoutParamsFlagFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
   private static final int LayoutParamsFlagNoFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
-  public SmallView(Client.MyFunctionInt myFunctionInt) {
-    this.myFunctionInt = myFunctionInt;
+  public SmallView(ClientView clientView) {
+    this.clientView = clientView;
     smallViewParams.gravity = Gravity.START | Gravity.TOP;
     // 设置监听控制
     setFloatVideoListener();
@@ -56,51 +55,76 @@ public class SmallView {
   public void show(Controller controller) {
     if (!isShow) {
       isShow = true;
-      // 显示
-      AppData.main.getWindowManager().addView(smallView.getRoot(), smallViewParams);
       // 隐藏工具栏
       smallView.barView.setVisibility(View.GONE);
       // 设置监听
       setButtonListener(controller);
-      // 更新MaxSize
+      // 显示
+      AppData.main.getWindowManager().addView(smallView.getRoot(), smallViewParams);
+      showSmallViewAnim();
+      // 更新TextureView
+      smallView.textureViewLayout.addView(clientView.textureView, 0);
       Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
-      maxSize = new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4);
-      // 更新Surface
-      listenerSurfaceOk();
+      clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
+      setCenter();
     }
   }
 
   public void hide() {
     if (isShow) {
       isShow = false;
+      smallView.textureViewLayout.removeView(clientView.textureView);
       AppData.main.getWindowManager().removeView(smallView.getRoot());
     }
   }
 
   public void changeRotation() {
     Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
-    maxSize = new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4);
-    myFunctionInt.handleEvent(Client.Event_UPDATE_SURFACE_SIZE);
-    // 居中显示
+    clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
     setCenter();
   }
 
+  // 更改Small View的形态
+  public void showSmallViewAnim() {
+    // 创建平移动画
+    smallView.getRoot().setTranslationY(400);
+    float endY = 0;
+    // 创建透明度动画
+    smallView.getRoot().setAlpha(0f);
+    float endAlpha = 1f;
+
+    // 设置动画时长和插值器
+    ViewPropertyAnimator animator = smallView.getRoot().animate()
+      .translationY(endY)
+      .alpha(endAlpha)
+      .setDuration(400)
+      .setInterpolator(new OvershootInterpolator());
+
+    // 启动动画
+    animator.start();
+  }
+
   // 设置焦点监听
+  private boolean viewFocus = true;
+
   @SuppressLint("ClickableViewAccessibility")
   private void setFloatVideoListener() {
-    final boolean[] viewFocus = {true};
     smallView.getRoot().setOnTouchListener((v, event) -> {
-      if (viewFocus[0] && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-        smallViewParams.flags = LayoutParamsFlagNoFocus;
-        AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
-        viewFocus[0] = false;
-      } else if (!viewFocus[0]) {
-        smallViewParams.flags = LayoutParamsFlagFocus;
-        AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
-        viewFocus[0] = true;
-      }
+      if (event.getAction() == MotionEvent.ACTION_OUTSIDE) setViewFocus(false);
       return false;
     });
+  }
+
+  public void setViewFocus(boolean toFocus) {
+    if (!toFocus && viewFocus) {
+      smallViewParams.flags = LayoutParamsFlagNoFocus;
+      AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
+      viewFocus = false;
+    } else if (toFocus && !viewFocus) {
+      smallViewParams.flags = LayoutParamsFlagFocus;
+      AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
+      viewFocus = true;
+    }
   }
 
   // 设置上横条监听控制
@@ -134,7 +158,7 @@ public class SmallView {
             isFilp.set(true);
           }
           // 拖动限制
-          if (x < 100 | x > screenSize.get().first - 100 | y < 100 | y > screenSize.get().second - 100)
+          if (x < 200 | x > screenSize.get().first - 200 | y < 200 | y > screenSize.get().second - 200)
             return true;
           // 更新
           smallViewParams.x = paramsX.get() + flipX;
@@ -144,32 +168,10 @@ public class SmallView {
         }
         case MotionEvent.ACTION_UP:
           if (!isFilp.get())
-            AppData.publicTools.changeBarViewAnim(smallView.barView, AppData.publicTools.dp2px(-40f));
+            clientView.changeBarViewAnim(smallView.barView, AppData.publicTools.dp2px(-40f));
           break;
       }
       return true;
-    });
-  }
-
-  // 等待Surface准备好后更新输出Surface
-  private void listenerSurfaceOk() {
-    surfaceView = smallView.surfaceView;
-    surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
-      @Override
-      public void surfaceCreated(SurfaceHolder holder) {
-        myFunctionInt.handleEvent(Client.Event_UPDATE_SURFACE);
-        setCenter();
-      }
-
-      @Override
-      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-      }
-
-      @Override
-      public void surfaceDestroyed(SurfaceHolder holder) {
-
-      }
     });
   }
 
@@ -177,7 +179,7 @@ public class SmallView {
   private void setCenter() {
     Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
     // 更新
-    ViewGroup.LayoutParams layoutParams = surfaceView.getLayoutParams();
+    ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
     smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
     AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
@@ -190,23 +192,22 @@ public class SmallView {
       smallView.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3));
       smallView.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187));
     }
-    smallView.buttonMini.setOnClickListener(v -> myFunctionInt.handleEvent(Client.Event_CHANGE_MINI));
-    smallView.buttonFull.setOnClickListener(v -> myFunctionInt.handleEvent(Client.Event_CHANGE_FULL));
-    smallView.buttonClose.setOnClickListener(v -> myFunctionInt.handleEvent(Client.Event_CLOSE));
+    smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
+    smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
+    smallView.buttonClose.setOnClickListener(v -> clientView.hide(true));
   }
 
   // 设置悬浮窗大小拖动按钮监听控制
   @SuppressLint("ClickableViewAccessibility")
   private void setReSizeListener() {
-    int minSize = AppData.publicTools.dp2px(100f);
+    int minSize = AppData.publicTools.dp2px(150f);
     smallView.reSize.setOnTouchListener((v, event) -> {
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
         // 更新位置大小
         int sizeX = (int) (event.getRawX() - smallViewParams.x);
         int sizeY = (int) (event.getRawY() - smallViewParams.y);
         if (sizeX < minSize || sizeY < minSize) return true;
-        maxSize = new Pair<>(sizeX, sizeY);
-        myFunctionInt.handleEvent(Client.Event_UPDATE_SURFACE_SIZE);
+        clientView.updateTextureViewSize(new Pair<>(sizeX, sizeY));
       }
       return true;
     });

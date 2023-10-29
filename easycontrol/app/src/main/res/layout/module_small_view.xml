@@ -6,13 +6,8 @@
   android:background="@drawable/background_cron"
   android:backgroundTint="@color/cardContainerBackground">
 
-  <View
-    android:id="@+id/re_size"
-    android:layout_width="30dp"
-    android:layout_height="30dp"
-    android:layout_gravity="end|bottom" />
-
   <FrameLayout
+    android:id="@+id/texture_view_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginLeft="5dp"
@@ -21,10 +16,6 @@
     android:layout_marginBottom="5dp"
     android:background="#000">
 
-    <TextureView
-      android:id="@+id/texture_view"
-      android:layout_width="200dp"
-      android:layout_height="300dp" />
 
     <ImageView
       android:layout_width="@dimen/round"
@@ -58,6 +49,12 @@
       android:tint="@color/cardContainerBackground" />
 
   </FrameLayout>
+
+  <View
+    android:id="@+id/re_size"
+    android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:layout_gravity="end|bottom" />
 
   <ImageView
     android:id="@+id/bar"

@@ -12,7 +12,6 @@ public class TcpChannel implements AdbChannel {
   private final OutputStream outputStream;
 
   public TcpChannel(String host, int port) throws IOException {
-    socket.setReceiveBufferSize(8192);
     socket.setTcpNoDelay(true);
     socket.connect(new InetSocketAddress(host, port));
     inputStream = socket.getInputStream();
@@ -45,8 +44,8 @@ public class TcpChannel implements AdbChannel {
   @Override
   public void close() {
     try {
-      inputStream.close();
       outputStream.close();
+      inputStream.close();
       socket.close();
     } catch (Exception ignored) {
     }
