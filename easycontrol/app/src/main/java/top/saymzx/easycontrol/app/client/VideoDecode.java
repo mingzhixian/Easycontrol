@@ -31,9 +31,8 @@ public class VideoDecode {
 
   public synchronized void decodeIn(ByteBuffer data) {
     try {
-      int inIndex = videoDecodec.dequeueInputBuffer(0);
-      // 缓冲区已满丢帧
-      if (inIndex < 0) return;
+      int inIndex;
+      do inIndex = videoDecodec.dequeueInputBuffer(-1); while (inIndex < 0);
       int size = data.remaining();
       videoDecodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
