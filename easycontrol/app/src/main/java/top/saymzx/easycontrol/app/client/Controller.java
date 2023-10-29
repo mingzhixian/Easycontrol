@@ -91,7 +91,7 @@ public class Controller {
     try {
       stream.write(byteBuffer);
     } catch (IOException | InterruptedException ignored) {
-      clientView.hide(true);
+      AppData.main.runOnUiThread(() -> clientView.hide(true));
     }
   }
 
