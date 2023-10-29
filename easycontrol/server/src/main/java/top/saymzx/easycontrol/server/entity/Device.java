@@ -72,12 +72,12 @@ public final class Device {
   }
 
   // 计算最佳的分辨率大小，按照主控端长宽比例缩放
-  private static void calculateSize() throws IOException {
+  private static void calculateSize() {
     // 保证方向一致
-    if (deviceSize.first < deviceSize.second ^ Options.setWidth<Options.setHeight){
-      int tmp=Options.setWidth;
-      Options.setWidth=Options.setHeight;
-      Options.setHeight=tmp;
+    if (deviceSize.first < deviceSize.second ^ Options.setWidth < Options.setHeight) {
+      int tmp = Options.setWidth;
+      Options.setWidth = Options.setHeight;
+      Options.setHeight = tmp;
     }
     Pair<Integer, Integer> newScreenSize;
     int tmp1 = Options.setHeight * Device.deviceSize.first / Options.setWidth;
@@ -87,9 +87,12 @@ public final class Device {
     else
       newScreenSize = new Pair<>(Options.setWidth * Device.deviceSize.second / Options.setHeight, Device.deviceSize.second);
     // 修改分辨率
-    new ProcessBuilder().command("bash", "-c", "wm size " + newScreenSize.first + "x" + newScreenSize.second).start();
-    // 更新新的设备分辨率大小
-    Device.deviceSize = newScreenSize;
+    try {
+      new ProcessBuilder().command("sh", "-c", "wm size " + newScreenSize.first + "x" + newScreenSize.second).start();
+      // 更新新的设备分辨率大小
+      Device.deviceSize = newScreenSize;
+    } catch (Exception ignored) {
+    }
   }
 
   private static void computeVideoSize() {
