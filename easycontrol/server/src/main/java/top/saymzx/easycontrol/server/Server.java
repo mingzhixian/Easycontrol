@@ -81,7 +81,10 @@ public final class Server {
       }
       // 恢复分辨率
       if (Options.setWidth != -1)
-        new ProcessBuilder().command("bash", "-c", "wm size reset").start();
+        try {
+          new ProcessBuilder().command("sh", "-c", "wm size reset").start();
+        } catch (Exception ignored) {
+        }
     } catch (Exception ignored) {
     } finally {
       // 释放资源
