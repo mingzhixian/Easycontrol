@@ -35,7 +35,7 @@ public final class Setting {
   }
 
   public boolean getDefaultSetResolution() {
-    return sharedPreferences.getBoolean("defaultSetResolution", false);
+    return sharedPreferences.getBoolean("defaultSetResolution", true);
   }
 
   public void setDefaultSetResolution(boolean value) {

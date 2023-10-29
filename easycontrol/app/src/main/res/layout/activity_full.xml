@@ -4,19 +4,17 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="#000"
-  tools:context=".FullActivity">
+  android:keepScreenOn="true"
+  tools:context=".client.view.FullActivity">
 
   <LinearLayout
+    android:id="@+id/texture_view_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="35dp"
     android:gravity="center"
     android:orientation="horizontal">
 
-    <TextureView
-      android:id="@+id/texture_view"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent" />
   </LinearLayout>
 
   <LinearLayout

@@ -20,7 +20,7 @@ public final class AudioEncode {
   public static AudioRecord audioCapture;
 
   public static boolean init() throws IOException, ErrnoException {
-    byte[] bytes = new byte[1];
+    byte[] bytes = new byte[]{0};
     try {
       // 从安卓12开始支持
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) throw new Exception("版本低");

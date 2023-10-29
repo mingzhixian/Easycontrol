@@ -7,6 +7,7 @@
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" /> <!-- USB -->
   <uses-permission android:name="android.permission.USB_PERMISSION" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- WIFI锁 -->
 
   <uses-feature android:name="android.hardware.usb.host" />
 
@@ -31,9 +32,10 @@
       android:name=".SetActivity"
       android:exported="false" />
     <activity
-      android:name=".FullActivity"
+      android:name=".client.view.FullActivity"
       android:exported="false"
-      android:launchMode="singleTask" />
+      android:launchMode="singleTask"
+      android:screenOrientation="portrait" />
   </application>
 
 </manifest>

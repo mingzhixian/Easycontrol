@@ -1,6 +1,5 @@
 package top.saymzx.easycontrol.app.helper;
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,10 +9,7 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
@@ -43,7 +39,6 @@ public class PublicTools {
       View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
       View.SYSTEM_UI_FLAG_FULLSCREEN |
       View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
     // 设置异形屏
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       context.getWindow().getAttributes().layoutInDisplayCutoutMode =
@@ -75,14 +70,14 @@ public class PublicTools {
   }
 
   // 创建弹窗
-  public Dialog createDialog(Context context, View view) {
+  public Dialog createDialog(Context context, boolean canCancel, View view) {
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
     builder.setCancelable(false);
     ScrollView dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).getRoot();
     dialogView.addView(view);
     builder.setView(dialogView);
     Dialog dialog = builder.create();
-    dialog.setCanceledOnTouchOutside(true);
+    dialog.setCanceledOnTouchOutside(canCancel);
     dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
     return dialog;
   }
@@ -94,7 +89,7 @@ public class PublicTools {
     DeviceListAdapter deviceListAdapter
   ) {
     ItemAddDeviceBinding itemAddDeviceBinding = ItemAddDeviceBinding.inflate(LayoutInflater.from(context));
-    Dialog dialog = createDialog(context, itemAddDeviceBinding.getRoot());
+    Dialog dialog = createDialog(context, true, itemAddDeviceBinding.getRoot());
     // 设置值
     itemAddDeviceBinding.addDeviceName.setText(device.name);
     itemAddDeviceBinding.addDeviceAddress.setText(device.address);
@@ -140,7 +135,7 @@ public class PublicTools {
     loadingView.text.setOnClickListener(v -> {
       if (function != null) function.run();
     });
-    return createDialog(context, loadingView.getRoot());
+    return createDialog(context, false, loadingView.getRoot());
   }
 
   // 创建纯文本卡片
@@ -203,65 +198,14 @@ public class PublicTools {
     return spinnerView;
   }
 
-  // 更改Bar View的形态
-  public void changeBarViewAnim(View view, int translationY) {
-    boolean toShowBarView = view.getVisibility() == View.GONE;
-    // 创建平移动画
-    view.setTranslationY(toShowBarView ? translationY : 0);
-    float endY = toShowBarView ? 0 : translationY;
-    // 创建缩放动画
-    view.setScaleY(toShowBarView ? 0f : 1f);
-    float endScaleY = toShowBarView ? 1f : 0f;
-    // 创建透明度动画
-    view.setAlpha(toShowBarView ? 0f : 1f);
-    float endAlpha = toShowBarView ? 1f : 0f;
-
-    // 设置动画时长和插值器
-    ViewPropertyAnimator animator = view.animate()
-      .translationY(endY)
-      .scaleY(endScaleY)
-      .alpha(endAlpha)
-      .setDuration(toShowBarView ? 200 : 250)
-      .setInterpolator(toShowBarView ? new DecelerateInterpolator() : new OvershootInterpolator());
-
-    // 显示或隐藏
-    animator.setListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-        if (toShowBarView) view.setVisibility(View.VISIBLE);
-      }
-
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        if (!toShowBarView) view.setVisibility(View.GONE);
-      }
-
-      @Override
-      public void onAnimationCancel(Animator animation) {
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
-      }
-    });
-
-    // 启动动画
-    animator.start();
-  }
-
   // 分离地址和端口号
   public Pair<String, Integer> getIpAndPort(String address) {
     String pattern;
     // ipv6
-    if (address.contains("[")) {
-      pattern = "(\\[.*?\\]):(\\d+)";
-    }
-    // 域名
-    else if (Pattern.matches(".*[a-zA-Z].*", address)) {
-      pattern = "(.*?):(\\d+)";
-    } else {
-      pattern = "(.*?):(\\d+)";
-    }
+    if (address.contains("[")) pattern = "(\\[.*?]):(\\d+)";
+      // 域名
+    else if (Pattern.matches(".*[a-zA-Z].*", address)) pattern = "(.*?):(\\d+)";
+    else pattern = "(.*?):(\\d+)";
     Pattern regex = Pattern.compile(pattern);
     Matcher matcher = regex.matcher(address);
     if (matcher.find()) {

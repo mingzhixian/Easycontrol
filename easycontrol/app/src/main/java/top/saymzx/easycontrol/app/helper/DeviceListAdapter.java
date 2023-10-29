@@ -65,7 +65,7 @@ public class DeviceListAdapter extends BaseAdapter {
   // 卡片长按事件
   private void onLongClickCard(Device device) {
     ItemSetDeviceBinding itemSetDeviceBinding = ItemSetDeviceBinding.inflate(LayoutInflater.from(context));
-    Dialog dialog = AppData.publicTools.createDialog(context, itemSetDeviceBinding.getRoot());
+    Dialog dialog = AppData.publicTools.createDialog(context,true, itemSetDeviceBinding.getRoot());
     itemSetDeviceBinding.open.setOnClickListener(v -> {
       dialog.hide();
       new Client(device, null);
