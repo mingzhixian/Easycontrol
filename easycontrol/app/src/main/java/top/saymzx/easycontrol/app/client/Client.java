@@ -110,9 +110,8 @@ public class Client {
     try {
       for (int i = 0; i < 3; i++) {
         String isHaveServer = adb.runAdbCmd("ls -l /data/local/tmp/easycontrol_*", true);
-//      if (isHaveServer.contains("easycontrol_server_" + AppData.versionCode + ".jar")) return;
+        if (isHaveServer.contains("easycontrol_server_" + AppData.versionCode + ".jar")) return;
         adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar");
-        return;
       }
     } catch (Exception ignored) {
       throw new Exception("发送Server失败");

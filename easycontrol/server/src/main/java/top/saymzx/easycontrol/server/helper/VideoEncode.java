@@ -28,10 +28,9 @@ public final class VideoEncode {
   public static boolean isHasChangeRotation = false;
 
   public static IBinder display;
+  private static boolean tryCbr = true;
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
-    // 创建Codec
-    setVideoEncodec();
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 写入视频宽高
@@ -40,10 +39,13 @@ public final class VideoEncode {
     byteBuffer.putInt(Device.videoSize.second);
     byteBuffer.flip();
     Server.write(byteBuffer);
+    // 创建Codec
     try {
+      setVideoEncodec();
       initEncode();
     } catch (Exception ignored) {
-      encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+      tryCbr = false;
+      setVideoEncodec();
       initEncode();
     }
     encodeOut();
@@ -62,7 +64,8 @@ public final class VideoEncode {
     encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
     // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
-    encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+    if (tryCbr)
+      encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
     encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
   }
 

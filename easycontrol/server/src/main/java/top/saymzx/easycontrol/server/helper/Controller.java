@@ -54,12 +54,15 @@ public final class Controller {
   }
 
   public static void checkScreenOff(boolean turnOn) throws IOException {
-    Process process = new ProcessBuilder().command("bash", "-c", "dumpsys deviceidle | grep mScreenOn").start();
-    boolean isScreenOn = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine().contains("mScreenOn=true");
-    // 如果屏幕状态和要求状态不同，则模拟按下电源键
-    if (isScreenOn ^ turnOn) Device.keyEvent(26);
-    // 只有需要打开屏幕，且要求关闭背光时才设置为0
-    Device.setScreenPowerMode((turnOn && Options.turnOffScreen) ? 0 : 1);
+    try {
+      Process process = new ProcessBuilder().command("sh", "-c", "dumpsys deviceidle | grep mScreenOn").start();
+      boolean isScreenOn = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine().contains("mScreenOn=true");
+      // 如果屏幕状态和要求状态不同，则模拟按下电源键
+      if (isScreenOn ^ turnOn) Device.keyEvent(26);
+      // 只有需要打开屏幕，且要求关闭背光时才设置为0
+      Device.setScreenPowerMode((turnOn && Options.turnOffScreen) ? 0 : 1);
+    } catch (Exception ignored) {
+    }
   }
 
 }
