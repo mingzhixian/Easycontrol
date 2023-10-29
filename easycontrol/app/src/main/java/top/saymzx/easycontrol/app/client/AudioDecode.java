@@ -50,12 +50,11 @@ public class AudioDecode {
 
   private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public void decodeOut(boolean isNormalPlay) {
+  public void decodeOut() {
     try {
       int outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, -1);
       if (outIndex >= 0) {
-        if (isNormalPlay)
-          audioTrack.write(audioDecodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
+        audioTrack.write(audioDecodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
         audioDecodec.releaseOutputBuffer(outIndex, false);
       }
     } catch (IllegalStateException ignored) {

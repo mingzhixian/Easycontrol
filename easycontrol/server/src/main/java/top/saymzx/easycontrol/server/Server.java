@@ -42,9 +42,6 @@ public final class Server {
     try {
       // 解析参数
       Options.parse(args);
-      // 修改分辨率
-      if (Options.setWidth != -1)
-        new ProcessBuilder().command("bash", "-c", "wm size " + Options.setWidth + "x" + Options.setHeight).start();
       // 初始化
       setManagers();
       Device.init();
@@ -62,8 +59,10 @@ public final class Server {
       audioOutThread.setPriority(Thread.MAX_PRIORITY);
       Thread controlInThread = new Thread(Server::executeControlIn);
       controlInThread.setPriority(Thread.MAX_PRIORITY);
+      Thread otherServiceThread = new Thread(Server::executeOtherService);
       videoOutThread.start();
       controlInThread.start();
+      otherServiceThread.start();
       if (canAudio) {
         audioInThread.start();
         audioOutThread.start();
@@ -75,6 +74,7 @@ public final class Server {
       // 终止子服务
       videoOutThread.interrupt();
       controlInThread.interrupt();
+      otherServiceThread.interrupt();
       if (canAudio) {
         audioInThread.interrupt();
         audioOutThread.interrupt();
@@ -179,18 +179,9 @@ public final class Server {
     }
   }
 
-  private static int audioInLoopNum = 100;
-
   private static void executeAudioIn() {
     try {
-      while (!Thread.interrupted()) {
-        AudioEncode.encodeIn();
-        audioInLoopNum++;
-        if (audioInLoopNum > 100) {
-          Controller.checkScreenOff(true);
-          audioInLoopNum = 0;
-        }
-      }
+      while (!Thread.interrupted()) AudioEncode.encodeIn();
     } catch (Exception ignored) {
       synchronized (object) {
         object.notify();
@@ -211,6 +202,19 @@ public final class Server {
   private static void executeControlIn() {
     try {
       while (!Thread.interrupted()) Controller.handleIn();
+    } catch (Exception ignored) {
+      synchronized (object) {
+        object.notify();
+      }
+    }
+  }
+
+  private static void executeOtherService() {
+    try {
+      while (!Thread.interrupted()) {
+        Controller.checkScreenOff(true);
+        Thread.sleep(1000);
+      }
     } catch (Exception ignored) {
       synchronized (object) {
         object.notify();

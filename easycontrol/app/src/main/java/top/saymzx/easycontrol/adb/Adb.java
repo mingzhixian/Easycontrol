@@ -141,11 +141,21 @@ public class Adb {
 
   private void handleOut() {
     try {
+      ByteBuffer buffer = ByteBuffer.allocate(8192);
+      byte[] bytes;
       while (!Thread.interrupted()) {
+        buffer.clear();
         // 阻塞等待数据
-        channel.write(sendQueue.take());
-        // 将所有数据清空，以减少flush次数
-        while (!sendQueue.isEmpty()) channel.write(sendQueue.take());
+        buffer.put(sendQueue.take());
+        // 将所有数据清空，以减少写入次数
+        while ((bytes = sendQueue.peek()) != null) {
+          if (bytes.length > buffer.remaining()) break;
+          buffer.put(sendQueue.take());
+        }
+        buffer.flip();
+        bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        channel.write(bytes);
         channel.flush();
       }
     } catch (IOException | InterruptedException ignored) {
