@@ -15,6 +15,7 @@ import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -37,10 +38,12 @@ public final class Device {
   public static int displayId = 0;
   public static int layerStack;
 
-  public static void init() {
+  public static void init() throws IOException {
     DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
     deviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
+    // 修改分辨率
+    if (Options.setWidth != -1) calculateSize();
     // 计算视频大小
     computeVideoSize();
     layerStack = displayInfo.layerStack;
@@ -66,6 +69,27 @@ public final class Device {
       pointerProperties[i] = props;
       pointerCoords[i] = coords;
     }
+  }
+
+  // 计算最佳的分辨率大小，按照主控端长宽比例缩放
+  private static void calculateSize() throws IOException {
+    // 保证方向一致
+    if (deviceSize.first < deviceSize.second ^ Options.setWidth<Options.setHeight){
+      int tmp=Options.setWidth;
+      Options.setWidth=Options.setHeight;
+      Options.setHeight=tmp;
+    }
+    Pair<Integer, Integer> newScreenSize;
+    int tmp1 = Options.setHeight * Device.deviceSize.first / Options.setWidth;
+    // 横向最大不会超出
+    if (Device.deviceSize.second > tmp1) newScreenSize = new Pair<>(Device.deviceSize.first, tmp1);
+      // 竖向最大不会超出
+    else
+      newScreenSize = new Pair<>(Options.setWidth * Device.deviceSize.second / Options.setHeight, Device.deviceSize.second);
+    // 修改分辨率
+    new ProcessBuilder().command("bash", "-c", "wm size " + newScreenSize.first + "x" + newScreenSize.second).start();
+    // 更新新的设备分辨率大小
+    Device.deviceSize = newScreenSize;
   }
 
   private static void computeVideoSize() {

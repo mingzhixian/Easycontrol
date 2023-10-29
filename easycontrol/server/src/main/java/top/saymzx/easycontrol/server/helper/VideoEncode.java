@@ -31,11 +31,7 @@ public final class VideoEncode {
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
     // 创建Codec
-    try {
-      setVideoEncodec(true);
-    } catch (Exception ignored) {
-      setVideoEncodec(false);
-    }
+    setVideoEncodec();
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 写入视频宽高
@@ -44,12 +40,17 @@ public final class VideoEncode {
     byteBuffer.putInt(Device.videoSize.second);
     byteBuffer.flip();
     Server.write(byteBuffer);
-    initEncode();
+    try {
+      initEncode();
+    } catch (Exception ignored) {
+      encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+      initEncode();
+    }
     encodeOut();
     encodeOut();
   }
 
-  private static void setVideoEncodec(boolean tryCbr) throws IOException {
+  private static void setVideoEncodec() throws IOException {
     String codecMime = MediaFormat.MIMETYPE_VIDEO_AVC;
     encedec = MediaCodec.createEncoderByType(codecMime);
     encodecFormat = new MediaFormat();
@@ -58,10 +59,10 @@ public final class VideoEncode {
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
-    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100000);
-    if (tryCbr) // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
-      encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
+    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
+    // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
+    encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
     encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
   }
 

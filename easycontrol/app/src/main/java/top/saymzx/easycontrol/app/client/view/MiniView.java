@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.app.client;
+package top.saymzx.easycontrol.app.client.view;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
@@ -19,7 +19,7 @@ import top.saymzx.easycontrol.app.entity.AppData;
 
 public class MiniView {
 
-  private final Client.MyFunctionInt myFunctionInt;
+  private final ClientView clientView;
 
   private boolean isShow = false;
 
@@ -35,8 +35,8 @@ public class MiniView {
 
   private static int color = 0;
 
-  public MiniView(Client.MyFunctionInt myFunctionInt) {
-    this.myFunctionInt = myFunctionInt;
+  public MiniView(ClientView clientView) {
+    this.clientView = clientView;
     miniViewParams.gravity = Gravity.START | Gravity.TOP;
     // Bar颜色
     int barColor = R.color.bar1;
@@ -54,7 +54,7 @@ public class MiniView {
     miniView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(barColor)));
     // 位置
     miniViewParams.x = -1 * AppData.publicTools.dp2px(10f);
-    miniViewParams.y = 200;
+    miniViewParams.y = 300 * (color % 4 + 1);
   }
 
   public void show() {
@@ -88,7 +88,7 @@ public class MiniView {
     ViewPropertyAnimator animator = miniView.getRoot().animate()
       .translationX(endX)
       .alpha(endAlpha)
-      .setDuration(300)
+      .setDuration(400)
       .setInterpolator(new LinearInterpolator());
 
     // 显示或隐藏
@@ -135,8 +135,7 @@ public class MiniView {
         }
         case MotionEvent.ACTION_UP:
           int flipY = (int) (yy.get() - event.getRawY());
-          if (flipY * flipY < 16)
-            myFunctionInt.handleEvent(Client.Event_CHANGE_SMALL);
+          if (flipY * flipY < 16) clientView.changeToSmall();
       }
       return true;
     });

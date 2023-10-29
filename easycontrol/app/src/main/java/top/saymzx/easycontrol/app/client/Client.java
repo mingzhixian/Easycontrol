@@ -1,7 +1,10 @@
 package top.saymzx.easycontrol.app.client;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
@@ -17,8 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 import top.saymzx.easycontrol.adb.Adb;
 import top.saymzx.easycontrol.adb.AdbStream;
-import top.saymzx.easycontrol.app.FullActivity;
 import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.client.view.ClientView;
+import top.saymzx.easycontrol.app.client.view.FullActivity;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 
@@ -26,23 +30,32 @@ public class Client {
   private final ExecutorService executor = new ThreadPoolExecutor(3, 15, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new CustomThreadFactory(), new ThreadPoolExecutor.CallerRunsPolicy());
 
   // 连接
-  private Adb adb;
-  private AdbStream stream;
+  public Adb adb;
+  public AdbStream stream;
+
+  private final WifiManager.WifiLock wifiLock;
 
   // 子服务
-  VideoDecode videoDecode;
-  AudioDecode audioDecode;
-  Controller controller;
+  public VideoDecode videoDecode;
+  public AudioDecode audioDecode;
+  public Controller controller;
 
   private final ClientView clientView = new ClientView(this);
 
   // 是否正常解码播放
-  boolean isNormalPlay = true;
+  public boolean isNormalPlay = true;
+
+  private final Dialog dialog = AppData.publicTools.createClientLoading(AppData.main, () -> clientView.hide(true));
 
   public Client(Device device, UsbDevice usbDevice) {
-    Dialog dialog = AppData.publicTools.createClientLoading(AppData.main, () -> handleEvent(Event_CLOSE));
+    // 显示加载框
     dialog.show();
+    // 设置剪切板的其余服务的检查时间
     videoOutLoopNum = videoOutLoopNumLimit = device.maxFps;
+    // 索取高性能wifi锁(非wifi情况会忽略本设置)
+    wifiLock = ((WifiManager) AppData.main.getApplicationContext().getSystemService(Context.WIFI_SERVICE)).createWifiLock(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? WifiManager.WIFI_MODE_FULL_LOW_LATENCY : WifiManager.WIFI_MODE_FULL_HIGH_PERF, "easycontrol");
+    wifiLock.acquire();
+    // 启动Client
     new Thread(() -> {
       try {
         // 连接ADB
@@ -55,10 +68,6 @@ public class Client {
         connectServer();
         // 创建子服务
         createSubService();
-        // 启动子服务
-        executor.execute(this::executeVideoDecodeOut);
-        if (audioDecode != null) executor.execute(this::executeAudioDecodeOut);
-        executor.execute(this::executeStreamIn);
         // 更新UI
         AppData.main.runOnUiThread(dialog::cancel);
         createUI();
@@ -68,10 +77,9 @@ public class Client {
         }
       } catch (Exception e) {
         AppData.main.runOnUiThread(() -> {
-          if (dialog.isShowing()) dialog.cancel();
           Toast.makeText(AppData.main, e.toString(), Toast.LENGTH_SHORT).show();
           Log.e("easycontrol", e.toString());
-          handleEvent(Event_CLOSE);
+          clientView.hide(true);
         });
       }
     }).start();
@@ -81,11 +89,11 @@ public class Client {
   private void connectADB(Device device, UsbDevice usbDevice) throws Exception {
     executor.execute(() -> {
       try {
-        // 连接和授权总共超时时间为10秒
-        Thread.sleep(10000);
-        if (adb == null) handleEvent(Event_CLOSE);
+        // 连接和授权总共超时时间为5秒
+        Thread.sleep(5000);
+        if (adb == null) throw new InterruptedException("连接ADB错误");
       } catch (InterruptedException ignored) {
-        handleEvent(Event_CLOSE);
+        AppData.main.runOnUiThread(() -> clientView.hide(true));
       }
     });
     if (usbDevice == null) {
@@ -127,7 +135,7 @@ public class Client {
         " video_bit_rate=" + device.maxVideoBit +
         " turn_off_screen=" + (AppData.setting.getSlaveTurnOffScreen() ? 1 : 0) +
         " set_width=" + setWidth +
-        " set_Height=" + setHeight +
+        " set_height=" + setHeight +
         " > /dev/null 2>&1 & ", false);
     } catch (Exception ignored) {
       throw new Exception("启动Server失败");
@@ -167,15 +175,25 @@ public class Client {
         audioDecode = new AudioDecode(csd0);
       }
       // 控制
-      controller = new Controller(this::handleEvent, stream);
+      controller = new Controller(clientView, stream);
     } catch (Exception e) {
       throw new Exception("启动Client失败" + e);
     }
   }
 
+  public void startSubService() {
+    // 启动子服务
+    executor.execute(this::executeVideoDecodeOut);
+    if (audioDecode != null) executor.execute(this::executeAudioDecodeOut);
+    executor.execute(this::executeStreamIn);
+  }
+
   // 创建UI
   private void createUI() {
-    handleEvent(AppData.setting.getDefaultFull() ? Event_CHANGE_FULL : Event_CHANGE_SMALL);
+    AppData.main.runOnUiThread(() -> {
+      if (AppData.setting.getDefaultFull()) clientView.changeToFull();
+      else clientView.changeToSmall();
+    });
   }
 
   // 服务分发
@@ -184,15 +202,14 @@ public class Client {
       boolean hasData = true;
       while (hasData) {
         switch (stream.readByte()) {
-          case 0:
-
           case 1:
             ByteBuffer videoFrame = readFrame();
+            // 视频因在界面旋转时会重新生成配置参数，因此此处仍需解码，只是不再显示，音频则可以直接停止解码
             executor.execute(() -> videoDecode.decodeIn(videoFrame));
             break;
           case 2:
             ByteBuffer audioFrame = readFrame();
-            executor.execute(() -> audioDecode.decodeIn(audioFrame));
+            if (isNormalPlay) executor.execute(() -> audioDecode.decodeIn(audioFrame));
             break;
           case 3:
             controller.handleClipboardEvent();
@@ -205,7 +222,7 @@ public class Client {
       }
       executor.execute(this::executeStreamIn);
     } catch (IOException | InterruptedException ignored) {
-      handleEvent(Event_CLOSE);
+      AppData.main.runOnUiThread(() -> clientView.hide(true));
     }
   }
 
@@ -219,15 +236,11 @@ public class Client {
       controller.checkClipBoard();
       videoOutLoopNum = 0;
     }
-    if (clientView.touchTime < 30) {
-      adb.sendMoreOk(stream);
-      clientView.touchTime++;
-    }
     executor.execute(this::executeVideoDecodeOut);
   }
 
   private void executeAudioDecodeOut() {
-    audioDecode.decodeOut(isNormalPlay);
+    audioDecode.decodeOut();
     executor.execute(this::executeAudioDecodeOut);
   }
 
@@ -235,49 +248,10 @@ public class Client {
     return stream.readByteArray(stream.readInt());
   }
 
-  public static final int Event_CHANGE_FULL = 1;
-  public static final int Event_CHANGE_SMALL = 2;
-  public static final int Event_CHANGE_MINI = 3;
-  public static final int Event_CHANGE_ROTATION = 4;
-  public static final int Event_UPDATE_SURFACE = 5;
-  public static final int Event_UPDATE_SURFACE_SIZE = 6;
-  public static final int Event_CLOSE = 7;
-
-  public void handleEvent(int arg) {
-    AppData.main.runOnUiThread(() -> {
-      switch (arg) {
-        case Event_CHANGE_FULL:
-          clientView.changeToFull();
-          break;
-        case Event_CHANGE_SMALL:
-          clientView.changeToSmall();
-          break;
-        case Event_CHANGE_MINI:
-          clientView.changeToMini();
-          break;
-        case Event_CHANGE_ROTATION:
-          clientView.changeRotation();
-          break;
-        case Event_UPDATE_SURFACE:
-          clientView.updateSurface();
-          break;
-        case Event_UPDATE_SURFACE_SIZE:
-          clientView.updateSurfaceSize();
-          break;
-        case Event_CLOSE:
-          clientView.hide();
-          release();
-          break;
-      }
-    });
-  }
-
-  public interface MyFunctionInt {
-    void handleEvent(int arg);
-  }
-
-  private void release() {
+  public void release() {
+    if (dialog.isShowing()) dialog.cancel();
     executor.shutdownNow();
+    if (wifiLock.isHeld()) wifiLock.release();
     if (adb != null) adb.close();
     if (videoDecode != null) videoDecode.release();
     if (audioDecode != null) audioDecode.release();
