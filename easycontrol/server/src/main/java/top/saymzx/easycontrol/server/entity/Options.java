@@ -4,6 +4,7 @@
 package top.saymzx.easycontrol.server.entity;
 
 public final class Options {
+  public static boolean isAudio;
   public static int maxSize;
   public static int videoBitRate;
   public static int maxFps;
@@ -20,6 +21,9 @@ public final class Options {
       String key = arg.substring(0, equalIndex);
       String value = arg.substring(equalIndex + 1);
       switch (key) {
+        case "is_audio":
+          isAudio = Integer.parseInt(value) == 1;
+          break;
         case "max_size":
           maxSize = Integer.parseInt(value) & ~7;
           break;

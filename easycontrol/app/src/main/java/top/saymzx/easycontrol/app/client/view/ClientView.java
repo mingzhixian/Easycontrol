@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client.view;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -104,7 +105,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   private void setTouchListener() {
     // 视频触摸控制
     int[] pointerList = new int[20];
-    textureView.setOnTouchListener((v, event) -> {
+    textureView.setOnTouchListener((view, event) -> {
       // 处理触摸事件
       int action = event.getActionMasked();
       if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {

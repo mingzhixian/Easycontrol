@@ -50,8 +50,6 @@ public class Client {
   public Client(Device device, UsbDevice usbDevice) {
     // 显示加载框
     dialog.show();
-    // 设置剪切板的其余服务的检查时间
-    videoOutLoopNum = videoOutLoopNumLimit = device.maxFps;
     // 索取高性能wifi锁(非wifi情况会忽略本设置)
     wifiLock = ((WifiManager) AppData.main.getApplicationContext().getSystemService(Context.WIFI_SERVICE)).createWifiLock(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? WifiManager.WIFI_MODE_FULL_LOW_LATENCY : WifiManager.WIFI_MODE_FULL_HIGH_PERF, "easycontrol");
     wifiLock.acquire();
@@ -129,6 +127,7 @@ public class Client {
         setHeight = tmpDeviceSize.second;
       }
       adb.runAdbCmd("CLASSPATH=/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar app_process / top.saymzx.easycontrol.server.Server" +
+        " is_audio=" + (device.isAudio ? 1 : 0) +
         " max_size=" + device.maxSize +
         " max_fps=" + device.maxFps +
         " video_bit_rate=" + device.maxVideoBit +
@@ -180,11 +179,12 @@ public class Client {
     }
   }
 
+  // 启动子服务
   public void startSubService() {
-    // 启动子服务
     executor.execute(this::executeVideoDecodeOut);
     if (audioDecode != null) executor.execute(this::executeAudioDecodeOut);
     executor.execute(this::executeStreamIn);
+    executor.execute(this::executeOtherService);
   }
 
   // 创建UI
@@ -225,22 +225,25 @@ public class Client {
     }
   }
 
-  private int videoOutLoopNum;
-  private final int videoOutLoopNumLimit;
-
   private void executeVideoDecodeOut() {
     videoDecode.decodeOut(isNormalPlay);
-    videoOutLoopNum++;
-    if (videoOutLoopNum > videoOutLoopNumLimit) {
-      controller.checkClipBoard();
-      videoOutLoopNum = 0;
-    }
     executor.execute(this::executeVideoDecodeOut);
   }
 
   private void executeAudioDecodeOut() {
     audioDecode.decodeOut();
     executor.execute(this::executeAudioDecodeOut);
+  }
+
+  private void executeOtherService() {
+    controller.checkClipBoard();
+    controller.sendKeepAlive();
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      clientView.hide(true);
+    }
+    executor.execute(this::executeOtherService);
   }
 
   private ByteBuffer readFrame() throws InterruptedException, IOException {

@@ -79,22 +79,16 @@ public final class Server {
         audioInThread.interrupt();
         audioOutThread.interrupt();
       }
-      // 恢复分辨率
-      if (Options.setWidth != -1)
-        try {
-          new ProcessBuilder().command("sh", "-c", "wm size reset").start();
-        } catch (Exception ignored) {
-        }
     } catch (Exception ignored) {
     } finally {
       // 释放资源
-      stop();
+      release();
     }
   }
 
   // 关闭
-  private static void stop() {
-    for (int i = 0; i < 5; i++) {
+  private static void release() {
+    for (int i = 0; i < 6; i++) {
       try {
         switch (i) {
           case 0:
@@ -102,16 +96,22 @@ public final class Server {
             socket.close();
             break;
           case 1:
+            // 恢复分辨率
+            if (Options.setWidth != -1) try {
+              new ProcessBuilder().command("sh", "-c", "wm size reset").start();
+            } catch (Exception ignored) {
+            }
+          case 2:
             SurfaceControl.destroyDisplay(VideoEncode.display);
             break;
-          case 2:
+          case 3:
             Controller.checkScreenOff(false);
             break;
-          case 3:
+          case 4:
             VideoEncode.encedec.stop();
             VideoEncode.encedec.release();
             break;
-          case 4:
+          case 5:
             AudioEncode.audioCapture.stop();
             AudioEncode.audioCapture.release();
             AudioEncode.encedec.stop();
@@ -216,6 +216,8 @@ public final class Server {
     try {
       while (!Thread.interrupted()) {
         Controller.checkScreenOff(true);
+        if (System.currentTimeMillis() - Controller.lastKeepAliveTime > 1000 * 5)
+          throw new IOException("连接断开");
         Thread.sleep(1000);
       }
     } catch (Exception ignored) {

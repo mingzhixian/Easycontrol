@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
   // 添加设备监听
   private void setAddDeviceListener() {
     mainActivity.masterAdd.setOnClickListener(v -> {
-      Dialog dialog = AppData.publicTools.createAddDeviceView(this, new Device(null, "", "", AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution()), deviceListAdapter);
+      Dialog dialog = AppData.publicTools.createAddDeviceView(this, new Device(null, "", "",AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution()), deviceListAdapter);
       dialog.show();
     });
   }
@@ -135,7 +135,7 @@ public class MainActivity extends Activity {
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
             mainActivity.linkedDevice.setVisibility(View.VISIBLE);
             // 有线设备参数为默认参数
-            Device device = new Device(null, "", "", AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution());
+            Device device = new Device(null, "", "",AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution());
             // 设置监听
             mainActivity.linkedDevice.setOnClickListener(view -> new Client(device, usbDevice));
           }
