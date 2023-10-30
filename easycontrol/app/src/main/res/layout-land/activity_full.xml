@@ -8,54 +8,69 @@
   tools:context=".client.view.FullActivity">
 
   <LinearLayout
-    android:id="@+id/texture_view_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginEnd="35dp"
-    android:gravity="center"
     android:orientation="horizontal">
 
+    <LinearLayout
+      android:id="@+id/texture_view_layout"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:orientation="horizontal" />
+
+    <LinearLayout
+      android:id="@+id/nav_bar"
+      android:layout_width="35dp"
+      android:layout_height="match_parent"
+      android:layout_gravity="end"
+      android:gravity="center"
+      android:orientation="vertical"
+      android:paddingTop="40dp">
+
+      <ImageView
+        android:id="@+id/button_switch"
+        android:layout_width="26dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/menu"
+        android:tint="#fff" />
+
+      <ImageView
+        android:id="@+id/button_home"
+        android:layout_width="26dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/home"
+        android:tint="#fff" />
+
+      <ImageView
+        android:id="@+id/button_back"
+        android:layout_width="26dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/back"
+        android:tint="#fff" />
+
+      <ImageView
+        android:id="@+id/button_more"
+        android:layout_width="26dp"
+        android:layout_height="40dp"
+        android:src="@drawable/more"
+        android:tint="#fff" />
+
+    </LinearLayout>
   </LinearLayout>
 
-  <LinearLayout
-    android:layout_width="35dp"
-    android:layout_height="match_parent"
-    android:layout_gravity="end"
-    android:gravity="center"
-    android:orientation="vertical">
-
-    <ImageView
-      android:id="@+id/button_switch"
-      android:layout_width="26dp"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:src="@drawable/menu"
-      android:tint="#fff" />
-
-    <ImageView
-      android:id="@+id/button_home"
-      android:layout_width="26dp"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:src="@drawable/home"
-      android:tint="#fff" />
-
-    <ImageView
-      android:id="@+id/button_back"
-      android:layout_width="26dp"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:src="@drawable/back"
-      android:tint="#fff" />
-
-    <ImageView
-      android:id="@+id/button_more"
-      android:layout_width="26dp"
-      android:layout_height="26dp"
-      android:layout_marginBottom="10dp"
-      android:src="@drawable/more"
-      android:tint="#fff" />
-  </LinearLayout>
+  <ImageView
+    android:id="@+id/bar"
+    android:layout_width="50dp"
+    android:layout_height="20dp"
+    android:layout_gravity="end|top"
+    android:src="@drawable/full_bar_land"
+    android:visibility="gone"
+    android:tint="@color/clientBar" />
 
   <GridLayout
     android:id="@+id/bar_view"

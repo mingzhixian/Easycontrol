@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.content.ClipData;
+import android.view.MotionEvent;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,7 +50,14 @@ public class Controller {
 
   // 发送触摸事件
   public void sendTouchEvent(int action, int p, float x, float y) {
-    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    if (x < 0 || x > 1 || y < 0 || y > 1) {
+      // 超出范围则改为抬起事件
+      if (x < 0) x = 0;
+      if (x > 1) x = 1;
+      if (y < 0) y = 0;
+      if (y > 1) y = 1;
+      action = MotionEvent.ACTION_UP;
+    }
     ByteBuffer byteBuffer = ByteBuffer.allocate(11);
     // 触摸事件
     byteBuffer.put((byte) 1);
@@ -85,6 +93,11 @@ public class Controller {
     byteBuffer.put(tmpTextByte);
     byteBuffer.flip();
     writeStream(byteBuffer);
+  }
+
+  // 发送心跳包
+  public void sendKeepAlive() {
+    writeStream(ByteBuffer.wrap(new byte[]{4}));
   }
 
   private void writeStream(ByteBuffer byteBuffer) {

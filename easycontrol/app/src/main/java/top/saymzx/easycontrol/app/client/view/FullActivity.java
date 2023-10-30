@@ -116,6 +116,18 @@ public class FullActivity extends Activity {
     fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, AppData.publicTools.dp2px(40f)));
+    fullActivity.buttonMore.setOnLongClickListener(v -> {
+      setNavBarHide();
+      return true;
+    });
+    fullActivity.bar.setOnClickListener(v -> setNavBarHide());
+  }
+
+  // 导航栏隐藏
+  private void setNavBarHide() {
+    boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
+    fullActivity.bar.setVisibility(isShow ? View.GONE : View.VISIBLE);
+    fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
   }
 
 }
