@@ -7,6 +7,15 @@ public final class Setting {
 
   private final SharedPreferences.Editor editor;
 
+  public boolean getDefaultIsAudio() {
+    return sharedPreferences.getBoolean("defaultIsAudio", true);
+  }
+
+  public void setDefaultIsAudio(boolean value) {
+    editor.putBoolean("defaultIsAudio", value);
+    editor.apply();
+  }
+
   public int getDefaultMaxSize() {
     return sharedPreferences.getInt("defaultMaxSize", 1600);
   }

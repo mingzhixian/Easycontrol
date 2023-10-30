@@ -10,8 +10,8 @@ android {
         applicationId "top.saymzx.easycontrol.app"
         minSdk 23
         targetSdk 33
-        versionCode 10007
-        versionName "1.0.7_dev"
+        versionCode 10008
+        versionName "1.0.8_dev"
         resConfigs "zh"
         resConfigs "xhdpi"
     }

@@ -91,8 +91,9 @@ public class PublicTools {
     ItemAddDeviceBinding itemAddDeviceBinding = ItemAddDeviceBinding.inflate(LayoutInflater.from(context));
     Dialog dialog = createDialog(context, true, itemAddDeviceBinding.getRoot());
     // 设置值
-    itemAddDeviceBinding.addDeviceName.setText(device.name);
-    itemAddDeviceBinding.addDeviceAddress.setText(device.address);
+    itemAddDeviceBinding.name.setText(device.name);
+    itemAddDeviceBinding.address.setText(device.address);
+    itemAddDeviceBinding.isAudio.setChecked(device.isAudio);
     // 创建View
     ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, maxSizeList);
     ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, maxFpsList);
@@ -101,18 +102,19 @@ public class PublicTools {
     ItemSpinnerBinding maxFps = createSpinnerCard(context, "最大帧率", maxFpsAdapter, device.maxFps.toString(), null);
     ItemSpinnerBinding maxVideoBit = createSpinnerCard(context, "最大码率", videoBitAdapter, device.maxVideoBit.toString(), null);
     ItemSwitchBinding setResolution = createSwitchCard(context, "修改分辨率", device.setResolution, null);
-    itemAddDeviceBinding.addDeviceOptions.addView(maxSize.getRoot());
-    itemAddDeviceBinding.addDeviceOptions.addView(maxFps.getRoot());
-    itemAddDeviceBinding.addDeviceOptions.addView(maxVideoBit.getRoot());
-    itemAddDeviceBinding.addDeviceOptions.addView(setResolution.getRoot());
+    itemAddDeviceBinding.options.addView(maxSize.getRoot());
+    itemAddDeviceBinding.options.addView(maxFps.getRoot());
+    itemAddDeviceBinding.options.addView(maxVideoBit.getRoot());
+    itemAddDeviceBinding.options.addView(setResolution.getRoot());
     // 是否显示高级选项
-    itemAddDeviceBinding.addDeviceIsOptions.setOnClickListener(v -> itemAddDeviceBinding.addDeviceOptions.setVisibility(itemAddDeviceBinding.addDeviceIsOptions.isChecked() ? View.VISIBLE : View.GONE));
+    itemAddDeviceBinding.isOptions.setOnClickListener(v -> itemAddDeviceBinding.options.setVisibility(itemAddDeviceBinding.isOptions.isChecked() ? View.VISIBLE : View.GONE));
     // 设置确认按钮监听
-    itemAddDeviceBinding.addDeviceOk.setOnClickListener(v -> {
+    itemAddDeviceBinding.ok.setOnClickListener(v -> {
       Device newDevice = new Device(
         device.id,
-        itemAddDeviceBinding.addDeviceName.getText().toString(),
-        itemAddDeviceBinding.addDeviceAddress.getText().toString(),
+        itemAddDeviceBinding.name.getText().toString(),
+        itemAddDeviceBinding.address.getText().toString(),
+        itemAddDeviceBinding.isAudio.isChecked(),
         Integer.parseInt(maxSize.itemSpinnerSpinner.getSelectedItem().toString()),
         Integer.parseInt(maxFps.itemSpinnerSpinner.getSelectedItem().toString()),
         Integer.parseInt(maxVideoBit.itemSpinnerSpinner.getSelectedItem().toString()),

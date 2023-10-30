@@ -59,9 +59,9 @@ public final class VideoEncode {
 
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
-    encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
+    encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
+    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2);
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
     // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
     if (tryCbr)

@@ -14,6 +14,7 @@ import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.server.Server;
+import top.saymzx.easycontrol.server.entity.Options;
 
 public final class AudioEncode {
   public static MediaCodec encedec;
@@ -22,8 +23,9 @@ public final class AudioEncode {
   public static boolean init() throws IOException, ErrnoException {
     byte[] bytes = new byte[]{0};
     try {
-      // 从安卓12开始支持
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) throw new Exception("版本低");
+      // 从安卓12开始支持音频
+      if (!Options.isAudio || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+        throw new Exception("版本低");
       setAudioEncodec();
       encedec.start();
       audioCapture = AudioCapture.init();
@@ -43,7 +45,7 @@ public final class AudioEncode {
     encedec = MediaCodec.createEncoderByType(codecMime);
     MediaFormat encodecFormat = new MediaFormat();
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
-    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 64000);
+    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
     encodecFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, AudioCapture.CHANNELS);
     encodecFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, AudioCapture.SAMPLE_RATE);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
@@ -69,6 +71,7 @@ public final class AudioEncode {
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
+      // opus需要做此处理
       if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
         buffer.getLong();
         int size = (int) buffer.getLong();
