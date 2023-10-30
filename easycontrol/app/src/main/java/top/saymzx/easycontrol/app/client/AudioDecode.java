@@ -40,10 +40,9 @@ public class AudioDecode {
       int inIndex = audioDecodec.dequeueInputBuffer(0);
       // 缓冲区已满丢帧
       if (inIndex < 0) return;
-      int size = data.remaining();
       audioDecodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
-      audioDecodec.queueInputBuffer(inIndex, 0, size, 0, 0);
+      audioDecodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
     } catch (IllegalStateException ignored) {
     }
   }
@@ -69,7 +68,7 @@ public class AudioDecode {
     // 音频参数
     int sampleRate = 48000;
     int channelCount = 2;
-    int bitRate = 64000;
+    int bitRate = 96000;
     MediaFormat mediaFormat = MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount);
     mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头

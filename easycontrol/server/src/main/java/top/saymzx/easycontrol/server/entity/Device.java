@@ -63,8 +63,8 @@ public final class Device {
 
       MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
       coords.orientation = 0;
-      coords.size = 0;
-      coords.pressure = 0;
+      coords.size = 0.01f;
+      coords.pressure = 1f;
 
       pointerProperties[i] = props;
       pointerCoords[i] = coords;
@@ -96,13 +96,13 @@ public final class Device {
   }
 
   private static void computeVideoSize() {
-    // h264只接受16的倍数，所以需要缩放至最近参数
+    // h264只接受8的倍数，所以需要缩放至最近参数
     boolean isPortrait = deviceSize.first < deviceSize.second;
     int major = isPortrait ? deviceSize.second : deviceSize.first;
     int minor = isPortrait ? deviceSize.first : deviceSize.second;
     if (major > Options.maxSize) {
       int minorExact = minor * Options.maxSize / major;
-      minor = minorExact + 8 & ~15;
+      minor = minorExact + 4 & ~7;
       major = Options.maxSize;
     }
     videoSize = isPortrait ? new Pair<>(minor, major) : new Pair<>(major, minor);

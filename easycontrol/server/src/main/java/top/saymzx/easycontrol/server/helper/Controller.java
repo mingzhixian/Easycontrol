@@ -27,6 +27,8 @@ public final class Controller {
         case 3:
           handleClipboardEvent();
           break;
+        case 4:
+          handleKeepAlive();
       }
       hasData = Server.streamIn.available() > 0;
     }
@@ -53,7 +55,13 @@ public final class Controller {
     Device.setClipboardText(text);
   }
 
-  public static void checkScreenOff(boolean turnOn) throws IOException {
+  public static long lastKeepAliveTime = System.currentTimeMillis();
+
+  private static void handleKeepAlive() {
+    lastKeepAliveTime = System.currentTimeMillis();
+  }
+
+  public static void checkScreenOff(boolean turnOn) {
     try {
       Process process = new ProcessBuilder().command("sh", "-c", "dumpsys deviceidle | grep mScreenOn").start();
       boolean isScreenOn = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine().contains("mScreenOn=true");

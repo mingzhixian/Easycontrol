@@ -23,7 +23,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t id integer PRIMARY KEY AUTOINCREMENT,\n" + "\t name text,\n" + "\t address text,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer" + ")");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t id integer PRIMARY KEY AUTOINCREMENT,\n" + "\t name text,\n" + "\t address text,\n"+ "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer" + ")");
   }
 
   @SuppressLint("Range")
@@ -72,6 +72,7 @@ public class DbHelper extends SQLiteOpenHelper {
     ContentValues values = new ContentValues();
     values.put("id", device.id);
     values.put("name", device.name);
+    values.put("isAudio", device.isAudio);
     values.put("address", device.address);
     values.put("maxSize", device.maxSize);
     values.put("maxFps", device.maxFps);
@@ -86,6 +87,7 @@ public class DbHelper extends SQLiteOpenHelper {
       cursor.getInt(cursor.getColumnIndex("id")),
       cursor.getString(cursor.getColumnIndex("name")),
       cursor.getString(cursor.getColumnIndex("address")),
+      cursor.getInt(cursor.getColumnIndex("isAudio")) == 1,
       cursor.getInt(cursor.getColumnIndex("maxSize")),
       cursor.getInt(cursor.getColumnIndex("maxFps")),
       cursor.getInt(cursor.getColumnIndex("maxVideoBit")),
