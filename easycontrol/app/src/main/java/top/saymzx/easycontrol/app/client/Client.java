@@ -107,12 +107,12 @@ public class Client {
     // 尝试发送Server
     try {
       if (BuildConfig.ENABLE_DEBUG_FEATURE) {
-        adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar");
+        adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/" + AppData.serverName);
       } else {
         for (int i = 0; i < 3; i++) {
           String isHaveServer = adb.runAdbCmd("ls -l /data/local/tmp/easycontrol_*", true);
-          if (isHaveServer.contains("easycontrol_server_" + AppData.versionCode + ".jar")) return;
-          adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar");
+          if (isHaveServer.contains(AppData.serverName)) return;
+          adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/" + AppData.serverName);
         }
       }
     } catch (Exception ignored) {
@@ -130,7 +130,7 @@ public class Client {
         setWidth = tmpDeviceSize.first;
         setHeight = tmpDeviceSize.second;
       }
-      adb.runAdbCmd("CLASSPATH=/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar app_process / top.saymzx.easycontrol.server.Server" +
+      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" +
         " is_audio=" + (device.isAudio ? 1 : 0) +
         " max_size=" + device.maxSize +
         " max_fps=" + device.maxFps +

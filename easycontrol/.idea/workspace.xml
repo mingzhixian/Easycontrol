@@ -325,6 +325,27 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="copyRelease" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -347,27 +368,6 @@
       <method v="2" />
     </configuration>
     <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="copyRelease" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
@@ -412,19 +412,19 @@
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
       <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
         <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
       </list>
     </recent_temporary>
   </component>

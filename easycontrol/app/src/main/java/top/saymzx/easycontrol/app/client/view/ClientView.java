@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app.client.view;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
-import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
