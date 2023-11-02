@@ -8,14 +8,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Toast;
 
@@ -103,7 +100,7 @@ public class MainActivity extends Activity {
   // 添加设备监听
   private void setAddDeviceListener() {
     mainActivity.masterAdd.setOnClickListener(v -> {
-      Dialog dialog = AppData.publicTools.createAddDeviceView(this, new Device(null, "", "",AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution()), deviceListAdapter);
+      Dialog dialog = AppData.publicTools.createAddDeviceView(this, Device.getDefaultDevice(), deviceListAdapter);
       dialog.show();
     });
   }
@@ -128,17 +125,15 @@ public class MainActivity extends Activity {
         }
         // USB设备已拔出
         case UsbManager.ACTION_USB_DEVICE_DETACHED: {
-          mainActivity.linkedDevice.setVisibility(View.GONE);
+          mainActivity.linkedDevice.getRoot().setVisibility(View.GONE);
           break;
         }
         // 授权完成
         case ACTION_USB_PERMISSION: {
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            mainActivity.linkedDevice.setVisibility(View.VISIBLE);
-            // 有线设备参数为默认参数
-            Device device = new Device(null, "", "",AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution());
+            mainActivity.linkedDevice.getRoot().setVisibility(View.VISIBLE);
             // 设置监听
-            mainActivity.linkedDevice.setOnClickListener(view -> new Client(device, usbDevice));
+            mainActivity.linkedDevice.getRoot().setOnClickListener(view -> new Client(Device.getDefaultDevice(), usbDevice));
           }
           break;
         }

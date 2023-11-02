@@ -51,7 +51,6 @@ public class DeviceListAdapter extends BaseAdapter {
     Device device = devices.get(i);
     // 设置卡片值
     devicesItemBinding.deviceName.setText(device.name);
-    devicesItemBinding.deviceAddress.setText(device.address);
     // 单击事件
     devicesItemBinding.getRoot().setOnClickListener(v -> new Client(device, null));
     // 长按事件

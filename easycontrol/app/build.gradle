@@ -10,8 +10,8 @@ android {
         applicationId "top.saymzx.easycontrol.app"
         minSdk 23
         targetSdk 33
-        versionCode 10010
-        versionName "1.0.10"
+        versionCode 10011
+        versionName "1.0.11"
         resConfigs "zh"
         resConfigs "xhdpi"
         ndk {
@@ -24,7 +24,7 @@ android {
     }
 
     buildTypes {
-        debug  {
+        debug {
             buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "true"
             debuggable true
         }

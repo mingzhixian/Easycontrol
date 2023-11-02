@@ -28,4 +28,8 @@ public class Device {
     this.maxVideoBit = maxVideoBit;
     this.setResolution = setResolution;
   }
+
+  public static Device getDefaultDevice() {
+    return new Device(null, "", "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution());
+  }
 }

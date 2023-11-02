@@ -80,15 +80,16 @@ public final class Device {
   }
 
   private static void computeVideoSize() {
-    // h264只接受8的倍数，所以需要缩放至最近参数
     boolean isPortrait = deviceSize.first < deviceSize.second;
     int major = isPortrait ? deviceSize.second : deviceSize.first;
     int minor = isPortrait ? deviceSize.first : deviceSize.second;
     if (major > Options.maxSize) {
-      int minorExact = minor * Options.maxSize / major;
-      minor = minorExact + 4 & ~7;
+      minor = minor * Options.maxSize / major;
       major = Options.maxSize;
     }
+    // h264只接受8的倍数，所以需要缩放至最近参数
+    minor = minor + 4 & ~7;
+    major = major + 4 & ~7;
     videoSize = isPortrait ? new Pair<>(minor, major) : new Pair<>(major, minor);
   }
 
