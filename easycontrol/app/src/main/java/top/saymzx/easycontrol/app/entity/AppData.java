@@ -18,7 +18,7 @@ public class AppData {
   public static Activity main;
 
   // 公共工具库
-  public static PublicTools publicTools;
+  public static PublicTools publicTools = new PublicTools();
 
   // 数据库工具
   public static DbHelper dbHelper;
@@ -36,16 +36,14 @@ public class AppData {
   public static Setting setting;
 
   // 当前版本号
-  public static int versionCode;
+  public static int versionCode = BuildConfig.VERSION_CODE;
 
   public static void init(Activity m) {
     main = m;
-    publicTools = new PublicTools();
     dbHelper = new DbHelper(main);
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
     usbManager = (UsbManager) main.getSystemService(Context.USB_SERVICE);
     setting = new Setting(main.getSharedPreferences("setting", Context.MODE_PRIVATE));
-    versionCode = BuildConfig.VERSION_CODE;
     // 读取密钥文件
     try {
       File privateKey = new File(main.getApplicationContext().getFilesDir(), "private.key");

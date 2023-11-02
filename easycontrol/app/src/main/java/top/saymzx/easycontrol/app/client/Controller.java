@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.content.ClipData;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import java.io.IOException;
@@ -98,6 +99,11 @@ public class Controller {
   // 发送心跳包
   public void sendKeepAlive() {
     writeStream(ByteBuffer.wrap(new byte[]{4}));
+  }
+
+  // 发送按键事件
+  public void sendPowerEvent() {
+    writeStream(ByteBuffer.wrap(new byte[]{5}));
   }
 
   private void writeStream(ByteBuffer byteBuffer) {

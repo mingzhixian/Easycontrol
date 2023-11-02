@@ -38,7 +38,7 @@ public class FullActivity extends Activity {
     // 隐藏工具栏
     fullActivity.barView.setVisibility(View.GONE);
     // 旋转
-    int rotation = FullActivity.isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    int rotation = isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
     if (rotation != getRequestedOrientation()) {
       setRequestedOrientation(rotation);
       return;
@@ -48,7 +48,7 @@ public class FullActivity extends Activity {
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
     Pair<Integer, Integer> maxSize = getScreenSizeWithoutDock();
-    clientView.updateTextureViewSize(FullActivity.isPortrait ? maxSize : new Pair<>(maxSize.second, maxSize.first));
+    clientView.updateTextureViewSize(isPortrait ? maxSize : new Pair<>(maxSize.second, maxSize.first));
   }
 
   @Override
@@ -115,18 +115,17 @@ public class FullActivity extends Activity {
     fullActivity.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
+    fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
+    fullActivity.buttonToLine.setOnClickListener(v -> setNavBarHide());
     fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, AppData.publicTools.dp2px(40f)));
-    fullActivity.buttonMore.setOnLongClickListener(v -> {
-      setNavBarHide();
-      return true;
-    });
-    fullActivity.bar.setOnClickListener(v -> setNavBarHide());
+    fullActivity.line.setOnClickListener(v -> setNavBarHide());
   }
 
   // 导航栏隐藏
   private void setNavBarHide() {
+    clientView.changeBarViewAnim(fullActivity.barView, AppData.publicTools.dp2px(40f));
     boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
-    fullActivity.bar.setVisibility(isShow ? View.GONE : View.VISIBLE);
+    fullActivity.line.setVisibility(isShow ? View.GONE : View.VISIBLE);
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
   }
 
