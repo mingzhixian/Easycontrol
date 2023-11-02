@@ -1,10 +1,7 @@
 package top.saymzx.easycontrol.app.client;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.hardware.usb.UsbDevice;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
@@ -20,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import top.saymzx.easycontrol.adb.Adb;
 import top.saymzx.easycontrol.adb.AdbStream;
+import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.client.view.FullActivity;
@@ -32,8 +30,6 @@ public class Client {
   // 连接
   public Adb adb;
   public AdbStream stream;
-
-  private final WifiManager.WifiLock wifiLock;
 
   // 子服务
   public VideoDecode videoDecode;
@@ -48,11 +44,16 @@ public class Client {
   private final Dialog dialog = AppData.publicTools.createClientLoading(AppData.main, () -> clientView.hide(true));
 
   public Client(Device device, UsbDevice usbDevice) {
+//    try {
+//      UsbChannel usbChannel=new UsbChannel(usbDevice);
+//      usbChannel.write(new byte[]{1});
+//      byte[] bytes=usbChannel.read(1);
+//      Log.e("sdsd", Arrays.toString(bytes));
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
     // 显示加载框
     dialog.show();
-    // 索取高性能wifi锁(非wifi情况会忽略本设置)
-    wifiLock = ((WifiManager) AppData.main.getApplicationContext().getSystemService(Context.WIFI_SERVICE)).createWifiLock(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? WifiManager.WIFI_MODE_FULL_LOW_LATENCY : WifiManager.WIFI_MODE_FULL_HIGH_PERF, "easycontrol");
-    wifiLock.acquire();
     // 启动Client
     new Thread(() -> {
       try {
@@ -89,10 +90,9 @@ public class Client {
       try {
         // 连接和授权总共超时时间为5秒
         Thread.sleep(5000);
-        if (adb == null) throw new InterruptedException("连接ADB错误");
       } catch (InterruptedException ignored) {
-        AppData.main.runOnUiThread(() -> clientView.hide(true));
       }
+      if (adb == null) AppData.main.runOnUiThread(() -> clientView.hide(true));
     });
     if (usbDevice == null) {
       Pair<String, Integer> address = AppData.publicTools.getIpAndPort(device.address);
@@ -106,10 +106,14 @@ public class Client {
   private void sendServer() throws Exception {
     // 尝试发送Server
     try {
-      for (int i = 0; i < 3; i++) {
-        String isHaveServer = adb.runAdbCmd("ls -l /data/local/tmp/easycontrol_*", true);
-        if (isHaveServer.contains("easycontrol_server_" + AppData.versionCode + ".jar")) return;
+      if (BuildConfig.ENABLE_DEBUG_FEATURE) {
         adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar");
+      } else {
+        for (int i = 0; i < 3; i++) {
+          String isHaveServer = adb.runAdbCmd("ls -l /data/local/tmp/easycontrol_*", true);
+          if (isHaveServer.contains("easycontrol_server_" + AppData.versionCode + ".jar")) return;
+          adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/easycontrol_server_" + AppData.versionCode + ".jar");
+        }
       }
     } catch (Exception ignored) {
       throw new Exception("发送Server失败");
@@ -132,6 +136,7 @@ public class Client {
         " max_fps=" + device.maxFps +
         " video_bit_rate=" + device.maxVideoBit +
         " turn_off_screen=" + (AppData.setting.getSlaveTurnOffScreen() ? 1 : 0) +
+        " auto_control_screen=" + (AppData.setting.getAutoControlScreen() ? 1 : 0) +
         " set_width=" + setWidth +
         " set_height=" + setHeight +
         " > /dev/null 2>&1 & ", false);
@@ -253,7 +258,6 @@ public class Client {
   public void release() {
     if (dialog.isShowing()) dialog.cancel();
     executor.shutdownNow();
-    if (wifiLock.isHeld()) wifiLock.release();
     if (adb != null) adb.close();
     if (videoDecode != null) videoDecode.release();
     if (audioDecode != null) audioDecode.release();

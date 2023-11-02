@@ -42,7 +42,8 @@ public class Adb {
         message = AdbProtocol.AdbMessage.parseAdbMessage(channel);
       }
     }
-    if (message.command != AdbProtocol.CMD_CNXN) throw new Exception("ADB连接失败: " + message);
+    if (message.command != AdbProtocol.CMD_CNXN)
+      throw new Exception("ADB连接失败: " + new String(message.payload));
     // 启动后台进程
     handleIn.setPriority(Thread.MAX_PRIORITY);
     handleIn.start();

@@ -1,10 +1,7 @@
 package top.saymzx.easycontrol.app.client;
 
 import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.Build;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 
@@ -63,19 +60,13 @@ public class VideoDecode {
     // 获取视频标识头
     mediaFormat.setByteBuffer("csd-0", csd0);
     mediaFormat.setByteBuffer("csd-1", csd1);
-    // 配置低延迟解码
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-      if (videoDecodec.getCodecInfo().getCapabilitiesForType(codecMime).isFeatureSupported(MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency)) {
-        Log.e("aaaa", "配置低延迟解码");
-        mediaFormat.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
-      }
     // 配置解码器
     videoDecodec.configure(mediaFormat, surface, null, 0);
     // 启动解码器
     videoDecodec.start();
     // 解析首帧，解决开始黑屏问题
-    decodeIn(csd0);
-    decodeIn(csd1);
+    decodeIn(ByteBuffer.wrap(csd0.array()));
+    decodeIn(ByteBuffer.wrap(csd1.array()));
   }
 
 }

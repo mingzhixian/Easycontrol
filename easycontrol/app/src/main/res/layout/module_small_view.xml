@@ -128,5 +128,17 @@
       android:src="@drawable/back"
       android:tint="@color/onCardBackground" />
 
+    <Space
+      android:layout_height="8dp"
+      android:layout_columnSpan="3" />
+
+    <ImageView
+      android:id="@+id/button_power"
+      android:layout_width="20dp"
+      android:layout_height="20dp"
+      android:layout_columnWeight="1"
+      android:src="@drawable/power"
+      android:tint="@color/onCardBackground" />
+
   </GridLayout>
 </FrameLayout>

@@ -28,7 +28,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[10AD39241S000HL]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[192.168.43.225:5555]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -191,7 +191,7 @@
       <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]">
+  <component name="RunManager" selected="Android App.app">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="Easycontrol.app.main" />
       <option name="DEPLOY" value="true" />
@@ -325,7 +325,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
@@ -346,7 +346,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (5)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
@@ -412,19 +412,19 @@
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
-      <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (5)" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
+      <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
         <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (5)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
       </list>
     </recent_temporary>
   </component>

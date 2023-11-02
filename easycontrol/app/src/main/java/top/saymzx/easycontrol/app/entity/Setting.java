@@ -61,6 +61,15 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getAutoControlScreen() {
+    return sharedPreferences.getBoolean("autoControlScreen", true);
+  }
+
+  public void setAutoControlScreen(boolean value) {
+    editor.putBoolean("autoControlScreen", value);
+    editor.apply();
+  }
+
   public boolean getDefaultFull() {
     return sharedPreferences.getBoolean("defaultFull", false);
   }

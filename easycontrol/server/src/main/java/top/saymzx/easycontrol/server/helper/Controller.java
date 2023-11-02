@@ -29,6 +29,10 @@ public final class Controller {
           break;
         case 4:
           handleKeepAlive();
+          break;
+        case 5:
+          handlePower();
+          break;
       }
       hasData = Server.streamIn.available() > 0;
     }
@@ -61,15 +65,19 @@ public final class Controller {
     lastKeepAliveTime = System.currentTimeMillis();
   }
 
-  public static void checkScreenOff(boolean turnOn) {
-    try {
-      Process process = new ProcessBuilder().command("sh", "-c", "dumpsys deviceidle | grep mScreenOn").start();
-      boolean isScreenOn = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine().contains("mScreenOn=true");
+  private static void handlePower() {
+    Device.keyEvent(26);
+  }
+
+  public static void checkScreenOff(boolean turnOn) throws IOException {
+    Process process = new ProcessBuilder().command("sh", "-c", "dumpsys deviceidle | grep mScreenOn").start();
+    String output = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
+    Boolean isScreenOn = null;
+    if (output.contains("mScreenOn=true")) isScreenOn = true;
+    else if (output.contains("mScreenOn=false")) isScreenOn = false;
+    if (isScreenOn != null) {
       // 如果屏幕状态和要求状态不同，则模拟按下电源键
       if (isScreenOn ^ turnOn) Device.keyEvent(26);
-      // 只有需要打开屏幕，且要求关闭背光时才设置为0
-      Device.setScreenPowerMode((turnOn && Options.turnOffScreen) ? 0 : 1);
-    } catch (Exception ignored) {
     }
   }
 

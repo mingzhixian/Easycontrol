@@ -14,6 +14,7 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Toast;

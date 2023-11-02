@@ -57,7 +57,7 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
       android:buttonTint="@color/onCardBackground"
-      android:text="是否音频"
+      android:text="使能音频"
       android:textColor="@color/onCardBackgroundSecond"
       android:textSize="@dimen/middleFont" />
 

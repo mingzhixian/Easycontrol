@@ -191,6 +191,7 @@ public class SmallView {
       smallView.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4));
       smallView.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3));
       smallView.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187));
+      smallView.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     }
     smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
