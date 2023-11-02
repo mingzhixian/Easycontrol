@@ -64,13 +64,13 @@
   </LinearLayout>
 
   <ImageView
-    android:id="@+id/bar"
+    android:id="@+id/line"
     android:layout_width="50dp"
     android:layout_height="20dp"
     android:layout_gravity="end|top"
     android:src="@drawable/full_bar_land"
-    android:visibility="gone"
-    android:tint="@color/clientBar" />
+    android:tint="@color/clientBar"
+    android:visibility="gone" />
 
   <GridLayout
     android:id="@+id/bar_view"
@@ -107,6 +107,26 @@
       android:layout_columnWeight="1"
       android:src="@drawable/close"
       android:tint="@color/buttonSecond" />
+
+    <Space
+      android:layout_height="8dp"
+      android:layout_columnSpan="3" />
+
+    <ImageView
+      android:id="@+id/button_power"
+      android:layout_width="26dp"
+      android:layout_height="26dp"
+      android:layout_columnWeight="1"
+      android:src="@drawable/power"
+      android:tint="@color/onCardBackground" />
+
+    <ImageView
+      android:id="@+id/button_to_line"
+      android:layout_width="26dp"
+      android:layout_height="26dp"
+      android:layout_columnWeight="1"
+      android:src="@drawable/to_line"
+      android:tint="@color/onCardBackground" />
 
   </GridLayout>
 </FrameLayout>

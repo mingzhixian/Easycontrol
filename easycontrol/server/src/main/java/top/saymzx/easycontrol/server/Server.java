@@ -97,15 +97,14 @@ public final class Server {
             break;
           case 1:
             // 恢复分辨率
-            if (Options.setWidth != -1) try {
+            if (Options.setWidth != -1)
               new ProcessBuilder().command("sh", "-c", "wm size reset").start();
-            } catch (Exception ignored) {
-            }
           case 2:
             SurfaceControl.destroyDisplay(VideoEncode.display);
             break;
           case 3:
-            Controller.checkScreenOff(false);
+            if (Options.autoControlScreen) Controller.checkScreenOff(false);
+            Device.setScreenPowerMode(1);
             break;
           case 4:
             VideoEncode.encedec.stop();
@@ -158,6 +157,13 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
+    new Thread(() -> {
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException ignored) {
+      }
+      if (streamIn == null) release();
+    }).start();
     try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
       socket = serverSocket.accept();
       fileDescriptor = socket.getFileDescriptor();
@@ -215,7 +221,8 @@ public final class Server {
   private static void executeOtherService() {
     try {
       while (!Thread.interrupted()) {
-        Controller.checkScreenOff(true);
+        if (Options.autoControlScreen) Controller.checkScreenOff(true);
+        Device.setScreenPowerMode(Options.turnOffScreen ? 0 : 1);
         if (System.currentTimeMillis() - Controller.lastKeepAliveTime > 1000 * 5)
           throw new IOException("连接断开");
         Thread.sleep(1000);

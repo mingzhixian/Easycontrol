@@ -22,10 +22,9 @@ public class UsbChannel implements AdbChannel {
   public UsbChannel(UsbDevice usbDevice) throws IOException {
     // 连接USB设备
     usbConnection = AppData.usbManager.openDevice(usbDevice);
-    // 查找ADB接口
+    // 查找ADB接口，ADB协议的Class为VENDOR_SPEC(255)
     for (int i = 0; i < usbDevice.getInterfaceCount(); i++)
-      // ADB协议的Class为VENDOR_SPEC(255)
-      if ((usbInterface = usbDevice.getInterface(i)).getInterfaceClass() == UsbConstants.USB_CLASS_VENDOR_SPEC)
+      if (((usbInterface = usbDevice.getInterface(i)).getInterfaceClass() == UsbConstants.USB_CLASS_VENDOR_SPEC))
         break;
     // 宣告独占接口
     if (usbInterface != null && usbConnection.claimInterface(usbInterface, true)) {
@@ -46,8 +45,11 @@ public class UsbChannel implements AdbChannel {
   public void write(byte[] data) throws IOException {
     int size = data.length;
     int bytesWrite = 0;
-    while (bytesWrite < size)
-      bytesWrite += usbConnection.bulkTransfer(endpointOut, data, bytesWrite, size - bytesWrite, 1000);
+    while (bytesWrite < size){
+      int len=usbConnection.bulkTransfer(endpointOut, data, bytesWrite, size - bytesWrite, 1000);
+      bytesWrite +=len;
+      Log.e("aaaa", String.valueOf(len));
+    }
   }
 
   @Override
@@ -58,10 +60,8 @@ public class UsbChannel implements AdbChannel {
   public byte[] read(int size) throws IOException {
     byte[] buffer = new byte[size];
     int bytesRead = 0;
-    while (bytesRead < size) {
-      bytesRead += usbConnection.bulkTransfer(endpointIn, buffer, bytesRead, size - bytesRead, 1000);
-      Log.e("aaaa", String.valueOf(bytesRead));
-    }
+    while (bytesRead < size)
+      bytesRead += usbConnection.bulkTransfer(endpointIn, buffer, bytesRead, size - bytesRead, 0);
     return buffer;
   }
 
