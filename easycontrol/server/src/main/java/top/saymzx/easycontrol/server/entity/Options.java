@@ -9,6 +9,7 @@ public final class Options {
   public static int videoBitRate;
   public static int maxFps;
   public static boolean turnOffScreen;
+  public static boolean autoControlScreen;
   public static int setWidth;
   public static int setHeight;
 
@@ -35,6 +36,9 @@ public final class Options {
           break;
         case "turn_off_screen":
           turnOffScreen = Integer.parseInt(value) == 1;
+          break;
+        case "auto_control_screen":
+          autoControlScreen = Integer.parseInt(value) == 1;
           break;
         case "set_width":
           setWidth = Integer.parseInt(value);

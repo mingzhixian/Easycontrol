@@ -40,7 +40,8 @@ public class SetActivity extends Activity {
     setActivity.setDefault.addView(AppData.publicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, String.valueOf(AppData.setting.getDefaultVideoBit()), str -> AppData.setting.setDefaultVideoBit(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(AppData.publicTools.createSwitchCard(this, "修改分辨率", AppData.setting.getDefaultSetResolution(), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
     // 显示
-    setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "被控端熄屏", AppData.setting.getSlaveTurnOffScreen(), isChecked -> AppData.setting.setSlaveTurnOffScreen(isChecked)).getRoot());
+    setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "熄屏控制", AppData.setting.getSlaveTurnOffScreen(), isChecked -> AppData.setting.setSlaveTurnOffScreen(isChecked)).getRoot());
+    setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "自动屏幕控制", AppData.setting.getAutoControlScreen(), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
     setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "默认全屏启动", AppData.setting.getDefaultFull(), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(AppData.publicTools.createTextCard(this, "清除默认设备", () -> {

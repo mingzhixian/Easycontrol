@@ -48,8 +48,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
       client.isNormalPlay = true;
       hide(false);
       uiMode = 1;
-      Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
-      FullActivity.show(this, client.controller, videoSize.second > videoSize.first == screenSize.second > screenSize.first);
+      FullActivity.show(this, client.controller, videoSize.second > videoSize.first);
     }
   }
 

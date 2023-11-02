@@ -3,7 +3,6 @@
  */
 package top.saymzx.easycontrol.server.entity;
 
-import android.annotation.SuppressLint;
 import android.content.IOnPrimaryClipChangedListener;
 import android.os.Build;
 import android.os.IBinder;
@@ -38,7 +37,7 @@ public final class Device {
   public static int displayId = 0;
   public static int layerStack;
 
-  public static void init() throws IOException {
+  public static void init() throws IOException, InterruptedException {
     DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
     deviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
@@ -47,32 +46,17 @@ public final class Device {
     // 计算视频大小
     computeVideoSize();
     layerStack = displayInfo.layerStack;
-    // 初始化指针
-    initPointers();
     // 旋转监听
     setRotationListener();
     // 剪切板监听
     setClipBoardListener();
   }
 
-  // 初始化指针
-  private static void initPointers() {
-    for (int i = 0; i < PointersState.MAX_POINTERS; ++i) {
-      MotionEvent.PointerProperties props = new MotionEvent.PointerProperties();
-      props.toolType = MotionEvent.TOOL_TYPE_FINGER;
-
-      MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
-      coords.orientation = 0;
-      coords.size = 0.01f;
-      coords.pressure = 1f;
-
-      pointerProperties[i] = props;
-      pointerCoords[i] = coords;
-    }
-  }
-
   // 计算最佳的分辨率大小，按照主控端长宽比例缩放
-  private static void calculateSize() {
+  private static void calculateSize() throws IOException, InterruptedException {
+    // 获取未旋转的原始分辨率
+    if (deviceRotation == 1 || deviceRotation == 3)
+      deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
     // 保证方向一致
     if (deviceSize.first < deviceSize.second ^ Options.setWidth < Options.setHeight) {
       int tmp = Options.setWidth;
@@ -87,12 +71,12 @@ public final class Device {
     else
       newScreenSize = new Pair<>(Options.setWidth * Device.deviceSize.second / Options.setHeight, Device.deviceSize.second);
     // 修改分辨率
-    try {
-      new ProcessBuilder().command("sh", "-c", "wm size " + newScreenSize.first + "x" + newScreenSize.second).start();
-      // 更新新的设备分辨率大小
-      Device.deviceSize = newScreenSize;
-    } catch (Exception ignored) {
-    }
+    Process process = new ProcessBuilder().command("sh", "-c", "wm size " + newScreenSize.first + "x" + newScreenSize.second).start();
+    // 更新新的设备分辨率大小
+    process.waitFor();
+    DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
+    deviceSize = displayInfo.size;
+    deviceRotation = displayInfo.rotation;
   }
 
   private static void computeVideoSize() {
@@ -161,38 +145,34 @@ public final class Device {
     ClipboardManager.setText(nowClipboardText);
   }
 
-  private static long lastTouchDown;
   private static final PointersState pointersState = new PointersState();
-  private static final MotionEvent.PointerProperties[] pointerProperties = new MotionEvent.PointerProperties[PointersState.MAX_POINTERS];
-  private static final MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[PointersState.MAX_POINTERS];
 
-  @SuppressLint({"Recycle"})
   public static void touchEvent(int action, Float x, Float y, int pointerId) {
-    pointerProperties[pointerId].id = pointerId;
+    Pointer pointer;
     long now = SystemClock.uptimeMillis();
-    int pointerIndex = pointersState.getPointerIndex(pointerId);
-    if (pointerIndex == -1) return;
-    Pointer pointer = pointersState.get(pointerIndex);
+    if (!pointersState.hasPointer(pointerId)) {
+      if (action != MotionEvent.ACTION_DOWN) return;
+      pointer = pointersState.newPointer(pointerId, now);
+    } else pointer = pointersState.get(pointerId);
+
     pointer.x = x * deviceSize.first;
     pointer.y = y * deviceSize.second;
 
-    pointer.isUp = action == MotionEvent.ACTION_UP;
+    int pointerCount = pointersState.update();
 
-    int pointerCount = pointersState.update(pointerProperties, pointerCoords);
-    int newAction = action;
-    if (pointerCount == 1) {
-      if (action == MotionEvent.ACTION_DOWN) {
-        lastTouchDown = now;
-      }
-    } else {
+    if (action == MotionEvent.ACTION_UP) pointersState.remove(pointerId);
+
+    if (pointerCount > 1) {
       if (action == MotionEvent.ACTION_UP) {
-        newAction = MotionEvent.ACTION_POINTER_UP | (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+        action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
       } else if (action == MotionEvent.ACTION_DOWN) {
-        newAction = MotionEvent.ACTION_POINTER_DOWN | (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+        action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
       }
     }
-    MotionEvent event = MotionEvent.obtain(lastTouchDown, now, newAction, pointerCount, pointerProperties, pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
+
+    MotionEvent event = MotionEvent.obtain(pointer.downTime, now, action, pointerCount, pointersState.pointerProperties, pointersState.pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
     injectEvent(event);
+
   }
 
   public static void keyEvent(int keyCode) {
