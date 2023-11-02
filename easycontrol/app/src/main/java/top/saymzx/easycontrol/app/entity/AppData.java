@@ -36,7 +36,7 @@ public class AppData {
   public static Setting setting;
 
   // 当前版本号
-  public static int versionCode = BuildConfig.VERSION_CODE;
+  public static String serverName = "easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
 
   public static void init(Activity m) {
     main = m;

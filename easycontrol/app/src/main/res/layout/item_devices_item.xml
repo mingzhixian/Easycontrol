@@ -6,31 +6,38 @@
   android:layout_height="wrap_content"
   android:background="@drawable/background_cron"
   android:backgroundTint="@color/cardBackground"
-  android:orientation="vertical"
+  android:gravity="center"
+  android:orientation="horizontal"
   android:paddingStart="16dp"
-  android:paddingTop="10dp"
+  android:paddingTop="12dp"
   android:paddingEnd="16dp"
-  android:paddingBottom="10dp">
+  android:paddingBottom="12dp">
+
+  <ImageView
+    android:layout_width="26dp"
+    android:layout_height="26dp"
+    android:src="@drawable/phone"
+    android:tint="@color/onCardBackground" />
 
   <TextView
     android:id="@+id/device_name"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_weight="1"
+    android:includeFontPadding="false"
     android:maxLines="1"
-    android:text="设备名称"
+    android:text="有线设备"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/largeFont"
     tools:ignore="HardcodedText" />
 
-  <TextView
-    android:id="@+id/device_address"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginStart="10dp"
-    android:layout_marginTop="4dp"
-    android:maxLines="1"
-    android:text="192.168.43.1:5555"
-    android:textColor="@color/onCardBackgroundSecond"
-    android:textSize="@dimen/middleFont"
-    tools:ignore="HardcodedText" />
+  <ImageView
+    android:layout_width="26dp"
+    android:layout_height="26dp"
+    android:rotation="180"
+    android:src="@drawable/back"
+    android:tint="@color/onCardBackground" />
+
 </LinearLayout>

@@ -38,7 +38,17 @@ public final class Server {
 
   public static final Object object = new Object();
 
+  private static boolean startSuccess = false;
+
   public static void main(String... args) {
+    // 启动超时
+    new Thread(() -> {
+      try {
+        Thread.sleep(8000);
+      } catch (InterruptedException ignored) {
+      }
+      if (!startSuccess) release();
+    }).start();
     try {
       // 解析参数
       Options.parse(args);
@@ -67,6 +77,7 @@ public final class Server {
         audioInThread.start();
         audioOutThread.start();
       }
+      startSuccess = true;
       // 程序运行
       synchronized (object) {
         object.wait();
@@ -88,7 +99,7 @@ public final class Server {
 
   // 关闭
   private static void release() {
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 7; i++) {
       try {
         switch (i) {
           case 0:
@@ -116,11 +127,12 @@ public final class Server {
             AudioEncode.encedec.stop();
             AudioEncode.encedec.release();
             break;
+          case 6:
+            new ProcessBuilder().command("sh", "-c", "ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9").start();
         }
       } catch (Exception ignored) {
       }
     }
-    Runtime.getRuntime().exit(0);
   }
 
   private static Method GET_SERVICE_METHOD;
@@ -157,13 +169,6 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    new Thread(() -> {
-      try {
-        Thread.sleep(5000);
-      } catch (InterruptedException ignored) {
-      }
-      if (streamIn == null) release();
-    }).start();
     try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
       socket = serverSocket.accept();
       fileDescriptor = socket.getFileDescriptor();

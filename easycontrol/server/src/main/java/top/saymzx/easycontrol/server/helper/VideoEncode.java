@@ -61,7 +61,9 @@ public final class VideoEncode {
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-    encodecFormat.setInteger(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES, 1);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      encodecFormat.setInteger(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES, 1);
+    }
     encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2);
     // 若在这个时间间隔内没有检测到足够大的场景变化，视频编码器将重复前一帧的内容，而不是编码全新的帧，以减少计算负担和节省带宽
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000);
