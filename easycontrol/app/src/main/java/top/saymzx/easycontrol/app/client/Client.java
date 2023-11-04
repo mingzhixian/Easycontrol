@@ -40,22 +40,23 @@ public class Client {
 
   // 是否正常解码播放
   public boolean isNormalPlay = true;
+  private boolean startSuccess = false;
 
   private final Dialog dialog = AppData.publicTools.createClientLoading(AppData.main, () -> clientView.hide(true));
 
   public Client(Device device, UsbDevice usbDevice) {
-//    try {
-//      UsbChannel usbChannel=new UsbChannel(usbDevice);
-//      usbChannel.write(new byte[]{1});
-//      byte[] bytes=usbChannel.read(1);
-//      Log.e("sdsd", Arrays.toString(bytes));
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
     // 显示加载框
     dialog.show();
+    // 启动超时
+    executor.execute(() -> {
+      try {
+        Thread.sleep(8000);
+      } catch (InterruptedException ignored) {
+      }
+      if (!startSuccess) clientView.hide(true);
+    });
     // 启动Client
-    new Thread(() -> {
+    executor.execute(() -> {
       try {
         // 连接ADB
         connectADB(device, usbDevice);
@@ -70,10 +71,7 @@ public class Client {
         // 更新UI
         AppData.main.runOnUiThread(dialog::cancel);
         createUI();
-        // 阻塞等待连接断开
-        synchronized (stream) {
-          stream.wait();
-        }
+        startSuccess = true;
       } catch (Exception e) {
         AppData.main.runOnUiThread(() -> {
           Toast.makeText(AppData.main, e.toString(), Toast.LENGTH_SHORT).show();
@@ -81,19 +79,11 @@ public class Client {
           clientView.hide(true);
         });
       }
-    }).start();
+    });
   }
 
   // 连接ADB
   private void connectADB(Device device, UsbDevice usbDevice) throws Exception {
-    executor.execute(() -> {
-      try {
-        // 连接和授权总共超时时间为5秒
-        Thread.sleep(5000);
-      } catch (InterruptedException ignored) {
-      }
-      if (adb == null) AppData.main.runOnUiThread(() -> clientView.hide(true));
-    });
     if (usbDevice == null) {
       Pair<String, Integer> address = AppData.publicTools.getIpAndPort(device.address);
       if (address == null) throw new Exception("地址格式错误");
@@ -130,16 +120,7 @@ public class Client {
         setWidth = tmpDeviceSize.first;
         setHeight = tmpDeviceSize.second;
       }
-      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" +
-        " is_audio=" + (device.isAudio ? 1 : 0) +
-        " max_size=" + device.maxSize +
-        " max_fps=" + device.maxFps +
-        " video_bit_rate=" + device.maxVideoBit +
-        " turn_off_screen=" + (AppData.setting.getSlaveTurnOffScreen() ? 1 : 0) +
-        " auto_control_screen=" + (AppData.setting.getAutoControlScreen() ? 1 : 0) +
-        " set_width=" + setWidth +
-        " set_height=" + setHeight +
-        " > /dev/null 2>&1 & ", false);
+      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (AppData.setting.getSlaveTurnOffScreen() ? 1 : 0) + " auto_control_screen=" + (AppData.setting.getAutoControlScreen() ? 1 : 0) + " set_width=" + setWidth + " set_height=" + setHeight + " > /dev/null 2>&1 & ", false);
     } catch (Exception ignored) {
       throw new Exception("启动Server失败");
     }
@@ -166,14 +147,14 @@ public class Client {
       // 视频大小
       clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
       // 视频解码
-      stream.readByte();
+      if (stream.readByte() != 1) throw new IOException("数据错误");
       ByteBuffer csd0 = readFrame();
-      stream.readByte();
+      if (stream.readByte() != 1) throw new IOException("数据错误");
       ByteBuffer csd1 = readFrame();
       videoDecode = new VideoDecode(clientView.videoSize, csd0, csd1);
       // 音频解码
       if (stream.readByte() == 1) {
-        stream.readByte();
+        if (stream.readByte() != 2) throw new IOException("数据错误");
         csd0 = readFrame();
         audioDecode = new AudioDecode(csd0);
       }
@@ -245,10 +226,9 @@ public class Client {
     controller.sendKeepAlive();
     try {
       Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      clientView.hide(true);
+      executor.execute(this::executeOtherService);
+    } catch (InterruptedException ignored) {
     }
-    executor.execute(this::executeOtherService);
   }
 
   private ByteBuffer readFrame() throws InterruptedException, IOException {

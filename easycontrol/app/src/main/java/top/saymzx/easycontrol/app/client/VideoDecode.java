@@ -31,7 +31,8 @@ public class VideoDecode {
 
   public synchronized void decodeIn(ByteBuffer data) {
     try {
-      int inIndex = videoDecodec.dequeueInputBuffer(0);
+      // 15ms相当于60帧的帧间隔时间
+      int inIndex = videoDecodec.dequeueInputBuffer(15_000);
       // 缓冲区已满则丢帧
       if (inIndex < 0) return;
       videoDecodec.getInputBuffer(inIndex).put(data);
