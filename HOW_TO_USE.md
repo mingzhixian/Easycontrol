@@ -1,18 +1,21 @@
 # 易控使用说明
 
-## 准备
+## 被控端准备
 
-1. 被控端打开无线ADB调试，端口为5555
+1. 被控端手机连续点击关于手机-版本号，直至提示打开开发者选项
+2. 开发者选项打开USB调试
+3. 电脑下载解压ADB文件
+4. 被控端手机连接电脑
+5. 在ADB所在文件夹按住Shift+右击打开命令行
+6. 执行以下命令：
 ``` shell
-// root用户：
+// root用户（永久）：
 adb shell
 su
 echo "sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh && chmod +x /data/adb/service.d/adb.sh
-// 无root：（先有线连接adb）
+// 无root（每次重启后需重复操作一次）：
 adb tcpip 5555
 ```
-2. 被控端安装易控(可选)
-	- 如主备控端分辨率相同，或在添加设备时选择不修改分辨率则可以不在被控端安装投屏
 
 ## 软件使用
 
