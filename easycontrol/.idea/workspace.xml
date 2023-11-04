@@ -28,7 +28,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[192.168.43.225:5555]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -44,6 +44,9 @@
           <activation />
         </task>
         <task path="$PROJECT_DIR$/oldServer">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/server">
           <activation />
         </task>
         <projects_view>
@@ -301,6 +304,27 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="copyRelease" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -385,43 +409,22 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="createDebugAndroidTestApkListingFileRedirect" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
-      <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
-        <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
       </list>
     </recent_temporary>
   </component>
