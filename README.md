@@ -1,6 +1,7 @@
 # 易控(Easycontrol)
 
-## <p style="color: red;">注意</p>
+## 注意
+
 本仓库已迁移至Gitee，Github仓库将保持代码同步，但发行版本将不再Github上发布，请点击下方“下载地址”前往Gitee获取后续发行版本。
 
 ## 简介
