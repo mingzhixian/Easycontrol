@@ -28,7 +28,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[192.168.43.225:5555]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -44,9 +44,6 @@
           <activation />
         </task>
         <task path="$PROJECT_DIR$/oldServer">
-          <activation />
-        </task>
-        <task path="$PROJECT_DIR$/server">
           <activation />
         </task>
         <projects_view>
@@ -112,33 +109,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ApkExportedModule&quot;: &quot;Easycontrol.app&quot;,
-    &quot;ExportApk.ApkPathForEasycontrol.app&quot;: &quot;E:\\Code\\Easycontrol\\easycontrol\\app&quot;,
-    &quot;ExportApk.ApkPathForeasycontrol.app&quot;: &quot;E:\\Code\\easycontrol\\easycontrol\\app&quot;,
-    &quot;ExportApk.ApkPathForscrcpy_android.app&quot;: &quot;E:\\Code\\scrcpy\\scrcpy_android\\app&quot;,
-    &quot;ResourceManagerPrefKey.ModuleName&quot;: &quot;easycontrol.app.main&quot;,
-    &quot;ResourceManagerPrefKey.ResourceType&quot;: &quot;DRAWABLE&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable&quot;: &quot;ALL&quot;,
-    &quot;last_directory_selection&quot;: &quot;E:/Code/scrcpy/scrcpy_android/server/src/main/java&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Code/Easycontrol/easycontrol/app/src/main/res/anim&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Build Variants&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ApkExportedModule": "Easycontrol.app",
+    "ExportApk.ApkPathForEasycontrol.app": "E:\\Code\\Easycontrol\\easycontrol\\app",
+    "ExportApk.ApkPathForeasycontrol.app": "E:\\Code\\easycontrol\\easycontrol\\app",
+    "ExportApk.ApkPathForscrcpy_android.app": "E:\\Code\\scrcpy\\scrcpy_android\\app",
+    "ResourceManagerPrefKey.ModuleName": "Easycontrol.app.main",
+    "ResourceManagerPrefKey.ResourceType": "DRAWABLE",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cidr.known.project.marker": "true",
+    "com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable": "ALL",
+    "last_directory_selection": "E:/Code/scrcpy/scrcpy_android/server/src/main/java",
+    "last_opened_file_path": "E:/Code/Easycontrol/easycontrol/app/src/main/res/anim",
+    "project.structure.last.edited": "Build Variants",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;ExportApk.BuildVariants&quot;: [
-      &quot;release&quot;
+  "keyToStringList": {
+    "ExportApk.BuildVariants": [
+      "release"
     ]
   }
-}</component>
+}]]></component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Properties" />
     <option name="BUILD_VARIANTS_TAB" value="Build Types" />
@@ -304,27 +301,6 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="copyRelease" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
     <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -388,6 +364,27 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="copyRelease" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -412,19 +409,19 @@
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
       <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
       <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
+        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
         <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
         <item itemvalue="Gradle.easycontrol:server [createDebugAndroidTestApkListingFileRedirect]" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (3)" />
       </list>
     </recent_temporary>
   </component>
