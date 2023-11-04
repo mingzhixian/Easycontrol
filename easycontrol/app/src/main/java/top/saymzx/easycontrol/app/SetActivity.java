@@ -62,9 +62,10 @@ public class SetActivity extends Activity {
     }).getRoot());
     // 关于
     setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "查看本机IP", () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "使用说明", () -> startUrl("https://github.com/mingzhixian/Easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "隐私政策", () -> startUrl("https://github.com/mingzhixian/Easycontrol/blob/master/PRIVACY.md")).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "版本: " + BuildConfig.VERSION_NAME, () -> startUrl("https://github.com/mingzhixian/Easycontrol/releases")).getRoot());
+    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "使用说明", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
+    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "隐私政策", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
+    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "捐助", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol#%E9%BC%93%E5%8A%B1")).getRoot());
+    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "版本: " + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
   }
 
   // 浏览器打开
