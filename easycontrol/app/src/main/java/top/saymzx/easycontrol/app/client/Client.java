@@ -190,7 +190,9 @@ public class Client {
           case 1:
             ByteBuffer videoFrame = readFrame();
             // 视频因在界面旋转时会重新生成配置参数，因此此处仍需解码，只是不再显示，音频则可以直接停止解码
-            executor.execute(() -> videoDecode.decodeIn(videoFrame));
+            executor.execute(() -> {
+              if (!videoDecode.decodeIn(videoFrame)) controller.sendCongestionEvent();
+            });
             break;
           case 2:
             ByteBuffer audioFrame = readFrame();

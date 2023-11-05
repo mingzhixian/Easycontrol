@@ -106,6 +106,11 @@ public class Controller {
     writeStream(ByteBuffer.wrap(new byte[]{5}));
   }
 
+  // 发送拥塞事件
+  public void sendCongestionEvent() {
+    writeStream(ByteBuffer.wrap(new byte[]{6}));
+  }
+
   private void writeStream(ByteBuffer byteBuffer) {
     try {
       stream.write(byteBuffer);

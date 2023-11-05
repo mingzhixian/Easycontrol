@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Pair;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.databinding.ItemAddDeviceBinding;
 import top.saymzx.easycontrol.app.databinding.ItemClientLoadingBinding;
+import top.saymzx.easycontrol.app.databinding.ItemDevicesItemBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
@@ -54,7 +56,9 @@ public class PublicTools {
     context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
     context.getWindow().setStatusBarColor(context.getResources().getColor(R.color.cardContainerBackground));
-    context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
+      context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    }
   }
 
   // DP转PX
@@ -172,7 +176,7 @@ public class PublicTools {
 
   // 创建列表卡片
   public final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
-  public final String[] maxFpsList = new String[]{"60", "45", "25", "15"};
+  public final String[] maxFpsList = new String[]{"60", "45", "35", "25", "15"};
   public final String[] videoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
 
   public ItemSpinnerBinding createSpinnerCard(

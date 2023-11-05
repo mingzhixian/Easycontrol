@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
-import top.saymzx.easycontrol.server.entity.Options;
 
 public final class Controller {
 
@@ -28,10 +27,13 @@ public final class Controller {
           handleClipboardEvent();
           break;
         case 4:
-          handleKeepAlive();
+          handleKeepAliveEvent();
           break;
         case 5:
-          handlePower();
+          handlePowerEvent();
+          break;
+        case 6:
+          handleCongestionEvent();
           break;
       }
       hasData = Server.streamIn.available() > 0;
@@ -61,12 +63,24 @@ public final class Controller {
 
   public static long lastKeepAliveTime = System.currentTimeMillis();
 
-  private static void handleKeepAlive() {
+  private static void handleKeepAliveEvent() {
     lastKeepAliveTime = System.currentTimeMillis();
   }
 
-  private static void handlePower() {
+  private static void handlePowerEvent() {
     Device.keyEvent(26);
+  }
+
+  public static final int[] maxFpsList = new int[]{60, 45, 35, 25, 15};
+
+  private static void handleCongestionEvent() {
+    for (int i : maxFpsList) {
+      if (i < VideoEncode.maxFps) {
+        VideoEncode.maxFps = i;
+        VideoEncode.isHasChangeConfig = true;
+        break;
+      }
+    }
   }
 
   public static void checkScreenOff(boolean turnOn) throws IOException {
