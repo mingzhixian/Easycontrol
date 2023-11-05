@@ -25,10 +25,11 @@ import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 public final class VideoEncode {
   public static MediaCodec encedec;
   private static MediaFormat encodecFormat;
-  public static boolean isHasChangeRotation = false;
+  public static boolean isHasChangeConfig = false;
+  public static int maxFps;
 
   public static IBinder display;
-  private static boolean tryCbr = true;
+  private static boolean tryNew = true;
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
     // 创建显示器
@@ -44,7 +45,7 @@ public final class VideoEncode {
       setVideoEncodec();
       initEncode();
     } catch (Exception ignored) {
-      tryCbr = false;
+      tryNew = false;
       setVideoEncodec();
       initEncode();
     }
@@ -58,18 +59,24 @@ public final class VideoEncode {
     encodecFormat = new MediaFormat();
 
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
+
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
-    encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-      encodecFormat.setInteger(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES, 1);
     encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2);
-    // 若在这个时间间隔内没有检测到足够大的场景变化，视频编码器将重复前一帧的内容，而不是编码全新的帧，以减少计算负担和节省带宽
-    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000);
-    // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
-    if (tryCbr)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+      encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 2);
+
+    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
+    encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+
+    if (tryNew) {
+      // CBR编码方式对网络传输比较好，其码率稳定，输出数据量稳定
       encodecFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
-    encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
+    }
+
+    encodecFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
+
+    maxFps = Options.maxFps;
   }
 
   private static void setDisplaySurface(IBinder display, Surface surface) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
@@ -90,6 +97,8 @@ public final class VideoEncode {
     // 重配置编码器宽高
     encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
     encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
+    // 重配置编码器最大帧率
+    encodecFormat.setFloat("max-fps-to-encoder", maxFps);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
     // 绑定Display和Surface
     surface = encedec.createInputSurface();

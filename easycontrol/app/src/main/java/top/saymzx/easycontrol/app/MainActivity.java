@@ -125,13 +125,13 @@ public class MainActivity extends Activity {
         }
         // USB设备已拔出
         case UsbManager.ACTION_USB_DEVICE_DETACHED: {
-          mainActivity.linkedDevice.getRoot().setVisibility(View.GONE);
+          mainActivity.linkedDeviceLayout.setVisibility(View.GONE);
           break;
         }
         // 授权完成
         case ACTION_USB_PERMISSION: {
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            mainActivity.linkedDevice.getRoot().setVisibility(View.VISIBLE);
+            mainActivity.linkedDeviceLayout.setVisibility(View.VISIBLE);
             // 设置监听
             mainActivity.linkedDevice.getRoot().setOnClickListener(view -> new Client(Device.getDefaultDevice(), usbDevice));
           }

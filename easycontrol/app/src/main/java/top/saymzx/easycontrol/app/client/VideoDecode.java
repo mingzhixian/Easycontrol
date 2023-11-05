@@ -15,7 +15,7 @@ public class VideoDecode {
   private final ByteBuffer csd1;
   private final Pair<Integer, Integer> videoSize;
 
-  public VideoDecode(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) throws IOException {
+  public VideoDecode(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) {
     this.videoSize = videoSize;
     this.csd0 = csd0;
     this.csd1 = csd1;
@@ -29,17 +29,29 @@ public class VideoDecode {
     }
   }
 
-  public synchronized void decodeIn(ByteBuffer data) {
+  private int dropFrameNum = 0;
+
+  public synchronized boolean decodeIn(ByteBuffer data) {
     try {
-      // 15ms相当于60帧的帧间隔时间
-      int inIndex = videoDecodec.dequeueInputBuffer(15_000);
+      // 50ms超时
+      int inIndex = videoDecodec.dequeueInputBuffer(50_000);
       // 缓冲区已满则丢帧
-      if (inIndex < 0) return;
+      if (inIndex < 0) {
+        dropFrameNum++;
+        // 连续丢帧3次触发帧率调整，自动下调帧率挡位
+        if (dropFrameNum > 3) {
+          dropFrameNum = 0;
+          return false;
+        }
+        return true;
+      }
+      dropFrameNum = 0;
       videoDecodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
       videoDecodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
     } catch (IllegalStateException ignored) {
     }
+    return true;
   }
 
   private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -61,6 +73,7 @@ public class VideoDecode {
     // 获取视频标识头
     mediaFormat.setByteBuffer("csd-0", csd0);
     mediaFormat.setByteBuffer("csd-1", csd1);
+    mediaFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
     // 配置解码器
     videoDecodec.configure(mediaFormat, surface, null, 0);
     // 启动解码器

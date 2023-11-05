@@ -179,8 +179,8 @@ public final class Server {
   private static void executeVideoOut() {
     try {
       while (!Thread.interrupted()) {
-        if (VideoEncode.isHasChangeRotation) {
-          VideoEncode.isHasChangeRotation = false;
+        if (VideoEncode.isHasChangeConfig) {
+          VideoEncode.isHasChangeConfig = false;
           VideoEncode.stopEncode();
           VideoEncode.initEncode();
         }

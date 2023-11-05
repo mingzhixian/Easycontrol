@@ -5,7 +5,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -22,10 +21,14 @@ public class UsbChannel implements AdbChannel {
   public UsbChannel(UsbDevice usbDevice) throws IOException {
     // 连接USB设备
     usbConnection = AppData.usbManager.openDevice(usbDevice);
-    // 查找ADB接口，ADB协议的Class为VENDOR_SPEC(255)
-    for (int i = 0; i < usbDevice.getInterfaceCount(); i++)
-      if (((usbInterface = usbDevice.getInterface(i)).getInterfaceClass() == UsbConstants.USB_CLASS_VENDOR_SPEC))
+    // 查找ADB的接口
+    for (int i = 0; i < usbDevice.getInterfaceCount(); i++) {
+      UsbInterface tmpUsbInterface = usbDevice.getInterface(i);
+      if ((tmpUsbInterface.getInterfaceClass() == UsbConstants.USB_CLASS_VENDOR_SPEC) && (tmpUsbInterface.getInterfaceSubclass() == 66) && (tmpUsbInterface.getInterfaceProtocol() == 1)) {
+        usbInterface = tmpUsbInterface;
         break;
+      }
+    }
     // 宣告独占接口
     if (usbInterface != null && usbConnection.claimInterface(usbInterface, true)) {
       // 查找输入输出端点
@@ -45,11 +48,8 @@ public class UsbChannel implements AdbChannel {
   public void write(byte[] data) throws IOException {
     int size = data.length;
     int bytesWrite = 0;
-    while (bytesWrite < size){
-      int len=usbConnection.bulkTransfer(endpointOut, data, bytesWrite, size - bytesWrite, 1000);
-      bytesWrite +=len;
-      Log.e("aaaa", String.valueOf(len));
-    }
+    while (bytesWrite < size)
+      bytesWrite += usbConnection.bulkTransfer(endpointOut, data, bytesWrite, size - bytesWrite, 2000);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class UsbChannel implements AdbChannel {
     byte[] buffer = new byte[size];
     int bytesRead = 0;
     while (bytesRead < size)
-      bytesRead += usbConnection.bulkTransfer(endpointIn, buffer, bytesRead, size - bytesRead, 0);
+      bytesRead += usbConnection.bulkTransfer(endpointIn, buffer, bytesRead, size - bytesRead, 2000);
     return buffer;
   }
 

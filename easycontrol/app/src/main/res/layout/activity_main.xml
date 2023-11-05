@@ -10,6 +10,7 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="30dp"
     android:background="@color/cardContainerBackground"
     android:elevation="6dp"
     android:gravity="center_vertical"
@@ -53,22 +54,33 @@
       android:tint="@color/onBackground" />
   </LinearLayout>
 
-  <include
-    android:id="@+id/linked_device"
+  <LinearLayout
+    android:id="@+id/linked_device_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="20dp"
-    android:layout_marginTop="30dp"
     android:layout_marginEnd="20dp"
-    android:visibility="gone"
-    layout="@layout/item_devices_item"/>
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <include
+      android:id="@+id/linked_device"
+      layout="@layout/item_devices_item"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_margin="14dp"
+      android:background="@color/onBackgroundSecond" />
+  </LinearLayout>
 
   <ListView
     android:id="@+id/master_devices_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginStart="20dp"
-    android:layout_marginTop="30dp"
     android:layout_marginEnd="20dp"
     android:divider="#00000000"
     android:dividerHeight="12dp"

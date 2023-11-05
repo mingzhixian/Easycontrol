@@ -136,7 +136,7 @@ public final class Device {
           }
         }
         deviceRotation = rotation;
-        VideoEncode.isHasChangeRotation = true;
+        VideoEncode.isHasChangeConfig = true;
       }
     }, displayId);
   }
