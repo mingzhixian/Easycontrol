@@ -93,6 +93,7 @@ public class MyHttpHandler implements HttpHandler {
       postDevice = new User.Device(uuid, ip);
       user.devices.add(postDevice);
     }
+    postDevice.ip = ip;
     postDevice.lastPostTime = System.currentTimeMillis();
     System.out.print("Post Device,Name=" + user.name + ",Password=" + user.password + ",UUID=" + uuid + "\n");
   }

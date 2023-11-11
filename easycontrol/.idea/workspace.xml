@@ -266,7 +266,7 @@
       <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Gradle.easycontrol:center [shadowJar]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="Easycontrol.app.main" />
       <option name="DEPLOY" value="true" />
