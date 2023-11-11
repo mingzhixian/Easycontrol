@@ -5,8 +5,8 @@ public class Device {
   public static final int TYPE_LINK = 2;
   public static final int TYPE_CENTER = 3;
 
-  public final Integer id;
-  public Integer type;
+  public final String uuid;
+  public final Integer type;
   public String name;
   public String address;
   public boolean isAudio;
@@ -18,7 +18,7 @@ public class Device {
   public boolean autoControlScreen;
   public boolean defaultFull;
 
-  public Device(Integer id,
+  public Device(String uuid,
                 Integer type,
                 String name,
                 String address,
@@ -30,7 +30,7 @@ public class Device {
                 boolean turnOffScreen,
                 boolean autoControlScreen,
                 boolean defaultFull) {
-    this.id = id;
+    this.uuid = uuid;
     this.type = type;
     this.name = name;
     this.address = address;
@@ -44,8 +44,8 @@ public class Device {
     this.defaultFull = defaultFull;
   }
 
-  public static Device getDefaultDevice() {
-    return new Device(null, TYPE_NORMAL, "", "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getTurnOffScreen(), AppData.setting.getAutoControlScreen(), AppData.setting.getDefaultFull());
+  public static Device getDefaultDevice(String uuid, int type) {
+    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getTurnOffScreen(), AppData.setting.getAutoControlScreen(), AppData.setting.getDefaultFull());
   }
 
   public boolean isNormalDevice() {

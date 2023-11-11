@@ -46,7 +46,7 @@ public class SetActivity extends Activity {
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "默认全屏启动", AppData.setting.getDefaultFull(), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(PublicTools.createTextCard(this, "清除默认设备", () -> {
-      AppData.setting.setDefaultDevice(-1);
+      AppData.setting.setDefaultDevice("");
       Toast.makeText(this, "已清除", Toast.LENGTH_SHORT).show();
     }).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, "重新生成密钥(需重新授权)", () -> {

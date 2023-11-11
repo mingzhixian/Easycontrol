@@ -122,16 +122,13 @@ public class PublicTools {
     itemAddDeviceBinding.options.addView(autoControlScreen.getRoot());
     itemAddDeviceBinding.options.addView(defaultFull.getRoot());
     // 特殊设备不允许修改
-    if (!device.isNormalDevice()) {
-      itemAddDeviceBinding.name.setEnabled(false);
-      itemAddDeviceBinding.address.setEnabled(false);
-    }
+    if (!device.isNormalDevice()) itemAddDeviceBinding.address.setEnabled(false);
     // 是否显示高级选项
     itemAddDeviceBinding.isOptions.setOnClickListener(v -> itemAddDeviceBinding.options.setVisibility(itemAddDeviceBinding.isOptions.isChecked() ? View.VISIBLE : View.GONE));
     // 设置确认按钮监听
     itemAddDeviceBinding.ok.setOnClickListener(v -> {
       Device newDevice = new Device(
-        device.id, device.type,
+        device.uuid, device.type,
         String.valueOf(itemAddDeviceBinding.name.getText()),
         String.valueOf(itemAddDeviceBinding.address.getText()),
         itemAddDeviceBinding.isAudio.isChecked(),
@@ -143,7 +140,7 @@ public class PublicTools {
         autoControlScreen.itemSwitchSwitch.isChecked(),
         defaultFull.itemSwitchSwitch.isChecked()
       );
-      if (newDevice.id != null) AppData.dbHelper.update(newDevice);
+      if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(newDevice);
       else AppData.dbHelper.insert(newDevice);
       deviceListAdapter.update();
       dialog.cancel();

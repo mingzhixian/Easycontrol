@@ -14,7 +14,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 2;
+  private static final int version = 3;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -23,13 +23,12 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t id integer PRIMARY KEY AUTOINCREMENT,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoControlScreen integer," + "\t defaultFull integer" + ")");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoControlScreen integer," + "\t defaultFull integer" + ")");
   }
 
   @SuppressLint("Range")
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    // 处理数据库升级逻辑
   }
 
   // 读取数据库设备列表
@@ -45,18 +44,9 @@ public class DbHelper extends SQLiteOpenHelper {
 
   // 查找
   @SuppressLint("Range")
-  public Device getById(int id) {
+  public Device getByUUID(String uuid) {
     Device device = null;
-    try (Cursor cursor = getReadableDatabase().query(tableName, null, "id = ?", new String[]{String.valueOf(id)}, null, null, null)) {
-      if (cursor.moveToFirst()) device = getDeviceFormCursor(cursor);
-    }
-    return device;
-  }
-
-  @SuppressLint("Range")
-  public Device getByName(String name) {
-    Device device = null;
-    try (Cursor cursor = getReadableDatabase().query(tableName, null, "name = ?", new String[]{String.valueOf(name)}, null, null, null)) {
+    try (Cursor cursor = getReadableDatabase().query(tableName, null, "uuid=?", new String[]{uuid}, null, null, null)) {
       if (cursor.moveToFirst()) device = getDeviceFormCursor(cursor);
     }
     return device;
@@ -69,17 +59,17 @@ public class DbHelper extends SQLiteOpenHelper {
 
   // 更新
   public void update(Device device) {
-    getWritableDatabase().update(tableName, getValues(device), "id=?", new String[]{String.valueOf(device.id)});
+    getWritableDatabase().update(tableName, getValues(device), "uuid=?", new String[]{String.valueOf(device.uuid)});
   }
 
   // 删除
   public void delete(Device device) {
-    getWritableDatabase().delete(tableName, "id=?", new String[]{String.valueOf(device.id)});
+    getWritableDatabase().delete(tableName, "uuid=?", new String[]{String.valueOf(device.uuid)});
   }
 
   private ContentValues getValues(Device device) {
     ContentValues values = new ContentValues();
-    values.put("id", device.id);
+    values.put("uuid", device.uuid);
     values.put("type", device.type);
     values.put("name", device.name);
     values.put("isAudio", device.isAudio);
@@ -97,7 +87,7 @@ public class DbHelper extends SQLiteOpenHelper {
   @SuppressLint("Range")
   private Device getDeviceFormCursor(Cursor cursor) {
     return new Device(
-      cursor.getInt(cursor.getColumnIndex("id")),
+      cursor.getString(cursor.getColumnIndex("uuid")),
       cursor.getInt(cursor.getColumnIndex("type")),
       cursor.getString(cursor.getColumnIndex("name")),
       cursor.getString(cursor.getColumnIndex("address")),

@@ -28,46 +28,47 @@ public class MyHttpHandler implements HttpHandler {
     JSONObject response = new JSONObject();
     try {
       JSONObject params = getRequestParam(httpExchange);
-      // 版本不符
-      if (params.getInt("version") == Center.version) {
-        response.put("status", RESPONSE_ERROR);
-        response.put("msg", "版本不符，Center版本为" + Center.version);
-      }
-      // 获取用户
-      User user = getUser(params.getString("name"), params.getString("password"));
-      // 用户不存在
-      if (user == null) {
-        response.put("status", RESPONSE_ERROR);
-        response.put("msg", "密码错误或用户已存在");
-      }
-      // 分发处理
-      else {
-        switch (params.getInt("handle")) {
-          case POST_DEVICE: {
-            postDevice(user, params, response);
-            break;
-          }
-          case DELETE_DEVICE: {
-            deleteDevice(user, params, response);
-            break;
-          }
-          case GET_DEVICE: {
-            getDevice(user, params, response);
-            break;
-          }
-          case CHANGE_PASSWORD: {
-            changePassword(user, params, response);
-            break;
-          }
-        }
-      }
+      handleParam(params, response);
     } catch (IOException ignored) {
-    } finally {
-      try {
-        System.out.print("aaa");
-        writeResponse(httpExchange, response);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+    }
+    try {
+      writeResponse(httpExchange, response);
+    } catch (IOException ignored) {
+    }
+  }
+
+  private static void handleParam(JSONObject params, JSONObject response) {
+    // 版本不符
+    if (params.getInt("version") != Center.version) {
+      response.put("status", RESPONSE_ERROR);
+      response.put("msg", "版本不符，Center版本为" + Center.version);
+      return;
+    }
+    // 获取用户
+    User user = getUser(params.getString("name"), params.getString("password"));
+    // 用户不存在
+    if (user == null) {
+      response.put("status", RESPONSE_ERROR);
+      response.put("msg", "密码错误或用户已存在");
+      return;
+    }
+    // 分发处理
+    switch (params.getInt("handle")) {
+      case POST_DEVICE: {
+        postDevice(user, params, response);
+        break;
+      }
+      case DELETE_DEVICE: {
+        deleteDevice(user, params, response);
+        break;
+      }
+      case GET_DEVICE: {
+        getDevice(user, params, response);
+        break;
+      }
+      case CHANGE_PASSWORD: {
+        changePassword(user, params, response);
+        break;
       }
     }
   }
@@ -85,24 +86,24 @@ public class MyHttpHandler implements HttpHandler {
   private static void postDevice(User user, JSONObject params, JSONObject response) {
     response.put("status", RESPONSE_OK);
     response.put("msg", "成功");
-    String deviceID = params.getString("deviceID");
+    String uuid = params.getString("uuid");
     String ip = params.getString("ip");
-    User.Device postDevice = user.getDevice(deviceID);
+    User.Device postDevice = user.getDevice(uuid);
     if (postDevice == null) {
-      postDevice = new User.Device(deviceID, ip);
+      postDevice = new User.Device(uuid, ip);
       user.devices.add(postDevice);
     }
     postDevice.lastPostTime = System.currentTimeMillis();
-    System.out.print("Post Device,Name=" + user.name + ",Password=" + user.password + ",DeviceId=" + deviceID + "\n");
+    System.out.print("Post Device,Name=" + user.name + ",Password=" + user.password + ",UUID=" + uuid + "\n");
   }
 
   private static void deleteDevice(User user, JSONObject params, JSONObject response) {
     response.put("status", RESPONSE_OK);
     response.put("msg", "成功");
-    String deviceID = params.getString("deviceID");
-    User.Device deleteDevice = user.getDevice(deviceID);
+    String uuid = params.getString("uuid");
+    User.Device deleteDevice = user.getDevice(uuid);
     if (deleteDevice != null) user.devices.remove(deleteDevice);
-    System.out.print("Delete Device,Name=" + user.name + ",Password=" + user.password + ",DeviceId=" + deviceID + "\n");
+    System.out.print("Delete Device,Name=" + user.name + ",Password=" + user.password + ",UUID=" + uuid + "\n");
   }
 
   private static void getDevice(User user, JSONObject params, JSONObject response) {
@@ -111,7 +112,7 @@ public class MyHttpHandler implements HttpHandler {
     JSONArray deviceArray = new JSONArray();
     for (User.Device device : user.devices) {
       JSONObject tmp = new JSONObject();
-      tmp.put("deviceID", device.deviceID);
+      tmp.put("uuid", device.uuid);
       tmp.put("ip", device.ip);
       deviceArray.put(tmp);
     }
