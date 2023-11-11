@@ -33,10 +33,12 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
   private static LocalSocket socket;
+  private static LocalSocket videoSocket;
   private static FileDescriptor fileDescriptor;
+  private static FileDescriptor videoFileDescriptor;
   public static DataInputStream streamIn;
 
-  public static final Object object = new Object();
+  private static final Object object = new Object();
 
   private static boolean startSuccess = false;
 
@@ -97,44 +99,6 @@ public final class Server {
     }
   }
 
-  // 关闭
-  private static void release() {
-    for (int i = 0; i < 7; i++) {
-      try {
-        switch (i) {
-          case 0:
-            streamIn.close();
-            socket.close();
-            break;
-          case 1:
-            // 恢复分辨率
-            if (Options.setWidth != -1)
-              new ProcessBuilder().command("sh", "-c", "wm size reset").start();
-          case 2:
-            SurfaceControl.destroyDisplay(VideoEncode.display);
-            break;
-          case 3:
-            if (Options.autoControlScreen) Controller.checkScreenOff(false);
-            Device.setScreenPowerMode(1);
-            break;
-          case 4:
-            VideoEncode.encedec.stop();
-            VideoEncode.encedec.release();
-            break;
-          case 5:
-            AudioEncode.audioCapture.stop();
-            AudioEncode.audioCapture.release();
-            AudioEncode.encedec.stop();
-            AudioEncode.encedec.release();
-            break;
-          case 6:
-            new ProcessBuilder().command("sh", "-c", "ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9").start();
-        }
-      } catch (Exception ignored) {
-      }
-    }
-  }
-
   private static Method GET_SERVICE_METHOD;
 
   @SuppressLint({"DiscouragedPrivateApi", "PrivateApi"})
@@ -172,6 +136,8 @@ public final class Server {
     try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
       socket = serverSocket.accept();
       fileDescriptor = socket.getFileDescriptor();
+      videoSocket = serverSocket.accept();
+      videoFileDescriptor = videoSocket.getFileDescriptor();
       streamIn = new DataInputStream(socket.getInputStream());
     }
   }
@@ -187,9 +153,7 @@ public final class Server {
         VideoEncode.encodeOut();
       }
     } catch (Exception ignored) {
-      synchronized (object) {
-        object.notify();
-      }
+      errorClose();
     }
   }
 
@@ -197,9 +161,7 @@ public final class Server {
     try {
       while (!Thread.interrupted()) AudioEncode.encodeIn();
     } catch (Exception ignored) {
-      synchronized (object) {
-        object.notify();
-      }
+      errorClose();
     }
   }
 
@@ -207,9 +169,7 @@ public final class Server {
     try {
       while (!Thread.interrupted()) AudioEncode.encodeOut();
     } catch (Exception ignored) {
-      synchronized (object) {
-        object.notify();
-      }
+      errorClose();
     }
   }
 
@@ -217,9 +177,7 @@ public final class Server {
     try {
       while (!Thread.interrupted()) Controller.handleIn();
     } catch (Exception ignored) {
-      synchronized (object) {
-        object.notify();
-      }
+      errorClose();
     }
   }
 
@@ -227,20 +185,71 @@ public final class Server {
     try {
       while (!Thread.interrupted()) {
         if (Options.autoControlScreen) Controller.checkScreenOff(true);
-        Device.setScreenPowerMode(Options.turnOffScreen ? 0 : 1);
+        if (Options.turnOffScreen) Device.setScreenPowerMode(0);
         if (System.currentTimeMillis() - Controller.lastKeepAliveTime > 1000 * 5)
           throw new IOException("连接断开");
         Thread.sleep(1000);
       }
     } catch (Exception ignored) {
-      synchronized (object) {
-        object.notify();
-      }
+      errorClose();
     }
   }
 
-  public synchronized static void write(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
-    while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
+  public static void errorClose() {
+    synchronized (object) {
+      object.notify();
+    }
+  }
+
+  public static void writeVideo(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
+    synchronized (videoFileDescriptor) {
+      while (byteBuffer.remaining() > 0) Os.write(videoFileDescriptor, byteBuffer);
+    }
+  }
+
+  public static void write(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
+    synchronized (fileDescriptor) {
+      while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
+    }
+  }
+
+  // 释放资源
+  private static void release() {
+    for (int i = 0; i < 7; i++) {
+      try {
+        switch (i) {
+          case 0:
+            streamIn.close();
+            socket.close();
+            videoSocket.close();
+            break;
+          case 1:
+            // 恢复分辨率
+            if (Options.setWidth != -1)
+              new ProcessBuilder().command("sh", "-c", "wm size reset").start();
+          case 2:
+            SurfaceControl.destroyDisplay(VideoEncode.display);
+            break;
+          case 3:
+            if (Options.autoControlScreen) Controller.checkScreenOff(false);
+            if (Options.turnOffScreen) Device.setScreenPowerMode(1);
+            break;
+          case 4:
+            VideoEncode.encedec.stop();
+            VideoEncode.encedec.release();
+            break;
+          case 5:
+            AudioEncode.audioCapture.stop();
+            AudioEncode.audioCapture.release();
+            AudioEncode.encedec.stop();
+            AudioEncode.encedec.release();
+            break;
+          case 6:
+            new ProcessBuilder().command("sh", "-c", "ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9").start();
+        }
+      } catch (Exception ignored) {
+      }
+    }
   }
 
 }

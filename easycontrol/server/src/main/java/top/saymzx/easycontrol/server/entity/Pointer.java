@@ -13,9 +13,9 @@ public final class Pointer {
 
   public long downTime;
 
-  public Pointer(int id,long downTime) {
+  public Pointer(int id, long downTime) {
     this.id = id;
-    this.downTime=downTime;
+    this.downTime = downTime;
   }
 
 }

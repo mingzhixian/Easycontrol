@@ -13,7 +13,7 @@ public class BufferNew {
   public ByteBuffer read(int size) throws InterruptedException {
     ByteBuffer data = ByteBuffer.allocate(size);
     int readBytes = 0;
-    synchronized (this) {
+    synchronized (dataQueue) {
       while (readBytes < size) {
         ByteBuffer tmpData = dataQueue.takeFirst();
         int needReadSize = size - readBytes;

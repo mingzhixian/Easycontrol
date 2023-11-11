@@ -10,77 +10,65 @@ import java.nio.ByteBuffer;
 
 public class VideoDecode {
 
-  private MediaCodec videoDecodec;
-  private final ByteBuffer csd0;
-  private final ByteBuffer csd1;
-  private final Pair<Integer, Integer> videoSize;
+  private MediaCodec decodec;
+  private MediaFormat decodecFormat;
+  private final boolean isH265Support;
 
-  public VideoDecode(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) {
-    this.videoSize = videoSize;
-    this.csd0 = csd0;
-    this.csd1 = csd1;
+  public VideoDecode(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) throws IOException {
+    isH265Support = csd1 == null;
+    setVideoDecodec(videoSize, csd0, csd1);
   }
 
   public void release() {
     try {
-      videoDecodec.stop();
-      videoDecodec.release();
+      decodec.stop();
+      decodec.release();
     } catch (Exception ignored) {
     }
   }
 
-  private int dropFrameNum = 0;
-
-  public synchronized boolean decodeIn(ByteBuffer data) {
+  public void decodeIn(ByteBuffer data) {
     try {
-      // 50ms超时
-      int inIndex = videoDecodec.dequeueInputBuffer(50_000);
+      int inIndex = decodec.dequeueInputBuffer(20_000);
       // 缓冲区已满则丢帧
-      if (inIndex < 0) {
-        dropFrameNum++;
-        // 连续丢帧3次触发帧率调整，自动下调帧率挡位
-        if (dropFrameNum > 3) {
-          dropFrameNum = 0;
-          return false;
-        }
-        return true;
-      }
-      dropFrameNum = 0;
-      videoDecodec.getInputBuffer(inIndex).put(data);
+      if (inIndex < 0) return;
+      decodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
-      videoDecodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
+      decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
     } catch (IllegalStateException ignored) {
     }
-    return true;
   }
 
   private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
   public void decodeOut(boolean isNormalPlay) {
     try {
-      int outIndex = videoDecodec.dequeueOutputBuffer(bufferInfo, -1);
-      if (outIndex >= 0) videoDecodec.releaseOutputBuffer(outIndex, isNormalPlay);
+      int outIndex = decodec.dequeueOutputBuffer(bufferInfo, -1);
+      if (outIndex >= 0) decodec.releaseOutputBuffer(outIndex, isNormalPlay);
     } catch (IllegalStateException ignored) {
     }
   }
 
   // 创建Codec
-  public void setVideoDecodec(Surface surface) throws IOException {
+  private void setVideoDecodec(Pair<Integer, Integer> videoSize, ByteBuffer csd0, ByteBuffer csd1) throws IOException {
     // 创建解码器
-    String codecMime = MediaFormat.MIMETYPE_VIDEO_AVC;
-    videoDecodec = MediaCodec.createDecoderByType(codecMime);
-    MediaFormat mediaFormat = MediaFormat.createVideoFormat(codecMime, videoSize.first, videoSize.second);
+    String codecMime = isH265Support ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
+    decodec = MediaCodec.createDecoderByType(codecMime);
+    decodecFormat = MediaFormat.createVideoFormat(codecMime, videoSize.first, videoSize.second);
     // 获取视频标识头
-    mediaFormat.setByteBuffer("csd-0", csd0);
-    mediaFormat.setByteBuffer("csd-1", csd1);
-    mediaFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
+    decodecFormat.setByteBuffer("csd-0", csd0);
+    if (!isH265Support) decodecFormat.setByteBuffer("csd-1", csd1);
+    decodecFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
+  }
+
+  public void setSurface(Surface surface) {
     // 配置解码器
-    videoDecodec.configure(mediaFormat, surface, null, 0);
+    decodec.configure(decodecFormat, surface, null, 0);
     // 启动解码器
-    videoDecodec.start();
+    decodec.start();
     // 解析首帧，解决开始黑屏问题
-    decodeIn(ByteBuffer.wrap(csd0.array()));
-    decodeIn(ByteBuffer.wrap(csd1.array()));
+    decodeIn(decodecFormat.getByteBuffer("csd-0"));
+    if (!isH265Support) decodeIn(decodecFormat.getByteBuffer("csd-1"));
   }
 
 }

@@ -12,6 +12,7 @@ import java.io.File;
 import top.saymzx.easycontrol.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class SetActivity extends Activity {
   private ActivitySetBinding setActivity;
@@ -22,7 +23,7 @@ public class SetActivity extends Activity {
     setActivity = ActivitySetBinding.inflate(this.getLayoutInflater());
     setContentView(setActivity.getRoot());
     // 设置状态栏导航栏颜色沉浸
-    AppData.publicTools.setStatusAndNavBar(this);
+    PublicTools.setStatusAndNavBar(this);
     // 设置页面
     drawUi();
     setButtonListener();
@@ -30,25 +31,25 @@ public class SetActivity extends Activity {
 
   // 设置默认值
   private void drawUi() {
-    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, AppData.publicTools.maxSizeList);
-    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, AppData.publicTools.maxFpsList);
-    ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, AppData.publicTools.videoBitList);
+    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.maxSizeList);
+    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.maxFpsList);
+    ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.videoBitList);
     // 默认配置
-    setActivity.setDefault.addView(AppData.publicTools.createSwitchCard(this, "使能音频", AppData.setting.getDefaultIsAudio(), isChecked -> AppData.setting.setDefaultIsAudio(isChecked)).getRoot());
-    setActivity.setDefault.addView(AppData.publicTools.createSpinnerCard(this, "最大大小", maxSizeAdapter, String.valueOf(AppData.setting.getDefaultMaxSize()), str -> AppData.setting.setDefaultMaxSize(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(AppData.publicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, String.valueOf(AppData.setting.getDefaultMaxFps()), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(AppData.publicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, String.valueOf(AppData.setting.getDefaultVideoBit()), str -> AppData.setting.setDefaultVideoBit(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(AppData.publicTools.createSwitchCard(this, "修改分辨率", AppData.setting.getDefaultSetResolution(), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使能音频", AppData.setting.getDefaultIsAudio(), isChecked -> AppData.setting.setDefaultIsAudio(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大大小", maxSizeAdapter, String.valueOf(AppData.setting.getDefaultMaxSize()), str -> AppData.setting.setDefaultMaxSize(Integer.parseInt(str))).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, String.valueOf(AppData.setting.getDefaultMaxFps()), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, String.valueOf(AppData.setting.getDefaultVideoBit()), str -> AppData.setting.setDefaultVideoBit(Integer.parseInt(str))).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", AppData.setting.getDefaultSetResolution(), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
     // 显示
-    setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "熄屏控制", AppData.setting.getSlaveTurnOffScreen(), isChecked -> AppData.setting.setSlaveTurnOffScreen(isChecked)).getRoot());
-    setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "自动屏幕控制", AppData.setting.getAutoControlScreen(), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
-    setActivity.setDisplay.addView(AppData.publicTools.createSwitchCard(this, "默认全屏启动", AppData.setting.getDefaultFull(), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", AppData.setting.getTurnOffScreen(), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", AppData.setting.getAutoControlScreen(), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "默认全屏启动", AppData.setting.getDefaultFull(), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
     // 其他
-    setActivity.setOther.addView(AppData.publicTools.createTextCard(this, "清除默认设备", () -> {
+    setActivity.setOther.addView(PublicTools.createTextCard(this, "清除默认设备", () -> {
       AppData.setting.setDefaultDevice(-1);
       Toast.makeText(this, "已清除", Toast.LENGTH_SHORT).show();
     }).getRoot());
-    setActivity.setOther.addView(AppData.publicTools.createTextCard(this, "重新生成密钥(需重新授权)", () -> {
+    setActivity.setOther.addView(PublicTools.createTextCard(this, "重新生成密钥(需重新授权)", () -> {
       try {
         // 读取密钥文件
         File privateKey = new File(this.getApplicationContext().getFilesDir(), "private.key");
@@ -61,11 +62,11 @@ public class SetActivity extends Activity {
 
     }).getRoot());
     // 关于
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "查看本机IP", () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "使用说明", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "隐私政策", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "捐助", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol#%E9%BC%93%E5%8A%B1")).getRoot());
-    setActivity.setAbout.addView(AppData.publicTools.createTextCard(this, "版本: " + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, "查看本机IP", () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, "使用说明", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, "隐私政策", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, "捐助", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol#%E9%BC%93%E5%8A%B1")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, "版本: " + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
   }
 
   // 浏览器打开
@@ -84,5 +85,6 @@ public class SetActivity extends Activity {
   // 设置返回按钮监听
   private void setButtonListener() {
     setActivity.backButton.setOnClickListener(v -> finish());
+    setActivity.setCenter.setOnClickListener(v -> startActivity(new Intent(this, CenterActivity.class)));
   }
 }

@@ -32,9 +32,6 @@ public final class Controller {
         case 5:
           handlePowerEvent();
           break;
-        case 6:
-          handleCongestionEvent();
-          break;
       }
       hasData = Server.streamIn.available() > 0;
     }
@@ -45,7 +42,8 @@ public final class Controller {
     int pointerId = Server.streamIn.readByte();
     float x = Server.streamIn.readFloat();
     float y = Server.streamIn.readFloat();
-    Device.touchEvent(action, x, y, pointerId);
+    int offsetTime=Server.streamIn.readInt();
+    Device.touchEvent(action, x, y, pointerId,offsetTime);
   }
 
   private static void handleKeyEvent() throws IOException {
@@ -69,18 +67,6 @@ public final class Controller {
 
   private static void handlePowerEvent() {
     Device.keyEvent(26);
-  }
-
-  public static final int[] maxFpsList = new int[]{60, 45, 35, 25, 15};
-
-  private static void handleCongestionEvent() {
-    for (int i : maxFpsList) {
-      if (i < VideoEncode.maxFps) {
-        VideoEncode.maxFps = i;
-        VideoEncode.isHasChangeConfig = true;
-        break;
-      }
-    }
   }
 
   public static void checkScreenOff(boolean turnOn) throws IOException {

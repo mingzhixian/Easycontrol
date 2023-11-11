@@ -46,7 +46,7 @@ public final class SurfaceControl {
 
   public static void setDisplayProjection(IBinder displayToken, int orientation, Rect layerStackRect, Rect displayRect) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     CLASS.getMethod("setDisplayProjection", IBinder.class, int.class, Rect.class, Rect.class)
-        .invoke(null, displayToken, orientation, layerStackRect, displayRect);
+      .invoke(null, displayToken, orientation, layerStackRect, displayRect);
   }
 
   public static void setDisplayLayerStack(IBinder displayToken, int layerStack) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {

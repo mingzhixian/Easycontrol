@@ -27,7 +27,8 @@
       android:layout_gravity="end"
       android:gravity="center"
       android:orientation="vertical"
-      android:paddingTop="40dp">
+      android:paddingTop="40dp"
+      android:paddingBottom="40dp">
 
       <ImageView
         android:id="@+id/button_switch"
@@ -53,24 +54,18 @@
         android:src="@drawable/back"
         android:tint="#fff" />
 
-      <ImageView
-        android:id="@+id/button_more"
-        android:layout_width="26dp"
-        android:layout_height="40dp"
-        android:src="@drawable/more"
-        android:tint="#fff" />
-
     </LinearLayout>
   </LinearLayout>
 
   <ImageView
-    android:id="@+id/line"
-    android:layout_width="50dp"
-    android:layout_height="20dp"
-    android:layout_gravity="end|top"
-    android:src="@drawable/full_bar_land"
-    android:tint="@color/clientBar"
-    android:visibility="gone" />
+    android:id="@+id/button_more"
+    android:layout_width="40dp"
+    android:layout_height="35dp"
+    android:layout_gravity="end|bottom"
+    android:paddingStart="7dp"
+    android:paddingEnd="7dp"
+    android:src="@drawable/more"
+    android:tint="#fff" />
 
   <GridLayout
     android:id="@+id/bar_view"

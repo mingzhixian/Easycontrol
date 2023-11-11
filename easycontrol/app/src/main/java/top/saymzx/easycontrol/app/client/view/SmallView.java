@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class SmallView {
   private final ClientView clientView;
@@ -64,7 +65,7 @@ public class SmallView {
       showSmallViewAnim();
       // 更新TextureView
       smallView.textureViewLayout.addView(clientView.textureView, 0);
-      Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
+      Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
       clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
       setCenter();
     }
@@ -79,7 +80,7 @@ public class SmallView {
   }
 
   public void changeRotation() {
-    Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
+    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
     clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
     setCenter();
   }
@@ -144,7 +145,7 @@ public class SmallView {
           paramsX.set(smallViewParams.x);
           paramsY.set(smallViewParams.y);
           isFilp.set(false);
-          screenSize.set(AppData.publicTools.getScreenSize());
+          screenSize.set(PublicTools.getScreenSize());
           break;
         }
         case MotionEvent.ACTION_MOVE: {
@@ -168,7 +169,7 @@ public class SmallView {
         }
         case MotionEvent.ACTION_UP:
           if (!isFilp.get())
-            clientView.changeBarViewAnim(smallView.barView, AppData.publicTools.dp2px(-40f));
+            clientView.changeBarViewAnim(smallView.barView, PublicTools.dp2px(-40f));
           break;
       }
       return true;
@@ -177,7 +178,7 @@ public class SmallView {
 
   // 居中显示
   private void setCenter() {
-    Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
+    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
     // 更新
     ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
@@ -201,7 +202,7 @@ public class SmallView {
   // 设置悬浮窗大小拖动按钮监听控制
   @SuppressLint("ClickableViewAccessibility")
   private void setReSizeListener() {
-    int minSize = AppData.publicTools.dp2px(150f);
+    int minSize = PublicTools.dp2px(150f);
     smallView.reSize.setOnTouchListener((v, event) -> {
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
         // 更新位置大小

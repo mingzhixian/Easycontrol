@@ -23,9 +23,9 @@ public final class DisplayManager {
 
   public static DisplayInfo parseDisplayInfo(String dumpsysDisplayOutput, int displayId) {
     Pattern regex = Pattern.compile(
-        "^    mOverrideDisplayInfo=DisplayInfo\\{\".*?, displayId " + displayId + ".*?(, FLAG_.*)?, real ([0-9]+) x ([0-9]+).*?, "
-            + "rotation ([0-9]+).*?, layerStack ([0-9]+)",
-        Pattern.MULTILINE);
+      "^    mOverrideDisplayInfo=DisplayInfo\\{\".*?, displayId " + displayId + ".*?(, FLAG_.*)?, real ([0-9]+) x ([0-9]+).*?, "
+        + "rotation ([0-9]+).*?, layerStack ([0-9]+)",
+      Pattern.MULTILINE);
     Matcher m = regex.matcher(dumpsysDisplayOutput);
     if (!m.find()) {
       return null;

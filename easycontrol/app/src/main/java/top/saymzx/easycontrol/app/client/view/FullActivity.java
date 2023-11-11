@@ -10,9 +10,11 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class FullActivity extends Activity {
 
@@ -34,7 +36,7 @@ public class FullActivity extends Activity {
     setContentView(fullActivity.getRoot());
     context = this;
     // 全屏
-    AppData.publicTools.setFullScreen(this);
+    PublicTools.setFullScreen(this);
     // 隐藏工具栏
     fullActivity.barView.setVisibility(View.GONE);
     // 旋转
@@ -100,11 +102,11 @@ public class FullActivity extends Activity {
 
   // 获取去除底部操作栏后的屏幕大小，用于修改分辨率使用
   public static Pair<Integer, Integer> getScreenSizeWithoutDock() {
-    Pair<Integer, Integer> screenSize = AppData.publicTools.getScreenSize();
+    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
     // 保持竖向
     if (screenSize.first > screenSize.second)
       screenSize = new Pair<>(screenSize.second, screenSize.first);
-    return new Pair<>(screenSize.first, screenSize.second - AppData.publicTools.dp2px(35f));
+    return new Pair<>(screenSize.first, screenSize.second - PublicTools.dp2px(35f));
   }
 
   // 设置按钮监听
@@ -117,16 +119,15 @@ public class FullActivity extends Activity {
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     fullActivity.buttonToLine.setOnClickListener(v -> setNavBarHide());
-    fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, AppData.publicTools.dp2px(40f)));
-    fullActivity.line.setOnClickListener(v -> setNavBarHide());
+    fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, PublicTools.dp2px(40f)));
   }
 
   // 导航栏隐藏
   private void setNavBarHide() {
-    clientView.changeBarViewAnim(fullActivity.barView, AppData.publicTools.dp2px(40f));
+    clientView.changeBarViewAnim(fullActivity.barView, PublicTools.dp2px(40f));
     boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
-    fullActivity.line.setVisibility(isShow ? View.GONE : View.VISIBLE);
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
+    fullActivity.buttonToLine.setImageResource(isShow ? R.drawable.to_line : R.drawable.exit_line);
   }
 
 }

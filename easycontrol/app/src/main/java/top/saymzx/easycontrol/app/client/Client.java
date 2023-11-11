@@ -23,17 +23,18 @@ import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.client.view.FullActivity;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class Client {
-  private final ExecutorService executor = new ThreadPoolExecutor(3, 15, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new CustomThreadFactory(), new ThreadPoolExecutor.CallerRunsPolicy());
-
-  // 连接
-  public Adb adb;
-  public AdbStream stream;
+  // 连接，双连接，避免tcp对头阻塞，以及避免adb同步阻塞
+  private Adb adb;
+  private Adb videoAdb;
+  private AdbStream stream;
+  private AdbStream videoStream;
 
   // 子服务
   public VideoDecode videoDecode;
-  public AudioDecode audioDecode;
+  private AudioDecode audioDecode;
   public Controller controller;
 
   private final ClientView clientView = new ClientView(this);
@@ -42,19 +43,22 @@ public class Client {
   public boolean isNormalPlay = true;
   private boolean startSuccess = false;
 
-  private final Dialog dialog = AppData.publicTools.createClientLoading(AppData.main, () -> clientView.hide(true));
+  private final Thread startCheckThread;
+  private final ExecutorService executor = new ThreadPoolExecutor(4, 6, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new CustomThreadFactory(), new ThreadPoolExecutor.CallerRunsPolicy());
+  private final Dialog dialog = PublicTools.createClientLoading(AppData.main, this::errorClose);
 
   public Client(Device device, UsbDevice usbDevice) {
     // 显示加载框
     dialog.show();
     // 启动超时
-    executor.execute(() -> {
+    startCheckThread = new Thread(() -> {
       try {
         Thread.sleep(8000);
+        if (!startSuccess) errorClose();
       } catch (InterruptedException ignored) {
       }
-      if (!startSuccess) clientView.hide(true);
     });
+    startCheckThread.start();
     // 启动Client
     executor.execute(() -> {
       try {
@@ -70,14 +74,13 @@ public class Client {
         createSubService();
         // 更新UI
         AppData.main.runOnUiThread(dialog::cancel);
-        createUI();
+        createUI(device);
         startSuccess = true;
       } catch (Exception e) {
-        AppData.main.runOnUiThread(() -> {
-          Toast.makeText(AppData.main, e.toString(), Toast.LENGTH_SHORT).show();
-          Log.e("easycontrol", e.toString());
-          clientView.hide(true);
-        });
+        String error = String.valueOf(e);
+        Log.e("Easycontrol", error);
+        AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
+        errorClose();
       }
     });
   }
@@ -85,16 +88,19 @@ public class Client {
   // 连接ADB
   private void connectADB(Device device, UsbDevice usbDevice) throws Exception {
     if (usbDevice == null) {
-      Pair<String, Integer> address = AppData.publicTools.getIpAndPort(device.address);
+      Pair<String, Integer> address = PublicTools.getIpAndPort(device.address);
       if (address == null) throw new Exception("地址格式错误");
       // 连接ADB
       adb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
-    } else adb = new Adb(usbDevice, AppData.keyPair);
+      videoAdb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
+    } else {
+      adb = new Adb(usbDevice, AppData.keyPair);
+      videoAdb = new Adb(usbDevice, AppData.keyPair);
+    }
   }
 
   // 发送Server
   private void sendServer() throws Exception {
-    // 尝试发送Server
     try {
       if (BuildConfig.ENABLE_DEBUG_FEATURE) {
         adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/" + AppData.serverName);
@@ -120,7 +126,7 @@ public class Client {
         setWidth = tmpDeviceSize.first;
         setHeight = tmpDeviceSize.second;
       }
-      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (AppData.setting.getSlaveTurnOffScreen() ? 1 : 0) + " auto_control_screen=" + (AppData.setting.getAutoControlScreen() ? 1 : 0) + " set_width=" + setWidth + " set_height=" + setHeight + " > /dev/null 2>&1 & ", false);
+      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " set_width=" + setWidth + " set_height=" + setHeight + " > /dev/null 2>&1 & ", false);
     } catch (Exception ignored) {
       throw new Exception("启动Server失败");
     }
@@ -132,7 +138,8 @@ public class Client {
     // 尝试连接
     for (int i = 0; i < 50; i++) {
       try {
-        stream = adb.localSocketForward("easycontrol", true);
+        if (stream == null) stream = adb.localSocketForward("easycontrol", true);
+        if (videoStream == null) videoStream = videoAdb.localSocketForward("easycontrol", true);
         return;
       } catch (Exception ignored) {
         Thread.sleep(40);
@@ -144,18 +151,18 @@ public class Client {
   // 创建子服务
   private void createSubService() throws Exception {
     try {
+      // 是否支持H265编码
+      boolean isH265Support = videoStream.readByte() == 1;
       // 视频大小
-      clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
+      clientView.videoSize = new Pair<>(videoStream.readInt(), videoStream.readInt());
       // 视频解码
-      if (stream.readByte() != 1) throw new IOException("数据错误");
-      ByteBuffer csd0 = readFrame();
-      if (stream.readByte() != 1) throw new IOException("数据错误");
-      ByteBuffer csd1 = readFrame();
+      ByteBuffer csd0 = readFrame(videoStream);
+      ByteBuffer csd1 = isH265Support ? null : readFrame(videoStream);
       videoDecode = new VideoDecode(clientView.videoSize, csd0, csd1);
       // 音频解码
       if (stream.readByte() == 1) {
-        if (stream.readByte() != 2) throw new IOException("数据错误");
-        csd0 = readFrame();
+        if (stream.readByte() != 1) throw new IOException("数据错误");
+        csd0 = readFrame(stream);
         audioDecode = new AudioDecode(csd0);
       }
       // 控制
@@ -165,75 +172,102 @@ public class Client {
     }
   }
 
-  // 启动子服务
-  public void startSubService() {
-    executor.execute(this::executeVideoDecodeOut);
-    if (audioDecode != null) executor.execute(this::executeAudioDecodeOut);
-    executor.execute(this::executeStreamIn);
-    executor.execute(this::executeOtherService);
-  }
-
   // 创建UI
-  private void createUI() {
+  private void createUI(Device device) {
     AppData.main.runOnUiThread(() -> {
-      if (AppData.setting.getDefaultFull()) clientView.changeToFull();
+      if (device.defaultFull) clientView.changeToFull();
       else clientView.changeToSmall();
     });
+  }
+
+  // 启动子服务
+  public void startSubService() {
+    startCheckThread.interrupt();
+    executor.execute(this::executeVideoDecodeIn);
+    executor.execute(this::executeVideoDecodeOut);
+    if (audioDecode != null) {
+      executor.execute(this::executeAudioDecodeIn);
+      executor.execute(this::executeAudioDecodeOut);
+    }
+    executor.execute(this::executeStreamIn);
+    executor.execute(this::executeOtherService);
   }
 
   // 服务分发
   private void executeStreamIn() {
     try {
-      boolean hasData = true;
-      while (hasData) {
+      while (!Thread.interrupted()) {
         switch (stream.readByte()) {
           case 1:
-            ByteBuffer videoFrame = readFrame();
-            // 视频因在界面旋转时会重新生成配置参数，因此此处仍需解码，只是不再显示，音频则可以直接停止解码
-            executor.execute(() -> {
-              if (!videoDecode.decodeIn(videoFrame)) controller.sendCongestionEvent();
-            });
+            ByteBuffer audioFrame = readFrame(stream);
+            if (isNormalPlay) audioDecode.dataQueue.offer(audioFrame);
             break;
           case 2:
-            ByteBuffer audioFrame = readFrame();
-            if (isNormalPlay) executor.execute(() -> audioDecode.decodeIn(audioFrame));
-            break;
-          case 3:
             controller.handleClipboardEvent();
             break;
-          case 4:
+          case 3:
             controller.handleRotationNotification();
             break;
         }
-        hasData = stream.isEmpty();
       }
-      executor.execute(this::executeStreamIn);
-    } catch (IOException | InterruptedException ignored) {
-      AppData.main.runOnUiThread(() -> clientView.hide(true));
+    } catch (Exception ignored) {
+      errorClose();
+    }
+  }
+
+  private void executeVideoDecodeIn() {
+    try {
+      while (!Thread.interrupted()) videoDecode.decodeIn(readFrame(videoStream));
+    } catch (Exception ignored) {
+      errorClose();
     }
   }
 
   private void executeVideoDecodeOut() {
-    videoDecode.decodeOut(isNormalPlay);
-    executor.execute(this::executeVideoDecodeOut);
-  }
-
-  private void executeAudioDecodeOut() {
-    audioDecode.decodeOut();
-    executor.execute(this::executeAudioDecodeOut);
-  }
-
-  private void executeOtherService() {
-    controller.checkClipBoard();
-    controller.sendKeepAlive();
     try {
-      Thread.sleep(1000);
-      executor.execute(this::executeOtherService);
-    } catch (InterruptedException ignored) {
+      while (!Thread.interrupted()) videoDecode.decodeOut(isNormalPlay);
+    } catch (Exception ignored) {
+      errorClose();
     }
   }
 
-  private ByteBuffer readFrame() throws InterruptedException, IOException {
+  private void executeAudioDecodeIn() {
+    try {
+      while (!Thread.interrupted()) audioDecode.decodeIn();
+    } catch (Exception ignored) {
+      errorClose();
+    }
+  }
+
+  private void executeAudioDecodeOut() {
+    try {
+      while (!Thread.interrupted()) audioDecode.decodeOut();
+    } catch (Exception ignored) {
+      errorClose();
+    }
+  }
+
+  private void executeOtherService() {
+    try {
+      while (!Thread.interrupted()) {
+        controller.checkClipBoard();
+        controller.sendKeepAlive();
+        Thread.sleep(1000);
+      }
+    } catch (Exception ignored) {
+      errorClose();
+    }
+  }
+
+  public void sendMoreOk() {
+    videoAdb.sendMoreOk(videoStream);
+  }
+
+  private void errorClose() {
+    AppData.main.runOnUiThread(() -> clientView.hide(true));
+  }
+
+  private ByteBuffer readFrame(AdbStream stream) throws InterruptedException, IOException {
     return stream.readByteArray(stream.readInt());
   }
 
@@ -241,12 +275,13 @@ public class Client {
     if (dialog.isShowing()) dialog.cancel();
     executor.shutdownNow();
     if (adb != null) adb.close();
+    if (videoAdb != null) videoAdb.close();
     if (videoDecode != null) videoDecode.release();
     if (audioDecode != null) audioDecode.release();
   }
 
   // 线程创建模板
-  static class CustomThreadFactory implements ThreadFactory {
+  private static class CustomThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable runnable) {
       Thread thread = new Thread(runnable);

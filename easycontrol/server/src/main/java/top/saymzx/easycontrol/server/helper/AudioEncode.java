@@ -5,6 +5,7 @@ package top.saymzx.easycontrol.server.helper;
 
 import android.media.AudioRecord;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.system.ErrnoException;
@@ -41,13 +42,11 @@ public final class AudioEncode {
   }
 
   private static void setAudioEncodec() throws IOException {
-    String codecMime = MediaFormat.MIMETYPE_AUDIO_OPUS;
+    String codecMime = MediaFormat.MIMETYPE_AUDIO_AAC;
     encedec = MediaCodec.createEncoderByType(codecMime);
-    MediaFormat encodecFormat = new MediaFormat();
-    encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
+    MediaFormat encodecFormat = MediaFormat.createAudioFormat(codecMime, AudioCapture.SAMPLE_RATE, AudioCapture.CHANNELS);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
-    encodecFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, AudioCapture.CHANNELS);
-    encodecFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, AudioCapture.SAMPLE_RATE);
+    encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
   }
 
@@ -71,22 +70,12 @@ public final class AudioEncode {
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
-      // opus需要做此处理
-      if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
-        buffer.getLong();
-        int size = (int) buffer.getLong();
-        buffer.limit(buffer.position() + size);
-      }
-      // 当无声音时不发送
-      int frameSize = buffer.remaining();
-      if (frameSize > 5) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(5 + frameSize);
-        byteBuffer.put((byte) 2);
-        byteBuffer.putInt(frameSize);
-        byteBuffer.put(buffer);
-        byteBuffer.flip();
-        Server.write(byteBuffer);
-      }
+      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + bufferInfo.size);
+      byteBuffer.put((byte) 1);
+      byteBuffer.putInt(bufferInfo.size);
+      byteBuffer.put(buffer);
+      byteBuffer.flip();
+      Server.write(byteBuffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

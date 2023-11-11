@@ -104,16 +104,14 @@ public final class Device {
           if (tmpTextByte.length > 5000) return;
           nowClipboardText = newClipboardText;
           ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
-          byteBuffer.put((byte) 3);
+          byteBuffer.put((byte) 2);
           byteBuffer.putInt(tmpTextByte.length);
           byteBuffer.put(tmpTextByte);
           byteBuffer.flip();
           try {
             Server.write(byteBuffer);
           } catch (Exception ignored) {
-            synchronized (Server.object) {
-              Server.object.notify();
-            }
+            Server.errorClose();
           }
         }
       }
@@ -126,13 +124,11 @@ public final class Device {
         if ((deviceRotation + rotation) % 2 != 0) {
           deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
           videoSize = new Pair<>(videoSize.second, videoSize.first);
-          byte[] bytes = new byte[]{4};
+          byte[] bytes = new byte[]{3};
           try {
             Server.write(ByteBuffer.wrap(bytes));
           } catch (Exception ignored) {
-            synchronized (Server.object) {
-              Server.object.notify();
-            }
+            Server.errorClose();
           }
         }
         deviceRotation = rotation;
@@ -148,32 +144,29 @@ public final class Device {
 
   private static final PointersState pointersState = new PointersState();
 
-  public static void touchEvent(int action, Float x, Float y, int pointerId) {
-    Pointer pointer;
-    long now = SystemClock.uptimeMillis();
-    if (!pointersState.hasPointer(pointerId)) {
+  public static void touchEvent(int action, Float x, Float y, int pointerId, int offsetTime) {
+    Pointer pointer = pointersState.get(pointerId);
+
+    if (pointer == null) {
       if (action != MotionEvent.ACTION_DOWN) return;
-      pointer = pointersState.newPointer(pointerId, now);
-    } else pointer = pointersState.get(pointerId);
+      pointer = pointersState.newPointer(pointerId, SystemClock.uptimeMillis());
+    }
 
     pointer.x = x * deviceSize.first;
     pointer.y = y * deviceSize.second;
-
     int pointerCount = pointersState.update();
 
-    if (action == MotionEvent.ACTION_UP) pointersState.remove(pointerId);
-
-    if (pointerCount > 1) {
-      if (action == MotionEvent.ACTION_UP) {
+    if (action == MotionEvent.ACTION_UP) {
+      pointersState.remove(pointerId);
+      if (pointerCount > 1)
         action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
-      } else if (action == MotionEvent.ACTION_DOWN) {
+    } else if (action == MotionEvent.ACTION_DOWN) {
+      if (pointerCount > 1)
         action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
-      }
     }
 
-    MotionEvent event = MotionEvent.obtain(pointer.downTime, now, action, pointerCount, pointersState.pointerProperties, pointersState.pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
+    MotionEvent event = MotionEvent.obtain(pointer.downTime, pointer.downTime + offsetTime, action, pointerCount, pointersState.pointerProperties, pointersState.pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
     injectEvent(event);
-
   }
 
   public static void keyEvent(int keyCode) {

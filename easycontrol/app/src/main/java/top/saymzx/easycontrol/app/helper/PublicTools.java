@@ -15,6 +15,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +28,6 @@ import java.util.regex.Pattern;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.databinding.ItemAddDeviceBinding;
 import top.saymzx.easycontrol.app.databinding.ItemClientLoadingBinding;
-import top.saymzx.easycontrol.app.databinding.ItemDevicesItemBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
@@ -33,7 +38,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class PublicTools {
 
   // 设置全面屏
-  public void setFullScreen(Activity context) {
+  public static void setFullScreen(Activity context) {
     // 全屏显示
     context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
       View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
@@ -49,7 +54,7 @@ public class PublicTools {
   }
 
   // 设置状态栏导航栏颜色
-  public void setStatusAndNavBar(Activity context) {
+  public static void setStatusAndNavBar(Activity context) {
     // 导航栏
     context.getWindow().setNavigationBarColor(context.getResources().getColor(R.color.background));
     // 状态栏
@@ -62,21 +67,21 @@ public class PublicTools {
   }
 
   // DP转PX
-  public int dp2px(Float dp) {
+  public static int dp2px(Float dp) {
     return (int) (dp * AppData.main.getResources().getDisplayMetrics().density);
   }
 
   // 获取当前界面宽高
-  public Pair<Integer, Integer> getScreenSize() {
+  public static Pair<Integer, Integer> getScreenSize() {
     DisplayMetrics metric = new DisplayMetrics();
     AppData.main.getWindowManager().getDefaultDisplay().getRealMetrics(metric);
     return new Pair<>(metric.widthPixels, metric.heightPixels);
   }
 
   // 创建弹窗
-  public Dialog createDialog(Context context, boolean canCancel, View view) {
+  public static Dialog createDialog(Context context, boolean canCancel, View view) {
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setCancelable(false);
+    builder.setCancelable(true);
     ScrollView dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).getRoot();
     dialogView.addView(view);
     builder.setView(dialogView);
@@ -87,7 +92,7 @@ public class PublicTools {
   }
 
   // 创建新建设备弹窗
-  public Dialog createAddDeviceView(
+  public static Dialog createAddDeviceView(
     Context context,
     Device device,
     DeviceListAdapter deviceListAdapter
@@ -106,34 +111,48 @@ public class PublicTools {
     ItemSpinnerBinding maxFps = createSpinnerCard(context, "最大帧率", maxFpsAdapter, device.maxFps.toString(), null);
     ItemSpinnerBinding maxVideoBit = createSpinnerCard(context, "最大码率", videoBitAdapter, device.maxVideoBit.toString(), null);
     ItemSwitchBinding setResolution = createSwitchCard(context, "修改分辨率", device.setResolution, null);
+    ItemSwitchBinding turnOffScreen = createSwitchCard(context, "熄屏控制", device.turnOffScreen, null);
+    ItemSwitchBinding autoControlScreen = createSwitchCard(context, "自动屏幕控制", device.autoControlScreen, null);
+    ItemSwitchBinding defaultFull = createSwitchCard(context, "默认全屏", device.defaultFull, null);
     itemAddDeviceBinding.options.addView(maxSize.getRoot());
     itemAddDeviceBinding.options.addView(maxFps.getRoot());
     itemAddDeviceBinding.options.addView(maxVideoBit.getRoot());
     itemAddDeviceBinding.options.addView(setResolution.getRoot());
+    itemAddDeviceBinding.options.addView(turnOffScreen.getRoot());
+    itemAddDeviceBinding.options.addView(autoControlScreen.getRoot());
+    itemAddDeviceBinding.options.addView(defaultFull.getRoot());
+    // 特殊设备不允许修改
+    if (!device.isNormalDevice()) {
+      itemAddDeviceBinding.name.setEnabled(false);
+      itemAddDeviceBinding.address.setEnabled(false);
+    }
     // 是否显示高级选项
     itemAddDeviceBinding.isOptions.setOnClickListener(v -> itemAddDeviceBinding.options.setVisibility(itemAddDeviceBinding.isOptions.isChecked() ? View.VISIBLE : View.GONE));
     // 设置确认按钮监听
     itemAddDeviceBinding.ok.setOnClickListener(v -> {
       Device newDevice = new Device(
-        device.id,
-        itemAddDeviceBinding.name.getText().toString(),
-        itemAddDeviceBinding.address.getText().toString(),
+        device.id, device.type,
+        String.valueOf(itemAddDeviceBinding.name.getText()),
+        String.valueOf(itemAddDeviceBinding.address.getText()),
         itemAddDeviceBinding.isAudio.isChecked(),
-        Integer.parseInt(maxSize.itemSpinnerSpinner.getSelectedItem().toString()),
-        Integer.parseInt(maxFps.itemSpinnerSpinner.getSelectedItem().toString()),
-        Integer.parseInt(maxVideoBit.itemSpinnerSpinner.getSelectedItem().toString()),
-        setResolution.itemSwitchSwitch.isChecked()
+        Integer.parseInt(String.valueOf(maxSize.itemSpinnerSpinner.getSelectedItem())),
+        Integer.parseInt(String.valueOf(maxFps.itemSpinnerSpinner.getSelectedItem())),
+        Integer.parseInt(String.valueOf(maxVideoBit.itemSpinnerSpinner.getSelectedItem())),
+        setResolution.itemSwitchSwitch.isChecked(),
+        turnOffScreen.itemSwitchSwitch.isChecked(),
+        autoControlScreen.itemSwitchSwitch.isChecked(),
+        defaultFull.itemSwitchSwitch.isChecked()
       );
       if (newDevice.id != null) AppData.dbHelper.update(newDevice);
       else AppData.dbHelper.insert(newDevice);
       deviceListAdapter.update();
-      dialog.hide();
+      dialog.cancel();
     });
     return dialog;
   }
 
   // 创建Client加载框
-  public Dialog createClientLoading(
+  public static Dialog createClientLoading(
     Context context,
     MyFunction function
   ) {
@@ -145,7 +164,7 @@ public class PublicTools {
   }
 
   // 创建纯文本卡片
-  public ItemTextBinding createTextCard(
+  public static ItemTextBinding createTextCard(
     Context context,
     String text,
     MyFunction function
@@ -159,7 +178,7 @@ public class PublicTools {
   }
 
   // 创建开关卡片
-  public ItemSwitchBinding createSwitchCard(
+  public static ItemSwitchBinding createSwitchCard(
     Context context,
     String text,
     Boolean isChecked,
@@ -175,11 +194,11 @@ public class PublicTools {
   }
 
   // 创建列表卡片
-  public final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
-  public final String[] maxFpsList = new String[]{"60", "45", "35", "25", "15"};
-  public final String[] videoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
+  public static final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
+  public static final String[] maxFpsList = new String[]{"60", "45", "35", "25", "15"};
+  public static final String[] videoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
 
-  public ItemSpinnerBinding createSpinnerCard(
+  public static ItemSpinnerBinding createSpinnerCard(
     Context context,
     String text,
     ArrayAdapter<String> adapter,
@@ -205,7 +224,7 @@ public class PublicTools {
   }
 
   // 分离地址和端口号
-  public Pair<String, Integer> getIpAndPort(String address) {
+  public static Pair<String, Integer> getIpAndPort(String address) {
     String pattern;
     // ipv6
     if (address.contains("[")) pattern = "(\\[.*?]):(\\d+)";
@@ -220,6 +239,30 @@ public class PublicTools {
       return new Pair<>(ip[0], port);
     }
     return null;
+  }
+
+  // 获取IP地址
+  public static Pair<ArrayList<String>, ArrayList<String>> getIp() {
+    ArrayList<String> ipv4Addresses = new ArrayList<>();
+    ArrayList<String> ipv6Addresses = new ArrayList<>();
+
+    try {
+      Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+      while (networkInterfaces.hasMoreElements()) {
+        NetworkInterface networkInterface = networkInterfaces.nextElement();
+        Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+        while (inetAddresses.hasMoreElements()) {
+          InetAddress inetAddress = inetAddresses.nextElement();
+          if (!inetAddress.isLoopbackAddress())
+            if (inetAddress instanceof Inet4Address)
+              ipv4Addresses.add(inetAddress.getHostAddress());
+            else if (inetAddress instanceof Inet6Address && !inetAddress.isLinkLocalAddress())
+              ipv6Addresses.add(inetAddress.getHostAddress());
+        }
+      }
+    } catch (Exception ignored) {
+    }
+    return new Pair<>(ipv4Addresses, ipv6Addresses);
   }
 
   public interface MyFunction {

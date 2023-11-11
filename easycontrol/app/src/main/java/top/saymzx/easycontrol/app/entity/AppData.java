@@ -11,16 +11,12 @@ import java.io.File;
 import top.saymzx.easycontrol.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.helper.DbHelper;
-import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class AppData {
   @SuppressLint("StaticFieldLeak")
   public static Activity main;
 
-  // 公共工具库
-  public static PublicTools publicTools = new PublicTools();
-
-  // 数据库工具
+  // 数据库工具库
   public static DbHelper dbHelper;
 
   // 密钥文件

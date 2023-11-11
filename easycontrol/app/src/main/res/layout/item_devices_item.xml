@@ -14,6 +14,7 @@
   android:paddingBottom="12dp">
 
   <ImageView
+    android:id="@+id/device_icon"
     android:layout_width="26dp"
     android:layout_height="26dp"
     android:src="@drawable/phone"
@@ -28,7 +29,7 @@
     android:layout_weight="1"
     android:includeFontPadding="false"
     android:maxLines="1"
-    android:text="有线设备"
+    android:text="设备1"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/largeFont"
     tools:ignore="HardcodedText" />

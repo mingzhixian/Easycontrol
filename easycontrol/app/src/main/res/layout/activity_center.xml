@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/background"
+  android:orientation="vertical"
+  tools:context=".CenterActivity">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/cardContainerBackground"
+    android:elevation="6dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="15dp">
+
+    <ImageView
+      android:id="@+id/back_button"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
+      android:src="@drawable/back"
+      android:tint="@color/onBackground" />
+  </LinearLayout>
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="20dp"
+      android:layout_marginEnd="20dp"
+      android:orientation="vertical">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="中心服务器地址:"
+          android:textColor="@color/onCardBackground"
+          android:textSize="@dimen/middleFont" />
+
+        <EditText
+          android:id="@+id/center_address"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp"
+          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:/."
+          android:hint="不可为空"
+          android:textColor="@color/onCardBackground"
+          android:textColorHint="@color/onCardBackgroundSecond"
+          android:textSize="@dimen/smallFont" />
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="用户名:"
+          android:textColor="@color/onCardBackground"
+          android:textSize="@dimen/middleFont" />
+
+        <EditText
+          android:id="@+id/center_name"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp"
+          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          android:hint="仅包含大小写字母和数字"
+          android:textColor="@color/onCardBackground"
+          android:textColorHint="@color/onCardBackgroundSecond"
+          android:textSize="@dimen/smallFont" />
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="密码:"
+          android:textColor="@color/onCardBackground"
+          android:textSize="@dimen/middleFont" />
+
+        <EditText
+          android:id="@+id/center_password"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp"
+          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          android:hint="仅包含大小写字母和数字"
+          android:inputType="textPassword"
+          android:textColor="@color/onCardBackground"
+          android:textColorHint="@color/onCardBackgroundSecond"
+          android:textSize="@dimen/smallFont" />
+
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="本机ADB端口:"
+          android:textColor="@color/onCardBackground"
+          android:textSize="@dimen/middleFont" />
+
+        <EditText
+          android:id="@+id/center_adb_port"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp"
+          android:digits="0123456789"
+          android:hint="可选，不填写则不会作为被控端"
+          android:textColor="@color/onCardBackground"
+          android:textColorHint="@color/onCardBackgroundSecond"
+          android:textSize="@dimen/smallFont" />
+      </LinearLayout>
+
+      <Button
+        android:id="@+id/ok"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/button"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="保存设置"
+        android:textColor="@color/onButton"
+        android:textSize="@dimen/middleFont" />
+    </LinearLayout>
+
+  </ScrollView>
+</LinearLayout>
