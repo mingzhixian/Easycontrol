@@ -16,7 +16,7 @@
     android:layout_marginBottom="25dp"
     android:text="干什么◔ ‸◔？ "
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/largeFont" />
+    android:textSize="@dimen/middleFont" />
 
   <LinearLayout
     android:layout_width="match_parent"
@@ -29,7 +29,7 @@
     <Button
       android:id="@+id/open"
       android:layout_width="0dp"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"
@@ -47,7 +47,7 @@
     <Button
       android:id="@+id/defult"
       android:layout_width="0dp"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"

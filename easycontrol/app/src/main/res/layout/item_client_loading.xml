@@ -17,7 +17,7 @@
     android:gravity="center"
     android:text="加载中\n点击文本取消"
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/largeFont"
+    android:textSize="@dimen/middleFont"
     android:textStyle="bold" />
 
 </FrameLayout>

@@ -9,9 +9,10 @@ import android.media.audiofx.LoudnessEnhancer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class AudioDecode {
-  public MediaCodec audioDecodec;
+  public MediaCodec decodec;
   public AudioTrack audioTrack;
   public LoudnessEnhancer loudnessEnhancer;
 
@@ -29,20 +30,23 @@ public class AudioDecode {
       audioTrack.stop();
       audioTrack.release();
       loudnessEnhancer.release();
-      audioDecodec.stop();
-      audioDecodec.release();
+      decodec.stop();
+      decodec.release();
     } catch (Exception ignored) {
     }
   }
 
-  public synchronized void decodeIn(ByteBuffer data) {
+  public final LinkedBlockingQueue<ByteBuffer> dataQueue = new LinkedBlockingQueue<>();
+
+  public void decodeIn() throws InterruptedException {
     try {
-      int inIndex = audioDecodec.dequeueInputBuffer(0);
+      ByteBuffer data = dataQueue.take();
+      int inIndex = decodec.dequeueInputBuffer(0);
       // 缓冲区已满丢帧
       if (inIndex < 0) return;
-      audioDecodec.getInputBuffer(inIndex).put(data);
+      decodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
-      audioDecodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
+      decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
     } catch (IllegalStateException ignored) {
     }
   }
@@ -51,10 +55,10 @@ public class AudioDecode {
 
   public void decodeOut() {
     try {
-      int outIndex = audioDecodec.dequeueOutputBuffer(bufferInfo, -1);
+      int outIndex = decodec.dequeueOutputBuffer(bufferInfo, -1);
       if (outIndex >= 0) {
-        audioTrack.write(audioDecodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
-        audioDecodec.releaseOutputBuffer(outIndex, false);
+        audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
+        decodec.releaseOutputBuffer(outIndex, false);
       }
     } catch (IllegalStateException ignored) {
     }
@@ -63,24 +67,20 @@ public class AudioDecode {
   // 创建Codec
   private void setAudioDecodec(ByteBuffer csd0) throws IOException {
     // 创建解码器
-    String codecMime = MediaFormat.MIMETYPE_AUDIO_OPUS;
-    audioDecodec = MediaCodec.createDecoderByType(codecMime);
+    String codecMime = MediaFormat.MIMETYPE_AUDIO_AAC;
+    decodec = MediaCodec.createDecoderByType(codecMime);
     // 音频参数
     int sampleRate = 48000;
     int channelCount = 2;
     int bitRate = 96000;
-    MediaFormat mediaFormat = MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount);
-    mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
+    MediaFormat decodecFormat = MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount);
+    decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头
-    mediaFormat.setByteBuffer("csd-0", csd0);
-    // csd1和csd2暂时没用到，所以默认全是用0
-    ByteBuffer csd12ByteBuffer = ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-    mediaFormat.setByteBuffer("csd-1", csd12ByteBuffer);
-    mediaFormat.setByteBuffer("csd-2", csd12ByteBuffer);
+    decodecFormat.setByteBuffer("csd-0", csd0);
     // 配置解码器
-    audioDecodec.configure(mediaFormat, null, null, 0);
+    decodec.configure(decodecFormat, null, null, 0);
     // 启动解码器
-    audioDecodec.start();
+    decodec.start();
   }
 
   // 创建AudioTrack

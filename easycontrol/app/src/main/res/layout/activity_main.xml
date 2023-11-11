@@ -10,7 +10,6 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="30dp"
     android:background="@color/cardContainerBackground"
     android:elevation="6dp"
     android:gravity="center_vertical"
@@ -24,7 +23,6 @@
       android:src="@drawable/app_icon" />
 
     <TextView
-      android:id="@+id/title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="易控"
@@ -38,15 +36,15 @@
       android:layout_weight="1" />
 
     <ImageView
-      android:id="@+id/master_add"
-      android:layout_width="25dp"
-      android:layout_height="25dp"
+      android:id="@+id/button_add"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
       android:layout_marginEnd="4dp"
       android:src="@drawable/add"
       android:tint="@color/onBackground" />
 
     <ImageView
-      android:id="@+id/master_set"
+      android:id="@+id/button_set"
       android:layout_width="30dp"
       android:layout_height="30dp"
       android:layout_marginEnd="12dp"
@@ -54,42 +52,17 @@
       android:tint="@color/onBackground" />
   </LinearLayout>
 
-  <LinearLayout
-    android:id="@+id/linked_device_layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="20dp"
-    android:layout_marginEnd="20dp"
-    android:orientation="vertical"
-    android:visibility="gone">
-
-    <include
-      android:id="@+id/linked_device"
-      layout="@layout/item_devices_item"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
-
-    <View
-      android:layout_width="match_parent"
-      android:layout_height="1dp"
-      android:layout_margin="14dp"
-      android:background="@color/onBackgroundSecond" />
-  </LinearLayout>
-
   <ListView
-    android:id="@+id/master_devices_list"
+    android:id="@+id/devices_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginStart="20dp"
     android:layout_marginEnd="20dp"
+    android:clipToPadding="false"
     android:divider="#00000000"
     android:dividerHeight="12dp"
+    android:paddingTop="30dp"
+    android:paddingBottom="60dp"
     tools:listitem="@layout/item_devices_item" />
-
-  <LinearLayout
-    android:id="@+id/ww"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal" />
 
 </LinearLayout>

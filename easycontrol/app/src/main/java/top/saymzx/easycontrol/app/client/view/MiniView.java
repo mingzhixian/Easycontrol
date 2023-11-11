@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.databinding.ModuleMiniViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class MiniView {
 
@@ -53,7 +54,7 @@ public class MiniView {
     }
     miniView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(barColor)));
     // 位置
-    miniViewParams.x = -1 * AppData.publicTools.dp2px(10f);
+    miniViewParams.x = -1 * PublicTools.dp2px(10f);
     miniViewParams.y = 300 * (color % 4 + 1);
   }
 
@@ -76,7 +77,7 @@ public class MiniView {
 
   // 显示隐藏动画
   private void showViewAnim() {
-    int width = AppData.publicTools.dp2px(-30f);
+    int width = PublicTools.dp2px(-30f);
     // 创建平移动画
     miniView.getRoot().setTranslationX(isShow ? width : 0);
     float endX = isShow ? 0 : width;

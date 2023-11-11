@@ -1,130 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/background"
+  android:orientation="vertical"
+  tools:context=".SetActivity">
+
+  <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background"
-    android:orientation="vertical"
-    tools:context=".SetActivity">
+    android:layout_height="wrap_content"
+    android:background="@color/cardContainerBackground"
+    android:elevation="6dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="15dp">
+
+    <ImageView
+      android:id="@+id/back_button"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
+      android:src="@drawable/back"
+      android:tint="@color/onBackground" />
+  </LinearLayout>
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="20dp"
+      android:layout_marginEnd="20dp"
+      android:orientation="vertical">
+
+      <LinearLayout
+        android:id="@+id/set_center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/cardContainerBackground"
-        android:elevation="6dp"
-        android:gravity="center_vertical"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:padding="15dp">
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="4dp"
+          android:layout_weight="1"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:text="中心服务设置"
+          android:textColor="@color/onCardBackground"
+          android:textSize="@dimen/middleFont"
+          tools:ignore="HardcodedText" />
 
         <ImageView
-            android:id="@+id/back_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/back"
-            android:tint="@color/onBackground" />
-    </LinearLayout>
+          android:layout_width="26dp"
+          android:layout_height="26dp"
+          android:rotation="180"
+          android:src="@drawable/back"
+          android:tint="@color/onCardBackground" />
 
-    <ScrollView
+      </LinearLayout>
+
+      <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:text="默认参数"
+        android:textColor="@color/onBackground"
+        android:textSize="@dimen/middleFont"
+        tools:ignore="HardcodedText" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:orientation="vertical">
+      <LinearLayout
+        android:id="@+id/set_default"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"
-                android:text="默认参数"
-                android:textColor="@color/onBackground"
-                android:textSize="@dimen/largeFont"
-                tools:ignore="HardcodedText" />
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:text="显示"
+        android:textColor="@color/onBackground"
+        android:textSize="@dimen/middleFont" />
 
-            <LinearLayout
-                android:id="@+id/set_default"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/background_cron"
-                android:backgroundTint="@color/cardBackground"
-                android:orientation="vertical"
-                android:paddingStart="20dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="10dp" />
+      <LinearLayout
+        android:id="@+id/set_display"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="10dp"
-                android:text="显示"
-                android:textColor="@color/onBackground"
-                android:textSize="@dimen/largeFont" />
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:text="其他"
+        android:textColor="@color/onBackground"
+        android:textSize="@dimen/middleFont" />
 
-            <LinearLayout
-                android:id="@+id/set_display"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/background_cron"
-                android:backgroundTint="@color/cardBackground"
-                android:orientation="vertical"
-                android:paddingStart="20dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="10dp" />
+      <LinearLayout
+        android:id="@+id/set_other"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="10dp"
-                android:text="其他"
-                android:textColor="@color/onBackground"
-                android:textSize="@dimen/largeFont" />
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:text="关于"
+        android:textColor="@color/onBackground"
+        android:textSize="@dimen/middleFont" />
 
-            <LinearLayout
-                android:id="@+id/set_other"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/background_cron"
-                android:backgroundTint="@color/cardBackground"
-                android:orientation="vertical"
-                android:paddingStart="20dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="10dp" />
+      <LinearLayout
+        android:id="@+id/set_about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/cardBackground"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="10dp"
-                android:text="关于"
-                android:textColor="@color/onBackground"
-                android:textSize="@dimen/largeFont" />
-
-            <LinearLayout
-                android:id="@+id/set_about"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="60dp"
-                android:background="@drawable/background_cron"
-                android:backgroundTint="@color/cardBackground"
-                android:orientation="vertical"
-                android:paddingStart="20dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="10dp" />
-
-        </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
+  </ScrollView>
 </LinearLayout>

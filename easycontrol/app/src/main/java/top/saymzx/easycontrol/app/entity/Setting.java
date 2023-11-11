@@ -2,6 +2,8 @@ package top.saymzx.easycontrol.app.entity;
 
 import android.content.SharedPreferences;
 
+import java.util.UUID;
+
 public final class Setting {
   private final SharedPreferences sharedPreferences;
 
@@ -52,12 +54,12 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getSlaveTurnOffScreen() {
-    return sharedPreferences.getBoolean("slaveTurnOffScreen", true);
+  public boolean getTurnOffScreen() {
+    return sharedPreferences.getBoolean("turnOffScreen", true);
   }
 
-  public void setSlaveTurnOffScreen(boolean value) {
-    editor.putBoolean("slaveTurnOffScreen", value);
+  public void setTurnOffScreen(boolean value) {
+    editor.putBoolean("turnOffScreen", value);
     editor.apply();
   }
 
@@ -86,6 +88,50 @@ public final class Setting {
   public void setDefaultDevice(int value) {
     editor.putInt("defaultDevice", value);
     editor.apply();
+  }
+
+  public String getCenterAddress() {
+    return sharedPreferences.getString("centerAddress", "");
+  }
+
+  public void setCenterAddress(String value) {
+    editor.putString("centerAddress", value);
+    editor.apply();
+  }
+
+  public String getCenterName() {
+    return sharedPreferences.getString("centerName", "");
+  }
+
+  public void setCenterName(String value) {
+    editor.putString("centerName", value);
+    editor.apply();
+  }
+
+  public String getCenterPassword() {
+    return sharedPreferences.getString("centerPassword", "");
+  }
+
+  public void setCenterPassword(String value) {
+    editor.putString("centerPassword", value);
+    editor.apply();
+  }
+
+  public int getCenterAdbPort() {
+    return sharedPreferences.getInt("centerAdbPort", -1);
+  }
+
+  public void setCenterAdbPort(int value) {
+    editor.putInt("centerAdbPort", value);
+    editor.apply();
+  }
+
+  public String getUUID() {
+    if (!sharedPreferences.contains("UUID")) {
+      editor.putString("UUID", UUID.randomUUID().toString());
+      editor.apply();
+    }
+    return sharedPreferences.getString("UUID", "");
   }
 
   public Setting(SharedPreferences sharedPreferences) {

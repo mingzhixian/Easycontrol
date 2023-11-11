@@ -1,50 +1,51 @@
 plugins {
-    id 'com.android.application' version '8.0.2'
+  id 'com.android.application' version '8.0.2'
 }
 
 android {
-    namespace 'top.saymzx.easycontrol.app'
-    compileSdk 33
+  namespace 'top.saymzx.easycontrol.app'
+  compileSdk 33
 
-    defaultConfig {
-        applicationId "top.saymzx.easycontrol.app"
-        minSdk 23
-        targetSdk 33
-        versionCode 10012
-        versionName "1.0.12"
-        resConfigs "zh"
-        resConfigs "xhdpi"
-        ndk {
-            abiFilters "arm64-v8a", "armeabi-v7a", "x86", "x86_64"
-        }
+  defaultConfig {
+    applicationId "top.saymzx.easycontrol.app"
+    minSdk 23
+    targetSdk 33
+    versionCode 10101
+    versionName "1.1.1_dev"
+    resConfigs "zh"
+    resConfigs "xhdpi"
+    ndk {
+      abiFilters "arm64-v8a", "armeabi-v7a", "x86", "x86_64"
     }
+  }
 
-    viewBinding {
-        enabled = true
-    }
+  viewBinding {
+    enabled = true
+  }
 
-    buildTypes {
-        debug {
-            buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "true"
-            debuggable true
-        }
-        release {
-            buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "false"
-            debuggable false
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles 'proguard-rules.pro'
-        }
+  buildTypes {
+    debug {
+      buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "true"
+      debuggable true
     }
+    release {
+      buildConfigField "boolean", "ENABLE_DEBUG_FEATURE", "false"
+      debuggable false
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles 'proguard-rules.pro'
+    }
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 
-    packagingOptions {
-        resources.excludes.add("META-INF/*")
-    }
+  packagingOptions {
+    resources.excludes.add("META-INF/*")
+  }
+
 }
 
 dependencies {

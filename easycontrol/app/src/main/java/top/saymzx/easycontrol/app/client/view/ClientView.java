@@ -16,8 +16,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import java.io.IOException;
-
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
 
@@ -69,6 +67,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     if (uiMode == 1) FullActivity.hide();
     else if (uiMode == 2) smallView.hide();
     else if (uiMode == 3) miniView.hide();
+    uiMode = 0;
     if (isRelease) {
       if (surfaceTexture != null) surfaceTexture.release();
       client.release();
@@ -104,6 +103,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     // 视频触摸控制
     int[] pointerList = new int[20];
     textureView.setOnTouchListener((view, event) -> {
+      int offsetTime = (int) (event.getEventTime() - event.getDownTime());
       // 处理触摸事件
       int action = event.getActionMasked();
       if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
@@ -114,7 +114,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
         // 记录xy信息
         pointerList[p] = x;
         pointerList[10 + p] = y;
-        client.controller.sendTouchEvent(MotionEvent.ACTION_DOWN, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second);
+        client.controller.sendTouchEvent(MotionEvent.ACTION_DOWN, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
         // 如果是小窗模式则需获取焦点，以获取剪切板同步
         if (uiMode == 2) smallView.setViewFocus(true);
       } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -122,7 +122,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
         int x = (int) event.getX(i);
         int y = (int) event.getY(i);
         int p = event.getPointerId(i);
-        client.controller.sendTouchEvent(MotionEvent.ACTION_UP, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second);
+        client.controller.sendTouchEvent(MotionEvent.ACTION_UP, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
       } else {
         for (int i = 0; i < event.getPointerCount(); i++) {
           int x = (int) event.getX(i);
@@ -134,11 +134,11 @@ public class ClientView implements TextureView.SurfaceTextureListener {
               return true;
             pointerList[p] = -1;
           }
-          client.controller.sendTouchEvent(MotionEvent.ACTION_MOVE, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second);
+          client.controller.sendTouchEvent(MotionEvent.ACTION_MOVE, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
         }
       }
       // 开始多倍发包，减少阻塞
-      client.adb.sendMoreOk(client.stream);
+      client.sendMoreOk();
       return true;
     });
   }
@@ -194,11 +194,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     // 初始化
     if (this.surfaceTexture == null) {
       this.surfaceTexture = surfaceTexture;
-      try {
-        client.videoDecode.setVideoDecodec(new Surface(this.surfaceTexture));
-      } catch (IOException e) {
-        hide(true);
-      }
+      client.videoDecode.setSurface(new Surface(this.surfaceTexture));
       client.startSubService();
     } else textureView.setSurfaceTexture(this.surfaceTexture);
   }

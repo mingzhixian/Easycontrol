@@ -3,6 +3,6 @@
   <dimen name="round">14dp</dimen>
   <!--字体-->
   <dimen name="largeFont">24sp</dimen>
-  <dimen name="middleFont">18sp</dimen>
-  <dimen name="smallFont">14sp</dimen>
+  <dimen name="middleFont">21sp</dimen>
+  <dimen name="smallFont">18sp</dimen>
 </resources>

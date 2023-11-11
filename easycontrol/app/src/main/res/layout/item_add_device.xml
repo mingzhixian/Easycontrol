@@ -15,7 +15,7 @@
     android:layout_height="wrap_content"
     android:text="设备名称:"
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/largeFont" />
+    android:textSize="@dimen/middleFont" />
 
   <EditText
     android:id="@+id/name"
@@ -25,7 +25,7 @@
     android:hint="不可为空"
     android:textColor="@color/onCardBackground"
     android:textColorHint="@color/onCardBackgroundSecond"
-    android:textSize="@dimen/middleFont" />
+    android:textSize="@dimen/smallFont" />
 
   <TextView
     android:layout_width="match_parent"
@@ -33,7 +33,7 @@
     android:layout_marginTop="8dp"
     android:text="地址:端口号"
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/largeFont" />
+    android:textSize="@dimen/middleFont" />
 
   <EditText
     android:id="@+id/address"
@@ -44,7 +44,7 @@
     android:hint="支持IPv4/v6地址、域名"
     android:textColor="@color/onCardBackground"
     android:textColorHint="@color/onCardBackgroundSecond"
-    android:textSize="@dimen/middleFont" />
+    android:textSize="@dimen/smallFont" />
 
   <LinearLayout
     android:layout_width="match_parent"
@@ -59,7 +59,7 @@
       android:buttonTint="@color/onCardBackground"
       android:text="使能音频"
       android:textColor="@color/onCardBackgroundSecond"
-      android:textSize="@dimen/middleFont" />
+      android:textSize="@dimen/smallFont" />
 
     <CheckBox
       android:id="@+id/is_options"
@@ -70,7 +70,7 @@
       android:buttonTint="@color/onCardBackground"
       android:text="高级选项"
       android:textColor="@color/onCardBackgroundSecond"
-      android:textSize="@dimen/middleFont" />
+      android:textSize="@dimen/smallFont" />
   </LinearLayout>
 
   <LinearLayout
@@ -84,17 +84,16 @@
 
   <Button
     android:id="@+id/ok"
-    android:layout_width="match_parent"
+    android:layout_width="200dp"
     android:layout_height="wrap_content"
-    android:layout_marginStart="50dp"
+    android:layout_gravity="center_horizontal"
     android:layout_marginTop="25dp"
-    android:layout_marginEnd="50dp"
     android:background="@drawable/background_cron"
     android:backgroundTint="@color/button"
     android:gravity="center"
     android:padding="6dp"
     android:text="确认"
     android:textColor="@color/onButton"
-    android:textSize="@dimen/largeFont" />
+    android:textSize="@dimen/middleFont" />
 
 </LinearLayout>

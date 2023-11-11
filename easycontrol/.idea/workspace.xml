@@ -46,6 +46,21 @@
         <task path="$PROJECT_DIR$/oldServer">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/app">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/center">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/app">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/center">
+          <activation />
+        </task>
         <task path="$PROJECT_DIR$/server">
           <activation />
         </task>
@@ -55,6 +70,63 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="Easycontrol" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="app" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="verification" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="center" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="center" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="center" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Easycontrol" type="f1a62948:ProjectNode" />
+                <item name="center" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="shadow" type="c8890929:TasksNode$1" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
@@ -86,9 +158,9 @@
       <list>
         <option value="Kotlin Object" />
         <option value="Kotlin Class" />
-        <option value="Class" />
         <option value="Interface" />
         <option value="resourceFile" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -131,7 +203,7 @@
     &quot;project.structure.last.edited&quot;: &quot;Build Variants&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.其他文件类型&quot;
   },
   &quot;keyToStringList&quot;: {
     &quot;ExportApk.BuildVariants&quot;: [
@@ -152,6 +224,9 @@
       <recent name="E:\Code\easycontrol\easycontrol\app\src\main\res\drawable" />
       <recent name="E:\Code\scrcpy\scrcpy_android\server\src\main" />
       <recent name="E:\Code\scrcpy\scrcpy_android\server\src\main\java\top\saymzx\scrcpy\server" />
+    </key>
+    <key name="android.template.474136164">
+      <recent name="top.saymzx.easycontrol.app" />
     </key>
     <key name="android.template.-723040403">
       <recent name="top.saymzx.scrcpy.android" />
@@ -191,7 +266,7 @@
       <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Gradle.E:/Code/Easycontrol/easycontrol/app [assembleRelease]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="Easycontrol.app.main" />
       <option name="DEPLOY" value="true" />
@@ -245,77 +320,37 @@
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2">
+        <option name="Gradle.BeforeRunTask" enabled="true" tasks="copyRelease" externalProjectPath="$PROJECT_DIR$/server" vmOptions="" scriptParameters="" />
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="server" type="AndroidRunConfigurationType" factoryName="Android App">
-      <module name="Easycontrol.server.main" />
-      <option name="DEPLOY" value="true" />
-      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
-      <option name="DEPLOY_AS_INSTANT" value="false" />
-      <option name="ARTIFACT_NAME" value="" />
-      <option name="PM_INSTALL_OPTIONS" value="" />
-      <option name="ALL_USERS" value="false" />
-      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
-      <option name="CLEAR_APP_STORAGE" value="false" />
-      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
-      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
-      <option name="MODE" value="default_activity" />
-      <option name="CLEAR_LOGCAT" value="false" />
-      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
-      <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
-      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
-      <option name="DEBUGGER_TYPE" value="Auto" />
-      <Auto>
-        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
-        <option name="SHOW_STATIC_VARS" value="true" />
-        <option name="WORKING_DIR" value="" />
-        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
-        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
-      </Auto>
-      <Hybrid>
-        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
-        <option name="SHOW_STATIC_VARS" value="true" />
-        <option name="WORKING_DIR" value="" />
-        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
-        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
-      </Hybrid>
-      <Java />
-      <Native>
-        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
-        <option name="SHOW_STATIC_VARS" value="true" />
-        <option name="WORKING_DIR" value="" />
-        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
-        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
-      </Native>
-      <Profilers>
-        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
-        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
-        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
-      </Profilers>
-      <option name="DEEP_LINK" value="" />
-      <option name="ACTIVITY_CLASS" value="" />
-      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
-      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+    <configuration name="Center" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="jbr-11" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="MAIN_CLASS_NAME" value="top.saymzx.easycontrol.center.Center" />
+      <module name="Easycontrol.center.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="top.saymzx.easycontrol.center.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
-        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+        <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="E:/Code/Easycontrol/easycontrol/app [assembleRelease]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/app" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="scriptParameters" value="" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value="copyRelease" />
+            <option value="assembleRelease" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -325,18 +360,18 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="easycontrol:center [shadowJar]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/center" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="scriptParameters" value="" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value="copyRelease" />
+            <option value="shadowJar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -346,54 +381,12 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="easycontrol:server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="copyRelease" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease] (5)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="copyRelease" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
-    <configuration name="E:/Code/Easycontrol/easycontrol/server [copyRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/server" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="scriptParameters" value="" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -410,23 +403,12 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (5)" />
-      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
+      <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/app [assembleRelease]" />
+      <item itemvalue="Gradle.easycontrol:server [copyRelease]" />
+      <item itemvalue="Gradle.easycontrol:center [shadowJar]" />
+      <item itemvalue="应用程序.Center" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease]" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (2)" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (4)" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (5)" />
-        <item itemvalue="Gradle.E:/Code/Easycontrol/easycontrol/server [copyRelease] (1)" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">

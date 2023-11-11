@@ -66,9 +66,7 @@ public class AdbStream {
     if (remoteId <= 0) throw new IOException("未连接");
     sink.write(byteBuffer);
     // 如果可以则插入发送队列
-    synchronized (this) {
-      checkSend();
-    }
+    checkSend();
   }
 
   public void setCanWrite(int remoteId) throws InterruptedException {
@@ -78,13 +76,11 @@ public class AdbStream {
         notifyAll();
       }
     }
-    synchronized (this) {
-      canWrite = true;
-      checkSend();
-    }
+    canWrite = true;
+    checkSend();
   }
 
-  private void checkSend() throws InterruptedException {
+  private synchronized void checkSend() throws InterruptedException {
     if (canWrite) {
       ByteBuffer data = pollSink();
       if (data != null) {

@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.content.ClipData;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ public class Controller {
   }
 
   // 发送触摸事件
-  public void sendTouchEvent(int action, int p, float x, float y) {
+  public void sendTouchEvent(int action, int p, float x, float y, int offsetTime) {
     if (x < 0 || x > 1 || y < 0 || y > 1) {
       // 超出范围则改为抬起事件
       if (x < 0) x = 0;
@@ -59,7 +58,7 @@ public class Controller {
       if (y > 1) y = 1;
       action = MotionEvent.ACTION_UP;
     }
-    ByteBuffer byteBuffer = ByteBuffer.allocate(11);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(15);
     // 触摸事件
     byteBuffer.put((byte) 1);
     // 触摸类型
@@ -69,6 +68,8 @@ public class Controller {
     // 坐标位置
     byteBuffer.putFloat(x);
     byteBuffer.putFloat(y);
+    // 时间偏移
+    byteBuffer.putInt(offsetTime);
     byteBuffer.flip();
     writeStream(byteBuffer);
   }
@@ -104,11 +105,6 @@ public class Controller {
   // 发送按键事件
   public void sendPowerEvent() {
     writeStream(ByteBuffer.wrap(new byte[]{5}));
-  }
-
-  // 发送拥塞事件
-  public void sendCongestionEvent() {
-    writeStream(ByteBuffer.wrap(new byte[]{6}));
   }
 
   private void writeStream(ByteBuffer byteBuffer) {

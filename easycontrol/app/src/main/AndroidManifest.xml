@@ -15,12 +15,14 @@
     android:label="易控"
     android:supportsRtl="true"
     android:theme="@android:style/Theme.Material.NoActionBar"
+    android:usesCleartextTraffic="true"
     tools:targetApi="31">
     <activity
       android:name=".MainActivity"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
+
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
@@ -31,10 +33,14 @@
       android:name=".SetActivity"
       android:exported="false" />
     <activity
+      android:name=".CenterActivity"
+      android:exported="false" />
+    <activity
       android:name=".client.view.FullActivity"
       android:exported="false"
       android:launchMode="singleTask"
       android:screenOrientation="portrait" />
+
   </application>
 
 </manifest>
