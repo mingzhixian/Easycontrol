@@ -81,12 +81,12 @@ public final class Setting {
     editor.apply();
   }
 
-  public int getDefaultDevice() {
-    return sharedPreferences.getInt("defaultDevice", -1);
+  public String getDefaultDevice() {
+    return sharedPreferences.getString("defaultDevice", "");
   }
 
-  public void setDefaultDevice(int value) {
-    editor.putInt("defaultDevice", value);
+  public void setDefaultDevice(String value) {
+    editor.putString("defaultDevice", value);
     editor.apply();
   }
 
@@ -126,7 +126,7 @@ public final class Setting {
     editor.apply();
   }
 
-  public String getUUID() {
+  public String getLocalUUID() {
     if (!sharedPreferences.contains("UUID")) {
       editor.putString("UUID", UUID.randomUUID().toString());
       editor.apply();

@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.helper;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,7 +18,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class CenterHelper {
   @SuppressLint("StaticFieldLeak")
   private static DeviceListAdapter deviceListAdapter;
-  private static final String localDeviceID = Build.MODEL + "_" + AppData.setting.getUUID();
+  private static final String localUUID = AppData.setting.getLocalUUID();
   private static String lastIpv6Address = "";
 
   public static void initCenterHelper(DeviceListAdapter deviceListAdapter) {
@@ -55,14 +54,14 @@ public class CenterHelper {
   // 撤销之前上报的地址
   private static void deleteDevice(String centerAddress) throws JSONException, IOException {
     JSONObject deleteDevice = createCenterPacket(NetHelper.DELETE_DEVICE);
-    deleteDevice.put("deviceID", localDeviceID);
+    deleteDevice.put("uuid", localUUID);
     NetHelper.getJson(centerAddress, deleteDevice);
   }
 
   // 上报本机地址
   private static void postDevice(String centerAddress) throws JSONException, IOException {
     JSONObject postDevice = createCenterPacket(NetHelper.POST_DEVICE);
-    postDevice.put("deviceID", localDeviceID);
+    postDevice.put("uuid", localUUID);
     postDevice.put("ip", lastIpv6Address);
     NetHelper.getJson(centerAddress, postDevice);
   }
@@ -73,11 +72,11 @@ public class CenterHelper {
     JSONArray deviceArray = getDevice.getJSONArray("deviceArray");
     for (int i = 0; i < deviceArray.length(); i++) {
       JSONObject jsonObject = deviceArray.getJSONObject(i);
-      String deviceID = jsonObject.getString("deviceID");
+      String uuid = jsonObject.getString("uuid");
       // 跳过本机
-      if (deviceID.equals(localDeviceID)) continue;
+      if (uuid.equals(localUUID)) continue;
       String ip = jsonObject.getString("ip");
-      Device device = AppData.dbHelper.getByName(deviceID);
+      Device device = AppData.dbHelper.getByUUID(uuid);
       // 更新该设备地址
       if (device != null) {
         device.address = ip;
@@ -85,19 +84,17 @@ public class CenterHelper {
       }
       // 若没有该设备，则新建设备
       else {
-        device = Device.getDefaultDevice();
-        device.type = Device.TYPE_CENTER;
-        device.name = deviceID;
+        device = Device.getDefaultDevice(uuid, Device.TYPE_CENTER);
         device.address = ip;
         AppData.dbHelper.insert(device);
       }
-      deviceListAdapter.centerDevices.add(deviceID);
+      deviceListAdapter.centerDevices.add(uuid);
     }
   }
 
   private static JSONObject createCenterPacket(int handle) throws JSONException {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("version", 1);
+    jsonObject.put("version", 2);
     jsonObject.put("name", AppData.setting.getCenterName());
     jsonObject.put("password", AppData.setting.getCenterPassword());
     jsonObject.put("handle", handle);

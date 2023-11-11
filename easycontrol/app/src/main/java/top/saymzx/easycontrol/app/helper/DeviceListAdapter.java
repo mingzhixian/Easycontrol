@@ -90,7 +90,7 @@ public class DeviceListAdapter extends BaseAdapter {
     itemSetDeviceBinding.defult.setOnClickListener(v -> {
       dialog.cancel();
       if (!device.isNormalDevice()) return;
-      AppData.setting.setDefaultDevice(device.id);
+      AppData.setting.setDefaultDevice(device.uuid);
     });
     itemSetDeviceBinding.delete.setOnClickListener(v -> {
       AppData.dbHelper.delete(device);
@@ -111,9 +111,9 @@ public class DeviceListAdapter extends BaseAdapter {
     ArrayList<Device> tmp3 = new ArrayList<>();
     for (Device device : rawDevices) {
       if (device.isLinkDevice()) {
-        if (linkDevice != null && Objects.equals(device.name, linkDevice.first)) tmp1 = device;
+        if (linkDevice != null && Objects.equals(device.uuid, linkDevice.first)) tmp1 = device;
       } else if (device.isCenterDevice()) {
-        if (centerDevices.contains(device.name)) tmp2.add(device);
+        if (centerDevices.contains(device.uuid)) tmp2.add(device);
       } else {
         tmp3.add(device);
       }

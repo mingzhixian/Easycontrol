@@ -13,9 +13,9 @@ public class User {
     this.password = password;
   }
 
-  public Device getDevice(String deviceID) {
+  public Device getDevice(String uuid) {
     for (Device device : devices) {
-      if (Objects.equals(device.deviceID, deviceID)) {
+      if (Objects.equals(device.uuid, uuid)) {
         return device;
       }
     }
@@ -23,12 +23,12 @@ public class User {
   }
 
   static class Device {
-    public final String deviceID;
+    public final String uuid;
     public String ip;
     public long lastPostTime;
 
-    public Device(String deviceID, String ip) {
-      this.deviceID = deviceID;
+    public Device(String uuid, String ip) {
+      this.uuid = uuid;
       this.ip = ip;
     }
   }

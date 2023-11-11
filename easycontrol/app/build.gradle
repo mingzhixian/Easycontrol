@@ -11,7 +11,7 @@ android {
     minSdk 23
     targetSdk 33
     versionCode 10101
-    versionName "1.1.1_dev"
+    versionName "1.1.2_dev"
     resConfigs "zh"
     resConfigs "xhdpi"
     ndk {

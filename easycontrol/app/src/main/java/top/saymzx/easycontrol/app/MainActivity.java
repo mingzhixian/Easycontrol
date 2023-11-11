@@ -17,6 +17,8 @@ import android.provider.Settings;
 import android.util.Pair;
 import android.widget.Toast;
 
+import java.util.UUID;
+
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -92,16 +94,16 @@ public class MainActivity extends Activity {
 
   // 启动默认设备
   private void startDefault() {
-    if (needStartDefault && AppData.setting.getDefaultDevice() != -1) {
+    if (needStartDefault && !AppData.setting.getDefaultDevice().equals("")) {
       needStartDefault = false;
-      Device device = AppData.dbHelper.getById(AppData.setting.getDefaultDevice());
+      Device device = AppData.dbHelper.getByUUID(AppData.setting.getDefaultDevice());
       if (device != null) new Client(device, null);
     }
   }
 
   // 设置按钮监听
   private void setButtonListener() {
-    mainActivity.buttonAdd.setOnClickListener(v -> PublicTools.createAddDeviceView(this, Device.getDefaultDevice(), deviceListAdapter).show());
+    mainActivity.buttonAdd.setOnClickListener(v -> PublicTools.createAddDeviceView(this, Device.getDefaultDevice(UUID.randomUUID().toString(), Device.TYPE_NORMAL), deviceListAdapter).show());
     mainActivity.buttonSet.setOnClickListener(v -> startActivity(new Intent(this, SetActivity.class)));
   }
 
@@ -136,16 +138,14 @@ public class MainActivity extends Activity {
         // 授权完成
         case ACTION_USB_PERMISSION: {
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            String deviceID = usbDevice.getProductName() + "_" + AppData.setting.getUUID();
+            String uuid = UUID.fromString(usbDevice.getSerialNumber()).toString();
             // 若没有该设备，则新建设备
-            Device device = AppData.dbHelper.getByName(deviceID);
+            Device device = AppData.dbHelper.getByUUID(uuid);
             if (device == null) {
-              device = Device.getDefaultDevice();
-              device.type = Device.TYPE_LINK;
-              device.name = deviceID;
+              device = Device.getDefaultDevice(uuid, Device.TYPE_LINK);
               AppData.dbHelper.insert(device);
             }
-            deviceListAdapter.linkDevice = new Pair<>(deviceID, usbDevice);
+            deviceListAdapter.linkDevice = new Pair<>(uuid, usbDevice);
             deviceListAdapter.update();
           }
           break;
