@@ -40,7 +40,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:padding="20dp">
 
@@ -68,7 +67,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:padding="20dp">
 
@@ -116,7 +114,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:padding="20dp">
 

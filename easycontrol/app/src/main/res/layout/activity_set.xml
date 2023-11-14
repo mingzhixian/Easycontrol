@@ -41,7 +41,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingStart="16dp"
@@ -64,8 +63,7 @@
         <ImageView
           android:layout_width="26dp"
           android:layout_height="26dp"
-          android:rotation="180"
-          android:src="@drawable/back"
+          android:src="@drawable/right"
           android:tint="@color/onCardBackground" />
 
       </LinearLayout>
@@ -86,7 +84,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:paddingStart="20dp"
         android:paddingTop="10dp"
@@ -108,7 +105,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:paddingStart="20dp"
         android:paddingTop="10dp"
@@ -130,7 +126,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:paddingStart="20dp"
         android:paddingTop="10dp"
@@ -153,7 +148,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="60dp"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/cardBackground"
         android:orientation="vertical"
         android:paddingStart="20dp"
         android:paddingTop="10dp"

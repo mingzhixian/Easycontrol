@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientView implements TextureView.SurfaceTextureListener {
   private final Client client;
@@ -74,11 +75,17 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     }
   }
 
+  // 处理外部旋转
+  public void reCalculateSite(Pair<Integer, Integer> screenSize) {
+    if (uiMode == 2) smallView.calculateSite(screenSize);
+    else if (uiMode == 3) miniView.calculateSite(screenSize);
+  }
+
   // 旋转
   public void changeRotation() {
     videoSize = new Pair<>(videoSize.second, videoSize.first);
     if (uiMode == 1) FullActivity.changeRotation();
-    else if (uiMode == 2) smallView.changeRotation();
+    else if (uiMode == 2) smallView.calculateSite(PublicTools.getScreenSize());
   }
 
   // 更新Surface大小
@@ -137,21 +144,17 @@ public class ClientView implements TextureView.SurfaceTextureListener {
           client.controller.sendTouchEvent(MotionEvent.ACTION_MOVE, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
         }
       }
-      // 开始多倍发包，减少阻塞
-      client.sendMoreOk();
       return true;
     });
   }
 
   // 更改Bar View的形态
-  public void changeBarViewAnim(View view, int translationY) {
+  public void changeBarViewAnim(View view, boolean toDown) {
+    int translationY = PublicTools.dp2px(40f) * (toDown ? -1 : 1);
     boolean toShowBarView = view.getVisibility() == View.GONE;
     // 创建平移动画
     view.setTranslationY(toShowBarView ? translationY : 0);
     float endY = toShowBarView ? 0 : translationY;
-    // 创建缩放动画
-    view.setScaleY(toShowBarView ? 0f : 1f);
-    float endScaleY = toShowBarView ? 1f : 0f;
     // 创建透明度动画
     view.setAlpha(toShowBarView ? 0f : 1f);
     float endAlpha = toShowBarView ? 1f : 0f;
@@ -159,7 +162,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     // 设置动画时长和插值器
     ViewPropertyAnimator animator = view.animate()
       .translationY(endY)
-      .scaleY(endScaleY)
       .alpha(endAlpha)
       .setDuration(300)
       .setInterpolator(toShowBarView ? new OvershootInterpolator() : new DecelerateInterpolator());

@@ -119,12 +119,12 @@ public class FullActivity extends Activity {
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     fullActivity.buttonToLine.setOnClickListener(v -> setNavBarHide());
-    fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, PublicTools.dp2px(40f)));
+    fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, false));
   }
 
   // 导航栏隐藏
   private void setNavBarHide() {
-    clientView.changeBarViewAnim(fullActivity.barView, PublicTools.dp2px(40f));
+    clientView.changeBarViewAnim(fullActivity.barView, false);
     boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
     fullActivity.buttonToLine.setImageResource(isShow ? R.drawable.to_line : R.drawable.exit_line);

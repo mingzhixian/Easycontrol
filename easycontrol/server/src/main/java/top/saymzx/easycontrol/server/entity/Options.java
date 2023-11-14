@@ -12,6 +12,7 @@ public final class Options {
   public static boolean autoControlScreen;
   public static int setWidth;
   public static int setHeight;
+  public static boolean isH265DecoderSupport;
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -45,6 +46,9 @@ public final class Options {
           break;
         case "set_height":
           setHeight = Integer.parseInt(value);
+          break;
+        case "isH265DecoderSupport":
+          isH265DecoderSupport = Integer.parseInt(value) == 1;
           break;
       }
     }

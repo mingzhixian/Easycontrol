@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
 
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 悬浮窗 -->
-  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-  <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" /> <!-- USB -->
-  <uses-permission android:name="android.permission.USB_PERMISSION" />
+  <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络 -->
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 悬浮窗 -->
+  <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+  <uses-permission android:name="android.permission.USB_PERMISSION" /> <!-- USB -->
 
   <uses-feature android:name="android.hardware.usb.host" />
 
@@ -14,7 +14,7 @@
     android:icon="@drawable/app_icon"
     android:label="易控"
     android:supportsRtl="true"
-    android:theme="@android:style/Theme.Material.NoActionBar"
+    android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
     android:usesCleartextTraffic="true"
     tools:targetApi="31">
     <activity

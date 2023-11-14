@@ -5,9 +5,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Pair;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -68,13 +71,17 @@ public class PublicTools {
 
   // DP转PX
   public static int dp2px(Float dp) {
-    return (int) (dp * AppData.main.getResources().getDisplayMetrics().density);
+    return (int) (dp * (defaultDisplay != null ? metric : AppData.main.getResources().getDisplayMetrics()).density);
   }
 
   // 获取当前界面宽高
+  private static final DisplayMetrics metric = new DisplayMetrics();
+  private static Display defaultDisplay = null;
+
   public static Pair<Integer, Integer> getScreenSize() {
-    DisplayMetrics metric = new DisplayMetrics();
-    AppData.main.getWindowManager().getDefaultDisplay().getRealMetrics(metric);
+    if (defaultDisplay == null)
+      defaultDisplay = AppData.windowManager.getDefaultDisplay();
+    defaultDisplay.getRealMetrics(metric);
     return new Pair<>(metric.widthPixels, metric.heightPixels);
   }
 
@@ -127,6 +134,7 @@ public class PublicTools {
     itemAddDeviceBinding.isOptions.setOnClickListener(v -> itemAddDeviceBinding.options.setVisibility(itemAddDeviceBinding.isOptions.isChecked() ? View.VISIBLE : View.GONE));
     // 设置确认按钮监听
     itemAddDeviceBinding.ok.setOnClickListener(v -> {
+      if (String.valueOf(itemAddDeviceBinding.address.getText()).equals("")) return;
       Device newDevice = new Device(
         device.uuid, device.type,
         String.valueOf(itemAddDeviceBinding.name.getText()),
@@ -192,7 +200,7 @@ public class PublicTools {
 
   // 创建列表卡片
   public static final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
-  public static final String[] maxFpsList = new String[]{"60", "45", "35", "25", "15"};
+  public static final String[] maxFpsList = new String[]{"90", "60", "40", "30", "20", "10"};
   public static final String[] videoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
 
   public static ItemSpinnerBinding createSpinnerCard(
@@ -242,7 +250,6 @@ public class PublicTools {
   public static Pair<ArrayList<String>, ArrayList<String>> getIp() {
     ArrayList<String> ipv4Addresses = new ArrayList<>();
     ArrayList<String> ipv6Addresses = new ArrayList<>();
-
     try {
       Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
       while (networkInterfaces.hasMoreElements()) {
@@ -260,6 +267,17 @@ public class PublicTools {
     } catch (Exception ignored) {
     }
     return new Pair<>(ipv4Addresses, ipv6Addresses);
+  }
+
+  // 获取是否支持H265
+  public static boolean isH265DecoderSupport() {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+      MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+      for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
+        if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
+      }
+    }
+    return false;
   }
 
   public interface MyFunction {

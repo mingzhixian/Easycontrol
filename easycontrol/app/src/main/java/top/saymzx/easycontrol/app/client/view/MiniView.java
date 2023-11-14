@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewPropertyAnimator;
@@ -34,28 +35,19 @@ public class MiniView {
     PixelFormat.TRANSLUCENT
   );
 
-  private static int color = 0;
+  private static int color = -1;
 
   public MiniView(ClientView clientView) {
     this.clientView = clientView;
     miniViewParams.gravity = Gravity.START | Gravity.TOP;
     // Bar颜色
+    int colorNum = color++ % 4;
     int barColor = R.color.bar1;
-    switch (color++ % 4) {
-      case 1:
-        barColor = R.color.bar2;
-        break;
-      case 2:
-        barColor = R.color.bar3;
-        break;
-      case 3:
-        barColor = R.color.bar4;
-        break;
-    }
+    if (colorNum == 1) barColor = R.color.bar2;
+    else if (colorNum == 2) barColor = R.color.bar3;
+    else if (colorNum == 3) barColor = R.color.bar4;
     miniView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(barColor)));
-    // 位置
     miniViewParams.x = -1 * PublicTools.dp2px(10f);
-    miniViewParams.y = 300 * (color % 4 + 1);
   }
 
   public void show() {
@@ -65,6 +57,7 @@ public class MiniView {
       setBarListener();
       // 显示
       showViewAnim();
+      calculateSite(PublicTools.getScreenSize());
     }
   }
 
@@ -73,6 +66,12 @@ public class MiniView {
       isShow = false;
       showViewAnim();
     }
+  }
+
+  // 计算合适位置
+  public void calculateSite(Pair<Integer, Integer> screenSize) {
+    miniViewParams.y = (screenSize.second / 5) * (color % 4 + 1);
+    AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
   }
 
   // 显示隐藏动画
@@ -96,12 +95,12 @@ public class MiniView {
     animator.setListener(new Animator.AnimatorListener() {
       @Override
       public void onAnimationStart(Animator animation) {
-        if (isShow) AppData.main.getWindowManager().addView(miniView.getRoot(), miniViewParams);
+        if (isShow) AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
       }
 
       @Override
       public void onAnimationEnd(Animator animation) {
-        if (!isShow) AppData.main.getWindowManager().removeView(miniView.getRoot());
+        if (!isShow) AppData.windowManager.removeView(miniView.getRoot());
       }
 
       @Override
@@ -131,7 +130,7 @@ public class MiniView {
         }
         case MotionEvent.ACTION_MOVE: {
           miniViewParams.y = paramsY.get() + (int) event.getRawY() - yy.get();
-          AppData.main.getWindowManager().updateViewLayout(miniView.getRoot(), miniViewParams);
+          AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
           break;
         }
         case MotionEvent.ACTION_UP:

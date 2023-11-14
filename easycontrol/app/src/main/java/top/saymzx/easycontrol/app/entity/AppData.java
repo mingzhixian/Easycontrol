@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.hardware.usb.UsbManager;
+import android.view.WindowManager;
 
 import java.io.File;
 
@@ -28,6 +29,9 @@ public class AppData {
   // USB
   public static UsbManager usbManager;
 
+  // 窗口管理
+  public static WindowManager windowManager;
+
   // 设置值
   public static Setting setting;
 
@@ -39,6 +43,7 @@ public class AppData {
     dbHelper = new DbHelper(main);
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
     usbManager = (UsbManager) main.getSystemService(Context.USB_SERVICE);
+    windowManager = main.getWindowManager();
     setting = new Setting(main.getSharedPreferences("setting", Context.MODE_PRIVATE));
     // 读取密钥文件
     try {

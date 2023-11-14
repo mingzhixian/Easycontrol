@@ -9,7 +9,7 @@ java {
 }
 
 shadowJar {
-  manifest{
+  manifest {
     attributes 'Main-Class': 'top.saymzx.easycontrol.center.Center'
   }
 }

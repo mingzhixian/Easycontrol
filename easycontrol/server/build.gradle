@@ -4,11 +4,11 @@ plugins {
 
 android {
   namespace 'top.saymzx.easycontrol.server'
-  compileSdk 33
+  compileSdk 34
 
   defaultConfig {
-    minSdk 23
-    targetSdk 33
+    minSdk 21
+    targetSdk 34
     applicationId 'top.saymzx.easycontrol.server'
     versionCode 10003
     versionName '1.0.3'

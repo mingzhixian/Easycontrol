@@ -59,13 +59,11 @@ public class SetActivity extends Activity {
         Toast.makeText(this, "已刷新", Toast.LENGTH_SHORT).show();
       } catch (Exception ignored) {
       }
-
     }).getRoot());
     // 关于
     setActivity.setAbout.addView(PublicTools.createTextCard(this, "查看本机IP", () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, "使用说明", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, "隐私政策", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
-    setActivity.setAbout.addView(PublicTools.createTextCard(this, "捐助", () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol#%E9%BC%93%E5%8A%B1")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, "版本: " + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
   }
 

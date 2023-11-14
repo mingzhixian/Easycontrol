@@ -94,9 +94,9 @@ public class CenterHelper {
 
   private static JSONObject createCenterPacket(int handle) throws JSONException {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("version", 2);
-    jsonObject.put("name", AppData.setting.getCenterName());
-    jsonObject.put("password", AppData.setting.getCenterPassword());
+    jsonObject.put("version", 3);
+    jsonObject.put("easycontrol_name", AppData.setting.getCenterName());
+    jsonObject.put("easycontrol_password", AppData.setting.getCenterPassword());
     jsonObject.put("handle", handle);
     return jsonObject;
   }

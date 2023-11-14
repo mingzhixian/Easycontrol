@@ -81,6 +81,7 @@ public class Client {
         Log.e("Easycontrol", error);
         AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
         errorClose();
+        throw new RuntimeException(e);
       }
     });
   }
@@ -95,7 +96,7 @@ public class Client {
       videoAdb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
     } else {
       adb = new Adb(usbDevice, AppData.keyPair);
-      videoAdb = new Adb(usbDevice, AppData.keyPair);
+      videoAdb = adb;
     }
   }
 
@@ -126,7 +127,7 @@ public class Client {
         setWidth = tmpDeviceSize.first;
         setHeight = tmpDeviceSize.second;
       }
-      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " set_width=" + setWidth + " set_height=" + setHeight + " > /dev/null 2>&1 & ", false);
+      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " set_width=" + setWidth + " set_height=" + setHeight + " isH265DecoderSupport=" + (PublicTools.isH265DecoderSupport() ? 1 : 0) + " > /dev/null 2>&1 & ", false);
     } catch (Exception ignored) {
       throw new Exception("启动Server失败");
     }
@@ -156,8 +157,8 @@ public class Client {
       // 视频大小
       clientView.videoSize = new Pair<>(videoStream.readInt(), videoStream.readInt());
       // 视频解码
-      ByteBuffer csd0 = readFrame(videoStream);
-      ByteBuffer csd1 = isH265Support ? null : readFrame(videoStream);
+      Pair<Long, ByteBuffer> csd0 = readFrame(videoStream);
+      Pair<Long, ByteBuffer> csd1 = isH265Support ? null : readFrame(videoStream);
       videoDecode = new VideoDecode(clientView.videoSize, csd0, csd1);
       // 音频解码
       if (stream.readByte() == 1) {
@@ -199,7 +200,7 @@ public class Client {
       while (!Thread.interrupted()) {
         switch (stream.readByte()) {
           case 1:
-            ByteBuffer audioFrame = readFrame(stream);
+            Pair<Long, ByteBuffer> audioFrame = readFrame(stream);
             if (isNormalPlay) audioDecode.dataQueue.offer(audioFrame);
             break;
           case 2:
@@ -217,7 +218,10 @@ public class Client {
 
   private void executeVideoDecodeIn() {
     try {
-      while (!Thread.interrupted()) videoDecode.decodeIn(readFrame(videoStream));
+      while (!Thread.interrupted()) {
+        videoAdb.sendMoreOk(videoStream);
+        videoDecode.decodeIn(readFrame(videoStream));
+      }
     } catch (Exception ignored) {
       errorClose();
     }
@@ -252,6 +256,7 @@ public class Client {
       while (!Thread.interrupted()) {
         controller.checkClipBoard();
         controller.sendKeepAlive();
+        checkScreenRotation();
         Thread.sleep(1000);
       }
     } catch (Exception ignored) {
@@ -259,16 +264,24 @@ public class Client {
     }
   }
 
-  public void sendMoreOk() {
-    videoAdb.sendMoreOk(videoStream);
+  private Boolean lastScreenIsPortal = null;
+
+  private void checkScreenRotation() {
+    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
+    boolean nowScreenIsPortal = screenSize.first < screenSize.second;
+    if (lastScreenIsPortal != null && lastScreenIsPortal != nowScreenIsPortal) {
+      AppData.main.runOnUiThread(() -> clientView.reCalculateSite(screenSize));
+    }
+    lastScreenIsPortal = nowScreenIsPortal;
   }
 
   private void errorClose() {
     AppData.main.runOnUiThread(() -> clientView.hide(true));
   }
 
-  private ByteBuffer readFrame(AdbStream stream) throws InterruptedException, IOException {
-    return stream.readByteArray(stream.readInt());
+  private Pair<Long, ByteBuffer> readFrame(AdbStream stream) throws InterruptedException, IOException {
+    long pts = stream.readLong();
+    return new Pair<>(pts, stream.readByteArray(stream.readInt()));
   }
 
   public void release() {
