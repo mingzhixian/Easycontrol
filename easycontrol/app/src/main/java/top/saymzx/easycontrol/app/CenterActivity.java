@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+
 import top.saymzx.easycontrol.app.databinding.ActivityCenterBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.CenterHelper;
@@ -33,7 +37,6 @@ public class CenterActivity extends Activity {
     if (!centerAddress.equals("")) {
       loginActivity.centerAddress.setText(centerAddress);
       loginActivity.centerName.setText(AppData.setting.getCenterName());
-      loginActivity.centerPassword.setText(AppData.setting.getCenterPassword());
       int adbPort = AppData.setting.getCenterAdbPort();
       if (adbPort != -1) loginActivity.centerAdbPort.setText(String.valueOf(adbPort));
     }
@@ -49,11 +52,21 @@ public class CenterActivity extends Activity {
       if (centerAddress.equals("") && centerName.equals("") && centerPassword.equals("")) return;
       AppData.setting.setCenterAddress(centerAddress);
       AppData.setting.setCenterName(centerName);
-      AppData.setting.setCenterPassword(centerPassword);
-      if (!centerAdbPort.equals(""))
-        AppData.setting.setCenterAdbPort(Integer.parseInt(centerAdbPort));
+      if (!centerPassword.equals("")) AppData.setting.setCenterPassword(md5Encode(centerPassword));
+      if (!centerAdbPort.equals("")) AppData.setting.setCenterAdbPort(Integer.parseInt(centerAdbPort));
       Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
       CenterHelper.checkCenter();
     });
+  }
+
+  // MD5加密
+  private static final String SALT = "Easycontrol";
+
+  private String md5Encode(String str) {
+    try {
+      return new BigInteger(1, MessageDigest.getInstance("md5").digest((str += SALT).getBytes(StandardCharsets.UTF_8))).toString(16);
+    } catch (Exception ignored) {
+      return str;
+    }
   }
 }

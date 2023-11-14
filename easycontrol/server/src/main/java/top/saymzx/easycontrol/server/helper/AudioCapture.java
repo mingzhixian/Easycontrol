@@ -48,17 +48,20 @@ public final class AudioCapture {
 
   @SuppressLint({"WrongConstant", "MissingPermission"})
   private static AudioRecord createAudioRecord() {
-    AudioRecord.Builder audioRecordBuilder = new AudioRecord.Builder();
-    if (VERSION.SDK_INT >= 31) audioRecordBuilder.setContext(FakeContext.get());
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+      AudioRecord.Builder audioRecordBuilder = new AudioRecord.Builder();
+      if (VERSION.SDK_INT >= 31) audioRecordBuilder.setContext(FakeContext.get());
 
-    audioRecordBuilder.setAudioSource(MediaRecorder.AudioSource.REMOTE_SUBMIX);
-    AudioFormat.Builder audioFormatBuilder = new AudioFormat.Builder();
-    audioFormatBuilder.setEncoding(ENCODING);
-    audioFormatBuilder.setSampleRate(SAMPLE_RATE);
-    audioFormatBuilder.setChannelMask(CHANNEL_CONFIG);
-    audioRecordBuilder.setAudioFormat(audioFormatBuilder.build());
-    audioRecordBuilder.setBufferSizeInBytes(8 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
-    return audioRecordBuilder.build();
+      audioRecordBuilder.setAudioSource(MediaRecorder.AudioSource.REMOTE_SUBMIX);
+      AudioFormat.Builder audioFormatBuilder = new AudioFormat.Builder();
+      audioFormatBuilder.setEncoding(ENCODING);
+      audioFormatBuilder.setSampleRate(SAMPLE_RATE);
+      audioFormatBuilder.setChannelMask(CHANNEL_CONFIG);
+      audioRecordBuilder.setAudioFormat(audioFormatBuilder.build());
+      audioRecordBuilder.setBufferSizeInBytes(8 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
+      return audioRecordBuilder.build();
+    }
+    return null;
   }
 
   @TargetApi(Build.VERSION_CODES.R)

@@ -70,8 +70,9 @@ public final class AudioEncode {
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
-      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + bufferInfo.size);
+      ByteBuffer byteBuffer = ByteBuffer.allocate(13 + bufferInfo.size);
       byteBuffer.put((byte) 1);
+      byteBuffer.putLong(bufferInfo.presentationTimeUs);
       byteBuffer.putInt(bufferInfo.size);
       byteBuffer.put(buffer);
       byteBuffer.flip();

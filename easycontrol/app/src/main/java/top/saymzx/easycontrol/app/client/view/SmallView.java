@@ -61,13 +61,11 @@ public class SmallView {
       // 设置监听
       setButtonListener(controller);
       // 显示
-      AppData.main.getWindowManager().addView(smallView.getRoot(), smallViewParams);
+      AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
       showSmallViewAnim();
       // 更新TextureView
       smallView.textureViewLayout.addView(clientView.textureView, 0);
-      Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
-      clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
-      setCenter();
+      calculateSite(PublicTools.getScreenSize());
     }
   }
 
@@ -75,14 +73,14 @@ public class SmallView {
     if (isShow) {
       isShow = false;
       smallView.textureViewLayout.removeView(clientView.textureView);
-      AppData.main.getWindowManager().removeView(smallView.getRoot());
+      AppData.windowManager.removeView(smallView.getRoot());
     }
   }
 
-  public void changeRotation() {
-    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
+  // 计算合适位置
+  public void calculateSite(Pair<Integer, Integer> screenSize) {
     clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
-    setCenter();
+    setCenter(screenSize);
   }
 
   // 更改Small View的形态
@@ -119,11 +117,11 @@ public class SmallView {
   public void setViewFocus(boolean toFocus) {
     if (!toFocus && viewFocus) {
       smallViewParams.flags = LayoutParamsFlagNoFocus;
-      AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
+      AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
       viewFocus = false;
     } else if (toFocus && !viewFocus) {
       smallViewParams.flags = LayoutParamsFlagFocus;
-      AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
+      AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
       viewFocus = true;
     }
   }
@@ -164,12 +162,12 @@ public class SmallView {
           // 更新
           smallViewParams.x = paramsX.get() + flipX;
           smallViewParams.y = paramsY.get() + flipY;
-          AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
+          AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
           break;
         }
         case MotionEvent.ACTION_UP:
           if (!isFilp.get())
-            clientView.changeBarViewAnim(smallView.barView, PublicTools.dp2px(-40f));
+            clientView.changeBarViewAnim(smallView.barView, true);
           break;
       }
       return true;
@@ -177,13 +175,11 @@ public class SmallView {
   }
 
   // 居中显示
-  private void setCenter() {
-    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
-    // 更新
+  private void setCenter(Pair<Integer, Integer> screenSize) {
     ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
     smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
-    AppData.main.getWindowManager().updateViewLayout(smallView.getRoot(), smallViewParams);
+    AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
   }
 
   // 设置按钮监听

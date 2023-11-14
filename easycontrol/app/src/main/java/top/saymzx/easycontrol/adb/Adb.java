@@ -166,6 +166,7 @@ public class Adb {
 
   public void sendMoreOk(AdbStream stream) {
     sendQueue.offer(AdbProtocol.generateOkay(stream.localId, stream.remoteId));
+    sendQueue.offer(AdbProtocol.generateOkay(stream.localId, stream.remoteId));
   }
 
   private boolean isClosed = false;

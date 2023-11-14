@@ -42,8 +42,8 @@ public final class Controller {
     int pointerId = Server.streamIn.readByte();
     float x = Server.streamIn.readFloat();
     float y = Server.streamIn.readFloat();
-    int offsetTime=Server.streamIn.readInt();
-    Device.touchEvent(action, x, y, pointerId,offsetTime);
+    int offsetTime = Server.streamIn.readInt();
+    Device.touchEvent(action, x, y, pointerId, offsetTime);
   }
 
   private static void handleKeyEvent() throws IOException {

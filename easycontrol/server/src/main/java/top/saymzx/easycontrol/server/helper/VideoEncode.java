@@ -58,9 +58,9 @@ public final class VideoEncode {
 
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
-    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2);
+    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-      encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 2);
+      encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 3);
     encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
 
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
@@ -108,7 +108,8 @@ public final class VideoEncode {
       // 找到已完成的输出缓冲区
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
-      ByteBuffer byteBuffer = ByteBuffer.allocate(4 + bufferInfo.size);
+      ByteBuffer byteBuffer = ByteBuffer.allocate(12 + bufferInfo.size);
+      byteBuffer.putLong(bufferInfo.presentationTimeUs);
       byteBuffer.putInt(bufferInfo.size);
       byteBuffer.put(encedec.getOutputBuffer(outIndex));
       byteBuffer.flip();
@@ -119,9 +120,11 @@ public final class VideoEncode {
   }
 
   private static boolean isH265EncoderSupport() {
-    MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
-      if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
+    if (Options.isH265DecoderSupport) {
+      MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+      for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
+        if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
+      }
     }
     return false;
   }

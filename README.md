@@ -22,7 +22,8 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 - 支持物理键盘输入(不完善，目前仅全屏控制下支持，且需配合QQ输入法等输入中文)
 
 ## 使用说明
-[点击此处前往](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md)
+[点击此处前往易控使用说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md)
+[点击此处前往Center中心服务器搭建说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE_CENTER.md)
 
 ## 更新日志
 [点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)

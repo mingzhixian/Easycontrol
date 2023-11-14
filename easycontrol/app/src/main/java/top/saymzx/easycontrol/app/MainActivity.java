@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -64,7 +65,7 @@ public class MainActivity extends Activity {
     // 启动Center检查服务
     CenterHelper.checkCenter();
     alarmPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_CENTER_SERVICE), PendingIntent.FLAG_MUTABLE);
-    ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 5, alarmPendingIntent);
+    ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 10, alarmPendingIntent);
   }
 
   @Override
@@ -84,7 +85,7 @@ public class MainActivity extends Activity {
   // 检查权限
   private void checkPermission() {
     // 检查悬浮窗权限
-    if (!Settings.canDrawOverlays(this)) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
       Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
       intent.setData(Uri.parse("package:$packageName"));
       startActivity(intent);
@@ -109,7 +110,7 @@ public class MainActivity extends Activity {
 
   // 广播处理
   public static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
-  public static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.center_service";
+  public static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.CENTER_SERVICE";
   PendingIntent alarmPendingIntent;
   private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
@@ -119,7 +120,6 @@ public class MainActivity extends Activity {
     }
 
     private void handleUSB(Context context, Intent intent) {
-
       UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
       if (usbDevice == null) return;
       switch (intent.getAction()) {
@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
         // 授权完成
         case ACTION_USB_PERMISSION: {
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            String uuid = UUID.fromString(usbDevice.getSerialNumber()).toString();
+            String uuid = UUID.fromString(usbDevice.getDeviceName() + usbDevice.getProductId()).toString();
             // 若没有该设备，则新建设备
             Device device = AppData.dbHelper.getByUUID(uuid);
             if (device == null) {
