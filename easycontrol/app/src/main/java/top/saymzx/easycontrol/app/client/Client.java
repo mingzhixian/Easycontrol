@@ -9,6 +9,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -20,12 +21,13 @@ import top.saymzx.easycontrol.adb.AdbStream;
 import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.ClientView;
-import top.saymzx.easycontrol.app.client.view.FullActivity;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class Client {
+  public static final ArrayList<Client> allClients = new ArrayList<>();
+
   // 连接，双连接，避免tcp对头阻塞，以及避免adb同步阻塞
   private Adb adb;
   private Adb videoAdb;
@@ -37,7 +39,7 @@ public class Client {
   private AudioDecode audioDecode;
   public Controller controller;
 
-  private final ClientView clientView = new ClientView(this);
+  public final ClientView clientView;
 
   // 是否正常解码播放
   public boolean isNormalPlay = true;
@@ -47,13 +49,17 @@ public class Client {
   private final ExecutorService executor = new ThreadPoolExecutor(4, 6, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new CustomThreadFactory(), new ThreadPoolExecutor.CallerRunsPolicy());
   private final Dialog dialog = PublicTools.createClientLoading(AppData.main, this::errorClose);
 
+  private static final int timeoutDelay = 1000 * 10;
+
   public Client(Device device, UsbDevice usbDevice) {
+    allClients.add(this);
+    clientView = new ClientView(this, device.setResolution);
     // 显示加载框
     dialog.show();
     // 启动超时
     startCheckThread = new Thread(() -> {
       try {
-        Thread.sleep(8000);
+        Thread.sleep(timeoutDelay);
         if (!startSuccess) errorClose();
       } catch (InterruptedException ignored) {
       }
@@ -81,7 +87,6 @@ public class Client {
         Log.e("Easycontrol", error);
         AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
         errorClose();
-        throw new RuntimeException(e);
       }
     });
   }
@@ -120,14 +125,7 @@ public class Client {
   // 启动Server
   private void startServer(Device device) throws Exception {
     try {
-      int setWidth = -1;
-      int setHeight = -1;
-      if (device.setResolution) {
-        Pair<Integer, Integer> tmpDeviceSize = FullActivity.getScreenSizeWithoutDock();
-        setWidth = tmpDeviceSize.first;
-        setHeight = tmpDeviceSize.second;
-      }
-      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " set_width=" + setWidth + " set_height=" + setHeight + " isH265DecoderSupport=" + (PublicTools.isH265DecoderSupport() ? 1 : 0) + " > /dev/null 2>&1 & ", false);
+      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " is_h265_decoder_support=" + ((AppData.setting.getDefaultH265() && PublicTools.isH265DecoderSupport()) ? 1 : 0) + " > /dev/null 2>&1 & ", false);
     } catch (Exception ignored) {
       throw new Exception("启动Server失败");
     }
@@ -207,7 +205,7 @@ public class Client {
             controller.handleClipboardEvent();
             break;
           case 3:
-            controller.handleRotationNotification();
+            controller.handleChangeSizeEvent();
             break;
         }
       }
@@ -257,7 +255,7 @@ public class Client {
         controller.checkClipBoard();
         controller.sendKeepAlive();
         checkScreenRotation();
-        Thread.sleep(1000);
+        Thread.sleep(1500);
       }
     } catch (Exception ignored) {
       errorClose();
@@ -269,9 +267,7 @@ public class Client {
   private void checkScreenRotation() {
     Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
     boolean nowScreenIsPortal = screenSize.first < screenSize.second;
-    if (lastScreenIsPortal != null && lastScreenIsPortal != nowScreenIsPortal) {
-      AppData.main.runOnUiThread(() -> clientView.reCalculateSite(screenSize));
-    }
+    if (lastScreenIsPortal != null && lastScreenIsPortal != nowScreenIsPortal) AppData.main.runOnUiThread(() -> clientView.hasChangeRotation(screenSize));
     lastScreenIsPortal = nowScreenIsPortal;
   }
 
@@ -291,6 +287,7 @@ public class Client {
     if (videoAdb != null) videoAdb.close();
     if (videoDecode != null) videoDecode.release();
     if (audioDecode != null) audioDecode.release();
+    allClients.remove(this);
   }
 
   // 线程创建模板

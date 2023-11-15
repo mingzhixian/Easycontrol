@@ -54,6 +54,15 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getDefaultH265() {
+    return sharedPreferences.getBoolean("defaultH265", true);
+  }
+
+  public void setDefaultH265(boolean value) {
+    editor.putBoolean("defaultH265", value);
+    editor.apply();
+  }
+
   public boolean getTurnOffScreen() {
     return sharedPreferences.getBoolean("turnOffScreen", true);
   }

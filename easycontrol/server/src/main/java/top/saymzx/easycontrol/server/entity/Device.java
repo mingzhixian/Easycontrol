@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.helper.VideoEncode;
@@ -27,8 +28,9 @@ import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 public final class Device {
-
+  private static Pair<Integer, Integer> realDeviceSize;
   public static Pair<Integer, Integer> deviceSize;
+  public static boolean hasSetResolution = false;
   public static int deviceRotation;
   public static Pair<Integer, Integer> videoSize;
 
@@ -38,45 +40,42 @@ public final class Device {
   public static int layerStack;
 
   public static void init() throws IOException, InterruptedException {
+    getRealDeviceSize();
     DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
     deviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
-    // 修改分辨率
-    if (Options.setWidth != -1) calculateSize();
-    // 计算视频大小
-    computeVideoSize();
     layerStack = displayInfo.layerStack;
+    computeVideoSize();
     // 旋转监听
     setRotationListener();
     // 剪切板监听
     setClipBoardListener();
   }
 
-  // 计算最佳的分辨率大小，按照主控端长宽比例缩放
-  private static void calculateSize() throws IOException, InterruptedException {
-    // 获取未旋转的原始分辨率
-    if (deviceRotation == 1 || deviceRotation == 3)
-      deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
-    // 保证方向一致
-    if (deviceSize.first < deviceSize.second ^ Options.setWidth < Options.setHeight) {
-      int tmp = Options.setWidth;
-      Options.setWidth = Options.setHeight;
-      Options.setHeight = tmp;
-    }
-    Pair<Integer, Integer> newScreenSize;
-    int tmp1 = Options.setHeight * Device.deviceSize.first / Options.setWidth;
-    // 横向最大不会超出
-    if (Device.deviceSize.second > tmp1) newScreenSize = new Pair<>(Device.deviceSize.first, tmp1);
-      // 竖向最大不会超出
-    else
-      newScreenSize = new Pair<>(Options.setWidth * Device.deviceSize.second / Options.setHeight, Device.deviceSize.second);
-    // 修改分辨率
-    Process process = new ProcessBuilder().command("sh", "-c", "wm size " + newScreenSize.first + "x" + newScreenSize.second).start();
-    // 更新新的设备分辨率大小
-    process.waitFor();
+  // 获取真实的设备大小
+  private static void getRealDeviceSize() {
     DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
-    deviceSize = displayInfo.size;
+    realDeviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
+    if (deviceRotation == 1 || deviceRotation == 3) deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
+  }
+
+  // 计算最佳的分辨率大小，按照主控端长宽比例缩放
+  public static void changeDeviceSize(float reSize) throws IOException, InterruptedException {
+    int newWidth;
+    int newHeight;
+    if (reSize > 1) {
+      newWidth = realDeviceSize.first;
+      newHeight = (int) (newWidth / reSize);
+    } else {
+      newHeight = realDeviceSize.second;
+      newWidth = (int) (newHeight * reSize);
+    }
+    // 修改分辨率
+    Device.execReadOutput("wm size " + newWidth + "x" + newHeight);
+    deviceSize = new Pair<>(newWidth, newHeight);
+    computeVideoSize();
+    hasSetResolution = VideoEncode.isHasChangeConfig = true;
   }
 
   private static void computeVideoSize() {
@@ -124,12 +123,6 @@ public final class Device {
         if ((deviceRotation + rotation) % 2 != 0) {
           deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
           videoSize = new Pair<>(videoSize.second, videoSize.first);
-          byte[] bytes = new byte[]{3};
-          try {
-            Server.write(ByteBuffer.wrap(bytes));
-          } catch (Exception ignored) {
-            Server.errorClose();
-          }
         }
         deviceRotation = rotation;
         VideoEncode.isHasChangeConfig = true;
@@ -158,13 +151,10 @@ public final class Device {
 
     if (action == MotionEvent.ACTION_UP) {
       pointersState.remove(pointerId);
-      if (pointerCount > 1)
-        action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+      if (pointerCount > 1) action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     } else if (action == MotionEvent.ACTION_DOWN) {
-      if (pointerCount > 1)
-        action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+      if (pointerCount > 1) action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     }
-
     MotionEvent event = MotionEvent.obtain(pointer.downTime, pointer.downTime + offsetTime, action, pointerCount, pointersState.pointerProperties, pointersState.pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
     injectEvent(event);
   }
@@ -197,5 +187,16 @@ public final class Device {
       if (d == null) return;
       SurfaceControl.setDisplayPowerMode(d, mode);
     }
+  }
+
+  public static String execReadOutput(String cmd) throws IOException, InterruptedException {
+    Process process = new ProcessBuilder().command("sh", "-c", cmd).start();
+    StringBuilder builder = new StringBuilder();
+    try (Scanner scanner = new Scanner(process.getInputStream())) {
+      while (scanner.hasNextLine()) builder.append(scanner.nextLine()).append('\n');
+    }
+    int exitCode = process.waitFor();
+    if (exitCode != 0) throw new IOException("命令执行错误" + cmd);
+    return builder.toString();
   }
 }

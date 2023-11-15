@@ -25,8 +25,7 @@ public final class AudioEncode {
     byte[] bytes = new byte[]{0};
     try {
       // 从安卓12开始支持音频
-      if (!Options.isAudio || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-        throw new Exception("版本低");
+      if (!Options.isAudio || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) throw new Exception("版本低");
       setAudioEncodec();
       encedec.start();
       audioCapture = AudioCapture.init();

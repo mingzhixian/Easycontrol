@@ -2,6 +2,8 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.graphics.Outline;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -9,6 +11,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -16,12 +19,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import java.util.Objects;
+
+import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
-public class ClientView implements TextureView.SurfaceTextureListener {
+public class ClientView extends ViewOutlineProvider implements TextureView.SurfaceTextureListener {
   private final Client client;
+  private final boolean setResolution;
   public final TextureView textureView = new TextureView(AppData.main);
   private SurfaceTexture surfaceTexture;
 
@@ -30,13 +37,17 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   private final SmallView smallView = new SmallView(this);
   private final MiniView miniView = new MiniView(this);
 
+  private Pair<Integer, Integer> layoutSize;
   public Pair<Integer, Integer> videoSize;
   private Pair<Integer, Integer> surfaceSize;
 
-  public ClientView(Client client) {
+  public ClientView(Client client, boolean setResolution) {
     this.client = client;
+    this.setResolution = setResolution;
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
+    textureView.setOutlineProvider(this);
+    textureView.setClipToOutline(true);
   }
 
   public void changeToFull() {
@@ -46,7 +57,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
       client.isNormalPlay = true;
       hide(false);
       uiMode = 1;
-      FullActivity.show(this, client.controller, videoSize.second > videoSize.first);
+      FullActivity.show(this, client.controller);
     }
   }
 
@@ -76,27 +87,34 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   }
 
   // 处理外部旋转
-  public void reCalculateSite(Pair<Integer, Integer> screenSize) {
+  public void hasChangeRotation(Pair<Integer, Integer> screenSize) {
     if (uiMode == 2) smallView.calculateSite(screenSize);
     else if (uiMode == 3) miniView.calculateSite(screenSize);
   }
 
-  // 旋转
-  public void changeRotation() {
-    videoSize = new Pair<>(videoSize.second, videoSize.first);
-    if (uiMode == 1) FullActivity.changeRotation();
-    else if (uiMode == 2) smallView.calculateSite(PublicTools.getScreenSize());
+  // 画面容器大小改变
+  public void changeLayoutSize(Pair<Integer, Integer> layoutSize) {
+    if (this.layoutSize != null && Objects.equals(this.layoutSize.first, layoutSize.first) && Objects.equals(this.layoutSize.second, layoutSize.second)) return;
+    this.layoutSize = layoutSize;
+    if (setResolution) {
+      client.controller.sendChangeSizeEvent(layoutSize);
+      if (surfaceSize == null) reCalculateTextureViewSize();
+    } else reCalculateTextureViewSize();
   }
 
-  // 更新Surface大小
-  public void updateTextureViewSize(Pair<Integer, Integer> maxSize) {
-    // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
-    int tmp1 = videoSize.second * maxSize.first / videoSize.first;
+  // 重新计算TextureView大小
+  private final int minSize = PublicTools.dp2px(150f);
+
+  public void reCalculateTextureViewSize() {
+    // 根据原画面大小videoSize计算在layoutSize空间内的最大缩放大小
+    int tmp1 = videoSize.second * layoutSize.first / videoSize.first;
     // 横向最大不会超出
-    if (maxSize.second > tmp1) surfaceSize = new Pair<>(maxSize.first, tmp1);
+    if (layoutSize.second > tmp1) surfaceSize = new Pair<>(layoutSize.first, tmp1);
       // 竖向最大不会超出
-    else
-      surfaceSize = new Pair<>(videoSize.first * maxSize.second / videoSize.second, maxSize.second);
+    else surfaceSize = new Pair<>(videoSize.first * layoutSize.second / videoSize.second, layoutSize.second);
+    // 避免画面过小
+    if (surfaceSize.first < minSize) surfaceSize = new Pair<>(minSize, surfaceSize.second * minSize / surfaceSize.first);
+    else if (surfaceSize.second < minSize) surfaceSize = new Pair<>(surfaceSize.first * minSize / surfaceSize.second, minSize);
     // 更新大小
     ViewGroup.LayoutParams layoutParams = textureView.getLayoutParams();
     layoutParams.width = surfaceSize.first;
@@ -107,7 +125,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   // 设置视频区域触摸监听
   @SuppressLint("ClickableViewAccessibility")
   private void setTouchListener() {
-    // 视频触摸控制
     int[] pointerList = new int[20];
     textureView.setOnTouchListener((view, event) -> {
       int offsetTime = (int) (event.getEventTime() - event.getDownTime());
@@ -137,8 +154,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
           int p = event.getPointerId(i);
           // 适配一些机器将点击视作小范围移动(小于3的圆内不做处理)
           if (pointerList[p] != -1) {
-            if ((pointerList[p] - x) * (pointerList[p] - x) + (pointerList[10 + p] - y) * (pointerList[10 + p] - y) < 9)
-              return true;
+            if ((pointerList[p] - x) * (pointerList[p] - x) + (pointerList[10 + p] - y) * (pointerList[10 + p] - y) < 9) return true;
             pointerList[p] = -1;
           }
           client.controller.sendTouchEvent(MotionEvent.ACTION_MOVE, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
@@ -189,6 +205,16 @@ public class ClientView implements TextureView.SurfaceTextureListener {
 
     // 启动动画
     animator.start();
+  }
+
+  @Override
+  public void getOutline(View view, Outline outline) {
+    Rect rect = new Rect();
+    view.getGlobalVisibleRect(rect);
+    int leftMargin = 0;
+    int topMargin = 0;
+    Rect selfRect = new Rect(leftMargin, topMargin, rect.right - rect.left - leftMargin, rect.bottom - rect.top - topMargin);
+    outline.setRoundRect(selfRect, AppData.main.getResources().getDimension(R.dimen.round));
   }
 
   @Override

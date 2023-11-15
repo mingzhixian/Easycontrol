@@ -3,9 +3,7 @@
  */
 package top.saymzx.easycontrol.server.helper;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import top.saymzx.easycontrol.server.Server;
@@ -13,7 +11,7 @@ import top.saymzx.easycontrol.server.entity.Device;
 
 public final class Controller {
 
-  public static void handleIn() throws IOException {
+  public static void handleIn() throws IOException, InterruptedException {
     boolean hasData = true;
     while (hasData) {
       switch (Server.streamIn.readByte()) {
@@ -31,6 +29,9 @@ public final class Controller {
           break;
         case 5:
           handlePowerEvent();
+          break;
+        case 6:
+          handleChangeSizeEvent();
           break;
       }
       hasData = Server.streamIn.available() > 0;
@@ -69,16 +70,17 @@ public final class Controller {
     Device.keyEvent(26);
   }
 
-  public static void checkScreenOff(boolean turnOn) throws IOException {
-    Process process = new ProcessBuilder().command("sh", "-c", "dumpsys deviceidle | grep mScreenOn").start();
-    String output = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
+  private static void handleChangeSizeEvent() throws IOException, InterruptedException {
+    Device.changeDeviceSize(Server.streamIn.readFloat());
+  }
+
+  public static void checkScreenOff(boolean turnOn) throws IOException, InterruptedException {
+    String output = Device.execReadOutput("dumpsys deviceidle | grep mScreenOn");
     Boolean isScreenOn = null;
     if (output.contains("mScreenOn=true")) isScreenOn = true;
     else if (output.contains("mScreenOn=false")) isScreenOn = false;
-    if (isScreenOn != null) {
-      // 如果屏幕状态和要求状态不同，则模拟按下电源键
-      if (isScreenOn ^ turnOn) Device.keyEvent(26);
-    }
+    // 如果屏幕状态和要求状态不同，则模拟按下电源键
+    if (isScreenOn != null && isScreenOn ^ turnOn) Device.keyEvent(26);
   }
 
 }

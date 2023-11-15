@@ -81,9 +81,8 @@ public class ClipboardManager {
   }
 
   private static void getAddPrimaryClipChangedListener() throws NoSuchMethodException {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-      addPrimaryClipChangedListener = manager.getClass().getMethod("addPrimaryClipChangedListener", IOnPrimaryClipChangedListener.class, String.class);
-    } else {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) addPrimaryClipChangedListener = manager.getClass().getMethod("addPrimaryClipChangedListener", IOnPrimaryClipChangedListener.class, String.class);
+    else {
       for (int i = 0; i < 3; i++) {
         try {
           addListenerMethodVersion = i;
@@ -107,9 +106,8 @@ public class ClipboardManager {
   public static void addPrimaryClipChangedListener(IOnPrimaryClipChangedListener listener) {
     if (manager == null) return;
     try {
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        addPrimaryClipChangedListener.invoke(manager, listener, FakeContext.PACKAGE_NAME);
-      } else {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) addPrimaryClipChangedListener.invoke(manager, listener, FakeContext.PACKAGE_NAME);
+      else {
         switch (addListenerMethodVersion) {
           case 0:
             addPrimaryClipChangedListener.invoke(manager, listener, FakeContext.PACKAGE_NAME, FakeContext.ROOT_UID);
@@ -130,9 +128,8 @@ public class ClipboardManager {
     if (manager == null) return null;
     try {
       ClipData clipData;
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        clipData = (ClipData) getPrimaryClipMethod.invoke(manager, FakeContext.PACKAGE_NAME);
-      } else {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) clipData = (ClipData) getPrimaryClipMethod.invoke(manager, FakeContext.PACKAGE_NAME);
+      else {
         switch (getMethodVersion) {
           case 0:
             clipData = (ClipData) getPrimaryClipMethod.invoke(manager, FakeContext.PACKAGE_NAME, FakeContext.ROOT_UID);
@@ -160,9 +157,8 @@ public class ClipboardManager {
     if (manager == null) return;
     ClipData clipData = ClipData.newPlainText("easycontrol", text);
     try {
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        setPrimaryClipMethod.invoke(manager, clipData, FakeContext.PACKAGE_NAME);
-      } else {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) setPrimaryClipMethod.invoke(manager, clipData, FakeContext.PACKAGE_NAME);
+      else {
         switch (setMethodVersion) {
           case 0:
             setPrimaryClipMethod.invoke(manager, clipData, FakeContext.PACKAGE_NAME, FakeContext.ROOT_UID);

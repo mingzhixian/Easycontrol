@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app.client.view;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -17,7 +16,6 @@ import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class FullActivity extends Activity {
-
   @SuppressLint("StaticFieldLeak")
   private static FullActivity context;
   private ActivityFullBinding fullActivity;
@@ -25,7 +23,6 @@ public class FullActivity extends Activity {
   private static Controller controller;
   @SuppressLint("StaticFieldLeak")
   private static ClientView clientView;
-  private static boolean isPortrait;
 
   public static boolean isShow = false;
 
@@ -39,24 +36,21 @@ public class FullActivity extends Activity {
     PublicTools.setFullScreen(this);
     // 隐藏工具栏
     fullActivity.barView.setVisibility(View.GONE);
-    // 旋转
-    int rotation = isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-    if (rotation != getRequestedOrientation()) {
-      setRequestedOrientation(rotation);
-      return;
-    }
     // 按键监听
     setButtonListener();
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
-    Pair<Integer, Integer> maxSize = getScreenSizeWithoutDock();
-    clientView.updateTextureViewSize(isPortrait ? maxSize : new Pair<>(maxSize.second, maxSize.first));
+    fullActivity.textureViewLayout.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+      if (isShow) clientView.changeLayoutSize(getLayoutSize());
+    });
   }
 
   @Override
   protected void onPause() {
-    // 退出页面时自动变为小窗
-    if (!isChangingConfigurations() && isShow) clientView.changeToSmall();
+    // 旋转时及时删除
+    if (isChangingConfigurations()) context.fullActivity.textureViewLayout.removeView(clientView.textureView);
+      // 退出页面时自动变为小窗
+    else if (isShow) clientView.changeToSmall();
     super.onPause();
   }
 
@@ -76,12 +70,11 @@ public class FullActivity extends Activity {
     return super.onKeyDown(keyCode, event);
   }
 
-  public static void show(ClientView clientView, Controller controller, boolean isPortrait) {
+  public static void show(ClientView clientView, Controller controller) {
     if (!isShow) {
       isShow = true;
       FullActivity.clientView = clientView;
       FullActivity.controller = controller;
-      FullActivity.isPortrait = isPortrait;
       AppData.main.startActivity(new Intent(AppData.main, FullActivity.class));
     }
   }
@@ -94,19 +87,8 @@ public class FullActivity extends Activity {
     }
   }
 
-  public static void changeRotation() {
-    FullActivity.isPortrait = !FullActivity.isPortrait;
-    context.fullActivity.textureViewLayout.removeView(clientView.textureView);
-    context.setRequestedOrientation(FullActivity.isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-  }
-
-  // 获取去除底部操作栏后的屏幕大小，用于修改分辨率使用
-  public static Pair<Integer, Integer> getScreenSizeWithoutDock() {
-    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
-    // 保持竖向
-    if (screenSize.first > screenSize.second)
-      screenSize = new Pair<>(screenSize.second, screenSize.first);
-    return new Pair<>(screenSize.first, screenSize.second - PublicTools.dp2px(35f));
+  private Pair<Integer, Integer> getLayoutSize() {
+    return new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight());
   }
 
   // 设置按钮监听

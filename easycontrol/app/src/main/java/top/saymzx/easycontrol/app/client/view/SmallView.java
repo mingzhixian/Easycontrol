@@ -65,7 +65,7 @@ public class SmallView {
       showSmallViewAnim();
       // 更新TextureView
       smallView.textureViewLayout.addView(clientView.textureView, 0);
-      calculateSite(PublicTools.getScreenSize());
+      clientView.changeLayoutSize(getDefaultLayoutSize());
     }
   }
 
@@ -77,12 +77,6 @@ public class SmallView {
     }
   }
 
-  // 计算合适位置
-  public void calculateSite(Pair<Integer, Integer> screenSize) {
-    clientView.updateTextureViewSize(new Pair<>(screenSize.first * 3 / 4, screenSize.second * 3 / 4));
-    setCenter(screenSize);
-  }
-
   // 更改Small View的形态
   public void showSmallViewAnim() {
     // 创建平移动画
@@ -91,16 +85,21 @@ public class SmallView {
     // 创建透明度动画
     smallView.getRoot().setAlpha(0f);
     float endAlpha = 1f;
-
     // 设置动画时长和插值器
     ViewPropertyAnimator animator = smallView.getRoot().animate()
       .translationY(endY)
       .alpha(endAlpha)
       .setDuration(400)
       .setInterpolator(new OvershootInterpolator());
-
     // 启动动画
     animator.start();
+  }
+
+  // 获取默认容器大小
+  public Pair<Integer, Integer> getDefaultLayoutSize() {
+    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
+    int min = screenSize.first > screenSize.second ? screenSize.second : screenSize.first;
+    return new Pair<>(min * 3 / 4, min * 5 / 4);
   }
 
   // 设置焦点监听
@@ -157,8 +156,7 @@ public class SmallView {
             isFilp.set(true);
           }
           // 拖动限制
-          if (x < 200 | x > screenSize.get().first - 200 | y < 200 | y > screenSize.get().second - 200)
-            return true;
+          if (x < 200 | x > screenSize.get().first - 200 | y < 200 | y > screenSize.get().second - 200) return true;
           // 更新
           smallViewParams.x = paramsX.get() + flipX;
           smallViewParams.y = paramsY.get() + flipY;
@@ -166,8 +164,7 @@ public class SmallView {
           break;
         }
         case MotionEvent.ACTION_UP:
-          if (!isFilp.get())
-            clientView.changeBarViewAnim(smallView.barView, true);
+          if (!isFilp.get()) clientView.changeBarViewAnim(smallView.barView, true);
           break;
       }
       return true;
@@ -175,7 +172,8 @@ public class SmallView {
   }
 
   // 居中显示
-  private void setCenter(Pair<Integer, Integer> screenSize) {
+  public void calculateSite(Pair<Integer, Integer> screenSize) {
+    clientView.changeLayoutSize(getDefaultLayoutSize());
     ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
     smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
@@ -191,21 +189,28 @@ public class SmallView {
       smallView.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     }
     smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
+    smallView.buttonMiniCircle.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
     smallView.buttonClose.setOnClickListener(v -> clientView.hide(true));
+    smallView.buttonCloseCircle.setOnClickListener(v -> clientView.hide(true));
   }
 
   // 设置悬浮窗大小拖动按钮监听控制
   @SuppressLint("ClickableViewAccessibility")
   private void setReSizeListener() {
-    int minSize = PublicTools.dp2px(150f);
     smallView.reSize.setOnTouchListener((v, event) -> {
+      // 更新位置大小
+      int sizeX = (int) (event.getRawX() - smallViewParams.x);
+      int sizeY = (int) (event.getRawY() - smallViewParams.y);
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-        // 更新位置大小
-        int sizeX = (int) (event.getRawX() - smallViewParams.x);
-        int sizeY = (int) (event.getRawY() - smallViewParams.y);
-        if (sizeX < minSize || sizeY < minSize) return true;
-        clientView.updateTextureViewSize(new Pair<>(sizeX, sizeY));
+        if (sizeX < 100 || sizeY < 100) return true;
+        // 更新
+        ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+        layoutParams.width = sizeX;
+        layoutParams.height = sizeY;
+        clientView.textureView.setLayoutParams(layoutParams);
+      } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+        clientView.changeLayoutSize(new Pair<>(sizeX, sizeY));
       }
       return true;
     });

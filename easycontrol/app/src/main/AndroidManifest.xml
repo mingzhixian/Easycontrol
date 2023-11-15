@@ -11,7 +11,7 @@
   <uses-feature android:name="android.hardware.usb.host" />
 
   <application
-    android:icon="@drawable/app_icon"
+    android:icon="@mipmap/ic_launcher"
     android:label="易控"
     android:supportsRtl="true"
     android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
@@ -22,7 +22,6 @@
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
@@ -38,8 +37,7 @@
     <activity
       android:name=".client.view.FullActivity"
       android:exported="false"
-      android:launchMode="singleTask"
-      android:screenOrientation="portrait" />
+      android:launchMode="singleTask" />
 
   </application>
 

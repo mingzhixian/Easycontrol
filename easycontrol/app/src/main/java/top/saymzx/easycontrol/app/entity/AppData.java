@@ -49,9 +49,7 @@ public class AppData {
     try {
       File privateKey = new File(main.getApplicationContext().getFilesDir(), "private.key");
       File publicKey = new File(main.getApplicationContext().getFilesDir(), "public.key");
-      if (!privateKey.isFile() || !publicKey.isFile()) {
-        AdbKeyPair.generate(privateKey, publicKey);
-      }
+      if (!privateKey.isFile() || !publicKey.isFile()) AdbKeyPair.generate(privateKey, publicKey);
       keyPair = AdbKeyPair.read(privateKey, publicKey);
     } catch (Exception ignored) {
     }

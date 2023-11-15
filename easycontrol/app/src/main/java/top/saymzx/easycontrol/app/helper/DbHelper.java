@@ -36,8 +36,7 @@ public class DbHelper extends SQLiteOpenHelper {
   public ArrayList<Device> getAll() {
     ArrayList<Device> devices = new ArrayList<>();
     try (Cursor cursor = getReadableDatabase().query(tableName, null, null, null, null, null, null)) {
-      if (cursor.moveToFirst())
-        do devices.add(getDeviceFormCursor(cursor)); while (cursor.moveToNext());
+      if (cursor.moveToFirst()) do devices.add(getDeviceFormCursor(cursor)); while (cursor.moveToNext());
     }
     return devices;
   }

@@ -6,6 +6,7 @@
 ```shell
 # Debian系统示例安装命令
 apt install openjdk-11-jre
+# 其他系统请自行搜索“xx系统安装java11环境”，按照网上教程安装
 ```
 - 下载Center-all.jar文件至服务器（项目本身不再提供发行版文件，需手动编译或进入[易控下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp))付费下载）
 
@@ -31,6 +32,9 @@ KillMode=mixed
 [Install]
 WantedBy=multi-user.target
 ```
+- 使用"systemctl enable easycontrol_center"命令允许开机自启动
+- 使用"systemctl start easycontrol_center"命令启动服务
+- 使用"systemctl status easycontrol_center"命令查看运行信息包括日志
 
 ## 使用
 - Center服务启动后监听8866端口，在易控端填入地址时需包括/api/路径，即若服务器地址为1.1.1.1，则易控端填写http://1.1.1.1:8866/api/

@@ -60,7 +60,6 @@ public class DeviceListAdapter extends BaseAdapter {
     if (device.isLinkDevice()) setView(view, device, linkDevice.second, R.drawable.link);
     else if (device.isCenterDevice()) setView(view, device, null, R.drawable.center);
     else setView(view, device, null, R.drawable.phone);
-
     return view;
   }
 
@@ -110,13 +109,9 @@ public class DeviceListAdapter extends BaseAdapter {
     ArrayList<Device> tmp2 = new ArrayList<>();
     ArrayList<Device> tmp3 = new ArrayList<>();
     for (Device device : rawDevices) {
-      if (device.isLinkDevice()) {
-        if (linkDevice != null && Objects.equals(device.uuid, linkDevice.first)) tmp1 = device;
-      } else if (device.isCenterDevice()) {
-        if (centerDevices.contains(device.uuid)) tmp2.add(device);
-      } else {
-        tmp3.add(device);
-      }
+      if (device.isLinkDevice() && linkDevice != null && Objects.equals(device.uuid, linkDevice.first)) tmp1 = device;
+      else if (device.isCenterDevice() && centerDevices.contains(device.uuid)) tmp2.add(device);
+      else if (device.isNormalDevice()) tmp3.add(device);
     }
     devices.clear();
     if (tmp1 != null) devices.add(tmp1);

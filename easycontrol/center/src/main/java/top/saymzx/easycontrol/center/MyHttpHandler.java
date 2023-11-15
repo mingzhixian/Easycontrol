@@ -128,10 +128,7 @@ public class MyHttpHandler implements HttpHandler {
       user = new User(name, password);
       Center.users.put(name, user);
       System.out.print("New User,Name=" + user.name + ",Password=" + user.password + "\n");
-    } else {
-      // 检查密码
-      if (!Objects.equals(user.password, password)) user = null;
-    }
+    } else if (!Objects.equals(user.password, password)) user = null;
     return user;
   }
 

@@ -20,7 +20,9 @@
       android:layout_width="50dp"
       android:layout_height="50dp"
       android:layout_marginStart="10dp"
-      android:src="@drawable/app_icon" />
+      android:scaleX="1.6"
+      android:scaleY="1.6"
+      android:src="@drawable/ic_launcher_foreground" />
 
     <TextView
       android:layout_width="wrap_content"
