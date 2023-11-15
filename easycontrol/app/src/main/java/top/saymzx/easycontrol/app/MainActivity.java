@@ -61,10 +61,12 @@ public class MainActivity extends Activity {
     filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
     filter.addAction(ACTION_USB_PERMISSION);
     filter.addAction(ACTION_CENTER_SERVICE);
-    registerReceiver(broadcastReceiver, filter);
+    filter.addAction(ACTION_SCREEN_OFF);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiver(broadcastReceiver, filter, RECEIVER_EXPORTED);
+    else registerReceiver(broadcastReceiver, filter);
     // 启动Center检查服务
     CenterHelper.checkCenter();
-    alarmPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_CENTER_SERVICE), PendingIntent.FLAG_MUTABLE);
+    alarmPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_CENTER_SERVICE), PendingIntent.FLAG_IMMUTABLE);
     ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 10, alarmPendingIntent);
   }
 
@@ -109,14 +111,20 @@ public class MainActivity extends Activity {
   }
 
   // 广播处理
-  public static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
-  public static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.CENTER_SERVICE";
+  private static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
+  private static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.CENTER_SERVICE";
+  private static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
   PendingIntent alarmPendingIntent;
   private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
       if (ACTION_CENTER_SERVICE.equals(intent.getAction())) CenterHelper.checkCenter();
+      else if (ACTION_SCREEN_OFF.equals(intent.getAction())) handleScreenOff();
       else handleUSB(context, intent);
+    }
+
+    private void handleScreenOff() {
+      for (Client client : Client.allClients) client.clientView.hide(true);
     }
 
     private void handleUSB(Context context, Intent intent) {
@@ -138,7 +146,8 @@ public class MainActivity extends Activity {
         // 授权完成
         case ACTION_USB_PERMISSION: {
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            String uuid = UUID.fromString(usbDevice.getDeviceName() + usbDevice.getProductId()).toString();
+            // 有线设备使用序列号作为唯一标识符
+            String uuid = usbDevice.getSerialNumber();
             // 若没有该设备，则新建设备
             Device device = AppData.dbHelper.getByUUID(uuid);
             if (device == null) {

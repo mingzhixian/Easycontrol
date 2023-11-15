@@ -24,11 +24,8 @@ public final class SurfaceControl {
 
   public static void init() throws ClassNotFoundException, NoSuchMethodException {
     CLASS = Class.forName("android.view.SurfaceControl");
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-      getBuiltInDisplayMethod = CLASS.getMethod("getBuiltInDisplay", int.class);
-    } else {
-      getBuiltInDisplayMethod = CLASS.getMethod("getInternalDisplayToken");
-    }
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) getBuiltInDisplayMethod = CLASS.getMethod("getBuiltInDisplay", int.class);
+    else getBuiltInDisplayMethod = CLASS.getMethod("getInternalDisplayToken");
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       getPhysicalDisplayTokenMethod = CLASS.getMethod("getPhysicalDisplayToken", long.class);
       getPhysicalDisplayIdsMethod = CLASS.getMethod("getPhysicalDisplayIds");
@@ -45,8 +42,7 @@ public final class SurfaceControl {
   }
 
   public static void setDisplayProjection(IBinder displayToken, int orientation, Rect layerStackRect, Rect displayRect) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    CLASS.getMethod("setDisplayProjection", IBinder.class, int.class, Rect.class, Rect.class)
-      .invoke(null, displayToken, orientation, layerStackRect, displayRect);
+    CLASS.getMethod("setDisplayProjection", IBinder.class, int.class, Rect.class, Rect.class).invoke(null, displayToken, orientation, layerStackRect, displayRect);
   }
 
   public static void setDisplayLayerStack(IBinder displayToken, int layerStack) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -67,9 +63,7 @@ public final class SurfaceControl {
 
   public static IBinder getBuiltInDisplay() {
     try {
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        return (IBinder) getBuiltInDisplayMethod.invoke(null, 0);
-      }
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return (IBinder) getBuiltInDisplayMethod.invoke(null, 0);
       return (IBinder) getBuiltInDisplayMethod.invoke(null);
     } catch (Exception e) {
       return null;

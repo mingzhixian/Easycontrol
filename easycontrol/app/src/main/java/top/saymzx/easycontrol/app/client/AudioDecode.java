@@ -106,9 +106,7 @@ public class AudioDecode {
       audioTrackBuild.setAudioFormat(audioFormat.build());
       // 4
       audioTrack = audioTrackBuild.build();
-    } else {
-      audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
-    }
+    } else audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
     audioTrack.play();
   }
 

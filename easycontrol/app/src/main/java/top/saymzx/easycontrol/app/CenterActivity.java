@@ -44,6 +44,7 @@ public class CenterActivity extends Activity {
 
   // 设置按钮监听
   private void setButtonListener() {
+    loginActivity.backButton.setOnClickListener(v -> finish());
     loginActivity.ok.setOnClickListener(v -> {
       String centerAddress = String.valueOf(loginActivity.centerAddress.getText());
       String centerName = String.valueOf(loginActivity.centerName.getText());

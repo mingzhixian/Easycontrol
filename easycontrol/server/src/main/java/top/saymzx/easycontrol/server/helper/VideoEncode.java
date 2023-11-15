@@ -59,25 +59,13 @@ public final class VideoEncode {
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.videoBitRate);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
     encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-      encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 3);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 3);
     encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
 
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
 
     encodecFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
-  }
-
-  private static void setDisplaySurface(IBinder display, Surface surface) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SurfaceControl.openTransaction();
-    try {
-      SurfaceControl.setDisplaySurface(display, surface);
-      SurfaceControl.setDisplayProjection(display, 0, new Rect(0, 0, Device.deviceSize.first, Device.deviceSize.second), new Rect(0, 0, Device.videoSize.first, Device.videoSize.second));
-      SurfaceControl.setDisplayLayerStack(display, Device.layerStack);
-    } finally {
-      SurfaceControl.closeTransaction();
-    }
   }
 
   // 初始化编码器
@@ -101,6 +89,17 @@ public final class VideoEncode {
     surface.release();
   }
 
+  private static void setDisplaySurface(IBinder display, Surface surface) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    SurfaceControl.openTransaction();
+    try {
+      SurfaceControl.setDisplaySurface(display, surface);
+      SurfaceControl.setDisplayProjection(display, 0, new Rect(0, 0, Device.deviceSize.first, Device.deviceSize.second), new Rect(0, 0, Device.videoSize.first, Device.videoSize.second));
+      SurfaceControl.setDisplayLayerStack(display, Device.layerStack);
+    } finally {
+      SurfaceControl.closeTransaction();
+    }
+  }
+
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
   public static void encodeOut() throws InterruptedIOException, ErrnoException {
@@ -122,9 +121,7 @@ public final class VideoEncode {
   private static boolean isH265EncoderSupport() {
     if (Options.isH265DecoderSupport) {
       MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-      for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
-        if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
-      }
+      for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
     }
     return false;
   }

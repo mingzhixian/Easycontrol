@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.content.ClipData;
+import android.util.Pair;
 import android.view.MotionEvent;
 
 import java.io.IOException;
@@ -43,9 +44,10 @@ public class Controller {
     AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, nowClipboardText));
   }
 
-  // 处理旋转
-  public void handleRotationNotification() {
-    AppData.main.runOnUiThread(clientView::changeRotation);
+  // 处理画面大小变化
+  public void handleChangeSizeEvent() throws IOException, InterruptedException {
+    clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
+    AppData.main.runOnUiThread(() -> clientView.reCalculateTextureViewSize());
   }
 
   // 发送触摸事件
@@ -105,6 +107,16 @@ public class Controller {
   // 发送按键事件
   public void sendPowerEvent() {
     writeStream(ByteBuffer.wrap(new byte[]{5}));
+  }
+
+  // 发送修改分辨率事件
+  public void sendChangeSizeEvent(Pair<Integer, Integer> newSize) {
+    if (newSize.first < 0 || newSize.second < 0) return;
+    ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+    byteBuffer.put((byte) 6);
+    byteBuffer.putFloat((float) newSize.first / (float) newSize.second);
+    byteBuffer.flip();
+    writeStream(byteBuffer);
   }
 
   private void writeStream(ByteBuffer byteBuffer) {

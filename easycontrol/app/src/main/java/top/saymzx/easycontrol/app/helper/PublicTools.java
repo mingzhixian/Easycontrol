@@ -50,10 +50,7 @@ public class PublicTools {
       View.SYSTEM_UI_FLAG_FULLSCREEN |
       View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      context.getWindow().getAttributes().layoutInDisplayCutoutMode =
-        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) context.getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
   }
 
   // 设置状态栏导航栏颜色
@@ -64,9 +61,8 @@ public class PublicTools {
     context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
     context.getWindow().setStatusBarColor(context.getResources().getColor(R.color.cardContainerBackground));
-    if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
+    if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES)
       context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-    }
   }
 
   // DP转PX
@@ -79,8 +75,7 @@ public class PublicTools {
   private static Display defaultDisplay = null;
 
   public static Pair<Integer, Integer> getScreenSize() {
-    if (defaultDisplay == null)
-      defaultDisplay = AppData.windowManager.getDefaultDisplay();
+    if (defaultDisplay == null) defaultDisplay = AppData.windowManager.getDefaultDisplay();
     defaultDisplay.getRealMetrics(metric);
     return new Pair<>(metric.widthPixels, metric.heightPixels);
   }
@@ -134,7 +129,7 @@ public class PublicTools {
     itemAddDeviceBinding.isOptions.setOnClickListener(v -> itemAddDeviceBinding.options.setVisibility(itemAddDeviceBinding.isOptions.isChecked() ? View.VISIBLE : View.GONE));
     // 设置确认按钮监听
     itemAddDeviceBinding.ok.setOnClickListener(v -> {
-      if (String.valueOf(itemAddDeviceBinding.address.getText()).equals("")) return;
+      if (device.type == Device.TYPE_NORMAL && String.valueOf(itemAddDeviceBinding.address.getText()).equals("")) return;
       Device newDevice = new Device(
         device.uuid, device.type,
         String.valueOf(itemAddDeviceBinding.name.getText()),
@@ -162,9 +157,7 @@ public class PublicTools {
     MyFunction function
   ) {
     ItemClientLoadingBinding loadingView = ItemClientLoadingBinding.inflate(LayoutInflater.from(context));
-    loadingView.text.setOnClickListener(v -> {
-      if (function != null) function.run();
-    });
+    if (function != null) loadingView.text.setOnClickListener(v -> function.run());
     return createDialog(context, false, loadingView.getRoot());
   }
 
@@ -176,9 +169,7 @@ public class PublicTools {
   ) {
     ItemTextBinding textView = ItemTextBinding.inflate(LayoutInflater.from(context));
     textView.getRoot().setText(text);
-    textView.getRoot().setOnClickListener(v -> {
-      if (function != null) function.run();
-    });
+    if (function != null) textView.getRoot().setOnClickListener(v -> function.run());
     return textView;
   }
 
@@ -192,9 +183,7 @@ public class PublicTools {
     ItemSwitchBinding switchView = ItemSwitchBinding.inflate(LayoutInflater.from(context));
     switchView.itemSwitchText.setText(text);
     switchView.itemSwitchSwitch.setChecked(isChecked);
-    switchView.itemSwitchSwitch.setOnCheckedChangeListener((buttonView, checked) -> {
-      if (function != null) function.run(checked);
-    });
+    if (function != null) switchView.itemSwitchSwitch.setOnCheckedChangeListener((buttonView, checked) -> function.run(checked));
     return switchView;
   }
 
@@ -231,9 +220,7 @@ public class PublicTools {
   // 分离地址和端口号
   public static Pair<String, Integer> getIpAndPort(String address) {
     String pattern;
-    // ipv6
     if (address.contains("[")) pattern = "(\\[.*?]):(\\d+)";
-      // 域名
     else if (Pattern.matches(".*[a-zA-Z].*", address)) pattern = "(.*?):(\\d+)";
     else pattern = "(.*?):(\\d+)";
     Pattern regex = Pattern.compile(pattern);
@@ -258,10 +245,8 @@ public class PublicTools {
         while (inetAddresses.hasMoreElements()) {
           InetAddress inetAddress = inetAddresses.nextElement();
           if (!inetAddress.isLoopbackAddress())
-            if (inetAddress instanceof Inet4Address)
-              ipv4Addresses.add(inetAddress.getHostAddress());
-            else if (inetAddress instanceof Inet6Address && !inetAddress.isLinkLocalAddress())
-              ipv6Addresses.add(inetAddress.getHostAddress());
+            if (inetAddress instanceof Inet4Address) ipv4Addresses.add(inetAddress.getHostAddress());
+            else if (inetAddress instanceof Inet6Address && !inetAddress.isLinkLocalAddress()) ipv6Addresses.add(inetAddress.getHostAddress());
         }
       }
     } catch (Exception ignored) {
@@ -271,12 +256,8 @@ public class PublicTools {
 
   // 获取是否支持H265
   public static boolean isH265DecoderSupport() {
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-      MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-      for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
-        if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
-      }
-    }
+    MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
     return false;
   }
 

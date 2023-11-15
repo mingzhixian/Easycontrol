@@ -42,11 +42,13 @@ public final class Server {
 
   private static boolean startSuccess = false;
 
+  private static final int timeoutDelay = 1000 * 10;
+
   public static void main(String... args) {
     // 启动超时
     new Thread(() -> {
       try {
-        Thread.sleep(8000);
+        Thread.sleep(timeoutDelay);
       } catch (InterruptedException ignored) {
       }
       if (!startSuccess) release();
@@ -149,6 +151,12 @@ public final class Server {
           VideoEncode.isHasChangeConfig = false;
           VideoEncode.stopEncode();
           VideoEncode.initEncode();
+          ByteBuffer byteBuffer = ByteBuffer.allocate(9);
+          byteBuffer.put((byte) 3);
+          byteBuffer.putInt(Device.videoSize.first);
+          byteBuffer.putInt(Device.videoSize.second);
+          byteBuffer.flip();
+          write(byteBuffer);
         }
         VideoEncode.encodeOut();
       }
@@ -186,9 +194,9 @@ public final class Server {
       while (!Thread.interrupted()) {
         if (Options.autoControlScreen) Controller.checkScreenOff(true);
         if (Options.turnOffScreen) Device.setScreenPowerMode(0);
-        if (System.currentTimeMillis() - Controller.lastKeepAliveTime > 1000 * 5)
+        if (System.currentTimeMillis() - Controller.lastKeepAliveTime > timeoutDelay)
           throw new IOException("连接断开");
-        Thread.sleep(1000);
+        Thread.sleep(1500);
       }
     } catch (Exception ignored) {
       errorClose();
@@ -225,8 +233,7 @@ public final class Server {
             break;
           case 1:
             // 恢复分辨率
-            if (Options.setWidth != -1)
-              new ProcessBuilder().command("sh", "-c", "wm size reset").start();
+            if (Device.hasSetResolution) Device.execReadOutput("wm size reset");
           case 2:
             SurfaceControl.destroyDisplay(VideoEncode.display);
             break;
@@ -235,8 +242,7 @@ public final class Server {
             if (Options.turnOffScreen) Device.setScreenPowerMode(1);
             break;
           case 4:
-            VideoEncode.encedec.stop();
-            VideoEncode.encedec.release();
+            VideoEncode.stopEncode();
             break;
           case 5:
             AudioEncode.audioCapture.stop();
@@ -245,7 +251,7 @@ public final class Server {
             AudioEncode.encedec.release();
             break;
           case 6:
-            new ProcessBuilder().command("sh", "-c", "ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9").start();
+            Device.execReadOutput("ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
         }
       } catch (Exception ignored) {
       }

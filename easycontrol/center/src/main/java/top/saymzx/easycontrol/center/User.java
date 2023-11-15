@@ -14,11 +14,7 @@ public class User {
   }
 
   public Device getDevice(String uuid) {
-    for (Device device : devices) {
-      if (Objects.equals(device.uuid, uuid)) {
-        return device;
-      }
-    }
+    for (Device device : devices) if (Objects.equals(device.uuid, uuid)) return device;
     return null;
   }
 

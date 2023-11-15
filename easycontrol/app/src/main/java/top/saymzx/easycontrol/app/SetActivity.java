@@ -40,6 +40,7 @@ public class SetActivity extends Activity {
     setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, String.valueOf(AppData.setting.getDefaultMaxFps()), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, String.valueOf(AppData.setting.getDefaultVideoBit()), str -> AppData.setting.setDefaultVideoBit(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", AppData.setting.getDefaultSetResolution(), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先H265", AppData.setting.getDefaultH265(), isChecked -> AppData.setting.setDefaultH265(isChecked)).getRoot());
     // 显示
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", AppData.setting.getTurnOffScreen(), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", AppData.setting.getAutoControlScreen(), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());

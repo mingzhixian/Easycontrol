@@ -10,16 +10,12 @@ public final class Options {
   public static int maxFps;
   public static boolean turnOffScreen;
   public static boolean autoControlScreen;
-  public static int setWidth;
-  public static int setHeight;
   public static boolean isH265DecoderSupport;
 
   public static void parse(String... args) {
     for (String arg : args) {
       int equalIndex = arg.indexOf('=');
-      if (equalIndex == -1) {
-        throw new IllegalArgumentException("参数格式错误");
-      }
+      if (equalIndex == -1) throw new IllegalArgumentException("参数格式错误");
       String key = arg.substring(0, equalIndex);
       String value = arg.substring(equalIndex + 1);
       switch (key) {
@@ -41,13 +37,7 @@ public final class Options {
         case "auto_control_screen":
           autoControlScreen = Integer.parseInt(value) == 1;
           break;
-        case "set_width":
-          setWidth = Integer.parseInt(value);
-          break;
-        case "set_height":
-          setHeight = Integer.parseInt(value);
-          break;
-        case "isH265DecoderSupport":
+        case "is_h265_decoder_support":
           isH265DecoderSupport = Integer.parseInt(value) == 1;
           break;
       }

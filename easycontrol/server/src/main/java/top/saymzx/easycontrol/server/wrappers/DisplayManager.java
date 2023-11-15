@@ -11,8 +11,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.DisplayInfo;
-import top.saymzx.easycontrol.server.helper.Command;
 
 public final class DisplayManager {
   private static Object manager;
@@ -27,9 +27,7 @@ public final class DisplayManager {
         + "rotation ([0-9]+).*?, layerStack ([0-9]+)",
       Pattern.MULTILINE);
     Matcher m = regex.matcher(dumpsysDisplayOutput);
-    if (!m.find()) {
-      return null;
-    }
+    if (!m.find()) return null;
     int flags = parseDisplayFlags(m.group(1));
     int width = Integer.parseInt(Objects.requireNonNull(m.group(2)));
     int height = Integer.parseInt(Objects.requireNonNull(m.group(3)));
@@ -41,7 +39,7 @@ public final class DisplayManager {
 
   private static DisplayInfo getDisplayInfoFromDumpsysDisplay(int displayId) {
     try {
-      String dumpsysDisplayOutput = Command.execReadOutput("dumpsys", "display");
+      String dumpsysDisplayOutput = Device.execReadOutput("dumpsys display");
       return parseDisplayInfo(dumpsysDisplayOutput, displayId);
     } catch (Exception e) {
       return null;
@@ -50,9 +48,7 @@ public final class DisplayManager {
 
   private static int parseDisplayFlags(String text) {
     Pattern regex = Pattern.compile("FLAG_[A-Z_]+");
-    if (text == null) {
-      return 0;
-    }
+    if (text == null) return 0;
 
     int flags = 0;
     Matcher m = regex.matcher(text);
@@ -71,10 +67,8 @@ public final class DisplayManager {
   public static DisplayInfo getDisplayInfo(int displayId) {
     try {
       Object displayInfo = manager.getClass().getMethod("getDisplayInfo", int.class).invoke(manager, displayId);
-      if (displayInfo == null) {
-        // fallback when displayInfo is null
-        return getDisplayInfoFromDumpsysDisplay(displayId);
-      }
+      // fallback when displayInfo is null
+      if (displayInfo == null) return getDisplayInfoFromDumpsysDisplay(displayId);
       Class<?> cls = displayInfo.getClass();
       // width and height already take the rotation into account
       int width = cls.getDeclaredField("logicalWidth").getInt(displayInfo);

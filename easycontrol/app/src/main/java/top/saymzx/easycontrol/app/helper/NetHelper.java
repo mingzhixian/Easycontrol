@@ -47,8 +47,7 @@ public class NetHelper {
       }
       connection.disconnect();
       JSONObject jsonObject = new JSONObject(responseBody.toString());
-      if (jsonObject.getInt("status") == RESPONSE_ERROR)
-        throw new IOException(jsonObject.getString("msg"));
+      if (jsonObject.getInt("status") == RESPONSE_ERROR) throw new IOException(jsonObject.getString("msg"));
       return jsonObject;
     } else {
       connection.disconnect();
