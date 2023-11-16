@@ -21,10 +21,9 @@ public class MiniView {
 
   private final ClientView clientView;
 
-  private boolean isShow = false;
-
   // 迷你悬浮窗
-  ModuleMiniViewBinding miniView = ModuleMiniViewBinding.inflate(AppData.main.getLayoutInflater());
+  private final ModuleMiniViewBinding miniView = ModuleMiniViewBinding.inflate(AppData.main.getLayoutInflater());
+  private boolean isShow = false;
   private final WindowManager.LayoutParams miniViewParams = new WindowManager.LayoutParams(
     WindowManager.LayoutParams.WRAP_CONTENT,
     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -33,13 +32,16 @@ public class MiniView {
     PixelFormat.TRANSLUCENT
   );
 
-  private static int color = -1;
+  private static int num = 0;
+  private int id;
+  private static final int[] site = new int[10];
+  private final int height = PublicTools.dp2px(60f);
 
   public MiniView(ClientView clientView) {
     this.clientView = clientView;
     miniViewParams.gravity = Gravity.START | Gravity.TOP;
     // Bar颜色
-    int colorNum = color++ % 4;
+    int colorNum = num++ % 4;
     int barColor = R.color.bar1;
     if (colorNum == 1) barColor = R.color.bar2;
     else if (colorNum == 2) barColor = R.color.bar3;
@@ -51,6 +53,7 @@ public class MiniView {
   public void show() {
     if (!isShow) {
       isShow = true;
+      id = num++;
       // 设置监听控制
       setBarListener();
       // 显示
@@ -67,6 +70,7 @@ public class MiniView {
   public void hide() {
     if (isShow) {
       isShow = false;
+      num--;
       clientView.viewAnim(miniView.getRoot(), false, PublicTools.dp2px(-40f), 0, (isStart -> {
         if (!isStart) {
           miniView.getRoot().setVisibility(View.GONE);
@@ -78,7 +82,20 @@ public class MiniView {
 
   // 计算合适位置
   public void calculateSite(Pair<Integer, Integer> screenSize) {
-    miniViewParams.y = (screenSize.second / 5) * (color % 4 + 1);
+    int startY;
+    boolean isConflict;
+    for (startY = screenSize.second / 5; startY < screenSize.second - height; startY += height / 2) {
+      isConflict = false;
+      for (int i = 0; i < num; i++) {
+        if (site[i] > startY - height || site[i] < startY + height) {
+          isConflict = true;
+          break;
+        }
+      }
+      if (isConflict) break;
+    }
+    miniViewParams.y = startY;
+    site[id] = startY;
     AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
   }
 
@@ -86,22 +103,21 @@ public class MiniView {
   @SuppressLint("ClickableViewAccessibility")
   private void setBarListener() {
     AtomicInteger yy = new AtomicInteger();
-    AtomicInteger paramsY = new AtomicInteger();
     miniView.getRoot().setOnTouchListener((v, event) -> {
       switch (event.getActionMasked()) {
         case MotionEvent.ACTION_DOWN: {
           yy.set((int) event.getRawY());
-          paramsY.set(miniViewParams.y);
           break;
         }
         case MotionEvent.ACTION_MOVE: {
-          miniViewParams.y = paramsY.get() + (int) event.getRawY() - yy.get();
+          miniViewParams.y = site[id] + (int) event.getRawY() - yy.get();
           AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
           break;
         }
         case MotionEvent.ACTION_UP:
           int flipY = (int) (yy.get() - event.getRawY());
           if (flipY * flipY < 16) clientView.changeToSmall();
+          else site[id] = miniViewParams.y;
       }
       return true;
     });

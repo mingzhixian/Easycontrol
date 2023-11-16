@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.Pair;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -96,7 +98,7 @@ public class SmallView {
 
   // 获取默认宽高比，用于修改分辨率使用
   public static float getResolution() {
-    return 0.6f;
+    return 0.55f;
   }
 
   // 设置焦点监听
@@ -151,9 +153,10 @@ public class SmallView {
           if (!isFilp.get()) {
             if (flipX * flipX + flipY * flipY < 16) return true;
             isFilp.set(true);
+            smallView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(R.color.clientBarSecond)));
           }
           // 拖动限制
-          if (x < 200 | x > screenSize.get().first - 200 | y < 200 | y > screenSize.get().second - 200) return true;
+          if (x < 100 | x > screenSize.get().first - 100 | y < 150 | y > screenSize.get().second - 100) return true;
           // 更新
           smallViewParams.x = paramsX.get() + flipX;
           smallViewParams.y = paramsY.get() + flipY;
@@ -168,6 +171,7 @@ public class SmallView {
               else if (!isStart && !toShowView) smallView.barView.setVisibility(View.GONE);
             }));
           }
+          smallView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(R.color.translucent)));
           break;
       }
       return true;
@@ -176,7 +180,6 @@ public class SmallView {
 
   // 居中显示
   public void calculateSite(Pair<Integer, Integer> screenSize) {
-    clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
     ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
     smallViewParams.y = (screenSize.second - layoutParams.height) / 2;

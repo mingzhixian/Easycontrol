@@ -39,7 +39,8 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
   private final SmallView smallView = new SmallView(this);
   private final MiniView miniView = new MiniView(this);
 
-  public Pair<Integer, Integer> videoSize;
+  private Pair<Integer, Integer> videoSize;
+  private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
   public ClientView(Client client, boolean setResolution) {
@@ -92,19 +93,27 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
 
   // 处理外部旋转
   public void hasChangeRotation(Pair<Integer, Integer> screenSize) {
-    if (uiMode == UI_MODE_SMALL) smallView.calculateSite(screenSize);
-    else if (uiMode == UI_MODE_MINI) miniView.calculateSite(screenSize);
+    if (uiMode == UI_MODE_SMALL) {
+      updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+      smallView.calculateSite(screenSize);
+    } else if (uiMode == UI_MODE_MINI) miniView.calculateSite(screenSize);
   }
 
   // 重新计算TextureView大小
-  private Pair<Integer, Integer> maxSize;
-
   public void updateMaxSize(Pair<Integer, Integer> maxSize) {
     this.maxSize = maxSize;
     reCalculateTextureViewSize();
   }
 
+  public void updateVideoSize(Pair<Integer, Integer> videoSize) {
+    this.videoSize = videoSize;
+    reCalculateTextureViewSize();
+    // 如果uiMode为小窗，则需重新使小窗居中
+    if (uiMode == UI_MODE_SMALL) smallView.calculateSite(PublicTools.getScreenSize());
+  }
+
   public void reCalculateTextureViewSize() {
+    if (maxSize == null || videoSize == null) return;
     // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
     int tmp1 = videoSize.second * maxSize.first / videoSize.first;
     // 横向最大不会超出

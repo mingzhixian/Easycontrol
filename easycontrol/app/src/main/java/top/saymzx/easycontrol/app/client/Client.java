@@ -36,7 +36,7 @@ public class Client {
   private AudioDecode audioDecode;
   public Controller controller;
   public final ClientView clientView;
-  private final Dialog dialog = PublicTools.createClientLoading(AppData.main, this::errorClose);
+  private final Dialog dialog = PublicTools.createClientLoading(AppData.main, () -> this.errorClose(null));
 
   private final ArrayList<Thread> threads = new ArrayList<>();
   private static final int timeoutDelay = 1000 * 10;
@@ -47,56 +47,60 @@ public class Client {
     // 显示加载框
     dialog.show();
     // 启动超时
-    Thread startCheckThread = new Thread(() -> {
+    threads.add(new Thread(() -> {
       try {
         Thread.sleep(timeoutDelay);
-        errorClose();
+        errorClose(new Exception("连接启动超时"));
       } catch (InterruptedException ignored) {
       }
-    });
-    startCheckThread.start();
+    }));
+    threads.get(0).start();
     // 启动Client
     new Thread(() -> {
-      try {
-        // 连接ADB
-        connectADB(device, usbDevice);
-        // 发送server
-        sendServer();
-        // 启动server
-        startServer(device);
-        // 连接server
-        connectServer();
-        // 创建子服务
-        createSubService();
-        startCheckThread.interrupt();
-        // 更新UI
-        AppData.main.runOnUiThread(dialog::cancel);
-        createUI(device);
-      } catch (Exception e) {
-        String error = String.valueOf(e);
-        Log.e("Easycontrol", error);
-        AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
-        errorClose();
-      }
+      // 连接ADB
+      connectADB(device, usbDevice);
+      // 发送server
+      sendServer();
+      // 启动server
+      startServer(device);
+      // 连接server
+      connectServer();
+      // 创建子服务
+      createSubService();
+      // 更新UI
+      AppData.main.runOnUiThread(dialog::cancel);
+      createUI(device);
     }).start();
   }
 
   // 连接ADB
-  private void connectADB(Device device, UsbDevice usbDevice) throws Exception {
-    if (usbDevice == null) {
-      Pair<String, Integer> address = PublicTools.getIpAndPort(device.address);
-      if (address == null) throw new Exception("地址格式错误");
-      // 连接ADB
-      adb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
-      videoAdb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
-    } else {
-      adb = new Adb(usbDevice, AppData.keyPair);
-      videoAdb = adb;
+  private void connectADB(Device device, UsbDevice usbDevice) {
+    try {
+      if (usbDevice == null) {
+        Pair<String, Integer> address = PublicTools.getIpAndPort(device.address);
+        if (address == null) throw new Exception("地址格式错误");
+        // 连接ADB
+        adb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
+        // 加速启动
+        new Thread(() -> {
+          try {
+            adb.runAdbCmd("ls", false);
+            videoAdb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
+          } catch (Exception e) {
+            errorClose(e);
+          }
+        }).start();
+      } else {
+        adb = new Adb(usbDevice, AppData.keyPair);
+        videoAdb = adb;
+      }
+    } catch (Exception e) {
+      errorClose(e);
     }
   }
 
   // 发送Server
-  private void sendServer() throws Exception {
+  private void sendServer() {
     try {
       if (BuildConfig.ENABLE_DEBUG_FEATURE) {
         adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), "/data/local/tmp/" + AppData.serverName);
@@ -108,48 +112,52 @@ public class Client {
         }
       }
     } catch (Exception ignored) {
-      throw new Exception("发送Server失败");
+      errorClose(new Exception("发送Server失败"));
     }
   }
 
   // 启动Server
-  private void startServer(Device device) throws Exception {
+  private void startServer(Device device) {
     try {
       float reSize = device.setResolution ? (device.defaultFull ? FullActivity.getResolution() : SmallView.getResolution()) : -1;
       adb.runAdbCmd("app_process -Djava.class.path=/data/local/tmp/" + AppData.serverName + " / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " reSize=" + reSize + " is_h265_decoder_support=" + ((AppData.setting.getDefaultH265() && PublicTools.isH265DecoderSupport()) ? 1 : 0) + " > /dev/null 2>&1 &", false);
     } catch (Exception ignored) {
-      throw new Exception("启动Server失败");
+      errorClose(new Exception("启动Server失败"));
     }
   }
 
   // 连接Server
-  private void connectServer() throws Exception {
-    Thread.sleep(100);
-    // 尝试连接
-    for (int i = 0; i < 50; i++) {
-      try {
-        if (stream == null) stream = adb.localSocketForward("easycontrol", true);
-        if (videoStream == null) videoStream = videoAdb.localSocketForward("easycontrol", true);
-        return;
-      } catch (Exception ignored) {
-        Thread.sleep(40);
+  private void connectServer() {
+    try {
+      Thread.sleep(100);
+      // 尝试连接
+      for (int i = 0; i < 40; i++) {
+        try {
+          if (stream == null) stream = adb.localSocketForward("easycontrol", true);
+          if (videoStream == null) videoStream = videoAdb.localSocketForward("easycontrol", true);
+          return;
+        } catch (Exception ignored) {
+          Thread.sleep(50);
+        }
       }
+      throw new Exception("连接Server失败");
+    } catch (Exception e) {
+      errorClose(e);
     }
-    throw new Exception("连接Server失败");
   }
 
   // 创建子服务
-  private void createSubService() throws Exception {
+  private void createSubService() {
     try {
       // 是否支持H265编码
       boolean isH265Support = videoStream.readByte() == 1;
       // 视频大小
       if (stream.readByte() != CHANGE_SIZE_EVENT) throw new IOException("数据错误");
-      clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
+      Pair<Integer, Integer> newVideoSize = new Pair<>(stream.readInt(), stream.readInt());
+      clientView.updateVideoSize(newVideoSize);
       // 视频解码
       Pair<Long, ByteBuffer> csd0 = readFrame(videoStream);
-      Pair<Long, ByteBuffer> csd1 = isH265Support ? null : readFrame(videoStream);
-      videoDecode = new VideoDecode(clientView.videoSize, csd0, csd1);
+      videoDecode = new VideoDecode(newVideoSize, csd0, isH265Support ? null : readFrame(videoStream));
       // 音频解码
       if (stream.readByte() == 1) {
         if (stream.readByte() != AUDIO_EVENT) throw new IOException("数据错误");
@@ -159,7 +167,7 @@ public class Client {
       // 控制
       controller = new Controller(clientView, stream);
     } catch (Exception e) {
-      throw new Exception("启动Client失败" + e);
+      errorClose(new Exception("启动Client失败" + e));
     }
   }
 
@@ -173,6 +181,8 @@ public class Client {
 
   // 启动子服务
   public void startSubService() {
+    threads.get(0).interrupt();
+    threads.clear();
     threads.add(new Thread(this::executeVideoDecodeIn));
     threads.add(new Thread(this::executeVideoDecodeOut));
     if (audioDecode != null) threads.add(new Thread(this::executeAudioDecodeOut));
@@ -204,7 +214,7 @@ public class Client {
         }
       }
     } catch (Exception ignored) {
-      errorClose();
+      errorClose(null);
     }
   }
 
@@ -216,7 +226,7 @@ public class Client {
         videoAdb.sendMoreOk(videoStream);
       }
     } catch (Exception ignored) {
-      errorClose();
+      errorClose(null);
     }
   }
 
@@ -224,7 +234,7 @@ public class Client {
     try {
       while (!Thread.interrupted()) videoDecode.decodeOut(clientView.checkIsNeedPlay());
     } catch (Exception ignored) {
-      errorClose();
+      errorClose(null);
     }
   }
 
@@ -232,7 +242,7 @@ public class Client {
     try {
       while (!Thread.interrupted()) audioDecode.decodeOut();
     } catch (Exception ignored) {
-      errorClose();
+      errorClose(null);
     }
   }
 
@@ -245,7 +255,7 @@ public class Client {
         Thread.sleep(1500);
       }
     } catch (Exception ignored) {
-      errorClose();
+      errorClose(null);
     }
   }
 
@@ -258,7 +268,12 @@ public class Client {
     lastScreenIsPortal = nowScreenIsPortal;
   }
 
-  private void errorClose() {
+  private void errorClose(Exception error) {
+    if (error != null) {
+      String errorStr = String.valueOf(error);
+      Log.e("Easycontrol", errorStr);
+      AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, errorStr, Toast.LENGTH_SHORT).show());
+    }
     AppData.main.runOnUiThread(() -> clientView.hide(true));
   }
 
