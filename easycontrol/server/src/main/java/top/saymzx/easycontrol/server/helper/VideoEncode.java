@@ -24,29 +24,24 @@ import top.saymzx.easycontrol.server.entity.Options;
 import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 
 public final class VideoEncode {
-  public static MediaCodec encedec;
+  private static MediaCodec encedec;
   private static MediaFormat encodecFormat;
-  public static boolean isHasChangeConfig = false;
+  public static boolean isHasChangeConfig;
 
-  public static IBinder display;
+  private static IBinder display;
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 检查解码器
     boolean isH265EncoderSupport = isH265EncoderSupport();
-    // 写入视频宽高
-    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
-    byteBuffer.put((byte) (isH265EncoderSupport ? 1 : 0));
-    byteBuffer.putInt(Device.videoSize.first);
-    byteBuffer.putInt(Device.videoSize.second);
-    byteBuffer.flip();
-    Server.writeVideo(byteBuffer);
+    Server.writeVideo(ByteBuffer.wrap(new byte[]{(byte) (isH265EncoderSupport ? 1 : 0)}));
     // 创建Codec
     setVideoEncodec(isH265EncoderSupport);
     initEncode();
     encodeOut();
     if (!isH265EncoderSupport) encodeOut();
+    isHasChangeConfig = false;
   }
 
   private static void setVideoEncodec(boolean isH265EncoderSupport) throws IOException {
@@ -71,7 +66,7 @@ public final class VideoEncode {
   // 初始化编码器
   private static Surface surface;
 
-  public static void initEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+  public static void initEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InterruptedIOException, ErrnoException {
     // 重配置编码器宽高
     encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
     encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
@@ -81,6 +76,12 @@ public final class VideoEncode {
     setDisplaySurface(display, surface);
     // 启动编码
     encedec.start();
+    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
+    byteBuffer.put((byte) 3);
+    byteBuffer.putInt(Device.videoSize.first);
+    byteBuffer.putInt(Device.videoSize.second);
+    byteBuffer.flip();
+    Server.write(byteBuffer);
   }
 
   public static void stopEncode() {
@@ -124,6 +125,15 @@ public final class VideoEncode {
       for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
     }
     return false;
+  }
+
+  public static void release() {
+    try {
+      stopEncode();
+      encedec.release();
+      SurfaceControl.destroyDisplay(display);
+    } catch (Exception ignored) {
+    }
   }
 
 }

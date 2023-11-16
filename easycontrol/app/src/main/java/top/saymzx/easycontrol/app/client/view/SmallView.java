@@ -8,9 +8,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
-import android.view.animation.OvershootInterpolator;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,50 +54,49 @@ public class SmallView {
   public void show(Controller controller) {
     if (!isShow) {
       isShow = true;
-      // 隐藏工具栏
+      // 初始化
       smallView.barView.setVisibility(View.GONE);
+      ViewGroup.LayoutParams layoutParams = smallView.textureViewLayout.getLayoutParams();
+      layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+      layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+      smallView.textureViewLayout.setLayoutParams(layoutParams);
       // 设置监听
       setButtonListener(controller);
       // 显示
-      AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
-      showSmallViewAnim();
+      clientView.viewAnim(smallView.getRoot(), true, 0, PublicTools.dp2px(40f), (isStart -> {
+        if (isStart) {
+          smallView.getRoot().setVisibility(View.VISIBLE);
+          AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
+        }
+      }));
       // 更新TextureView
       smallView.textureViewLayout.addView(clientView.textureView, 0);
-      clientView.changeLayoutSize(getDefaultLayoutSize());
+      Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
+      clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+      calculateSite(screenSize);
     }
   }
 
   public void hide() {
     if (isShow) {
       isShow = false;
+      ViewGroup.LayoutParams layoutParams = smallView.textureViewLayout.getLayoutParams();
+      layoutParams.width = smallView.textureViewLayout.getMeasuredWidth();
+      layoutParams.height = smallView.textureViewLayout.getMeasuredHeight();
+      smallView.textureViewLayout.setLayoutParams(layoutParams);
       smallView.textureViewLayout.removeView(clientView.textureView);
-      AppData.windowManager.removeView(smallView.getRoot());
+      clientView.viewAnim(smallView.getRoot(), false, 0, PublicTools.dp2px(40f), (isStart -> {
+        if (!isStart) {
+          smallView.getRoot().setVisibility(View.GONE);
+          AppData.windowManager.removeView(smallView.getRoot());
+        }
+      }));
     }
   }
 
-  // 更改Small View的形态
-  public void showSmallViewAnim() {
-    // 创建平移动画
-    smallView.getRoot().setTranslationY(400);
-    float endY = 0;
-    // 创建透明度动画
-    smallView.getRoot().setAlpha(0f);
-    float endAlpha = 1f;
-    // 设置动画时长和插值器
-    ViewPropertyAnimator animator = smallView.getRoot().animate()
-      .translationY(endY)
-      .alpha(endAlpha)
-      .setDuration(400)
-      .setInterpolator(new OvershootInterpolator());
-    // 启动动画
-    animator.start();
-  }
-
-  // 获取默认容器大小
-  public Pair<Integer, Integer> getDefaultLayoutSize() {
-    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
-    int min = screenSize.first > screenSize.second ? screenSize.second : screenSize.first;
-    return new Pair<>(min * 3 / 4, min * 5 / 4);
+  // 获取默认宽高比，用于修改分辨率使用
+  public static float getResolution() {
+    return 0.6f;
   }
 
   // 设置焦点监听
@@ -164,7 +161,13 @@ public class SmallView {
           break;
         }
         case MotionEvent.ACTION_UP:
-          if (!isFilp.get()) clientView.changeBarViewAnim(smallView.barView, true);
+          if (!isFilp.get()) {
+            boolean toShowView = smallView.barView.getVisibility() == View.GONE;
+            clientView.viewAnim(smallView.barView, toShowView, 0, PublicTools.dp2px(-40f), (isStart -> {
+              if (isStart && toShowView) smallView.barView.setVisibility(View.VISIBLE);
+              else if (!isStart && !toShowView) smallView.barView.setVisibility(View.GONE);
+            }));
+          }
           break;
       }
       return true;
@@ -173,7 +176,7 @@ public class SmallView {
 
   // 居中显示
   public void calculateSite(Pair<Integer, Integer> screenSize) {
-    clientView.changeLayoutSize(getDefaultLayoutSize());
+    clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
     ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
     smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
@@ -198,19 +201,13 @@ public class SmallView {
   // 设置悬浮窗大小拖动按钮监听控制
   @SuppressLint("ClickableViewAccessibility")
   private void setReSizeListener() {
+    int minSize = PublicTools.dp2px(150f);
     smallView.reSize.setOnTouchListener((v, event) -> {
-      // 更新位置大小
       int sizeX = (int) (event.getRawX() - smallViewParams.x);
       int sizeY = (int) (event.getRawY() - smallViewParams.y);
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-        if (sizeX < 100 || sizeY < 100) return true;
-        // 更新
-        ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
-        layoutParams.width = sizeX;
-        layoutParams.height = sizeY;
-        clientView.textureView.setLayoutParams(layoutParams);
-      } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-        clientView.changeLayoutSize(new Pair<>(sizeX, sizeY));
+        if (sizeX < minSize || sizeY < minSize) return true;
+        clientView.updateMaxSize(new Pair<>(sizeX, sizeY));
       }
       return true;
     });

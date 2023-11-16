@@ -40,19 +40,18 @@ public final class Server {
 
   private static final Object object = new Object();
 
-  private static boolean startSuccess = false;
-
   private static final int timeoutDelay = 1000 * 10;
 
   public static void main(String... args) {
     // 启动超时
-    new Thread(() -> {
+    Thread startCheckThread = new Thread(() -> {
       try {
         Thread.sleep(timeoutDelay);
+        release();
       } catch (InterruptedException ignored) {
       }
-      if (!startSuccess) release();
-    }).start();
+    });
+    startCheckThread.start();
     try {
       // 解析参数
       Options.parse(args);
@@ -81,7 +80,7 @@ public final class Server {
         audioInThread.start();
         audioOutThread.start();
       }
-      startSuccess = true;
+      startCheckThread.interrupt();
       // 程序运行
       synchronized (object) {
         object.wait();
@@ -151,12 +150,6 @@ public final class Server {
           VideoEncode.isHasChangeConfig = false;
           VideoEncode.stopEncode();
           VideoEncode.initEncode();
-          ByteBuffer byteBuffer = ByteBuffer.allocate(9);
-          byteBuffer.put((byte) 3);
-          byteBuffer.putInt(Device.videoSize.first);
-          byteBuffer.putInt(Device.videoSize.second);
-          byteBuffer.flip();
-          write(byteBuffer);
         }
         VideoEncode.encodeOut();
       }
@@ -210,20 +203,16 @@ public final class Server {
   }
 
   public static void writeVideo(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
-    synchronized (videoFileDescriptor) {
-      while (byteBuffer.remaining() > 0) Os.write(videoFileDescriptor, byteBuffer);
-    }
+    while (byteBuffer.remaining() > 0) Os.write(videoFileDescriptor, byteBuffer);
   }
 
-  public static void write(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
-    synchronized (fileDescriptor) {
-      while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
-    }
+  public synchronized static void write(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
+    while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
   }
 
   // 释放资源
   private static void release() {
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
       try {
         switch (i) {
           case 0:
@@ -232,25 +221,18 @@ public final class Server {
             videoSocket.close();
             break;
           case 1:
-            // 恢复分辨率
-            if (Device.hasSetResolution) Device.execReadOutput("wm size reset");
+            if (Options.reSize != -1) Device.execReadOutput("wm size reset");
           case 2:
-            SurfaceControl.destroyDisplay(VideoEncode.display);
+            VideoEncode.release();
             break;
           case 3:
+            AudioEncode.release();
+            break;
+          case 4:
             if (Options.autoControlScreen) Controller.checkScreenOff(false);
             if (Options.turnOffScreen) Device.setScreenPowerMode(1);
             break;
-          case 4:
-            VideoEncode.stopEncode();
-            break;
           case 5:
-            AudioEncode.audioCapture.stop();
-            AudioEncode.audioCapture.release();
-            AudioEncode.encedec.stop();
-            AudioEncode.encedec.release();
-            break;
-          case 6:
             Device.execReadOutput("ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
         }
       } catch (Exception ignored) {

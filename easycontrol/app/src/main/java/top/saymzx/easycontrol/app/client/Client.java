@@ -10,17 +10,14 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import top.saymzx.easycontrol.adb.Adb;
 import top.saymzx.easycontrol.adb.AdbStream;
 import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.ClientView;
+import top.saymzx.easycontrol.app.client.view.FullActivity;
+import top.saymzx.easycontrol.app.client.view.SmallView;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
@@ -38,17 +35,10 @@ public class Client {
   public VideoDecode videoDecode;
   private AudioDecode audioDecode;
   public Controller controller;
-
   public final ClientView clientView;
-
-  // 是否正常解码播放
-  public boolean isNormalPlay = true;
-  private boolean startSuccess = false;
-
-  private final Thread startCheckThread;
-  private final ExecutorService executor = new ThreadPoolExecutor(4, 6, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new CustomThreadFactory(), new ThreadPoolExecutor.CallerRunsPolicy());
   private final Dialog dialog = PublicTools.createClientLoading(AppData.main, this::errorClose);
 
+  private final ArrayList<Thread> threads = new ArrayList<>();
   private static final int timeoutDelay = 1000 * 10;
 
   public Client(Device device, UsbDevice usbDevice) {
@@ -57,16 +47,16 @@ public class Client {
     // 显示加载框
     dialog.show();
     // 启动超时
-    startCheckThread = new Thread(() -> {
+    Thread startCheckThread = new Thread(() -> {
       try {
         Thread.sleep(timeoutDelay);
-        if (!startSuccess) errorClose();
+        errorClose();
       } catch (InterruptedException ignored) {
       }
     });
     startCheckThread.start();
     // 启动Client
-    executor.execute(() -> {
+    new Thread(() -> {
       try {
         // 连接ADB
         connectADB(device, usbDevice);
@@ -78,17 +68,17 @@ public class Client {
         connectServer();
         // 创建子服务
         createSubService();
+        startCheckThread.interrupt();
         // 更新UI
         AppData.main.runOnUiThread(dialog::cancel);
         createUI(device);
-        startSuccess = true;
       } catch (Exception e) {
         String error = String.valueOf(e);
         Log.e("Easycontrol", error);
         AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
         errorClose();
       }
-    });
+    }).start();
   }
 
   // 连接ADB
@@ -125,7 +115,8 @@ public class Client {
   // 启动Server
   private void startServer(Device device) throws Exception {
     try {
-      adb.runAdbCmd("CLASSPATH=/data/local/tmp/" + AppData.serverName + " app_process / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " is_h265_decoder_support=" + ((AppData.setting.getDefaultH265() && PublicTools.isH265DecoderSupport()) ? 1 : 0) + " > /dev/null 2>&1 & ", false);
+      float reSize = device.setResolution ? (device.defaultFull ? FullActivity.getResolution() : SmallView.getResolution()) : -1;
+      adb.runAdbCmd("app_process -Djava.class.path=/data/local/tmp/" + AppData.serverName + " / top.saymzx.easycontrol.server.Server" + " is_audio=" + (device.isAudio ? 1 : 0) + " max_size=" + device.maxSize + " max_fps=" + device.maxFps + " video_bit_rate=" + device.maxVideoBit + " turn_off_screen=" + (device.turnOffScreen ? 1 : 0) + " auto_control_screen=" + (device.autoControlScreen ? 1 : 0) + " reSize=" + reSize + " is_h265_decoder_support=" + ((AppData.setting.getDefaultH265() && PublicTools.isH265DecoderSupport()) ? 1 : 0) + " > /dev/null 2>&1 &", false);
     } catch (Exception ignored) {
       throw new Exception("启动Server失败");
     }
@@ -153,14 +144,15 @@ public class Client {
       // 是否支持H265编码
       boolean isH265Support = videoStream.readByte() == 1;
       // 视频大小
-      clientView.videoSize = new Pair<>(videoStream.readInt(), videoStream.readInt());
+      if (stream.readByte() != CHANGE_SIZE_EVENT) throw new IOException("数据错误");
+      clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
       // 视频解码
       Pair<Long, ByteBuffer> csd0 = readFrame(videoStream);
       Pair<Long, ByteBuffer> csd1 = isH265Support ? null : readFrame(videoStream);
       videoDecode = new VideoDecode(clientView.videoSize, csd0, csd1);
       // 音频解码
       if (stream.readByte() == 1) {
-        if (stream.readByte() != 1) throw new IOException("数据错误");
+        if (stream.readByte() != AUDIO_EVENT) throw new IOException("数据错误");
         csd0 = readFrame(stream);
         audioDecode = new AudioDecode(csd0);
       }
@@ -181,30 +173,32 @@ public class Client {
 
   // 启动子服务
   public void startSubService() {
-    startCheckThread.interrupt();
-    executor.execute(this::executeVideoDecodeIn);
-    executor.execute(this::executeVideoDecodeOut);
-    if (audioDecode != null) {
-      executor.execute(this::executeAudioDecodeIn);
-      executor.execute(this::executeAudioDecodeOut);
-    }
-    executor.execute(this::executeStreamIn);
-    executor.execute(this::executeOtherService);
+    threads.add(new Thread(this::executeVideoDecodeIn));
+    threads.add(new Thread(this::executeVideoDecodeOut));
+    if (audioDecode != null) threads.add(new Thread(this::executeAudioDecodeOut));
+    threads.add(new Thread(this::executeStreamIn));
+    for (Thread thread : threads) thread.setPriority(Thread.MAX_PRIORITY);
+    threads.add(new Thread(this::executeOtherService));
+    for (Thread thread : threads) thread.start();
   }
 
   // 服务分发
+  private static final int AUDIO_EVENT = 1;
+  private static final int CLIPBOARD_EVENT = 2;
+  private static final int CHANGE_SIZE_EVENT = 3;
+
   private void executeStreamIn() {
     try {
       while (!Thread.interrupted()) {
         switch (stream.readByte()) {
-          case 1:
+          case AUDIO_EVENT:
             Pair<Long, ByteBuffer> audioFrame = readFrame(stream);
-            if (isNormalPlay) audioDecode.dataQueue.offer(audioFrame);
+            if (clientView.checkIsNeedPlay()) audioDecode.decodeIn(audioFrame);
             break;
-          case 2:
+          case CLIPBOARD_EVENT:
             controller.handleClipboardEvent();
             break;
-          case 3:
+          case CHANGE_SIZE_EVENT:
             controller.handleChangeSizeEvent();
             break;
         }
@@ -219,6 +213,7 @@ public class Client {
       while (!Thread.interrupted()) {
         videoAdb.sendMoreOk(videoStream);
         videoDecode.decodeIn(readFrame(videoStream));
+        videoAdb.sendMoreOk(videoStream);
       }
     } catch (Exception ignored) {
       errorClose();
@@ -227,15 +222,7 @@ public class Client {
 
   private void executeVideoDecodeOut() {
     try {
-      while (!Thread.interrupted()) videoDecode.decodeOut(isNormalPlay);
-    } catch (Exception ignored) {
-      errorClose();
-    }
-  }
-
-  private void executeAudioDecodeIn() {
-    try {
-      while (!Thread.interrupted()) audioDecode.decodeIn();
+      while (!Thread.interrupted()) videoDecode.decodeOut(clientView.checkIsNeedPlay());
     } catch (Exception ignored) {
       errorClose();
     }
@@ -282,7 +269,7 @@ public class Client {
 
   public void release() {
     if (dialog.isShowing()) dialog.cancel();
-    executor.shutdownNow();
+    for (Thread thread : threads) thread.interrupt();
     if (adb != null) adb.close();
     if (videoAdb != null) videoAdb.close();
     if (videoDecode != null) videoDecode.release();
@@ -290,13 +277,4 @@ public class Client {
     allClients.remove(this);
   }
 
-  // 线程创建模板
-  private static class CustomThreadFactory implements ThreadFactory {
-    @Override
-    public Thread newThread(Runnable runnable) {
-      Thread thread = new Thread(runnable);
-      thread.setPriority(Thread.MAX_PRIORITY);
-      return thread;
-    }
-  }
 }

@@ -6,61 +6,55 @@
   android:background="@drawable/background_cron"
   android:backgroundTint="@color/cardContainerBackground">
 
-  <LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:gravity="center_vertical"
-      android:orientation="horizontal">
+    <ImageView
+      android:id="@+id/button_mini_circle"
+      android:layout_width="18dp"
+      android:layout_height="18dp"
+      android:layout_gravity="start|top"
+      android:layout_margin="4dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/clientBarSecond"
+      android:padding="4dp"
+      android:src="@drawable/mini"
+      android:tint="@color/onCardBackground" />
 
-      <ImageView
-        android:id="@+id/button_mini_circle"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_margin="3dp"
+    <FrameLayout
+      android:id="@+id/bar"
+      android:layout_width="100dp"
+      android:layout_height="18dp"
+      android:layout_gravity="top|center_horizontal"
+      android:layout_margin="4dp">
+
+      <View
+        android:layout_width="70dp"
+        android:layout_height="6dp"
+        android:layout_gravity="center"
         android:background="@drawable/background_cron"
-        android:backgroundTint="@color/clientBarSecond"
-        android:padding="4dp"
-        android:src="@drawable/mini"
-        android:tint="@color/onCardBackground" />
+        android:backgroundTint="@color/clientBar" />
+    </FrameLayout>
 
-      <FrameLayout
-        android:id="@+id/bar"
-        android:layout_width="0dp"
-        android:layout_height="18dp"
-        android:layout_weight="1">
+    <ImageView
+      android:id="@+id/button_close_circle"
+      android:layout_width="18dp"
+      android:layout_height="18dp"
+      android:layout_gravity="end|top"
+      android:layout_margin="4dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/clientBarSecond"
+      android:padding="4dp"
+      android:src="@drawable/close"
+      android:tint="@color/buttonSecond" />
 
-        <View
-          android:layout_width="70dp"
-          android:layout_height="6dp"
-          android:layout_gravity="center"
-          android:background="@drawable/background_cron"
-          android:backgroundTint="@color/clientBar" />
-      </FrameLayout>
-
-      <ImageView
-        android:id="@+id/button_close_circle"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_margin="3dp"
-        android:background="@drawable/background_cron"
-        android:backgroundTint="@color/clientBarSecond"
-        android:padding="4dp"
-        android:src="@drawable/close"
-        android:tint="@color/onCardBackground" />
-    </LinearLayout>
-
-    <LinearLayout
+    <FrameLayout
       android:id="@+id/texture_view_layout"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:gravity="center"
-      android:orientation="horizontal" />
-  </LinearLayout>
+      android:layout_marginTop="24dp"></FrameLayout>
+  </FrameLayout>
 
   <View
     android:id="@+id/re_size"
@@ -73,7 +67,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:layout_marginTop="33dp"
+    android:layout_marginTop="29dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"
     android:padding="8dp">

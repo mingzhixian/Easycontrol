@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client;
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.content.ClipData;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 
@@ -47,7 +48,7 @@ public class Controller {
   // 处理画面大小变化
   public void handleChangeSizeEvent() throws IOException, InterruptedException {
     clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
-    AppData.main.runOnUiThread(() -> clientView.reCalculateTextureViewSize());
+    AppData.main.runOnUiThread(clientView::reCalculateTextureViewSize);
   }
 
   // 发送触摸事件
@@ -110,11 +111,10 @@ public class Controller {
   }
 
   // 发送修改分辨率事件
-  public void sendChangeSizeEvent(Pair<Integer, Integer> newSize) {
-    if (newSize.first < 0 || newSize.second < 0) return;
+  public void sendChangeSizeEvent(float newSize) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(5);
     byteBuffer.put((byte) 6);
-    byteBuffer.putFloat((float) newSize.first / (float) newSize.second);
+    byteBuffer.putFloat(newSize);
     byteBuffer.flip();
     writeStream(byteBuffer);
   }

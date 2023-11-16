@@ -9,6 +9,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
@@ -26,6 +28,8 @@ public class FullActivity extends Activity {
 
   public static boolean isShow = false;
 
+  private Pair<Integer, Integer> layoutSize = new Pair<>(0, 0);
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -41,7 +45,11 @@ public class FullActivity extends Activity {
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
     fullActivity.textureViewLayout.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-      if (isShow) clientView.changeLayoutSize(getLayoutSize());
+      Pair<Integer, Integer> newLayoutSize = new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight());
+      if (isShow && (!Objects.equals(layoutSize.first, newLayoutSize.first) || !Objects.equals(layoutSize.second, newLayoutSize.second))) {
+        layoutSize = newLayoutSize;
+        clientView.updateMaxSize(layoutSize);
+      }
     });
   }
 
@@ -50,7 +58,7 @@ public class FullActivity extends Activity {
     // 旋转时及时删除
     if (isChangingConfigurations()) context.fullActivity.textureViewLayout.removeView(clientView.textureView);
       // 退出页面时自动变为小窗
-    else if (isShow) clientView.changeToSmall();
+    else if (isShow) clientView.changeToMini();
     super.onPause();
   }
 
@@ -87,8 +95,12 @@ public class FullActivity extends Activity {
     }
   }
 
-  private Pair<Integer, Integer> getLayoutSize() {
-    return new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight());
+  // 获取去除底部操作栏后的屏幕大小，用于修改分辨率使用
+  public static float getResolution() {
+    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
+    // 保持竖向
+    if (screenSize.first > screenSize.second) screenSize = new Pair<>(screenSize.second, screenSize.first);
+    return (float) screenSize.first / (float) (screenSize.second - PublicTools.dp2px(32f));
   }
 
   // 设置按钮监听
@@ -101,15 +113,23 @@ public class FullActivity extends Activity {
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     fullActivity.buttonToLine.setOnClickListener(v -> setNavBarHide());
-    fullActivity.buttonMore.setOnClickListener(v -> clientView.changeBarViewAnim(fullActivity.barView, false));
+    fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
   }
 
   // 导航栏隐藏
   private void setNavBarHide() {
-    clientView.changeBarViewAnim(fullActivity.barView, false);
+    changeBarView();
     boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
     fullActivity.buttonToLine.setImageResource(isShow ? R.drawable.to_line : R.drawable.exit_line);
+  }
+
+  private void changeBarView() {
+    boolean toShowView = fullActivity.barView.getVisibility() == View.GONE;
+    clientView.viewAnim(fullActivity.barView, toShowView, 0, PublicTools.dp2px(40f), (isStart -> {
+      if (isStart && toShowView) fullActivity.barView.setVisibility(View.VISIBLE);
+      else if (!isStart && !toShowView) fullActivity.barView.setVisibility(View.GONE);
+    }));
   }
 
 }

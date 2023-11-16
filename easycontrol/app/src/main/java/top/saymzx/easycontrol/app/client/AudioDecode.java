@@ -11,7 +11,6 @@ import android.util.Pair;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class AudioDecode {
   public MediaCodec decodec;
@@ -38,12 +37,9 @@ public class AudioDecode {
     }
   }
 
-  public final LinkedBlockingQueue<Pair<Long, ByteBuffer>> dataQueue = new LinkedBlockingQueue<>();
-
-  public void decodeIn() throws InterruptedException {
+  public void decodeIn(Pair<Long, ByteBuffer> data) {
     try {
-      Pair<Long, ByteBuffer> data = dataQueue.take();
-      int inIndex = decodec.dequeueInputBuffer(20_000);
+      int inIndex = decodec.dequeueInputBuffer(0);
       // 缓冲区已满丢帧
       if (inIndex < 0) return;
       decodec.getInputBuffer(inIndex).put(data.second);

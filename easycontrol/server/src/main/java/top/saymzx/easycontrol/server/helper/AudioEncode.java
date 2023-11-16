@@ -16,10 +16,11 @@ import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Options;
+import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 
 public final class AudioEncode {
-  public static MediaCodec encedec;
-  public static AudioRecord audioCapture;
+  private static MediaCodec encedec;
+  private static AudioRecord audioCapture;
 
   public static boolean init() throws IOException, ErrnoException {
     byte[] bytes = new byte[]{0};
@@ -78,6 +79,16 @@ public final class AudioEncode {
       Server.write(byteBuffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
+    }
+  }
+
+  public static void release(){
+    try {
+      audioCapture.stop();
+      audioCapture.release();
+      encedec.stop();
+      encedec.release();
+    } catch (Exception ignored) {
     }
   }
 }

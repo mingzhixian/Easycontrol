@@ -1,6 +1,5 @@
 package top.saymzx.easycontrol.app.client.view;
 
-import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.PixelFormat;
@@ -8,9 +7,8 @@ import android.os.Build;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.ViewPropertyAnimator;
+import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.LinearInterpolator;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,15 +54,25 @@ public class MiniView {
       // 设置监听控制
       setBarListener();
       // 显示
-      showViewAnim();
-      calculateSite(PublicTools.getScreenSize());
+      clientView.viewAnim(miniView.getRoot(), true, PublicTools.dp2px(-40f), 0, (isStart -> {
+        if (isStart) {
+          miniView.getRoot().setVisibility(View.VISIBLE);
+          AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
+          calculateSite(PublicTools.getScreenSize());
+        }
+      }));
     }
   }
 
   public void hide() {
     if (isShow) {
       isShow = false;
-      showViewAnim();
+      clientView.viewAnim(miniView.getRoot(), false, PublicTools.dp2px(-40f), 0, (isStart -> {
+        if (!isStart) {
+          miniView.getRoot().setVisibility(View.GONE);
+          AppData.windowManager.removeView(miniView.getRoot());
+        }
+      }));
     }
   }
 
@@ -72,48 +80,6 @@ public class MiniView {
   public void calculateSite(Pair<Integer, Integer> screenSize) {
     miniViewParams.y = (screenSize.second / 5) * (color % 4 + 1);
     AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
-  }
-
-  // 显示隐藏动画
-  private void showViewAnim() {
-    int width = PublicTools.dp2px(-30f);
-    // 创建平移动画
-    miniView.getRoot().setTranslationX(isShow ? width : 0);
-    float endX = isShow ? 0 : width;
-    // 创建透明度动画
-    miniView.getRoot().setAlpha(isShow ? 0f : 1f);
-    float endAlpha = isShow ? 1f : 0f;
-
-    // 设置动画时长和插值器
-    ViewPropertyAnimator animator = miniView.getRoot().animate()
-      .translationX(endX)
-      .alpha(endAlpha)
-      .setDuration(400)
-      .setInterpolator(new LinearInterpolator());
-
-    // 显示或隐藏
-    animator.setListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-        if (isShow) AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
-      }
-
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        if (!isShow) AppData.windowManager.removeView(miniView.getRoot());
-      }
-
-      @Override
-      public void onAnimationCancel(Animator animation) {
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
-      }
-    });
-
-    // 启动动画
-    animator.start();
   }
 
   // 设置监听控制
