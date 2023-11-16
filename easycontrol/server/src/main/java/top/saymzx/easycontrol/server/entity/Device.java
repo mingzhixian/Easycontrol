@@ -30,22 +30,16 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 public final class Device {
   private static Pair<Integer, Integer> realDeviceSize;
   public static Pair<Integer, Integer> deviceSize;
-  public static boolean hasSetResolution = false;
   public static int deviceRotation;
   public static Pair<Integer, Integer> videoSize;
 
-  private static String nowClipboardText = "";
-
-  public static int displayId = 0;
+  private static final int displayId = 0;
   public static int layerStack;
 
   public static void init() throws IOException, InterruptedException {
     getRealDeviceSize();
-    DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
-    deviceSize = displayInfo.size;
-    deviceRotation = displayInfo.rotation;
-    layerStack = displayInfo.layerStack;
-    computeVideoSize();
+    if (Options.reSize != -1) changeDeviceSize(Options.reSize);
+    else getDeivceSize();
     // 旋转监听
     setRotationListener();
     // 剪切板监听
@@ -57,28 +51,43 @@ public final class Device {
     DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
     realDeviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
-    if (deviceRotation == 1 || deviceRotation == 3) deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
+    if (deviceRotation == 1 || deviceRotation == 3) realDeviceSize = new Pair<>(realDeviceSize.second, realDeviceSize.first);
   }
 
-  // 计算最佳的分辨率大小，按照主控端长宽比例缩放
+  // 计算最佳的分辨率大小
   public static void changeDeviceSize(float reSize) throws IOException, InterruptedException {
+    // 竖向比例最大为1
+    if (reSize > 1) reSize = 1;
+    boolean isPortrait = realDeviceSize.first < realDeviceSize.second;
+    int major = isPortrait ? realDeviceSize.second : realDeviceSize.first;
+    int minor = isPortrait ? realDeviceSize.first : realDeviceSize.second;
+
     int newWidth;
     int newHeight;
-    if (reSize > 1) {
-      newWidth = realDeviceSize.first;
-      newHeight = (int) (newWidth / reSize);
+    if ((float) minor / (float) major > reSize) {
+      newWidth = (int) (reSize * major);
+      newHeight = major;
     } else {
-      newHeight = realDeviceSize.second;
-      newWidth = (int) (newHeight * reSize);
+      newWidth = minor;
+      newHeight = (int) (minor / reSize);
     }
     // 修改分辨率
-    Device.execReadOutput("wm size " + newWidth + "x" + newHeight);
-    deviceSize = new Pair<>(newWidth, newHeight);
-    computeVideoSize();
-    hasSetResolution = VideoEncode.isHasChangeConfig = true;
+    Pair<Integer, Integer> newDeivceSize = new Pair<>((isPortrait ? newWidth : newHeight), (isPortrait ? newHeight : newWidth));
+    newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
+    Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
+    getDeivceSize();
+//    VideoEncode.isHasChangeConfig = true;
   }
 
-  private static void computeVideoSize() {
+  private static void getDeivceSize() {
+    DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
+    deviceSize = displayInfo.size;
+    deviceRotation = displayInfo.rotation;
+    layerStack = displayInfo.layerStack;
+    compute8Size();
+  }
+
+  private static void compute8Size() {
     boolean isPortrait = deviceSize.first < deviceSize.second;
     int major = isPortrait ? deviceSize.second : deviceSize.first;
     int minor = isPortrait ? deviceSize.first : deviceSize.second;
@@ -91,6 +100,8 @@ public final class Device {
     major = major + 4 & ~7;
     videoSize = isPortrait ? new Pair<>(minor, major) : new Pair<>(major, minor);
   }
+
+  private static String nowClipboardText = "";
 
   private static void setClipBoardListener() {
     ClipboardManager.addPrimaryClipChangedListener(new IOnPrimaryClipChangedListener.Stub() {
@@ -117,6 +128,11 @@ public final class Device {
     });
   }
 
+  public static void setClipboardText(String text) {
+    nowClipboardText = text;
+    ClipboardManager.setText(nowClipboardText);
+  }
+
   private static void setRotationListener() {
     WindowManager.registerRotationWatcher(new IRotationWatcher.Stub() {
       public void onRotationChanged(int rotation) {
@@ -130,11 +146,6 @@ public final class Device {
     }, displayId);
   }
 
-  public static void setClipboardText(String text) {
-    nowClipboardText = text;
-    ClipboardManager.setText(nowClipboardText);
-  }
-
   private static final PointersState pointersState = new PointersState();
 
   public static void touchEvent(int action, Float x, Float y, int pointerId, int offsetTime) {
@@ -142,7 +153,7 @@ public final class Device {
 
     if (pointer == null) {
       if (action != MotionEvent.ACTION_DOWN) return;
-      pointer = pointersState.newPointer(pointerId, SystemClock.uptimeMillis());
+      pointer = pointersState.newPointer(pointerId, SystemClock.uptimeMillis() - 50);
     }
 
     pointer.x = x * deviceSize.first;

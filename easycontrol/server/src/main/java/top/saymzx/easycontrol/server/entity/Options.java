@@ -10,6 +10,7 @@ public final class Options {
   public static int maxFps;
   public static boolean turnOffScreen;
   public static boolean autoControlScreen;
+  public static float reSize = -1;
   public static boolean isH265DecoderSupport;
 
   public static void parse(String... args) {
@@ -36,6 +37,9 @@ public final class Options {
           break;
         case "auto_control_screen":
           autoControlScreen = Integer.parseInt(value) == 1;
+          break;
+        case "reSize":
+          reSize = Float.parseFloat(value);
           break;
         case "is_h265_decoder_support":
           isH265DecoderSupport = Integer.parseInt(value) == 1;

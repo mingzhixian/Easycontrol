@@ -37,6 +37,7 @@
     <activity
       android:name=".client.view.FullActivity"
       android:exported="false"
+      android:hardwareAccelerated="true"
       android:launchMode="singleTask" />
 
   </application>

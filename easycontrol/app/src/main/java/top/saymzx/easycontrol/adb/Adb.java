@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.adb;
 
 import android.hardware.usb.UsbDevice;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -165,7 +166,6 @@ public class Adb {
   }
 
   public void sendMoreOk(AdbStream stream) {
-    sendQueue.offer(AdbProtocol.generateOkay(stream.localId, stream.remoteId));
     sendQueue.offer(AdbProtocol.generateOkay(stream.localId, stream.remoteId));
   }
 

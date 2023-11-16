@@ -74,7 +74,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom|end"
-    android:layout_marginEnd="40dp"
+    android:layout_marginEnd="42dp"
     android:layout_marginBottom="10dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"

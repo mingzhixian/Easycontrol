@@ -1,6 +1,5 @@
 package top.saymzx.easycontrol.app.client.view;
 
-import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.graphics.Outline;
 import android.graphics.Rect;
@@ -19,8 +18,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import java.util.Objects;
-
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -33,11 +30,15 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
   private SurfaceTexture surfaceTexture;
 
   // UI模式，0为未显示，1为全屏，2为小窗，3为mini侧边条
-  private int uiMode = 0;
+  private int uiMode = UI_MODE_NONE;
+  private static final int UI_MODE_NONE = 0;
+  private static final int UI_MODE_FULL = 1;
+  private static final int UI_MODE_SMALL = 2;
+  private static final int UI_MODE_MINI = 3;
+
   private final SmallView smallView = new SmallView(this);
   private final MiniView miniView = new MiniView(this);
 
-  private Pair<Integer, Integer> layoutSize;
   public Pair<Integer, Integer> videoSize;
   private Pair<Integer, Integer> surfaceSize;
 
@@ -54,32 +55,35 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
     if (FullActivity.isShow) {
       Toast.makeText(AppData.main, "有设备正在全屏控制", Toast.LENGTH_SHORT).show();
     } else {
-      client.isNormalPlay = true;
       hide(false);
-      uiMode = 1;
+      uiMode = UI_MODE_FULL;
+      if (surfaceSize != null && setResolution) client.controller.sendChangeSizeEvent(FullActivity.getResolution());
       FullActivity.show(this, client.controller);
     }
   }
 
   public void changeToSmall() {
-    client.isNormalPlay = true;
     hide(false);
-    uiMode = 2;
+    uiMode = UI_MODE_SMALL;
+    if (surfaceSize != null && setResolution) client.controller.sendChangeSizeEvent(SmallView.getResolution());
     smallView.show(client.controller);
   }
 
   public void changeToMini() {
-    client.isNormalPlay = false;
     hide(false);
-    uiMode = 3;
+    uiMode = UI_MODE_MINI;
     miniView.show();
   }
 
+  public boolean checkIsNeedPlay() {
+    return uiMode != UI_MODE_MINI;
+  }
+
   public void hide(boolean isRelease) {
-    if (uiMode == 1) FullActivity.hide();
-    else if (uiMode == 2) smallView.hide();
-    else if (uiMode == 3) miniView.hide();
-    uiMode = 0;
+    if (uiMode == UI_MODE_FULL) FullActivity.hide();
+    else if (uiMode == UI_MODE_SMALL) smallView.hide();
+    else if (uiMode == UI_MODE_MINI) miniView.hide();
+    uiMode = UI_MODE_NONE;
     if (isRelease) {
       if (surfaceTexture != null) surfaceTexture.release();
       client.release();
@@ -88,33 +92,25 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
 
   // 处理外部旋转
   public void hasChangeRotation(Pair<Integer, Integer> screenSize) {
-    if (uiMode == 2) smallView.calculateSite(screenSize);
-    else if (uiMode == 3) miniView.calculateSite(screenSize);
-  }
-
-  // 画面容器大小改变
-  public void changeLayoutSize(Pair<Integer, Integer> layoutSize) {
-    if (this.layoutSize != null && Objects.equals(this.layoutSize.first, layoutSize.first) && Objects.equals(this.layoutSize.second, layoutSize.second)) return;
-    this.layoutSize = layoutSize;
-    if (setResolution) {
-      client.controller.sendChangeSizeEvent(layoutSize);
-      if (surfaceSize == null) reCalculateTextureViewSize();
-    } else reCalculateTextureViewSize();
+    if (uiMode == UI_MODE_SMALL) smallView.calculateSite(screenSize);
+    else if (uiMode == UI_MODE_MINI) miniView.calculateSite(screenSize);
   }
 
   // 重新计算TextureView大小
-  private final int minSize = PublicTools.dp2px(150f);
+  private Pair<Integer, Integer> maxSize;
+
+  public void updateMaxSize(Pair<Integer, Integer> maxSize) {
+    this.maxSize = maxSize;
+    reCalculateTextureViewSize();
+  }
 
   public void reCalculateTextureViewSize() {
-    // 根据原画面大小videoSize计算在layoutSize空间内的最大缩放大小
-    int tmp1 = videoSize.second * layoutSize.first / videoSize.first;
+    // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
+    int tmp1 = videoSize.second * maxSize.first / videoSize.first;
     // 横向最大不会超出
-    if (layoutSize.second > tmp1) surfaceSize = new Pair<>(layoutSize.first, tmp1);
+    if (maxSize.second > tmp1) surfaceSize = new Pair<>(maxSize.first, tmp1);
       // 竖向最大不会超出
-    else surfaceSize = new Pair<>(videoSize.first * layoutSize.second / videoSize.second, layoutSize.second);
-    // 避免画面过小
-    if (surfaceSize.first < minSize) surfaceSize = new Pair<>(minSize, surfaceSize.second * minSize / surfaceSize.first);
-    else if (surfaceSize.second < minSize) surfaceSize = new Pair<>(surfaceSize.first * minSize / surfaceSize.second, minSize);
+    else surfaceSize = new Pair<>(videoSize.first * maxSize.second / videoSize.second, maxSize.second);
     // 更新大小
     ViewGroup.LayoutParams layoutParams = textureView.getLayoutParams();
     layoutParams.width = surfaceSize.first;
@@ -125,82 +121,64 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
   // 设置视频区域触摸监听
   @SuppressLint("ClickableViewAccessibility")
   private void setTouchListener() {
-    int[] pointerList = new int[20];
     textureView.setOnTouchListener((view, event) -> {
-      int offsetTime = (int) (event.getEventTime() - event.getDownTime());
-      // 处理触摸事件
       int action = event.getActionMasked();
       if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
         int i = event.getActionIndex();
-        int x = (int) event.getX(i);
-        int y = (int) event.getY(i);
-        int p = event.getPointerId(i);
-        // 记录xy信息
-        pointerList[p] = x;
-        pointerList[10 + p] = y;
-        client.controller.sendTouchEvent(MotionEvent.ACTION_DOWN, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
+        pointerDownTime[i] = event.getEventTime();
+        createTouchPacket(event, MotionEvent.ACTION_DOWN, i);
         // 如果是小窗模式则需获取焦点，以获取剪切板同步
-        if (uiMode == 2) smallView.setViewFocus(true);
-      } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP || action == MotionEvent.ACTION_CANCEL) {
-        int i = event.getActionIndex();
-        int x = (int) event.getX(i);
-        int y = (int) event.getY(i);
-        int p = event.getPointerId(i);
-        client.controller.sendTouchEvent(MotionEvent.ACTION_UP, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
-      } else {
-        for (int i = 0; i < event.getPointerCount(); i++) {
-          int x = (int) event.getX(i);
-          int y = (int) event.getY(i);
-          int p = event.getPointerId(i);
-          // 适配一些机器将点击视作小范围移动(小于3的圆内不做处理)
-          if (pointerList[p] != -1) {
-            if ((pointerList[p] - x) * (pointerList[p] - x) + (pointerList[10 + p] - y) * (pointerList[10 + p] - y) < 9) return true;
-            pointerList[p] = -1;
-          }
-          client.controller.sendTouchEvent(MotionEvent.ACTION_MOVE, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
-        }
-      }
+        if (uiMode == UI_MODE_SMALL) smallView.setViewFocus(true);
+      } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) createTouchPacket(event, MotionEvent.ACTION_UP, event.getActionIndex());
+      else for (int i = 0; i < event.getPointerCount(); i++) createTouchPacket(event, MotionEvent.ACTION_MOVE, i);
       return true;
     });
   }
 
-  // 更改Bar View的形态
-  public void changeBarViewAnim(View view, boolean toDown) {
-    int translationY = PublicTools.dp2px(40f) * (toDown ? -1 : 1);
-    boolean toShowBarView = view.getVisibility() == View.GONE;
+  private final int[] pointerList = new int[20];
+  private final long[] pointerDownTime = new long[10];
+
+  private void createTouchPacket(MotionEvent event, int action, int i) {
+    int offsetTime = (int) (event.getEventTime() - pointerDownTime[i]);
+    int x = (int) event.getX(i);
+    int y = (int) event.getY(i);
+    int p = event.getPointerId(i);
+    if (action == MotionEvent.ACTION_MOVE) {
+      // 减少发送小范围移动(小于4的圆内不做处理)
+      int flipX = pointerList[p] - x;
+      if (flipX > -4 && flipX < 4) {
+        int flipY = pointerList[10 + p] - y;
+        if (flipY > -4 && flipY < 4) return;
+      }
+    }
+    pointerList[p] = x;
+    pointerList[10 + p] = y;
+    client.controller.sendTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
+  }
+
+  // 更改View的形态
+  public void viewAnim(View view, boolean toShowView, int translationX, int translationY, PublicTools.MyFunctionBoolean action) {
     // 创建平移动画
-    view.setTranslationY(toShowBarView ? translationY : 0);
-    float endY = toShowBarView ? 0 : translationY;
+    view.setTranslationX(toShowView ? translationX : 0);
+    float endX = toShowView ? 0 : translationX;
+    view.setTranslationY(toShowView ? translationY : 0);
+    float endY = toShowView ? 0 : translationY;
     // 创建透明度动画
-    view.setAlpha(toShowBarView ? 0f : 1f);
-    float endAlpha = toShowBarView ? 1f : 0f;
+    view.setAlpha(toShowView ? 0f : 1f);
+    float endAlpha = toShowView ? 1f : 0f;
 
     // 设置动画时长和插值器
     ViewPropertyAnimator animator = view.animate()
+      .translationX(endX)
       .translationY(endY)
       .alpha(endAlpha)
-      .setDuration(300)
-      .setInterpolator(toShowBarView ? new OvershootInterpolator() : new DecelerateInterpolator());
-
-    // 显示或隐藏
-    animator.setListener(new Animator.AnimatorListener() {
-      @Override
-      public void onAnimationStart(Animator animation) {
-        if (toShowBarView) view.setVisibility(View.VISIBLE);
-      }
-
-      @Override
-      public void onAnimationEnd(Animator animation) {
-        if (!toShowBarView) view.setVisibility(View.GONE);
-      }
-
-      @Override
-      public void onAnimationCancel(Animator animation) {
-      }
-
-      @Override
-      public void onAnimationRepeat(Animator animation) {
-      }
+      .setDuration(toShowView ? 300 : 200)
+      .setInterpolator(toShowView ? new OvershootInterpolator() : new DecelerateInterpolator());
+    animator.withStartAction(() -> {
+      if (action != null) action.run(true);
+    });
+    animator.withEndAction(() -> {
+      if (action != null) action.run(false);
     });
 
     // 启动动画
