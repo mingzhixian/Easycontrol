@@ -75,8 +75,10 @@ public final class Device {
     Pair<Integer, Integer> newDeivceSize = new Pair<>((isPortrait ? newWidth : newHeight), (isPortrait ? newHeight : newWidth));
     newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
     Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
+    // 更新
+    Thread.sleep(500);
     getDeivceSize();
-//    VideoEncode.isHasChangeConfig = true;
+    VideoEncode.isHasChangeConfig = true;
   }
 
   private static void getDeivceSize() {

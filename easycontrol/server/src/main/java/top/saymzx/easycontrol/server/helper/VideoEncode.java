@@ -27,6 +27,7 @@ public final class VideoEncode {
   private static MediaCodec encedec;
   private static MediaFormat encodecFormat;
   public static boolean isHasChangeConfig;
+  private static boolean isH265EncoderSupport;
 
   private static IBinder display;
 
@@ -34,17 +35,37 @@ public final class VideoEncode {
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 检查解码器
-    boolean isH265EncoderSupport = isH265EncoderSupport();
+    isH265EncoderSupport = isH265EncoderSupport();
     Server.writeVideo(ByteBuffer.wrap(new byte[]{(byte) (isH265EncoderSupport ? 1 : 0)}));
     // 创建Codec
-    setVideoEncodec(isH265EncoderSupport);
-    initEncode();
+    createEncodecFormat();
+    startEncode();
     encodeOut();
     if (!isH265EncoderSupport) encodeOut();
-    isHasChangeConfig = false;
+    isHasChangeConfig=false;
   }
 
-  private static void setVideoEncodec(boolean isH265EncoderSupport) throws IOException {
+  // 初始化编码器
+  private static Surface surface;
+
+  public static void startEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
+    encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
+    encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
+    encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+    // 绑定Display和Surface
+    surface = encedec.createInputSurface();
+    setDisplaySurface(display, surface);
+    // 启动编码
+    encedec.start();
+    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
+    byteBuffer.put((byte) 3);
+    byteBuffer.putInt(Device.videoSize.first);
+    byteBuffer.putInt(Device.videoSize.second);
+    byteBuffer.flip();
+    Server.write(byteBuffer);
+  }
+
+  private static void createEncodecFormat() throws IOException {
     String codecMime = isH265EncoderSupport ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
     encedec = MediaCodec.createEncoderByType(codecMime);
     encodecFormat = new MediaFormat();
@@ -61,27 +82,6 @@ public final class VideoEncode {
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
 
     encodecFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
-  }
-
-  // 初始化编码器
-  private static Surface surface;
-
-  public static void initEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InterruptedIOException, ErrnoException {
-    // 重配置编码器宽高
-    encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
-    encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
-    encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-    // 绑定Display和Surface
-    surface = encedec.createInputSurface();
-    setDisplaySurface(display, surface);
-    // 启动编码
-    encedec.start();
-    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
-    byteBuffer.put((byte) 3);
-    byteBuffer.putInt(Device.videoSize.first);
-    byteBuffer.putInt(Device.videoSize.second);
-    byteBuffer.flip();
-    Server.write(byteBuffer);
   }
 
   public static void stopEncode() {

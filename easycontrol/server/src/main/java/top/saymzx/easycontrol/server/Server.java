@@ -149,7 +149,7 @@ public final class Server {
         if (VideoEncode.isHasChangeConfig) {
           VideoEncode.isHasChangeConfig = false;
           VideoEncode.stopEncode();
-          VideoEncode.initEncode();
+          VideoEncode.startEncode();
         }
         VideoEncode.encodeOut();
       }

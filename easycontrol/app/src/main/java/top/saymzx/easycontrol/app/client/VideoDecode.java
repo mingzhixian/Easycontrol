@@ -2,7 +2,6 @@ package top.saymzx.easycontrol.app.client;
 
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 

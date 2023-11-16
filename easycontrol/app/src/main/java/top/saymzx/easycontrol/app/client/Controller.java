@@ -15,6 +15,7 @@ import java.util.Objects;
 import top.saymzx.easycontrol.adb.AdbStream;
 import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class Controller {
   private final ClientView clientView;
@@ -47,8 +48,8 @@ public class Controller {
 
   // 处理画面大小变化
   public void handleChangeSizeEvent() throws IOException, InterruptedException {
-    clientView.videoSize = new Pair<>(stream.readInt(), stream.readInt());
-    AppData.main.runOnUiThread(clientView::reCalculateTextureViewSize);
+    Pair<Integer,Integer> newVideoSize=new Pair<>(stream.readInt(), stream.readInt());
+    AppData.main.runOnUiThread(()-> clientView.updateVideoSize(newVideoSize));
   }
 
   // 发送触摸事件
