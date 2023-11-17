@@ -55,15 +55,6 @@
         <task path="$PROJECT_DIR$/center">
           <activation />
         </task>
-        <task path="$PROJECT_DIR$/app">
-          <activation />
-        </task>
-        <task path="$PROJECT_DIR$/center">
-          <activation />
-        </task>
-        <task path="$PROJECT_DIR$/server">
-          <activation />
-        </task>
         <projects_view>
           <option name="groupModules" value="false" />
           <tree_state>
@@ -268,7 +259,7 @@
       <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.easycontrol:center [shadowJar]">
+  <component name="RunManager" selected="Android App.app">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="Easycontrol.app.main" />
       <option name="DEPLOY" value="true" />

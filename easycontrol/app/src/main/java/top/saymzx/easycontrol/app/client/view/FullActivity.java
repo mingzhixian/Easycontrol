@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client.view;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -112,7 +113,7 @@ public class FullActivity extends Activity {
     fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
-    fullActivity.buttonToLine.setOnClickListener(v -> setNavBarHide());
+    fullActivity.buttonNavBar.setOnClickListener(v -> setNavBarHide());
     fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
   }
 
@@ -121,7 +122,7 @@ public class FullActivity extends Activity {
     changeBarView();
     boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    fullActivity.buttonToLine.setImageResource(isShow ? R.drawable.to_line : R.drawable.exit_line);
+    fullActivity.buttonNavBar.setImageResource(isShow ? R.drawable.hide_nav : R.drawable.show_nav);
   }
 
   private void changeBarView() {
@@ -130,6 +131,11 @@ public class FullActivity extends Activity {
       if (isStart && toShowView) fullActivity.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) fullActivity.barView.setVisibility(View.GONE);
     }));
+  }
+
+  // 更新模糊背景图
+  public static void updateBackImage(Drawable drawable) {
+    context.fullActivity.getRoot().setBackground(drawable);
   }
 
 }

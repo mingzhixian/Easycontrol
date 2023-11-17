@@ -2,13 +2,19 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.Outline;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.WindowManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +27,7 @@ import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
-public class SmallView {
+public class SmallView extends ViewOutlineProvider {
   private final ClientView clientView;
 
   private boolean isShow = false;
@@ -48,9 +54,11 @@ public class SmallView {
     smallViewParams.gravity = Gravity.START | Gravity.TOP;
     // 设置监听控制
     setFloatVideoListener();
-    setButtonListener(null);
     setReSizeListener();
     setBarListener();
+    // 设置圆角
+    smallView.getRoot().setOutlineProvider(this);
+    smallView.getRoot().setClipToOutline(true);
   }
 
   public void show(Controller controller) {
@@ -164,13 +172,7 @@ public class SmallView {
           break;
         }
         case MotionEvent.ACTION_UP:
-          if (!isFilp.get()) {
-            boolean toShowView = smallView.barView.getVisibility() == View.GONE;
-            clientView.viewAnim(smallView.barView, toShowView, 0, PublicTools.dp2px(-40f), (isStart -> {
-              if (isStart && toShowView) smallView.barView.setVisibility(View.VISIBLE);
-              else if (!isStart && !toShowView) smallView.barView.setVisibility(View.GONE);
-            }));
-          }
+          if (!isFilp.get()) changeBarView();
           smallView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(R.color.translucent)));
           break;
       }
@@ -188,17 +190,32 @@ public class SmallView {
 
   // 设置按钮监听
   private void setButtonListener(Controller controller) {
-    if (controller != null) {
-      smallView.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4));
-      smallView.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3));
-      smallView.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187));
-      smallView.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
-    }
+    smallView.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4));
+    smallView.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3));
+    smallView.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187));
+    smallView.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonMiniCircle.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
     smallView.buttonClose.setOnClickListener(v -> clientView.hide(true));
     smallView.buttonCloseCircle.setOnClickListener(v -> clientView.hide(true));
+    smallView.buttonNavBar.setOnClickListener(v -> setNavBarHide());
+  }
+
+  // 导航栏隐藏
+  private void setNavBarHide() {
+    changeBarView();
+    boolean isShow = smallView.navBar.getVisibility() == View.GONE;
+    smallView.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
+    smallView.buttonNavBar.setImageResource(isShow ? R.drawable.hide_nav : R.drawable.show_nav);
+  }
+
+  private void changeBarView() {
+    boolean toShowView = smallView.barView.getVisibility() == View.GONE;
+    clientView.viewAnim(smallView.barView, toShowView, 0, PublicTools.dp2px(-40f), (isStart -> {
+      if (isStart && toShowView) smallView.barView.setVisibility(View.VISIBLE);
+      else if (!isStart && !toShowView) smallView.barView.setVisibility(View.GONE);
+    }));
   }
 
   // 设置悬浮窗大小拖动按钮监听控制
@@ -214,6 +231,21 @@ public class SmallView {
       }
       return true;
     });
+  }
+
+  // 更新模糊背景图
+  public void updateBackImage(Drawable drawable) {
+    smallView.getRoot().setBackground(drawable);
+  }
+
+  @Override
+  public void getOutline(View view, Outline outline) {
+    Rect rect = new Rect();
+    view.getGlobalVisibleRect(rect);
+    int leftMargin = 0;
+    int topMargin = 0;
+    Rect selfRect = new Rect(leftMargin, topMargin, rect.right - rect.left - leftMargin, rect.bottom - rect.top - topMargin);
+    outline.setRoundRect(selfRect, AppData.main.getResources().getDimension(R.dimen.round));
   }
 
 }

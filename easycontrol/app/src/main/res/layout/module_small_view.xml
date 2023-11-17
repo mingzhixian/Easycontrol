@@ -1,143 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content"
-  android:background="@drawable/background_cron"
-  android:backgroundTint="@color/cardContainerBackground">
+  android:background="@color/cardBackground"
+  android:orientation="vertical">
 
   <FrameLayout
     android:id="@+id/texture_view_layout"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />
+    android:layout_height="wrap_content">
 
-  <ImageView
-    android:id="@+id/button_mini_circle"
-    android:layout_width="18dp"
-    android:layout_height="18dp"
-    android:layout_gravity="start|top"
-    android:layout_marginStart="6dp"
-    android:layout_marginTop="3dp"
-    android:alpha="0.7"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/clientBarSecond"
-    android:padding="3dp"
-    android:src="@drawable/mini"
-    android:tint="@color/onCardBackground" />
-
-  <FrameLayout
-    android:id="@+id/bar"
-    android:layout_width="70dp"
-    android:layout_height="22dp"
-    android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="1dp"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/translucent"
-    android:paddingBottom="1dp">
-
-    <View
-      android:layout_width="50dp"
-      android:layout_height="5dp"
-      android:layout_gravity="center"
+    <ImageView
+      android:id="@+id/button_mini_circle"
+      android:layout_width="18dp"
+      android:layout_height="18dp"
+      android:layout_gravity="start|top"
+      android:layout_marginStart="6dp"
+      android:layout_marginTop="3dp"
       android:background="@drawable/background_cron"
-      android:backgroundTint="@color/clientBar" />
-  </FrameLayout>
-
-  <ImageView
-    android:id="@+id/button_close_circle"
-    android:layout_width="18dp"
-    android:layout_height="18dp"
-    android:layout_gravity="end|top"
-    android:layout_marginTop="3dp"
-    android:layout_marginEnd="6dp"
-    android:alpha="0.7"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/clientBarSecond"
-    android:padding="3dp"
-    android:src="@drawable/close"
-    android:tint="@color/onCardBackground" />
-
-  <View
-    android:id="@+id/re_size"
-    android:layout_width="25dp"
-    android:layout_height="25dp"
-    android:layout_gravity="end|bottom" />
-
-  <GridLayout
-    android:id="@+id/bar_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="24dp"
-    android:background="@drawable/background_cron"
-    android:columnCount="4"
-    android:padding="8dp">
-
-    <ImageView
-      android:id="@+id/button_power"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
-      android:src="@drawable/power"
-      android:tint="@color/onCardBackground" />
-
-    <ImageView
-      android:id="@+id/button_mini"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
+      android:backgroundTint="@color/clientBarSecond"
+      android:padding="3dp"
       android:src="@drawable/mini"
       android:tint="@color/onCardBackground" />
 
+    <FrameLayout
+      android:id="@+id/bar"
+      android:layout_width="70dp"
+      android:layout_height="22dp"
+      android:layout_gravity="top|center_horizontal"
+      android:layout_marginTop="1dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/translucent"
+      android:paddingBottom="1dp">
+
+      <View
+        android:layout_width="50dp"
+        android:layout_height="5dp"
+        android:layout_gravity="center"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/clientBar" />
+    </FrameLayout>
+
     <ImageView
-      android:id="@+id/button_full"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
-      android:src="@drawable/fullscreen"
+      android:id="@+id/button_close_circle"
+      android:layout_width="18dp"
+      android:layout_height="18dp"
+      android:layout_gravity="end|top"
+      android:layout_marginTop="3dp"
+      android:layout_marginEnd="6dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/clientBarSecond"
+      android:padding="3dp"
+      android:src="@drawable/close"
       android:tint="@color/onCardBackground" />
 
-    <ImageView
-      android:id="@+id/button_close"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
-      android:src="@drawable/close"
-      android:tint="@color/buttonSecond" />
+    <LinearLayout
+      android:id="@+id/bar_view"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:layout_marginTop="29dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/cardBackgroundTranslucent"
+      android:padding="5dp">
+
+      <ImageView
+        android:id="@+id/button_nav_bar"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="1dp"
+        android:src="@drawable/show_nav"
+        android:tint="@color/onCardBackground" />
+
+      <ImageView
+        android:id="@+id/button_power"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="1dp"
+        android:src="@drawable/power"
+        android:tint="@color/onCardBackground" />
+
+      <ImageView
+        android:id="@+id/button_mini"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="1dp"
+        android:src="@drawable/mini"
+        android:tint="@color/onCardBackground" />
+
+      <ImageView
+        android:id="@+id/button_full"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="1dp"
+        android:src="@drawable/fullscreen"
+        android:tint="@color/onCardBackground" />
+
+      <ImageView
+        android:id="@+id/button_close"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="1dp"
+        android:src="@drawable/close"
+        android:tint="@color/buttonSecond" />
+
+    </LinearLayout>
+
+    <View
+      android:id="@+id/re_size"
+      android:layout_width="25dp"
+      android:layout_height="25dp"
+      android:layout_gravity="end|bottom" />
+  </FrameLayout>
+
+  <LinearLayout
+    android:id="@+id/nav_bar"
+    android:layout_width="match_parent"
+    android:layout_height="24dp"
+    android:gravity="center"
+    android:visibility="gone">
 
     <Space
-      android:layout_height="6dp"
-      android:layout_columnSpan="4" />
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1" />
 
     <ImageView
       android:id="@+id/button_switch"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="2"
+      android:padding="4dp"
       android:src="@drawable/menu"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_home"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="2"
+      android:padding="4dp"
       android:src="@drawable/round"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_back"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_columnWeight="1"
-      android:layout_margin="2dp"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="2"
+      android:padding="4dp"
       android:src="@drawable/caret"
       android:tint="@color/onCardBackground" />
-  </GridLayout>
-</FrameLayout>
+
+    <Space
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1" />
+  </LinearLayout>
+</LinearLayout>

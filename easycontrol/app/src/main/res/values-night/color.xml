@@ -17,14 +17,16 @@
   <color name="buttonSecond">#ca5357</color>
   <color name="onButtonSecond">#ded8d8</color>
   <color name="translucent">#000000ff</color>
+  <color name="cardBackgroundTranslucent">#d03d4043</color>
 
   <!-- 客户端界面色彩 -->
   <color name="clientBar">#579CF9</color>
-  <color name="clientBarSecond">#7e7e7e</color>
+  <color name="clientBarSecond">#807e7e7e</color>
 
   <!-- 迷你客户端界面色彩 -->
   <color name="bar1">#e8b621</color>
   <color name="bar2">#3a7f9e</color>
   <color name="bar3">#6eaa84</color>
   <color name="bar4">#0A95FF</color>
+
 </resources>

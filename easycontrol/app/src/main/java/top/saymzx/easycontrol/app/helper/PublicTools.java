@@ -5,9 +5,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
@@ -259,6 +264,28 @@ public class PublicTools {
     MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
     for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
     return false;
+  }
+
+  // 图片模糊处理
+  private static RenderScript renderScript;
+  private static ScriptIntrinsicBlur scriptIntrinsicBlur;
+
+  public static Bitmap blurBitmap(Bitmap bitmap, int radius) {
+    if (renderScript == null) {
+      renderScript = RenderScript.create(AppData.main);
+      scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+    }
+    Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    Allocation allIn = Allocation.createFromBitmap(renderScript, bitmap);
+    Allocation allOut = Allocation.createFromBitmap(renderScript, outBitmap);
+
+    scriptIntrinsicBlur.setRadius(radius);
+
+    scriptIntrinsicBlur.setInput(allIn);
+    scriptIntrinsicBlur.forEach(allOut);
+    allOut.copyTo(outBitmap);
+    bitmap.recycle();
+    return outBitmap;
   }
 
   public interface MyFunction {
