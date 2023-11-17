@@ -1,16 +1,16 @@
 package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
-import android.graphics.Outline;
-import android.graphics.Rect;
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -18,12 +18,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
-public class ClientView extends ViewOutlineProvider implements TextureView.SurfaceTextureListener {
+public class ClientView implements TextureView.SurfaceTextureListener {
   private final Client client;
   private final boolean setResolution;
   public final TextureView textureView = new TextureView(AppData.main);
@@ -48,8 +47,6 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
     this.setResolution = setResolution;
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
-    textureView.setOutlineProvider(this);
-    textureView.setClipToOutline(true);
   }
 
   public void changeToFull() {
@@ -89,6 +86,15 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
       if (surfaceTexture != null) surfaceTexture.release();
       client.release();
     }
+  }
+
+  // 更新模糊背景图
+  public void updateBackImage() {
+    Bitmap bitmap = textureView.getBitmap();
+    if (bitmap == null) return;
+    Drawable drawable = new BitmapDrawable(PublicTools.blurBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 10, bitmap.getHeight() / 10, false), 8));
+    if (uiMode == UI_MODE_FULL) FullActivity.updateBackImage(drawable);
+    else if (uiMode == UI_MODE_SMALL) smallView.updateBackImage(drawable);
   }
 
   // 处理外部旋转
@@ -192,16 +198,6 @@ public class ClientView extends ViewOutlineProvider implements TextureView.Surfa
 
     // 启动动画
     animator.start();
-  }
-
-  @Override
-  public void getOutline(View view, Outline outline) {
-    Rect rect = new Rect();
-    view.getGlobalVisibleRect(rect);
-    int leftMargin = 0;
-    int topMargin = 0;
-    Rect selfRect = new Rect(leftMargin, topMargin, rect.right - rect.left - leftMargin, rect.bottom - rect.top - topMargin);
-    outline.setRoundRect(selfRect, AppData.main.getResources().getDimension(R.dimen.round));
   }
 
   @Override
