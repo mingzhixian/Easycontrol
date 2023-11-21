@@ -13,9 +13,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
-import android.util.DisplayMetrics;
 import android.util.Pair;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -72,17 +70,14 @@ public class PublicTools {
 
   // DP转PX
   public static int dp2px(Float dp) {
-    return (int) (dp * (defaultDisplay != null ? metric : AppData.main.getResources().getDisplayMetrics()).density);
+    return (int) (dp * AppData.realScreenSize.density);
   }
 
   // 获取当前界面宽高
-  private static final DisplayMetrics metric = new DisplayMetrics();
-  private static Display defaultDisplay = null;
-
-  public static Pair<Integer, Integer> getScreenSize() {
-    if (defaultDisplay == null) defaultDisplay = AppData.windowManager.getDefaultDisplay();
-    defaultDisplay.getRealMetrics(metric);
-    return new Pair<>(metric.widthPixels, metric.heightPixels);
+  public static Pair<Integer, Integer> getNowScreenSize() {
+    Pair<Integer, Integer> nowScreenSize = new Pair<>(AppData.realScreenSize.widthPixels, AppData.realScreenSize.heightPixels);
+    if (!AppData.rotationIsPortrait) nowScreenSize = new Pair<>(nowScreenSize.second, nowScreenSize.first);
+    return nowScreenSize;
   }
 
   // 创建弹窗

@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -15,7 +16,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.Pair;
+import android.view.OrientationEventListener;
 import android.widget.Toast;
 
 import java.util.UUID;
@@ -68,6 +71,8 @@ public class MainActivity extends Activity {
     CenterHelper.checkCenter();
     alarmPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_CENTER_SERVICE), PendingIntent.FLAG_IMMUTABLE);
     ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 10, alarmPendingIntent);
+    // 注册旋转监听
+    setRotationListener();
   }
 
   @Override
@@ -80,7 +85,9 @@ public class MainActivity extends Activity {
   @Override
   protected void onDestroy() {
     // 注销广播监听
+    ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).cancel(alarmPendingIntent);
     unregisterReceiver(broadcastReceiver);
+    orientationEventListener.disable();
     super.onDestroy();
   }
 
@@ -110,11 +117,28 @@ public class MainActivity extends Activity {
     mainActivity.buttonSet.setOnClickListener(v -> startActivity(new Intent(this, SetActivity.class)));
   }
 
+  // 设置旋转监听
+  private OrientationEventListener orientationEventListener;
+
+  private void setRotationListener() {
+    orientationEventListener = new OrientationEventListener(this) {
+      @Override
+      public void onOrientationChanged(int i) {
+        boolean nowRotation = (i <= 45 || i >= 135) && (i <= 225 || i >= 315);
+        if (AppData.rotationIsPortrait ^ nowRotation) {
+          AppData.rotationIsPortrait = nowRotation;
+          for (Client client : Client.allClients) client.clientView.changeRotation();
+        }
+      }
+    };
+    orientationEventListener.enable();
+  }
+
   // 广播处理
   private static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
   private static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.CENTER_SERVICE";
   private static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
-  PendingIntent alarmPendingIntent;
+  private PendingIntent alarmPendingIntent;
   private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {

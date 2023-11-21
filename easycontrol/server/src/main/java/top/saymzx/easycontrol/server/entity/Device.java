@@ -8,16 +8,18 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Pair;
+import android.view.Display;
 import android.view.IRotationWatcher;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.helper.VideoEncode;
@@ -33,7 +35,7 @@ public final class Device {
   public static int deviceRotation;
   public static Pair<Integer, Integer> videoSize;
 
-  private static final int displayId = 0;
+  private static final int displayId = Display.DEFAULT_DISPLAY;
   public static int layerStack;
 
   public static void init() throws IOException, InterruptedException {
@@ -76,7 +78,7 @@ public final class Device {
     newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
     Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
     // 更新
-    Thread.sleep(500);
+    Thread.sleep(videoSize == null ? 300 : 500);
     getDeivceSize();
     VideoEncode.isHasChangeConfig = true;
   }
@@ -202,11 +204,18 @@ public final class Device {
     }
   }
 
+  public static void rotateDevice(int rotation) {
+    boolean accelerometerRotation = !WindowManager.isRotationFrozen();
+    WindowManager.freezeRotation(rotation);
+    if (accelerometerRotation) WindowManager.thawRotation();
+  }
+
   public static String execReadOutput(String cmd) throws IOException, InterruptedException {
     Process process = new ProcessBuilder().command("sh", "-c", cmd).start();
     StringBuilder builder = new StringBuilder();
-    try (Scanner scanner = new Scanner(process.getInputStream())) {
-      while (scanner.hasNextLine()) builder.append(scanner.nextLine()).append('\n');
+    String line;
+    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+      while ((line = bufferedReader.readLine()) != null) builder.append(line).append("\n");
     }
     int exitCode = process.waitFor();
     if (exitCode != 0) throw new IOException("命令执行错误" + cmd);

@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.hardware.usb.UsbManager;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.File;
@@ -35,6 +37,10 @@ public class AppData {
   // 设置值
   public static Setting setting;
 
+  // 系统分辨率
+  public static final DisplayMetrics realScreenSize = new DisplayMetrics();
+  public static boolean rotationIsPortrait = true;
+
   // 当前版本号
   public static String serverName = "easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
 
@@ -44,6 +50,7 @@ public class AppData {
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
     usbManager = (UsbManager) main.getSystemService(Context.USB_SERVICE);
     windowManager = main.getWindowManager();
+    getRealScreenSize(m);
     setting = new Setting(main.getSharedPreferences("setting", Context.MODE_PRIVATE));
     // 读取密钥文件
     try {
@@ -52,6 +59,19 @@ public class AppData {
       if (!privateKey.isFile() || !publicKey.isFile()) AdbKeyPair.generate(privateKey, publicKey);
       keyPair = AdbKeyPair.read(privateKey, publicKey);
     } catch (Exception ignored) {
+    }
+  }
+
+  // 获取设备真实分辨率
+  private static void getRealScreenSize(Activity m) {
+    Display display = m.getWindowManager().getDefaultDisplay();
+    display.getRealMetrics(realScreenSize);
+    int rotation = display.getRotation();
+    if (rotation == 1 || rotation == 3) {
+      rotationIsPortrait = false;
+      int tmp = realScreenSize.heightPixels;
+      realScreenSize.heightPixels = realScreenSize.widthPixels;
+      realScreenSize.widthPixels = tmp;
     }
   }
 }

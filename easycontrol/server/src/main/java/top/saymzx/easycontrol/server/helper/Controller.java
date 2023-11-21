@@ -33,6 +33,9 @@ public final class Controller {
         case 6:
           handleChangeSizeEvent();
           break;
+        case 7:
+          handleRotateEvent();
+          break;
       }
       hasData = Server.streamIn.available() > 0;
     }
@@ -72,6 +75,10 @@ public final class Controller {
 
   private static void handleChangeSizeEvent() throws IOException, InterruptedException {
     Device.changeDeviceSize(Server.streamIn.readFloat());
+  }
+
+  private static void handleRotateEvent() throws IOException {
+    Device.rotateDevice(Server.streamIn.readByte());
   }
 
   public static void checkScreenOff(boolean turnOn) throws IOException, InterruptedException {

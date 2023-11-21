@@ -4,14 +4,14 @@
 package top.saymzx.easycontrol.server.entity;
 
 public final class Options {
-  public static boolean isAudio;
-  public static int maxSize;
-  public static int videoBitRate;
-  public static int maxFps;
-  public static boolean turnOffScreen;
-  public static boolean autoControlScreen;
+  public static boolean isAudio = true;
+  public static int maxSize = 1600;
+  public static int videoBitRate = 8000000;
+  public static int maxFps = 60;
+  public static boolean turnOffScreen = true;
+  public static boolean autoControlScreen = true;
   public static float reSize = -1;
-  public static boolean isH265DecoderSupport;
+  public static boolean isH265DecoderSupport = true;
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -24,7 +24,7 @@ public final class Options {
           isAudio = Integer.parseInt(value) == 1;
           break;
         case "max_size":
-          maxSize = Integer.parseInt(value) & ~7;
+          maxSize = Integer.parseInt(value);
           break;
         case "max_fps":
           maxFps = Integer.parseInt(value);
