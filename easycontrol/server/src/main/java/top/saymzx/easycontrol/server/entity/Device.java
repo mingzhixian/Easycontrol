@@ -78,7 +78,7 @@ public final class Device {
     newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
     Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
     // 更新
-    Thread.sleep(videoSize == null ? 300 : 500);
+    Thread.sleep(500);
     getDeivceSize();
     VideoEncode.isHasChangeConfig = true;
   }

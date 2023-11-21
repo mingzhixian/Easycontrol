@@ -113,7 +113,7 @@ public class Client {
 
   // 连接Server
   private void connectServer() throws Exception {
-    Thread.sleep(50);
+    Thread.sleep(100);
     // 尝试连接
     for (int i = 0; i < 60; i++) {
       try {
