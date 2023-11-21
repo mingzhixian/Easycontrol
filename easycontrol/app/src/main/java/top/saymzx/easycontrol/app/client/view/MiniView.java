@@ -61,10 +61,14 @@ public class MiniView {
         if (isStart) {
           miniView.getRoot().setVisibility(View.VISIBLE);
           AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
-          calculateSite(PublicTools.getScreenSize());
+          calculateSite(PublicTools.getNowScreenSize());
         }
       }));
     }
+  }
+
+  public void changeRotation(Pair<Integer, Integer> screenSize) {
+    calculateSite(screenSize);
   }
 
   public void hide() {
@@ -81,7 +85,7 @@ public class MiniView {
   }
 
   // 计算合适位置
-  public void calculateSite(Pair<Integer, Integer> screenSize) {
+  private void calculateSite(Pair<Integer, Integer> screenSize) {
     int startY;
     boolean isConflict;
     for (startY = screenSize.second / 5; startY < screenSize.second - height; startY += height / 2) {

@@ -2,11 +2,9 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Pair;
@@ -81,10 +79,15 @@ public class SmallView extends ViewOutlineProvider {
       }));
       // 更新TextureView
       smallView.textureViewLayout.addView(clientView.textureView, 0);
-      Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
+      Pair<Integer, Integer> screenSize = PublicTools.getNowScreenSize();
       clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
       calculateSite(screenSize);
     }
+  }
+
+  public void changeRotation(Pair<Integer, Integer> screenSize) {
+    clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+    calculateSite(screenSize);
   }
 
   public void hide() {
@@ -149,7 +152,7 @@ public class SmallView extends ViewOutlineProvider {
           paramsX.set(smallViewParams.x);
           paramsY.set(smallViewParams.y);
           isFilp.set(false);
-          screenSize.set(PublicTools.getScreenSize());
+          screenSize.set(PublicTools.getNowScreenSize());
           break;
         }
         case MotionEvent.ACTION_MOVE: {
@@ -180,8 +183,8 @@ public class SmallView extends ViewOutlineProvider {
     });
   }
 
-  // 居中显示
-  public void calculateSite(Pair<Integer, Integer> screenSize) {
+  // 计算位置，居中显示
+  private void calculateSite(Pair<Integer, Integer> screenSize) {
     ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
     smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
     smallViewParams.y = (screenSize.second - layoutParams.height) / 2;

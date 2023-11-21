@@ -3,14 +3,14 @@ package top.saymzx.easycontrol.app.client.view;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
-
-import java.util.Objects;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Controller;
@@ -21,15 +21,13 @@ import top.saymzx.easycontrol.app.helper.PublicTools;
 public class FullActivity extends Activity {
   @SuppressLint("StaticFieldLeak")
   private static FullActivity context;
-  private ActivityFullBinding fullActivity;
-
   private static Controller controller;
   @SuppressLint("StaticFieldLeak")
   private static ClientView clientView;
 
-  public static boolean isShow = false;
+  private ActivityFullBinding fullActivity;
 
-  private Pair<Integer, Integer> layoutSize = new Pair<>(0, 0);
+  public static boolean isShow = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +43,7 @@ public class FullActivity extends Activity {
     setButtonListener();
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
-    fullActivity.textureViewLayout.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-      Pair<Integer, Integer> newLayoutSize = new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight());
-      if (isShow && (!Objects.equals(layoutSize.first, newLayoutSize.first) || !Objects.equals(layoutSize.second, newLayoutSize.second))) {
-        layoutSize = newLayoutSize;
-        clientView.updateMaxSize(layoutSize);
-      }
-    });
+    fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
   }
 
   @Override
@@ -64,15 +56,19 @@ public class FullActivity extends Activity {
   }
 
   @Override
+  public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
+    fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
+    super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
+  }
+
+  @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (keyCode == KeyEvent.KEYCODE_BACK) {
       Toast.makeText(AppData.main, "全屏状态会拦截返回", Toast.LENGTH_SHORT).show();
       return true;
     }
     // 为不影响主机功能，仅传送常用输入字符
-    else if ((keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) ||
-      (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) ||
-      (keyCode >= KeyEvent.KEYCODE_COMMA && keyCode <= KeyEvent.KEYCODE_PLUS)) {
+    else if ((keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) || (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) || (keyCode >= KeyEvent.KEYCODE_COMMA && keyCode <= KeyEvent.KEYCODE_PLUS)) {
       controller.sendKeyEvent(keyCode);
       return true;
     }
@@ -88,6 +84,10 @@ public class FullActivity extends Activity {
     }
   }
 
+  public static void changeRotation() {
+    context.setRequestedOrientation(AppData.rotationIsPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+  }
+
   public static void hide() {
     if (isShow) {
       isShow = false;
@@ -98,10 +98,7 @@ public class FullActivity extends Activity {
 
   // 获取去除底部操作栏后的屏幕大小，用于修改分辨率使用
   public static float getResolution() {
-    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
-    // 保持竖向
-    if (screenSize.first > screenSize.second) screenSize = new Pair<>(screenSize.second, screenSize.first);
-    return (float) screenSize.first / (float) (screenSize.second - PublicTools.dp2px(32f));
+    return (float) AppData.realScreenSize.widthPixels / (float) (AppData.realScreenSize.heightPixels - PublicTools.dp2px(32f));
   }
 
   // 设置按钮监听

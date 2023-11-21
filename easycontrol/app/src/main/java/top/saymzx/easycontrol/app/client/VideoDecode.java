@@ -58,7 +58,6 @@ public class VideoDecode {
     // 获取视频标识头
     decodecFormat.setByteBuffer("csd-0", csd0.second);
     if (!isH265Support) decodecFormat.setByteBuffer("csd-1", csd1.second);
-    decodecFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
   }
 
   public void setSurface(Surface surface) {

@@ -45,6 +45,7 @@ public class SetActivity extends Activity {
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", AppData.setting.getTurnOffScreen(), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", AppData.setting.getAutoControlScreen(), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "默认全屏启动", AppData.setting.getDefaultFull(), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "被控端跟随旋转", AppData.setting.getAudoRotation(), isChecked -> AppData.setting.setAudoRotation(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(PublicTools.createTextCard(this, "清除默认设备", () -> {
       AppData.setting.setDefaultDevice("");

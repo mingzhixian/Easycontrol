@@ -90,6 +90,15 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getAudoRotation() {
+    return sharedPreferences.getBoolean("audoRotation", true);
+  }
+
+  public void setAudoRotation(boolean value) {
+    editor.putBoolean("audoRotation", value);
+    editor.apply();
+  }
+
   public String getDefaultDevice() {
     return sharedPreferences.getString("defaultDevice", "");
   }

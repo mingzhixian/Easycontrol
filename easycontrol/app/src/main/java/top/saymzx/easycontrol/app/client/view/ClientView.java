@@ -73,6 +73,16 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     miniView.show();
   }
 
+  // 处理主控端旋转
+  public void changeRotation() {
+    Pair<Integer, Integer> screenSize = PublicTools.getNowScreenSize();
+    if (uiMode == UI_MODE_FULL) {
+      FullActivity.changeRotation();
+      if (AppData.setting.getAudoRotation()) client.controller.sendRotateEvent(AppData.rotationIsPortrait);
+    } else if (uiMode == UI_MODE_SMALL) smallView.changeRotation(screenSize);
+    else if (uiMode == UI_MODE_MINI) miniView.changeRotation(screenSize);
+  }
+
   public boolean checkIsNeedPlay() {
     return uiMode != UI_MODE_MINI;
   }
@@ -97,14 +107,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     else if (uiMode == UI_MODE_SMALL) smallView.updateBackImage(drawable);
   }
 
-  // 处理外部旋转
-  public void hasChangeRotation(Pair<Integer, Integer> screenSize) {
-    if (uiMode == UI_MODE_SMALL) {
-      updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
-      smallView.calculateSite(screenSize);
-    } else if (uiMode == UI_MODE_MINI) miniView.calculateSite(screenSize);
-  }
-
   // 重新计算TextureView大小
   public void updateMaxSize(Pair<Integer, Integer> maxSize) {
     this.maxSize = maxSize;
@@ -114,11 +116,9 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   public void updateVideoSize(Pair<Integer, Integer> videoSize) {
     this.videoSize = videoSize;
     reCalculateTextureViewSize();
-    // 如果uiMode为小窗，则需重新使小窗居中
-    if (uiMode == UI_MODE_SMALL) smallView.calculateSite(PublicTools.getScreenSize());
   }
 
-  public void reCalculateTextureViewSize() {
+  private void reCalculateTextureViewSize() {
     if (maxSize == null || videoSize == null) return;
     // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
     int tmp1 = videoSize.second * maxSize.first / videoSize.first;

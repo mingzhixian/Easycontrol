@@ -113,9 +113,9 @@ public class Client {
 
   // 连接Server
   private void connectServer() throws Exception {
-    Thread.sleep(100);
+    Thread.sleep(50);
     // 尝试连接
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < 60; i++) {
       try {
         if (stream == null) stream = adb.localSocketForward("easycontrol", true);
         if (videoStream == null) videoStream = videoAdb.localSocketForward("easycontrol", true);
@@ -129,6 +129,8 @@ public class Client {
 
   // 创建子服务
   private void createSubService() throws IOException, InterruptedException {
+    // 控制
+    controller = new Controller(clientView, stream);
     // 是否支持H265编码
     boolean isH265Support = videoStream.readByte() == 1;
     // 视频大小
@@ -144,8 +146,6 @@ public class Client {
       csd0 = readFrame(stream);
       audioDecode = new AudioDecode(csd0);
     }
-    // 控制
-    controller = new Controller(clientView, stream);
   }
 
   // 创建UI
@@ -228,7 +228,6 @@ public class Client {
       while (!Thread.interrupted()) {
         controller.checkClipBoard();
         controller.sendKeepAlive();
-        checkScreenRotation();
         // 背景模糊效果，耗费性能，且因更新频率不高导致效果不是很好
 //        AppData.main.runOnUiThread(clientView::updateBackImage);
         Thread.sleep(1500);
@@ -236,15 +235,6 @@ public class Client {
     } catch (Exception e) {
       errorClose(e);
     }
-  }
-
-  private Boolean lastScreenIsPortal = null;
-
-  private void checkScreenRotation() {
-    Pair<Integer, Integer> screenSize = PublicTools.getScreenSize();
-    boolean nowScreenIsPortal = screenSize.first < screenSize.second;
-    if (lastScreenIsPortal != null && lastScreenIsPortal != nowScreenIsPortal) AppData.main.runOnUiThread(() -> clientView.hasChangeRotation(screenSize));
-    lastScreenIsPortal = nowScreenIsPortal;
   }
 
   private boolean hasClose = false;

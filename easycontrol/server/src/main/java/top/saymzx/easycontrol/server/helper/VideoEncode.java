@@ -42,7 +42,7 @@ public final class VideoEncode {
     startEncode();
     encodeOut();
     if (!isH265EncoderSupport) encodeOut();
-    isHasChangeConfig=false;
+    isHasChangeConfig = false;
   }
 
   // 初始化编码器
@@ -80,8 +80,6 @@ public final class VideoEncode {
 
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-
-    encodecFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
   }
 
   public static void stopEncode() {

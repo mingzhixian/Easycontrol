@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class BufferNew {
-  final LinkedBlockingDeque<ByteBuffer> dataQueue = new LinkedBlockingDeque<>();
+  private final LinkedBlockingDeque<ByteBuffer> dataQueue = new LinkedBlockingDeque<>();
 
   public void write(ByteBuffer data) {
     dataQueue.offerLast(data);
