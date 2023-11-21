@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -71,16 +72,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     hide(false);
     uiMode = UI_MODE_MINI;
     miniView.show();
-  }
-
-  // 处理主控端旋转
-  public void changeRotation() {
-    Pair<Integer, Integer> screenSize = PublicTools.getNowScreenSize();
-    if (uiMode == UI_MODE_FULL) {
-      FullActivity.changeRotation();
-      if (AppData.setting.getAudoRotation()) client.controller.sendRotateEvent(AppData.rotationIsPortrait);
-    } else if (uiMode == UI_MODE_SMALL) smallView.changeRotation(screenSize);
-    else if (uiMode == UI_MODE_MINI) miniView.changeRotation(screenSize);
   }
 
   public boolean checkIsNeedPlay() {

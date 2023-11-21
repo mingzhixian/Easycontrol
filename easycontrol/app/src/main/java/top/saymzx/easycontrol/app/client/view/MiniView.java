@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.PixelFormat;
 import android.os.Build;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,7 +27,7 @@ public class MiniView {
     WindowManager.LayoutParams.WRAP_CONTENT,
     WindowManager.LayoutParams.WRAP_CONTENT,
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE,
-    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
     PixelFormat.TRANSLUCENT
   );
 
@@ -47,7 +46,7 @@ public class MiniView {
     else if (colorNum == 2) barColor = R.color.bar3;
     else if (colorNum == 3) barColor = R.color.bar4;
     miniView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(barColor)));
-    miniViewParams.x = -1 * PublicTools.dp2px(10f);
+    miniViewParams.x = 0;
   }
 
   public void show() {
@@ -61,14 +60,10 @@ public class MiniView {
         if (isStart) {
           miniView.getRoot().setVisibility(View.VISIBLE);
           AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
-          calculateSite(PublicTools.getNowScreenSize());
+          calculateSite();
         }
       }));
     }
-  }
-
-  public void changeRotation(Pair<Integer, Integer> screenSize) {
-    calculateSite(screenSize);
   }
 
   public void hide() {
@@ -85,10 +80,10 @@ public class MiniView {
   }
 
   // 计算合适位置
-  private void calculateSite(Pair<Integer, Integer> screenSize) {
+  private void calculateSite() {
     int startY;
     boolean isConflict;
-    for (startY = screenSize.second / 5; startY < screenSize.second - height; startY += height / 2) {
+    for (startY = 100; startY < 1000; startY += height / 2) {
       isConflict = false;
       for (int i = 0; i < num; i++) {
         if (site[i] > startY - height || site[i] < startY + height) {

@@ -39,7 +39,6 @@ public class AppData {
 
   // 系统分辨率
   public static final DisplayMetrics realScreenSize = new DisplayMetrics();
-  public static boolean rotationIsPortrait = true;
 
   // 当前版本号
   public static String serverName = "easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
@@ -68,7 +67,6 @@ public class AppData {
     display.getRealMetrics(realScreenSize);
     int rotation = display.getRotation();
     if (rotation == 1 || rotation == 3) {
-      rotationIsPortrait = false;
       int tmp = realScreenSize.heightPixels;
       realScreenSize.heightPixels = realScreenSize.widthPixels;
       realScreenSize.widthPixels = tmp;

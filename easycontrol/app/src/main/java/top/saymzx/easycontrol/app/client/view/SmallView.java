@@ -17,7 +17,6 @@ import android.view.WindowManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Controller;
@@ -36,16 +35,28 @@ public class SmallView extends ViewOutlineProvider {
     new WindowManager.LayoutParams(
       WindowManager.LayoutParams.WRAP_CONTENT,
       WindowManager.LayoutParams.WRAP_CONTENT,
-      200,
-      200,
+      0,
+      0,
       Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE,
       LayoutParamsFlagFocus,
+      PixelFormat.TRANSLUCENT
+    );
+  private final View backgroundWindow = new View(AppData.main);
+  private final WindowManager.LayoutParams backgroundWindowParams =
+    new WindowManager.LayoutParams(
+      WindowManager.LayoutParams.MATCH_PARENT,
+      WindowManager.LayoutParams.MATCH_PARENT,
+      0,
+      0,
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE,
+      backgroundWindowFlag,
       PixelFormat.TRANSLUCENT
     );
 
   private static final int baseLayoutParamsFlag = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
   private static final int LayoutParamsFlagFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
   private static final int LayoutParamsFlagNoFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+  private static final int backgroundWindowFlag = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 
   public SmallView(ClientView clientView) {
     this.clientView = clientView;
@@ -57,6 +68,12 @@ public class SmallView extends ViewOutlineProvider {
     // 设置圆角
     smallView.getRoot().setOutlineProvider(this);
     smallView.getRoot().setClipToOutline(true);
+    // 设置背景窗口监听
+    backgroundWindow.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+      Pair<Integer, Integer> screenSize = new Pair<>(backgroundWindow.getMeasuredWidth(), backgroundWindow.getMeasuredHeight());
+      clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+      calculateSite(screenSize);
+    });
   }
 
   public void show(Controller controller) {
@@ -74,20 +91,13 @@ public class SmallView extends ViewOutlineProvider {
       clientView.viewAnim(smallView.getRoot(), true, 0, PublicTools.dp2px(40f), (isStart -> {
         if (isStart) {
           smallView.getRoot().setVisibility(View.VISIBLE);
+          AppData.windowManager.addView(backgroundWindow, backgroundWindowParams);
           AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
         }
       }));
       // 更新TextureView
       smallView.textureViewLayout.addView(clientView.textureView, 0);
-      Pair<Integer, Integer> screenSize = PublicTools.getNowScreenSize();
-      clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
-      calculateSite(screenSize);
     }
-  }
-
-  public void changeRotation(Pair<Integer, Integer> screenSize) {
-    clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
-    calculateSite(screenSize);
   }
 
   public void hide() {
@@ -102,6 +112,7 @@ public class SmallView extends ViewOutlineProvider {
         if (!isStart) {
           smallView.getRoot().setVisibility(View.GONE);
           AppData.windowManager.removeView(smallView.getRoot());
+          AppData.windowManager.removeView(backgroundWindow);
         }
       }));
     }
@@ -143,7 +154,6 @@ public class SmallView extends ViewOutlineProvider {
     AtomicInteger yy = new AtomicInteger();
     AtomicInteger paramsX = new AtomicInteger();
     AtomicInteger paramsY = new AtomicInteger();
-    AtomicReference<Pair<Integer, Integer>> screenSize = new AtomicReference<>(new Pair<>(0, 0));
     smallView.bar.setOnTouchListener((v, event) -> {
       switch (event.getActionMasked()) {
         case MotionEvent.ACTION_DOWN: {
@@ -152,7 +162,6 @@ public class SmallView extends ViewOutlineProvider {
           paramsX.set(smallViewParams.x);
           paramsY.set(smallViewParams.y);
           isFilp.set(false);
-          screenSize.set(PublicTools.getNowScreenSize());
           break;
         }
         case MotionEvent.ACTION_MOVE: {
@@ -167,7 +176,7 @@ public class SmallView extends ViewOutlineProvider {
             smallView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(R.color.clientBarSecond)));
           }
           // 拖动限制
-          if (x < 100 | x > screenSize.get().first - 100 | y < 150 | y > screenSize.get().second - 100) return true;
+          if (x < 100 | x > backgroundWindow.getMeasuredWidth() - 100 | y < 150 | y > backgroundWindow.getMeasuredHeight() - 100) return true;
           // 更新
           smallViewParams.x = paramsX.get() + flipX;
           smallViewParams.y = paramsY.get() + flipY;
@@ -252,4 +261,3 @@ public class SmallView extends ViewOutlineProvider {
   }
 
 }
-
