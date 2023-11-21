@@ -73,13 +73,6 @@ public class PublicTools {
     return (int) (dp * AppData.realScreenSize.density);
   }
 
-  // 获取当前界面宽高
-  public static Pair<Integer, Integer> getNowScreenSize() {
-    Pair<Integer, Integer> nowScreenSize = new Pair<>(AppData.realScreenSize.widthPixels, AppData.realScreenSize.heightPixels);
-    if (!AppData.rotationIsPortrait) nowScreenSize = new Pair<>(nowScreenSize.second, nowScreenSize.first);
-    return nowScreenSize;
-  }
-
   // 创建弹窗
   public static Dialog createDialog(Context context, boolean canCancel, View view) {
     AlertDialog.Builder builder = new AlertDialog.Builder(context);

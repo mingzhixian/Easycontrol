@@ -21,7 +21,7 @@
 
   <!-- 客户端界面色彩 -->
   <color name="clientBar">#579CF9</color>
-  <color name="clientBarSecond">#807e7e7e</color>
+  <color name="clientBarSecond">#907e7e7e</color>
 
   <!-- 迷你客户端界面色彩 -->
   <color name="bar1">#e8b621</color>
