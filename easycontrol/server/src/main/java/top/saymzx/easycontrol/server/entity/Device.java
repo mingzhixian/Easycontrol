@@ -115,7 +115,7 @@ public final class Device {
         if (!newClipboardText.equals(nowClipboardText)) {
           // 发送报文
           byte[] tmpTextByte = newClipboardText.getBytes(StandardCharsets.UTF_8);
-          if (tmpTextByte.length > 5000) return;
+          if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return;
           nowClipboardText = newClipboardText;
           ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
           byteBuffer.put((byte) 2);

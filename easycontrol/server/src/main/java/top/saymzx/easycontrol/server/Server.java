@@ -187,8 +187,7 @@ public final class Server {
       while (!Thread.interrupted()) {
         if (Options.autoControlScreen) Controller.checkScreenOff(true);
         if (Options.turnOffScreen) Device.setScreenPowerMode(0);
-        if (System.currentTimeMillis() - Controller.lastKeepAliveTime > timeoutDelay)
-          throw new IOException("连接断开");
+        if (System.currentTimeMillis() - Controller.lastKeepAliveTime > timeoutDelay) throw new IOException("连接断开");
         Thread.sleep(1500);
       }
     } catch (Exception ignored) {
@@ -233,7 +232,7 @@ public final class Server {
             if (Options.turnOffScreen) Device.setScreenPowerMode(1);
             break;
           case 5:
-            Device.execReadOutput("ps -ef | grep easycontrol | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
+            Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
         }
       } catch (Exception ignored) {
       }

@@ -14,19 +14,22 @@ import top.saymzx.easycontrol.server.helper.FakeContext;
 
 public class ClipboardManager {
   private static IInterface manager;
-  private static Method getPrimaryClipMethod;
-  private static Method setPrimaryClipMethod;
-  private static Method addPrimaryClipChangedListener;
+  private static Method getPrimaryClipMethod = null;
+  private static Method setPrimaryClipMethod = null;
+  private static Method addPrimaryClipChangedListener = null;
   private static int getMethodVersion;
   private static int setMethodVersion;
   private static int addListenerMethodVersion;
 
-  public static void init(IInterface m) throws NoSuchMethodException {
+  public static void init(IInterface m) {
     manager = m;
     if (manager == null) return;
-    getGetPrimaryClipMethod();
-    getSetPrimaryClipMethod();
-    getAddPrimaryClipChangedListener();
+    try {
+      getGetPrimaryClipMethod();
+      getSetPrimaryClipMethod();
+      getAddPrimaryClipChangedListenerMethod();
+    } catch (Exception ignored) {
+    }
   }
 
   private static void getGetPrimaryClipMethod() throws NoSuchMethodException {
@@ -80,7 +83,7 @@ public class ClipboardManager {
     }
   }
 
-  private static void getAddPrimaryClipChangedListener() throws NoSuchMethodException {
+  private static void getAddPrimaryClipChangedListenerMethod() throws NoSuchMethodException {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) addPrimaryClipChangedListener = manager.getClass().getMethod("addPrimaryClipChangedListener", IOnPrimaryClipChangedListener.class, String.class);
     else {
       for (int i = 0; i < 3; i++) {
@@ -104,7 +107,7 @@ public class ClipboardManager {
   }
 
   public static void addPrimaryClipChangedListener(IOnPrimaryClipChangedListener listener) {
-    if (manager == null) return;
+    if (addPrimaryClipChangedListener == null) return;
     try {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) addPrimaryClipChangedListener.invoke(manager, listener, FakeContext.PACKAGE_NAME);
       else {
@@ -125,7 +128,7 @@ public class ClipboardManager {
   }
 
   public static String getText() {
-    if (manager == null) return null;
+    if (getPrimaryClipMethod == null) return null;
     try {
       ClipData clipData;
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) clipData = (ClipData) getPrimaryClipMethod.invoke(manager, FakeContext.PACKAGE_NAME);
@@ -154,7 +157,7 @@ public class ClipboardManager {
   }
 
   public static void setText(String text) {
-    if (manager == null) return;
+    if (setPrimaryClipMethod == null) return;
     ClipData clipData = ClipData.newPlainText("easycontrol", text);
     try {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) setPrimaryClipMethod.invoke(manager, clipData, FakeContext.PACKAGE_NAME);

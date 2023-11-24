@@ -99,6 +99,24 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getSendMoreOk() {
+    return sharedPreferences.getBoolean("sendMoreOk", true);
+  }
+
+  public void setSendMoreOk(boolean value) {
+    editor.putBoolean("sendMoreOk", value);
+    editor.apply();
+  }
+
+  public boolean getMultipleAdb() {
+    return sharedPreferences.getBoolean("multipleAdb", true);
+  }
+
+  public void setMultipleAdb(boolean value) {
+    editor.putBoolean("multipleAdb", value);
+    editor.apply();
+  }
+
   public String getDefaultDevice() {
     return sharedPreferences.getString("defaultDevice", "");
   }

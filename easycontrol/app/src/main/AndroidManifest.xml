@@ -12,7 +12,9 @@
 
   <application
     android:icon="@mipmap/ic_launcher"
+    android:installLocation="internalOnly"
     android:label="易控"
+    android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
     android:usesCleartextTraffic="true"

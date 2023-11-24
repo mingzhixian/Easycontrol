@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Center {
-  public static final double version = 3;
+  public static final Double version = 3.1;
 
   // 线程池
   private static final ExecutorService executor = new ThreadPoolExecutor(5, 20, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
@@ -32,13 +32,13 @@ public class Center {
   private static void checkAddress() {
     while (true) {
       try {
-        Thread.sleep(60 * 10);
+        Thread.sleep(60 * 15);
       } catch (InterruptedException e) {
         return;
       }
       long now = System.currentTimeMillis();
       for (User user : users.values())
-        user.devices.removeIf(address -> now - address.lastPostTime > 1000 * 60 * 60);
+        user.devices.removeIf(address -> now - address.lastPostTime > 1000 * 60 * 90);
     }
   }
 }

@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.adb;
 
 import android.hardware.usb.UsbDevice;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,8 +42,7 @@ public class Adb {
         message = AdbProtocol.AdbMessage.parseAdbMessage(channel);
       }
     }
-    if (message.command != AdbProtocol.CMD_CNXN)
-      throw new Exception("ADB连接失败: " + new String(message.payload));
+    if (message.command != AdbProtocol.CMD_CNXN) throw new Exception("ADB连接失败: " + message.command + "-" + new String(message.payload));
     // 启动后台进程
     handleIn.setPriority(Thread.MAX_PRIORITY);
     handleIn.start();
