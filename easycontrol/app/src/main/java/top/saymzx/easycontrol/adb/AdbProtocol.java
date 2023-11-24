@@ -23,7 +23,7 @@ public class AdbProtocol {
   // 旧版本的adb服务端硬编码maxdata=4096，因此这里设置为4096，若你的设备较新，可将此值设置为1024*1024以提高效率
   public static final int CONNECT_MAXDATA = 1024 * 1024;
 
-  public static final byte[] CONNECT_PAYLOAD = "host::\u0000".getBytes();
+  public static final byte[] CONNECT_PAYLOAD = "host::\0".getBytes();
 
   public static byte[] generateConnect() {
     return generateMessage(CMD_CNXN, CONNECT_VERSION, CONNECT_MAXDATA, CONNECT_PAYLOAD);

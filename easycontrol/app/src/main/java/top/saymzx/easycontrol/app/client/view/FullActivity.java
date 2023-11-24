@@ -43,19 +43,17 @@ public class FullActivity extends Activity {
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
     fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
+    // 同步方向
+    if (AppData.setting.getAudoRotation()) {
+      int rotation = getWindowManager().getDefaultDisplay().getRotation();
+      controller.sendRotateEvent(rotation == 0 || rotation == 2);
+    }
   }
 
   @Override
   protected void onPause() {
-    // 旋转
-    if (isChangingConfigurations()) {
-      if (AppData.setting.getAudoRotation()) {
-        int rotation = getWindowManager().getDefaultDisplay().getRotation();
-        controller.sendRotateEvent(rotation == 1 || rotation == 3);
-      }
-      context.fullActivity.textureViewLayout.removeView(clientView.textureView);
-    }
-    // 非正常退出页面
+    if (isChangingConfigurations()) context.fullActivity.textureViewLayout.removeView(clientView.textureView);
+      // 非正常退出页面
     else if (isShow) clientView.changeToMini();
     super.onPause();
   }

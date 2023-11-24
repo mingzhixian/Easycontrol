@@ -12,19 +12,23 @@ import java.lang.reflect.Method;
 public final class WindowManager {
   private static IInterface manager;
   private static Class<?> CLASS;
-  private static Method freezeRotationMethod;
-  private static Method isRotationFrozenMethod;
-  private static Method thawRotationMethod;
+  private static Method freezeRotationMethod = null;
+  private static Method isRotationFrozenMethod = null;
+  private static Method thawRotationMethod = null;
 
-  public static void init(IInterface m) throws NoSuchMethodException {
+  public static void init(IInterface m) {
     manager = m;
     CLASS = manager.getClass();
-    freezeRotationMethod = manager.getClass().getMethod("freezeRotation", int.class);
-    isRotationFrozenMethod = manager.getClass().getMethod("isRotationFrozen");
-    thawRotationMethod = manager.getClass().getMethod("thawRotation");
+    try {
+      freezeRotationMethod = manager.getClass().getMethod("freezeRotation", int.class);
+      isRotationFrozenMethod = manager.getClass().getMethod("isRotationFrozen");
+      thawRotationMethod = manager.getClass().getMethod("thawRotation");
+    } catch (Exception ignored) {
+    }
   }
 
   public static void freezeRotation(int rotation) {
+    if (freezeRotationMethod == null) return;
     try {
       freezeRotationMethod.invoke(manager, rotation);
     } catch (InvocationTargetException | IllegalAccessException ignored) {
@@ -32,6 +36,7 @@ public final class WindowManager {
   }
 
   public static boolean isRotationFrozen() {
+    if (isRotationFrozenMethod == null) return false;
     try {
       return (boolean) isRotationFrozenMethod.invoke(manager);
     } catch (InvocationTargetException | IllegalAccessException ignored) {
@@ -40,6 +45,7 @@ public final class WindowManager {
   }
 
   public static void thawRotation() {
+    if (thawRotationMethod == null) return;
     try {
       thawRotationMethod.invoke(manager);
     } catch (InvocationTargetException | IllegalAccessException ignored) {

@@ -38,8 +38,8 @@ public class MyHttpHandler implements HttpHandler {
 
   private static void handleParam(JSONObject params, JSONObject response) {
     // 版本不符
-    double clientVersion = params.getInt("version");
-    if (clientVersion < Math.floor(Center.version) || clientVersion > Math.floor(Center.version) + 1) {
+    double clientVersion = params.getDouble("version");
+    if (clientVersion < Center.version.intValue() || clientVersion > Center.version.intValue() + 1) {
       response.put("status", RESPONSE_ERROR);
       response.put("msg", "版本不符，Center版本为" + Center.version);
       return;

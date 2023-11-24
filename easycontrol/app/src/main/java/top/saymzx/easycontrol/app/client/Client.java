@@ -84,7 +84,7 @@ public class Client {
       if (address == null) throw new Exception("地址格式错误");
       // 连接ADB
       adb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
-      videoAdb = new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair);
+      videoAdb = AppData.setting.getMultipleAdb() ? new Adb(InetAddress.getByName(address.first).getHostAddress(), address.second, AppData.keyPair) : adb;
     } else {
       adb = new Adb(usbDevice, AppData.keyPair);
       videoAdb = adb;
@@ -197,10 +197,11 @@ public class Client {
 
   private void executeVideoDecodeIn() {
     try {
+      boolean isSendMoreOk = AppData.setting.getSendMoreOk();
       while (!Thread.interrupted()) {
-        videoAdb.sendMoreOk(videoStream);
+        if (isSendMoreOk) videoAdb.sendMoreOk(videoStream);
         videoDecode.decodeIn(readFrame(videoStream));
-        videoAdb.sendMoreOk(videoStream);
+        if (isSendMoreOk) videoAdb.sendMoreOk(videoStream);
       }
     } catch (Exception e) {
       errorClose(e);

@@ -30,7 +30,7 @@ public class Controller {
   public void checkClipBoard() {
     ClipData clipBoard = AppData.clipBoard.getPrimaryClip();
     if (clipBoard != null && clipBoard.getItemCount() > 0) {
-      String newClipBoardText = clipBoard.getItemAt(0).getText().toString();
+      String newClipBoardText = String.valueOf(clipBoard.getItemAt(0).getText());
       if (!Objects.equals(nowClipboardText, newClipBoardText)) {
         nowClipboardText = newClipBoardText;
         sendClipboardEvent();
@@ -90,7 +90,7 @@ public class Controller {
   // 发送剪切板事件
   private void sendClipboardEvent() {
     byte[] tmpTextByte = nowClipboardText.getBytes(StandardCharsets.UTF_8);
-    if (tmpTextByte.length > 5000) return;
+    if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return;
     ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
     byteBuffer.put((byte) 3);
     byteBuffer.putInt(tmpTextByte.length);
@@ -120,7 +120,7 @@ public class Controller {
 
   // 发送旋转请求事件
   public void sendRotateEvent(boolean isPortrait) {
-    writeStream(ByteBuffer.wrap(new byte[]{7, (byte) (isPortrait?0:1)}));
+    writeStream(ByteBuffer.wrap(new byte[]{7, (byte) (isPortrait ? 0 : 1)}));
   }
 
   private void writeStream(ByteBuffer byteBuffer) {
