@@ -4,14 +4,15 @@
 package top.saymzx.easycontrol.server.entity;
 
 public final class Options {
+  public static int tcpPort=5556;
   public static boolean isAudio = true;
   public static int maxSize = 1600;
-  public static int videoBitRate = 8000000;
+  public static int maxVideoBit = 8000000;
   public static int maxFps = 60;
   public static boolean turnOffScreen = true;
   public static boolean autoControlScreen = true;
   public static float reSize = -1;
-  public static boolean isH265DecoderSupport = true;
+  public static boolean useH265 = true;
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -20,29 +21,32 @@ public final class Options {
       String key = arg.substring(0, equalIndex);
       String value = arg.substring(equalIndex + 1);
       switch (key) {
-        case "is_audio":
+        case "tcpPort":
+          tcpPort = Integer.parseInt(value);
+          break;
+        case "isAudio":
           isAudio = Integer.parseInt(value) == 1;
           break;
-        case "max_size":
+        case "maxSize":
           maxSize = Integer.parseInt(value);
           break;
-        case "max_fps":
+        case "maxFps":
           maxFps = Integer.parseInt(value);
           break;
-        case "video_bit_rate":
-          videoBitRate = Integer.parseInt(value) * 1000000;
+        case "maxVideoBit":
+          maxVideoBit = Integer.parseInt(value) * 1000000;
           break;
-        case "turn_off_screen":
+        case "turnOffScreen":
           turnOffScreen = Integer.parseInt(value) == 1;
           break;
-        case "auto_control_screen":
+        case "autoControlScreen":
           autoControlScreen = Integer.parseInt(value) == 1;
           break;
         case "reSize":
           reSize = Float.parseFloat(value);
           break;
-        case "is_h265_decoder_support":
-          isH265DecoderSupport = Integer.parseInt(value) == 1;
+        case "useH265":
+          useH265 = Integer.parseInt(value) == 1;
           break;
       }
     }

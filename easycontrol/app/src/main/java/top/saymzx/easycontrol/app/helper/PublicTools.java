@@ -5,14 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -102,13 +97,13 @@ public class PublicTools {
     ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, maxSizeList);
     ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, maxFpsList);
     ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, videoBitList);
-    ItemSpinnerBinding maxSize = createSpinnerCard(context, "最大大小", maxSizeAdapter, device.maxSize.toString(), null);
-    ItemSpinnerBinding maxFps = createSpinnerCard(context, "最大帧率", maxFpsAdapter, device.maxFps.toString(), null);
-    ItemSpinnerBinding maxVideoBit = createSpinnerCard(context, "最大码率", videoBitAdapter, device.maxVideoBit.toString(), null);
-    ItemSwitchBinding setResolution = createSwitchCard(context, "修改分辨率", device.setResolution, null);
-    ItemSwitchBinding turnOffScreen = createSwitchCard(context, "熄屏控制", device.turnOffScreen, null);
-    ItemSwitchBinding autoControlScreen = createSwitchCard(context, "自动屏幕控制", device.autoControlScreen, null);
-    ItemSwitchBinding defaultFull = createSwitchCard(context, "默认全屏", device.defaultFull, null);
+    ItemSpinnerBinding maxSize = createSpinnerCard(context, "最大大小", maxSizeAdapter, new Pair<>(device.maxSize.toString(), Device.maxSizeDetail), null);
+    ItemSpinnerBinding maxFps = createSpinnerCard(context, "最大帧率", maxFpsAdapter, new Pair<>(device.maxFps.toString(), Device.maxFpsDetail), null);
+    ItemSpinnerBinding maxVideoBit = createSpinnerCard(context, "最大码率", videoBitAdapter, new Pair<>(device.maxVideoBit.toString(), Device.maxVideoBitDetail), null);
+    ItemSwitchBinding setResolution = createSwitchCard(context, "修改分辨率", new Pair<>(device.setResolution, Device.setResolutionDetail), null);
+    ItemSwitchBinding turnOffScreen = createSwitchCard(context, "熄屏控制", new Pair<>(device.turnOffScreen, Device.turnOffScreenDetail), null);
+    ItemSwitchBinding autoControlScreen = createSwitchCard(context, "自动屏幕控制", new Pair<>(device.autoControlScreen, Device.autoControlScreenDetail), null);
+    ItemSwitchBinding defaultFull = createSwitchCard(context, "默认全屏", new Pair<>(device.defaultFull, Device.defaultFullDetail), null);
     itemAddDeviceBinding.options.addView(maxSize.getRoot());
     itemAddDeviceBinding.options.addView(maxFps.getRoot());
     itemAddDeviceBinding.options.addView(maxVideoBit.getRoot());
@@ -128,13 +123,13 @@ public class PublicTools {
         String.valueOf(itemAddDeviceBinding.name.getText()),
         String.valueOf(itemAddDeviceBinding.address.getText()),
         itemAddDeviceBinding.isAudio.isChecked(),
-        Integer.parseInt(String.valueOf(maxSize.itemSpinnerSpinner.getSelectedItem())),
-        Integer.parseInt(String.valueOf(maxFps.itemSpinnerSpinner.getSelectedItem())),
-        Integer.parseInt(String.valueOf(maxVideoBit.itemSpinnerSpinner.getSelectedItem())),
-        setResolution.itemSwitchSwitch.isChecked(),
-        turnOffScreen.itemSwitchSwitch.isChecked(),
-        autoControlScreen.itemSwitchSwitch.isChecked(),
-        defaultFull.itemSwitchSwitch.isChecked()
+        Integer.parseInt(String.valueOf(maxSize.itemSpinner.getSelectedItem())),
+        Integer.parseInt(String.valueOf(maxFps.itemSpinner.getSelectedItem())),
+        Integer.parseInt(String.valueOf(maxVideoBit.itemSpinner.getSelectedItem())),
+        setResolution.itemSwitch.isChecked(),
+        turnOffScreen.itemSwitch.isChecked(),
+        autoControlScreen.itemSwitch.isChecked(),
+        defaultFull.itemSwitch.isChecked()
       );
       if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(newDevice);
       else AppData.dbHelper.insert(newDevice);
@@ -146,11 +141,9 @@ public class PublicTools {
 
   // 创建Client加载框
   public static Dialog createClientLoading(
-    Context context,
-    MyFunction function
+    Context context
   ) {
     ItemClientLoadingBinding loadingView = ItemClientLoadingBinding.inflate(LayoutInflater.from(context));
-    if (function != null) loadingView.text.setOnClickListener(v -> function.run());
     return createDialog(context, false, loadingView.getRoot());
   }
 
@@ -170,13 +163,14 @@ public class PublicTools {
   public static ItemSwitchBinding createSwitchCard(
     Context context,
     String text,
-    Boolean isChecked,
+    Pair<Boolean, String> config,
     MyFunctionBoolean function
   ) {
     ItemSwitchBinding switchView = ItemSwitchBinding.inflate(LayoutInflater.from(context));
-    switchView.itemSwitchText.setText(text);
-    switchView.itemSwitchSwitch.setChecked(isChecked);
-    if (function != null) switchView.itemSwitchSwitch.setOnCheckedChangeListener((buttonView, checked) -> function.run(checked));
+    switchView.itemText.setText(text);
+    switchView.itemDetail.setText(config.second);
+    switchView.itemSwitch.setChecked(config.first);
+    if (function != null) switchView.itemSwitch.setOnCheckedChangeListener((buttonView, checked) -> function.run(checked));
     return switchView;
   }
 
@@ -189,18 +183,19 @@ public class PublicTools {
     Context context,
     String text,
     ArrayAdapter<String> adapter,
-    String defaultText,
+    Pair<String, String> config,
     MyFunctionString function
   ) {
     ItemSpinnerBinding spinnerView = ItemSpinnerBinding.inflate(LayoutInflater.from(context));
-    spinnerView.itemSpinnerText.setText(text);
-    spinnerView.itemSpinnerSpinner.setAdapter(adapter);
-    spinnerView.itemSpinnerSpinner.setSelection(adapter.getPosition(defaultText));
-    spinnerView.itemSpinnerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    spinnerView.itemText.setText(text);
+    spinnerView.itemDetail.setText(config.second);
+    spinnerView.itemSpinner.setAdapter(adapter);
+    spinnerView.itemSpinner.setSelection(adapter.getPosition(config.first));
+    spinnerView.itemSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if (function != null)
-          function.run(spinnerView.itemSpinnerSpinner.getSelectedItem().toString());
+          function.run(spinnerView.itemSpinner.getSelectedItem().toString());
       }
 
       @Override
@@ -252,28 +247,6 @@ public class PublicTools {
     MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
     for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
     return false;
-  }
-
-  // 图片模糊处理
-  private static RenderScript renderScript;
-  private static ScriptIntrinsicBlur scriptIntrinsicBlur;
-
-  public static Bitmap blurBitmap(Bitmap bitmap, int radius) {
-    if (renderScript == null) {
-      renderScript = RenderScript.create(AppData.main);
-      scriptIntrinsicBlur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
-    }
-    Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-    Allocation allIn = Allocation.createFromBitmap(renderScript, bitmap);
-    Allocation allOut = Allocation.createFromBitmap(renderScript, outBitmap);
-
-    scriptIntrinsicBlur.setRadius(radius);
-
-    scriptIntrinsicBlur.setInput(allIn);
-    scriptIntrinsicBlur.forEach(allOut);
-    allOut.copyTo(outBitmap);
-    bitmap.recycle();
-    return outBitmap;
   }
 
   public interface MyFunction {

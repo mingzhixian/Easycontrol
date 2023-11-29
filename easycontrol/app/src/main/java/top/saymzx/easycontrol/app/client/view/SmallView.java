@@ -245,11 +245,6 @@ public class SmallView extends ViewOutlineProvider {
     });
   }
 
-  // 更新模糊背景图
-  public void updateBackImage(Drawable drawable) {
-    smallView.getRoot().setBackground(drawable);
-  }
-
   @Override
   public void getOutline(View view, Outline outline) {
     Rect rect = new Rect();

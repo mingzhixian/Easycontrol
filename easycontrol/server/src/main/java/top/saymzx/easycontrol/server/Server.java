@@ -4,20 +4,17 @@
 package top.saymzx.easycontrol.server;
 
 import android.annotation.SuppressLint;
-import android.net.LocalServerSocket;
-import android.net.LocalSocket;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.system.ErrnoException;
-import android.system.Os;
 
 import java.io.DataInputStream;
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
@@ -32,11 +29,9 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static LocalSocket socket;
-  private static LocalSocket videoSocket;
-  private static FileDescriptor fileDescriptor;
-  private static FileDescriptor videoFileDescriptor;
-  public static DataInputStream streamIn;
+  private static Socket socket;
+  public static DataInputStream inputStream;
+  public static OutputStream outputStream;
 
   private static final Object object = new Object();
 
@@ -64,35 +59,23 @@ public final class Server {
       VideoEncode.init();
       boolean canAudio = AudioEncode.init();
       // 启动
-      Thread videoOutThread = new Thread(Server::executeVideoOut);
-      videoOutThread.setPriority(Thread.MAX_PRIORITY);
-      Thread audioInThread = new Thread(Server::executeAudioIn);
-      audioInThread.setPriority(Thread.MAX_PRIORITY);
-      Thread audioOutThread = new Thread(Server::executeAudioOut);
-      audioOutThread.setPriority(Thread.MAX_PRIORITY);
-      Thread controlInThread = new Thread(Server::executeControlIn);
-      controlInThread.setPriority(Thread.MAX_PRIORITY);
-      Thread otherServiceThread = new Thread(Server::executeOtherService);
-      videoOutThread.start();
-      controlInThread.start();
-      otherServiceThread.start();
+      ArrayList<Thread> threads = new ArrayList<>();
+      threads.add(new Thread(Server::executeVideoOut));
       if (canAudio) {
-        audioInThread.start();
-        audioOutThread.start();
+        threads.add(new Thread(Server::executeAudioIn));
+        threads.add(new Thread(Server::executeAudioOut));
       }
-      startCheckThread.interrupt();
+      threads.add(new Thread(Server::executeControlIn));
+      threads.add(new Thread(Server::executeOtherService));
+      for (Thread thread : threads) thread.setPriority(Thread.MAX_PRIORITY);
+      for (Thread thread : threads) thread.start();
       // 程序运行
+      startCheckThread.interrupt();
       synchronized (object) {
         object.wait();
       }
       // 终止子服务
-      videoOutThread.interrupt();
-      controlInThread.interrupt();
-      otherServiceThread.interrupt();
-      if (canAudio) {
-        audioInThread.interrupt();
-        audioOutThread.interrupt();
-      }
+      for (Thread thread : threads) thread.interrupt();
     } catch (Exception ignored) {
     } finally {
       // 释放资源
@@ -134,12 +117,11 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
+    try (ServerSocket serverSocket = new ServerSocket(Options.tcpPort)) {
       socket = serverSocket.accept();
-      fileDescriptor = socket.getFileDescriptor();
-      videoSocket = serverSocket.accept();
-      videoFileDescriptor = videoSocket.getFileDescriptor();
-      streamIn = new DataInputStream(socket.getInputStream());
+      socket.setTcpNoDelay(true);
+      inputStream = new DataInputStream(socket.getInputStream());
+      outputStream = socket.getOutputStream();
     }
   }
 
@@ -159,19 +141,11 @@ public final class Server {
   }
 
   private static void executeAudioIn() {
-    try {
-      while (!Thread.interrupted()) AudioEncode.encodeIn();
-    } catch (Exception ignored) {
-      errorClose();
-    }
+    while (!Thread.interrupted()) AudioEncode.encodeIn();
   }
 
   private static void executeAudioOut() {
-    try {
-      while (!Thread.interrupted()) AudioEncode.encodeOut();
-    } catch (Exception ignored) {
-      errorClose();
-    }
+    while (!Thread.interrupted()) AudioEncode.encodeOut();
   }
 
   private static void executeControlIn() {
@@ -195,18 +169,18 @@ public final class Server {
     }
   }
 
-  public static void errorClose() {
-    synchronized (object) {
-      object.notify();
+  public synchronized static void write(byte[] buffer) {
+    try {
+      outputStream.write(buffer);
+    } catch (IOException ignored) {
+      errorClose();
     }
   }
 
-  public static void writeVideo(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
-    while (byteBuffer.remaining() > 0) Os.write(videoFileDescriptor, byteBuffer);
-  }
-
-  public synchronized static void write(ByteBuffer byteBuffer) throws InterruptedIOException, ErrnoException {
-    while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
+  private static void errorClose() {
+    synchronized (object) {
+      object.notify();
+    }
   }
 
   // 释放资源
@@ -215,12 +189,13 @@ public final class Server {
       try {
         switch (i) {
           case 0:
-            streamIn.close();
+            inputStream.close();
+            outputStream.close();
             socket.close();
-            videoSocket.close();
             break;
           case 1:
             if (Options.reSize != -1) Device.execReadOutput("wm size reset");
+            break;
           case 2:
             VideoEncode.release();
             break;
@@ -233,6 +208,7 @@ public final class Server {
             break;
           case 5:
             Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
+            break;
         }
       } catch (Exception ignored) {
       }

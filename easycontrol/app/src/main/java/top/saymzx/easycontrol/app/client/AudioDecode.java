@@ -17,7 +17,7 @@ public class AudioDecode {
   public AudioTrack audioTrack;
   public LoudnessEnhancer loudnessEnhancer;
 
-  public AudioDecode(Pair<Long, ByteBuffer> csd0) throws IOException {
+  public AudioDecode(Pair<Long, byte[]> csd0) throws IOException {
     // 创建Codec
     setAudioDecodec(csd0);
     // 创建AudioTrack
@@ -37,14 +37,14 @@ public class AudioDecode {
     }
   }
 
-  public void decodeIn(Pair<Long, ByteBuffer> data) {
+  public void decodeIn(Pair<Long, byte[]> data) {
     try {
       int inIndex = decodec.dequeueInputBuffer(0);
       // 缓冲区已满丢帧
       if (inIndex < 0) return;
       decodec.getInputBuffer(inIndex).put(data.second);
       // 提交解码器解码
-      decodec.queueInputBuffer(inIndex, 0, data.second.capacity(), data.first, 0);
+      decodec.queueInputBuffer(inIndex, 0, data.second.length, data.first, 0);
     } catch (IllegalStateException ignored) {
     }
   }
@@ -63,7 +63,7 @@ public class AudioDecode {
   }
 
   // 创建Codec
-  private void setAudioDecodec(Pair<Long, ByteBuffer> csd0) throws IOException {
+  private void setAudioDecodec(Pair<Long, byte[]> csd0) throws IOException {
     // 创建解码器
     String codecMime = MediaFormat.MIMETYPE_AUDIO_AAC;
     decodec = MediaCodec.createDecoderByType(codecMime);
@@ -74,7 +74,7 @@ public class AudioDecode {
     MediaFormat decodecFormat = MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount);
     decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头
-    decodecFormat.setByteBuffer("csd-0", csd0.second);
+    decodecFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.second));
     // 配置解码器
     decodec.configure(decodecFormat, null, null, 0);
     // 启动解码器

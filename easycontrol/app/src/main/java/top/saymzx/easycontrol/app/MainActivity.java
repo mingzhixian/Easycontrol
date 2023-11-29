@@ -22,6 +22,7 @@ import android.widget.Toast;
 import java.util.UUID;
 
 import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -56,17 +57,14 @@ public class MainActivity extends Activity {
     setButtonListener();
     // 启动默认设备
     startDefault();
-    // 注册USB广播监听
+    // 注册广播监听
     IntentFilter filter = new IntentFilter();
-    filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-    filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
-    filter.addAction(ACTION_USB_PERMISSION);
     filter.addAction(ACTION_CENTER_SERVICE);
     filter.addAction(ACTION_SCREEN_OFF);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiver(broadcastReceiver, filter, RECEIVER_EXPORTED);
     else registerReceiver(broadcastReceiver, filter);
     // 启动Center检查服务
-    CenterHelper.checkCenter();
+    CenterHelper.checkCenter(null);
     alarmPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_CENTER_SERVICE), PendingIntent.FLAG_IMMUTABLE);
     ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, alarmPendingIntent);
   }
@@ -102,7 +100,7 @@ public class MainActivity extends Activity {
     if (needStartDefault && !AppData.setting.getDefaultDevice().equals("")) {
       needStartDefault = false;
       Device device = AppData.dbHelper.getByUUID(AppData.setting.getDefaultDevice());
-      if (device != null) new Client(device, null);
+      if (device != null) new Client(device);
     }
   }
 
@@ -113,55 +111,18 @@ public class MainActivity extends Activity {
   }
 
   // 广播处理
-  private static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
   private static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.CENTER_SERVICE";
   private static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
   private PendingIntent alarmPendingIntent;
   private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      if (ACTION_CENTER_SERVICE.equals(intent.getAction())) CenterHelper.checkCenter();
+      if (ACTION_CENTER_SERVICE.equals(intent.getAction())) CenterHelper.checkCenter(null);
       else if (ACTION_SCREEN_OFF.equals(intent.getAction())) handleScreenOff();
-      else handleUSB(context, intent);
     }
 
     private void handleScreenOff() {
-      for (Client client : Client.allClients) client.clientView.hide(true);
-    }
-
-    private void handleUSB(Context context, Intent intent) {
-      UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-      if (usbDevice == null) return;
-      switch (intent.getAction()) {
-        // USB设备已插入
-        case UsbManager.ACTION_USB_DEVICE_ATTACHED: {
-          PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
-          AppData.usbManager.requestPermission(usbDevice, permissionIntent);
-          break;
-        }
-        // USB设备已拔出
-        case UsbManager.ACTION_USB_DEVICE_DETACHED: {
-          deviceListAdapter.linkDevice = null;
-          deviceListAdapter.update();
-          break;
-        }
-        // 授权完成
-        case ACTION_USB_PERMISSION: {
-          if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            // 有线设备使用序列号作为唯一标识符
-            String uuid = usbDevice.getSerialNumber();
-            // 若没有该设备，则新建设备
-            Device device = AppData.dbHelper.getByUUID(uuid);
-            if (device == null) {
-              device = Device.getDefaultDevice(uuid, Device.TYPE_LINK);
-              AppData.dbHelper.insert(device);
-            }
-            deviceListAdapter.linkDevice = new Pair<>(uuid, usbDevice);
-            deviceListAdapter.update();
-          }
-          break;
-        }
-      }
+      for (ClientView clientView : ClientView.allClientVuews) clientView.hide(true);
     }
   };
 

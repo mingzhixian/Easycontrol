@@ -12,53 +12,49 @@ import top.saymzx.easycontrol.server.entity.Device;
 public final class Controller {
 
   public static void handleIn() throws IOException, InterruptedException {
-    boolean hasData = true;
-    while (hasData) {
-      switch (Server.streamIn.readByte()) {
-        case 1:
-          handleTouchEvent();
-          break;
-        case 2:
-          handleKeyEvent();
-          break;
-        case 3:
-          handleClipboardEvent();
-          break;
-        case 4:
-          handleKeepAliveEvent();
-          break;
-        case 5:
-          handlePowerEvent();
-          break;
-        case 6:
-          handleChangeSizeEvent();
-          break;
-        case 7:
-          handleRotateEvent();
-          break;
-      }
-      hasData = Server.streamIn.available() > 0;
+    switch (Server.inputStream.readByte()) {
+      case 1:
+        handleTouchEvent();
+        break;
+      case 2:
+        handleKeyEvent();
+        break;
+      case 3:
+        handleClipboardEvent();
+        break;
+      case 4:
+        handleKeepAliveEvent();
+        break;
+      case 5:
+        handlePowerEvent();
+        break;
+      case 6:
+        handleChangeSizeEvent();
+        break;
+      case 7:
+        handleRotateEvent();
+        break;
     }
   }
 
   private static void handleTouchEvent() throws IOException {
-    int action = Server.streamIn.readByte();
-    int pointerId = Server.streamIn.readByte();
-    float x = Server.streamIn.readFloat();
-    float y = Server.streamIn.readFloat();
-    int offsetTime = Server.streamIn.readInt();
+    int action = Server.inputStream.readByte();
+    int pointerId = Server.inputStream.readByte();
+    float x = Server.inputStream.readFloat();
+    float y = Server.inputStream.readFloat();
+    int offsetTime = Server.inputStream.readInt();
     Device.touchEvent(action, x, y, pointerId, offsetTime);
   }
 
   private static void handleKeyEvent() throws IOException {
-    int keyCode = Server.streamIn.readInt();
+    int keyCode = Server.inputStream.readInt();
     Device.keyEvent(keyCode);
   }
 
   private static void handleClipboardEvent() throws IOException {
-    int size = Server.streamIn.readInt();
+    int size = Server.inputStream.readInt();
     byte[] textBytes = new byte[size];
-    Server.streamIn.readFully(textBytes);
+    Server.inputStream.readFully(textBytes);
     String text = new String(textBytes, StandardCharsets.UTF_8);
     Device.setClipboardText(text);
   }
@@ -74,11 +70,11 @@ public final class Controller {
   }
 
   private static void handleChangeSizeEvent() throws IOException, InterruptedException {
-    Device.changeDeviceSize(Server.streamIn.readFloat());
+    Device.changeDeviceSize(Server.inputStream.readFloat());
   }
 
   private static void handleRotateEvent() throws IOException {
-    Device.rotateDevice(Server.streamIn.readByte());
+    Device.rotateDevice(Server.inputStream.readByte());
   }
 
   public static void checkScreenOff(boolean turnOn) throws IOException, InterruptedException {

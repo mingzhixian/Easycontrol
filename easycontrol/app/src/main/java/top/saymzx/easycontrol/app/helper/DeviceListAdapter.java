@@ -2,15 +2,12 @@ package top.saymzx.easycontrol.app.helper;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.hardware.usb.UsbDevice;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Client;
@@ -23,7 +20,6 @@ public class DeviceListAdapter extends BaseAdapter {
 
   // 特殊设备的名单，在该名单的设备则显示，不在则不显示
   public ArrayList<String> centerDevices = new ArrayList<>();
-  public Pair<String, UsbDevice> linkDevice = null;
 
   private final ArrayList<Device> devices = new ArrayList<>();
   private final Context context;
@@ -57,20 +53,19 @@ public class DeviceListAdapter extends BaseAdapter {
     }
     // 获取设备
     Device device = devices.get(i);
-    if (device.isLinkDevice()) setView(view, device, linkDevice.second, R.drawable.link);
-    else if (device.isCenterDevice()) setView(view, device, null, R.drawable.center);
-    else setView(view, device, null, R.drawable.phone);
+    if (device.isCenterDevice()) setView(view, device, R.drawable.center);
+    else setView(view, device, R.drawable.phone);
     return view;
   }
 
   // 创建View
-  private void setView(View view, Device device, UsbDevice usbDevice, int deviceIcon) {
+  private void setView(View view, Device device, int deviceIcon) {
     ItemDevicesItemBinding devicesItemBinding = (ItemDevicesItemBinding) view.getTag();
     // 设置卡片值
     devicesItemBinding.deviceIcon.setImageResource(deviceIcon);
     devicesItemBinding.deviceName.setText(device.name);
     // 单击事件
-    devicesItemBinding.getRoot().setOnClickListener(v -> new Client(device, usbDevice));
+    devicesItemBinding.getRoot().setOnClickListener(v -> new Client(device));
     // 长按事件
     devicesItemBinding.getRoot().setOnLongClickListener(v -> {
       onLongClickCard(device);
@@ -84,7 +79,7 @@ public class DeviceListAdapter extends BaseAdapter {
     Dialog dialog = PublicTools.createDialog(context, true, itemSetDeviceBinding.getRoot());
     itemSetDeviceBinding.open.setOnClickListener(v -> {
       dialog.cancel();
-      new Client(device, null);
+      new Client(device);
     });
     itemSetDeviceBinding.defult.setOnClickListener(v -> {
       dialog.cancel();
@@ -105,18 +100,15 @@ public class DeviceListAdapter extends BaseAdapter {
 
   private void queryDevices() {
     ArrayList<Device> rawDevices = AppData.dbHelper.getAll();
-    Device tmp1 = null;
+    ArrayList<Device> tmp1 = new ArrayList<>();
     ArrayList<Device> tmp2 = new ArrayList<>();
-    ArrayList<Device> tmp3 = new ArrayList<>();
     for (Device device : rawDevices) {
-      if (device.isLinkDevice() && linkDevice != null && Objects.equals(device.uuid, linkDevice.first)) tmp1 = device;
-      else if (device.isCenterDevice() && centerDevices.contains(device.uuid)) tmp2.add(device);
-      else if (device.isNormalDevice()) tmp3.add(device);
+      if (device.isCenterDevice() && centerDevices.contains(device.uuid)) tmp1.add(device);
+      else if (device.isNormalDevice()) tmp2.add(device);
     }
     devices.clear();
-    if (tmp1 != null) devices.add(tmp1);
+    devices.addAll(tmp1);
     devices.addAll(tmp2);
-    devices.addAll(tmp3);
   }
 
   public void update() {

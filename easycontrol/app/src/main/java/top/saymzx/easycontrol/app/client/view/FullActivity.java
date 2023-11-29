@@ -3,11 +3,12 @@ package top.saymzx.easycontrol.app.client.view;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Toast;
 
@@ -43,8 +44,27 @@ public class FullActivity extends Activity {
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
     fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
-    // 同步方向
-    if (AppData.setting.getAudoRotation()) {
+    // 主控端自动旋转
+    if (AppData.setting.getMasterAudoRotation().first) {
+      new OrientationEventListener(this) {
+        private int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+        @Override
+        public void onOrientationChanged(int i) {
+          int newOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+          if (i < 45 || i > 315) newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+          else if (i > 45 && i < 135) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+          else if (i > 135 && i < 225) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+          else if (i > 225 && i < 315) newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+          if (lastOrientation != newOrientation) {
+            lastOrientation = newOrientation;
+            setRequestedOrientation(newOrientation);
+          }
+        }
+      }.enable();
+    }
+    // 被控端旋转跟随
+    if (AppData.setting.getSlaveAudoRotation().first) {
       int rotation = getWindowManager().getDefaultDisplay().getRotation();
       controller.sendRotateEvent(rotation == 0 || rotation == 2);
     }
@@ -92,6 +112,9 @@ public class FullActivity extends Activity {
       isShow = false;
       context.fullActivity.textureViewLayout.removeView(clientView.textureView);
       context.finish();
+      context = null;
+      FullActivity.clientView = null;
+      FullActivity.controller = null;
     }
   }
 
@@ -127,11 +150,6 @@ public class FullActivity extends Activity {
       if (isStart && toShowView) fullActivity.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) fullActivity.barView.setVisibility(View.GONE);
     }));
-  }
-
-  // 更新模糊背景图
-  public static void updateBackImage(Drawable drawable) {
-    context.fullActivity.getRoot().setBackground(drawable);
   }
 
 }

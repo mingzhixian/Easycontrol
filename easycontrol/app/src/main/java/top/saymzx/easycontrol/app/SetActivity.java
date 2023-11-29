@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Pair;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import java.io.File;
 import top.saymzx.easycontrol.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class SetActivity extends Activity {
@@ -36,19 +38,17 @@ public class SetActivity extends Activity {
     ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.videoBitList);
     // 默认参数
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使能音频", AppData.setting.getDefaultIsAudio(), isChecked -> AppData.setting.setDefaultIsAudio(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大大小", maxSizeAdapter, String.valueOf(AppData.setting.getDefaultMaxSize()), str -> AppData.setting.setDefaultMaxSize(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, String.valueOf(AppData.setting.getDefaultMaxFps()), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, String.valueOf(AppData.setting.getDefaultVideoBit()), str -> AppData.setting.setDefaultVideoBit(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", AppData.setting.getDefaultSetResolution(), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大大小", maxSizeAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxSize()), Device.maxSizeDetail), str -> AppData.setting.setDefaultMaxSize(Integer.parseInt(str))).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxFps()), Device.maxFpsDetail), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxVideoBit()), Device.maxVideoBitDetail), str -> AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str))).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", new Pair<>(AppData.setting.getDefaultSetResolution(), Device.setResolutionDetail), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先H265", AppData.setting.getDefaultH265(), isChecked -> AppData.setting.setDefaultH265(isChecked)).getRoot());
     // 显示
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", AppData.setting.getTurnOffScreen(), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", AppData.setting.getAutoControlScreen(), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "默认全屏启动", AppData.setting.getDefaultFull(), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "被控端跟随旋转", AppData.setting.getAudoRotation(), isChecked -> AppData.setting.setAudoRotation(isChecked)).getRoot());
-    // 实验功能
-    setActivity.setExperiment.addView(PublicTools.createSwitchCard(this, "多倍确认", AppData.setting.getSendMoreOk(), isChecked -> AppData.setting.setSendMoreOk(isChecked)).getRoot());
-    setActivity.setExperiment.addView(PublicTools.createSwitchCard(this, "双ADB连接", AppData.setting.getMultipleAdb(), isChecked -> AppData.setting.setMultipleAdb(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", new Pair<>(AppData.setting.getTurnOffScreen(), Device.turnOffScreenDetail), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", new Pair<>(AppData.setting.getAutoControlScreen(), Device.autoControlScreenDetail), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "默认全屏启动", new Pair<>(AppData.setting.getDefaultFull(), Device.defaultFullDetail), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "主控端自动旋转", AppData.setting.getMasterAudoRotation(), isChecked -> AppData.setting.setMasterAudoRotation(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "被控端跟随旋转", AppData.setting.getSlaveAudoRotation(), isChecked -> AppData.setting.setSlaveAudoRotation(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(PublicTools.createTextCard(this, "清除默认设备", () -> {
       AppData.setting.setDefaultDevice("");

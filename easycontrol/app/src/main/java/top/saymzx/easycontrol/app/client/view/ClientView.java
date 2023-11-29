@@ -1,11 +1,7 @@
 package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -19,11 +15,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientView implements TextureView.SurfaceTextureListener {
+  public static final ArrayList<ClientView> allClientVuews = new ArrayList<>();
   private final Client client;
   private final boolean setResolution;
   public final TextureView textureView = new TextureView(AppData.main);
@@ -48,6 +47,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     this.setResolution = setResolution;
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
+    allClientVuews.add(this);
   }
 
   public void changeToFull() {
@@ -87,15 +87,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
       if (surfaceTexture != null) surfaceTexture.release();
       client.release();
     }
-  }
-
-  // 更新模糊背景图
-  public void updateBackImage() {
-    Bitmap bitmap = textureView.getBitmap();
-    if (bitmap == null) return;
-    Drawable drawable = new BitmapDrawable(PublicTools.blurBitmap(Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 10, bitmap.getHeight() / 10, false), 8));
-    if (uiMode == UI_MODE_FULL) FullActivity.updateBackImage(drawable);
-    else if (uiMode == UI_MODE_SMALL) smallView.updateBackImage(drawable);
   }
 
   // 重新计算TextureView大小
@@ -196,8 +187,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     // 初始化
     if (this.surfaceTexture == null) {
       this.surfaceTexture = surfaceTexture;
-      client.videoDecode.setSurface(new Surface(this.surfaceTexture));
-      client.startSubService();
+      client.startSubService(new Surface(surfaceTexture));
     } else textureView.setSurfaceTexture(this.surfaceTexture);
   }
 

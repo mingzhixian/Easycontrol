@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -55,8 +56,12 @@ public class CenterActivity extends Activity {
       AppData.setting.setCenterName(centerName);
       if (!centerPassword.equals("")) AppData.setting.setCenterPassword(md5Encode(centerPassword));
       if (!centerAdbPort.equals("")) AppData.setting.setCenterAdbPort(Integer.parseInt(centerAdbPort));
-      Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-      CenterHelper.checkCenter();
+      Dialog dialog = PublicTools.createClientLoading(this);
+      dialog.show();
+      CenterHelper.checkCenter(str -> runOnUiThread(() -> {
+        dialog.cancel();
+        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+      }));
     });
   }
 

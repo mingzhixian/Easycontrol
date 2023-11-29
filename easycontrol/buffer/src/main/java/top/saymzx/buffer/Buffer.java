@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.adb.buffer;
+package top.saymzx.buffer;
 
 import java.io.IOException;
 

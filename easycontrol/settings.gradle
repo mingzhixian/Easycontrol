@@ -16,3 +16,4 @@ rootProject.name = "Easycontrol"
 include ':app'
 include ':server'
 include ':center'
+include ':buffer'

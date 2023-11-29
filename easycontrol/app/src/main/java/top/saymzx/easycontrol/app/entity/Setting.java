@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.entity;
 
 import android.content.SharedPreferences;
+import android.util.Pair;
 
 import java.util.UUID;
 
@@ -9,8 +10,8 @@ public final class Setting {
 
   private final SharedPreferences.Editor editor;
 
-  public boolean getDefaultIsAudio() {
-    return sharedPreferences.getBoolean("defaultIsAudio", true);
+  public Pair<Boolean, String> getDefaultIsAudio() {
+    return new Pair(sharedPreferences.getBoolean("defaultIsAudio", true), "开启后将尝试传输音频，被控端需要安卓12之上");
   }
 
   public void setDefaultIsAudio(boolean value) {
@@ -36,12 +37,12 @@ public final class Setting {
     editor.apply();
   }
 
-  public int getDefaultVideoBit() {
-    return sharedPreferences.getInt("defaultVideoBit", 8);
+  public int getDefaultMaxVideoBit() {
+    return sharedPreferences.getInt("defaultMaxVideoBit", 4);
   }
 
-  public void setDefaultVideoBit(int value) {
-    editor.putInt("defaultVideoBit", value);
+  public void setDefaultMaxVideoBit(int value) {
+    editor.putInt("defaultMaxVideoBit", value);
     editor.apply();
   }
 
@@ -54,8 +55,8 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getDefaultH265() {
-    return sharedPreferences.getBoolean("defaultH265", true);
+  public Pair<Boolean, String> getDefaultH265() {
+    return new Pair<>(sharedPreferences.getBoolean("defaultH265", true), "优先使用H265格式，视频体积小延迟低，实际以主备控端支持情况为主，若视频异常可尝试关闭");
   }
 
   public void setDefaultH265(boolean value) {
@@ -90,30 +91,21 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getAudoRotation() {
-    return sharedPreferences.getBoolean("audoRotation", true);
+  public Pair<Boolean, String> getMasterAudoRotation() {
+    return new Pair<>(sharedPreferences.getBoolean("masterAudoRotation", true), "仅在全屏状态下生效，开启后当旋转主控端时会自动旋转页面");
   }
 
-  public void setAudoRotation(boolean value) {
-    editor.putBoolean("audoRotation", value);
+  public void setMasterAudoRotation(boolean value) {
+    editor.putBoolean("masterAudoRotation", value);
     editor.apply();
   }
 
-  public boolean getSendMoreOk() {
-    return sharedPreferences.getBoolean("sendMoreOk", true);
+  public Pair<Boolean, String> getSlaveAudoRotation() {
+    return new Pair<>(sharedPreferences.getBoolean("slaveAudoRotation", true), "仅在全屏状态下生效，开启后当主控端页面旋转时，会尝试旋转被控端");
   }
 
-  public void setSendMoreOk(boolean value) {
-    editor.putBoolean("sendMoreOk", value);
-    editor.apply();
-  }
-
-  public boolean getMultipleAdb() {
-    return sharedPreferences.getBoolean("multipleAdb", true);
-  }
-
-  public void setMultipleAdb(boolean value) {
-    editor.putBoolean("multipleAdb", value);
+  public void setSlaveAudoRotation(boolean value) {
+    editor.putBoolean("slaveAudoRotation", value);
     editor.apply();
   }
 
