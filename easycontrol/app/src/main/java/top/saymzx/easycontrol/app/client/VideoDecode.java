@@ -14,7 +14,7 @@ public class VideoDecode {
   private MediaFormat decodecFormat;
   private final boolean isH265Support;
 
-  public VideoDecode(Pair<Integer, Integer> videoSize, Pair<Long, ByteBuffer> csd0, Pair<Long, ByteBuffer> csd1) throws IOException {
+  public VideoDecode(Pair<Integer, Integer> videoSize, Pair<Long, byte[]> csd0, Pair<Long, byte[]> csd1) throws IOException {
     isH265Support = csd1 == null;
     setVideoDecodec(videoSize, csd0, csd1);
   }
@@ -27,14 +27,14 @@ public class VideoDecode {
     }
   }
 
-  public void decodeIn(Pair<Long, ByteBuffer> data) {
+  public void decodeIn(Pair<Long, byte[]> data) {
     try {
       int inIndex = decodec.dequeueInputBuffer(20_000);
       // 缓冲区已满则丢帧
       if (inIndex < 0) return;
       decodec.getInputBuffer(inIndex).put(data.second);
       // 提交解码器解码
-      decodec.queueInputBuffer(inIndex, 0, data.second.capacity(), data.first, 0);
+      decodec.queueInputBuffer(inIndex, 0, data.second.length, data.first, 0);
     } catch (IllegalStateException ignored) {
     }
   }
@@ -50,14 +50,14 @@ public class VideoDecode {
   }
 
   // 创建Codec
-  private void setVideoDecodec(Pair<Integer, Integer> videoSize, Pair<Long, ByteBuffer> csd0, Pair<Long, ByteBuffer> csd1) throws IOException {
+  private void setVideoDecodec(Pair<Integer, Integer> videoSize, Pair<Long, byte[]> csd0, Pair<Long, byte[]> csd1) throws IOException {
     // 创建解码器
     String codecMime = isH265Support ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
     decodec = MediaCodec.createDecoderByType(codecMime);
     decodecFormat = MediaFormat.createVideoFormat(codecMime, videoSize.first, videoSize.second);
     // 获取视频标识头
-    decodecFormat.setByteBuffer("csd-0", csd0.second);
-    if (!isH265Support) decodecFormat.setByteBuffer("csd-1", csd1.second);
+    decodecFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.second));
+    if (!isH265Support) decodecFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1.second));
   }
 
   public void setSurface(Surface surface) {
@@ -66,8 +66,8 @@ public class VideoDecode {
     // 启动解码器
     decodec.start();
     // 解析首帧，解决开始黑屏问题
-    decodeIn(new Pair<>(0L, decodecFormat.getByteBuffer("csd-0")));
-    if (!isH265Support) decodeIn(new Pair<>(0L, decodecFormat.getByteBuffer("csd-1")));
+    decodeIn(new Pair<>(0L, decodecFormat.getByteBuffer("csd-0").array()));
+    if (!isH265Support) decodeIn(new Pair<>(0L, decodecFormat.getByteBuffer("csd-1").array()));
   }
 
 }

@@ -31,11 +31,11 @@ public final class AudioEncode {
       encedec.start();
       audioCapture = AudioCapture.init();
     } catch (Exception ignored) {
-      Server.write(ByteBuffer.wrap(bytes));
+      Server.write(bytes);
       return false;
     }
     bytes[0] = 1;
-    Server.write(ByteBuffer.wrap(bytes));
+    Server.write(bytes);
     encodeIn();
     encodeOut();
     return true;
@@ -64,19 +64,19 @@ public final class AudioEncode {
 
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public static void encodeOut() throws InterruptedIOException, ErrnoException {
+  public static void encodeOut()  {
     try {
       // 找到已完成的输出缓冲区
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
       ByteBuffer byteBuffer = ByteBuffer.allocate(13 + bufferInfo.size);
-      byteBuffer.put((byte) 1);
+      byteBuffer.put((byte) 2);
       byteBuffer.putLong(bufferInfo.presentationTimeUs);
       byteBuffer.putInt(bufferInfo.size);
       byteBuffer.put(buffer);
       byteBuffer.flip();
-      Server.write(byteBuffer);
+      Server.write(byteBuffer.array());
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

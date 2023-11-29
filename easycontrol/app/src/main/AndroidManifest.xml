@@ -6,9 +6,6 @@
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 悬浮窗 -->
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
-  <uses-permission android:name="android.permission.USB_PERMISSION" /> <!-- USB -->
-
-  <uses-feature android:name="android.hardware.usb.host" />
 
   <application
     android:icon="@mipmap/ic_launcher"

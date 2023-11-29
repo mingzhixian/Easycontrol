@@ -10,8 +10,8 @@ android {
     applicationId "top.saymzx.easycontrol.app"
     minSdk 21
     targetSdk 34
-    versionCode 10109
-    versionName "1.1.9"
+    versionCode 10110
+    versionName "1.1.10"
     resConfigs "zh"
     resConfigs "xhdpi"
     ndk {
@@ -49,4 +49,5 @@ android {
 }
 
 dependencies {
+  implementation project(':buffer')
 }

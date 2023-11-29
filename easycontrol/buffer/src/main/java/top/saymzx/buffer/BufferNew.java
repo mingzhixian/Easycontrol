@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.adb.buffer;
+package top.saymzx.buffer;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingDeque;

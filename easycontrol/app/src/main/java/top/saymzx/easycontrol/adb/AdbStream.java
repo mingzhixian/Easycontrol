@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingQueue;
 
-import top.saymzx.easycontrol.adb.buffer.BufferNew;
+import top.saymzx.buffer.BufferNew;
 
 public class AdbStream {
   private final BlockingQueue<byte[]> sendQueue;

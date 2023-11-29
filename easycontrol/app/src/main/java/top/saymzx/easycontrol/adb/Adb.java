@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.adb;
 
 import android.hardware.usb.UsbDevice;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,11 +23,6 @@ public class Adb {
 
   public Adb(String host, int port, AdbKeyPair keyPair) throws Exception {
     channel = new TcpChannel(host, port);
-    connect(keyPair);
-  }
-
-  public Adb(UsbDevice usbDevice, AdbKeyPair keyPair) throws Exception {
-    channel = new UsbChannel(usbDevice);
     connect(keyPair);
   }
 

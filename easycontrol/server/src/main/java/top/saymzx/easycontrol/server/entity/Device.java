@@ -118,15 +118,11 @@ public final class Device {
           if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return;
           nowClipboardText = newClipboardText;
           ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
-          byteBuffer.put((byte) 2);
+          byteBuffer.put((byte) 3);
           byteBuffer.putInt(tmpTextByte.length);
           byteBuffer.put(tmpTextByte);
           byteBuffer.flip();
-          try {
-            Server.write(byteBuffer);
-          } catch (Exception ignored) {
-            Server.errorClose();
-          }
+            Server.write(byteBuffer.array());
         }
       }
     });

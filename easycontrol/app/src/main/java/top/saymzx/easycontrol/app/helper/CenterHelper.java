@@ -2,7 +2,6 @@ package top.saymzx.easycontrol.app.helper;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,7 +24,7 @@ public class CenterHelper {
     CenterHelper.deviceListAdapter = deviceListAdapter;
   }
 
-  public static void checkCenter() {
+  public static void checkCenter(PublicTools.MyFunctionString handleFunction) {
     new Thread(() -> {
       try {
         String centerAddress = AppData.setting.getCenterAddress();
@@ -44,9 +43,11 @@ public class CenterHelper {
         deviceListAdapter.centerDevices.clear();
         if (!lastIpv6Address.equals("")) getDevice(centerAddress);
         AppData.main.runOnUiThread(deviceListAdapter::update);
+        if (handleFunction != null) handleFunction.run("连接成功");
       } catch (Exception e) {
-        Log.e("Easycontrol", String.valueOf(e));
-        AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, "Center:" + e, Toast.LENGTH_SHORT).show());
+        String error = String.valueOf(e);
+        Log.e("Easycontrol", error);
+        if (handleFunction != null) handleFunction.run(error);
       }
     }).start();
   }
@@ -94,7 +95,7 @@ public class CenterHelper {
 
   private static JSONObject createCenterPacket(int handle) throws JSONException {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("version", (double) 3.1);
+    jsonObject.put("version", 3.1);
     jsonObject.put("easycontrol_name", AppData.setting.getCenterName());
     jsonObject.put("easycontrol_password", AppData.setting.getCenterPassword());
     jsonObject.put("handle", handle);

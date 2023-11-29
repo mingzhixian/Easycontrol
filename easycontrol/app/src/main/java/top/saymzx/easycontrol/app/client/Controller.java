@@ -1,31 +1,23 @@
 package top.saymzx.easycontrol.app.client;
 
-import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
-
 import android.content.ClipData;
-import android.util.Pair;
 import android.view.MotionEvent;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import top.saymzx.easycontrol.adb.AdbStream;
-import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.entity.AppData;
 
 public class Controller {
-  private final ClientView clientView;
-  private final AdbStream stream;
+  private final Client client;
 
-  public Controller(ClientView clientView, AdbStream stream) {
-    this.clientView = clientView;
-    this.stream = stream;
+  public Controller(Client client) {
+    this.client = client;
   }
 
   // 剪切板
-  private String nowClipboardText = "";
+  public String nowClipboardText = "";
 
   public void checkClipBoard() {
     ClipData clipBoard = AppData.clipBoard.getPrimaryClip();
@@ -36,18 +28,6 @@ public class Controller {
         sendClipboardEvent();
       }
     }
-  }
-
-  public void handleClipboardEvent() throws InterruptedException, IOException {
-    int size = stream.readInt();
-    nowClipboardText = new String(stream.readByteArray(size).array());
-    AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, nowClipboardText));
-  }
-
-  // 处理画面大小变化
-  public void handleChangeSizeEvent() throws IOException, InterruptedException {
-    Pair<Integer, Integer> newVideoSize = new Pair<>(stream.readInt(), stream.readInt());
-    AppData.main.runOnUiThread(() -> clientView.updateVideoSize(newVideoSize));
   }
 
   // 发送触摸事件
@@ -73,7 +53,7 @@ public class Controller {
     // 时间偏移
     byteBuffer.putInt(offsetTime);
     byteBuffer.flip();
-    writeStream(byteBuffer);
+    client.write(byteBuffer.array());
   }
 
   // 发送按键事件
@@ -84,7 +64,7 @@ public class Controller {
     // 按键类型
     byteBuffer.putInt(key);
     byteBuffer.flip();
-    writeStream(byteBuffer);
+    client.write(byteBuffer.array());
   }
 
   // 发送剪切板事件
@@ -96,17 +76,17 @@ public class Controller {
     byteBuffer.putInt(tmpTextByte.length);
     byteBuffer.put(tmpTextByte);
     byteBuffer.flip();
-    writeStream(byteBuffer);
+    client.write(byteBuffer.array());
   }
 
   // 发送心跳包
   public void sendKeepAlive() {
-    writeStream(ByteBuffer.wrap(new byte[]{4}));
+    client.write(new byte[]{4});
   }
 
   // 发送按键事件
   public void sendPowerEvent() {
-    writeStream(ByteBuffer.wrap(new byte[]{5}));
+    client.write(new byte[]{5});
   }
 
   // 发送修改分辨率事件
@@ -115,20 +95,12 @@ public class Controller {
     byteBuffer.put((byte) 6);
     byteBuffer.putFloat(newSize);
     byteBuffer.flip();
-    writeStream(byteBuffer);
+    client.write(byteBuffer.array());
   }
 
   // 发送旋转请求事件
   public void sendRotateEvent(boolean isPortrait) {
-    writeStream(ByteBuffer.wrap(new byte[]{7, (byte) (isPortrait ? 0 : 1)}));
-  }
-
-  private void writeStream(ByteBuffer byteBuffer) {
-    try {
-      stream.write(byteBuffer);
-    } catch (IOException | InterruptedException ignored) {
-      AppData.main.runOnUiThread(() -> clientView.hide(true));
-    }
+    client.write(new byte[]{7, (byte) (isPortrait ? 0 : 1)});
   }
 
 }

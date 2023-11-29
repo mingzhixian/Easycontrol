@@ -5,24 +5,40 @@
   android:layout_height="wrap_content"
   android:background="@color/cardBackground"
   android:gravity="center_vertical"
-  android:orientation="horizontal"
+  android:orientation="vertical"
   android:paddingTop="3dp"
   android:paddingBottom="3dp">
 
-  <TextView
-    android:id="@+id/item_spinner_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="视频码率:"
-    android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/smallFont"
-    tools:ignore="HardcodedText" />
-
-  <Spinner
-    android:id="@+id/item_spinner_spinner"
+  <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+      android:id="@+id/item_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="设置项"
+      android:textColor="@color/onCardBackground"
+      android:textSize="@dimen/smallFont"
+      tools:ignore="HardcodedText" />
+
+    <Spinner
+      android:id="@+id/item_spinner"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="10dp"
+      android:backgroundTint="@color/onCardContainerBackground"
+      android:textSize="@dimen/smallFont" />
+  </LinearLayout>
+
+  <TextView
+    android:id="@+id/item_detail"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_marginStart="10dp"
-    android:backgroundTint="@color/onCardContainerBackground"
-    android:textSize="@dimen/smallFont" />
+    android:text="辅助说明"
+    android:textColor="@color/onCardBackgroundSecond"
+    android:textSize="@dimen/smallSmallFont"
+    tools:ignore="HardcodedText" />
 </LinearLayout>

@@ -41,7 +41,7 @@ public class AppData {
   public static final DisplayMetrics realScreenSize = new DisplayMetrics();
 
   // 当前版本号
-  public static String serverName = "easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
+  public static String serverName = "/data/local/tmp/easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
 
   public static void init(Activity m) {
     main = m;
