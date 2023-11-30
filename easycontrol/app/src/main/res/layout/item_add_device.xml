@@ -4,23 +4,19 @@
   android:layout_height="wrap_content"
   android:background="@drawable/background_cron"
   android:orientation="vertical"
-  android:paddingStart="20dp"
-  android:paddingTop="20dp"
-  android:paddingEnd="20dp"
-  android:paddingBottom="20dp">
+  android:padding="15dp">
 
   <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="设备名称:"
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/middleFont" />
+    android:textSize="@dimen/smallFont" />
 
   <EditText
     android:id="@+id/name"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
     android:hint="不可为空"
     android:textColor="@color/onCardBackground"
     android:textColorHint="@color/onCardBackgroundSecond"
@@ -29,16 +25,15 @@
   <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="4dp"
     android:text="地址:端口号"
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/middleFont" />
+    android:textSize="@dimen/smallFont" />
 
   <EditText
     android:id="@+id/address"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
     android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]-.:"
     android:hint="支持IPv4/v6地址、域名"
     android:textColor="@color/onCardBackground"
@@ -54,7 +49,7 @@
       android:id="@+id/is_audio"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
+      android:layout_marginTop="4dp"
       android:buttonTint="@color/onCardBackground"
       android:text="使能音频"
       android:textColor="@color/onCardBackgroundSecond"
@@ -65,7 +60,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="12dp"
-      android:layout_marginTop="8dp"
+      android:layout_marginTop="4dp"
       android:buttonTint="@color/onCardBackground"
       android:text="高级选项"
       android:textColor="@color/onCardBackgroundSecond"
@@ -77,8 +72,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingStart="10dp"
-    android:paddingEnd="10dp"
     android:visibility="gone" />
 
   <Button
@@ -86,13 +79,12 @@
     android:layout_width="200dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:layout_marginTop="25dp"
+    android:layout_marginTop="20dp"
     android:background="@drawable/background_cron"
     android:backgroundTint="@color/button"
     android:gravity="center"
-    android:padding="6dp"
     android:text="确认"
     android:textColor="@color/onButton"
-    android:textSize="@dimen/middleFont" />
+    android:textSize="@dimen/smallFont" />
 
 </LinearLayout>

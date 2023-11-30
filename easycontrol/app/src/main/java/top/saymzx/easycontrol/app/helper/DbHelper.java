@@ -9,12 +9,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 
+import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 3;
+  private static final int version = 4;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -23,19 +24,35 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoControlScreen integer," + "\t defaultFull integer" + ")");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoControlScreen integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useTunnel integer" + ")");
   }
 
   @SuppressLint("Range")
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    if (oldVersion < 4) {
+      // 获取旧数据
+      ArrayList<Device> devices = getAll(db);
+      // 修改表名
+      db.execSQL("alter table " + tableName + " rename to tempTable");
+      // 新建新表
+      onCreate(db);
+      // 将数据搬移至新表
+      for (Device device : devices) insert(db, device);
+      // 删除旧表
+      db.execSQL("drop table tempTable");
+    }
   }
 
   // 读取数据库设备列表
   @SuppressLint("Range")
   public ArrayList<Device> getAll() {
+    return getAll(getReadableDatabase());
+  }
+
+  private ArrayList<Device> getAll(SQLiteDatabase db) {
     ArrayList<Device> devices = new ArrayList<>();
-    try (Cursor cursor = getReadableDatabase().query(tableName, null, null, null, null, null, null)) {
+    try (Cursor cursor = db.query(tableName, null, null, null, null, null, null)) {
       if (cursor.moveToFirst()) do devices.add(getDeviceFormCursor(cursor)); while (cursor.moveToNext());
     }
     return devices;
@@ -53,7 +70,11 @@ public class DbHelper extends SQLiteOpenHelper {
 
   // 更新
   public void insert(Device device) {
-    getWritableDatabase().insert(tableName, null, getValues(device));
+    insert(getWritableDatabase(), device);
+  }
+
+  public void insert(SQLiteDatabase db, Device device) {
+    db.insert(tableName, null, getValues(device));
   }
 
   // 更新
@@ -80,6 +101,8 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("turnOffScreen", device.turnOffScreen);
     values.put("autoControlScreen", device.autoControlScreen);
     values.put("defaultFull", device.defaultFull);
+    values.put("useH265", device.useH265);
+    values.put("useTunnel", device.useTunnel);
     return values;
   }
 
@@ -97,6 +120,8 @@ public class DbHelper extends SQLiteOpenHelper {
       cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
       cursor.getInt(cursor.getColumnIndex("turnOffScreen")) == 1,
       cursor.getInt(cursor.getColumnIndex("autoControlScreen")) == 1,
-      cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1);
+      cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
+      cursor.getColumnIndex("useH265") == -1 ? AppData.setting.getUseH265() : cursor.getInt(cursor.getColumnIndex("useH265")) == 1,
+      cursor.getColumnIndex("useTunnel") == -1 ? AppData.setting.getUseTunnel() : cursor.getInt(cursor.getColumnIndex("useTunnel")) == 1);
   }
 }

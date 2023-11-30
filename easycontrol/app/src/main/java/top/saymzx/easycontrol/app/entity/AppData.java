@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.hardware.usb.UsbManager;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
@@ -18,6 +19,7 @@ import top.saymzx.easycontrol.app.helper.DbHelper;
 public class AppData {
   @SuppressLint("StaticFieldLeak")
   public static Activity main;
+  public static Handler handler;
 
   // 数据库工具库
   public static DbHelper dbHelper;
@@ -45,6 +47,7 @@ public class AppData {
 
   public static void init(Activity m) {
     main = m;
+    handler = new android.os.Handler(m.getMainLooper());
     dbHelper = new DbHelper(main);
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
     usbManager = (UsbManager) main.getSystemService(Context.USB_SERVICE);

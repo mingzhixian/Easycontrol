@@ -104,6 +104,8 @@ public class PublicTools {
     ItemSwitchBinding turnOffScreen = createSwitchCard(context, "熄屏控制", new Pair<>(device.turnOffScreen, Device.turnOffScreenDetail), null);
     ItemSwitchBinding autoControlScreen = createSwitchCard(context, "自动屏幕控制", new Pair<>(device.autoControlScreen, Device.autoControlScreenDetail), null);
     ItemSwitchBinding defaultFull = createSwitchCard(context, "默认全屏", new Pair<>(device.defaultFull, Device.defaultFullDetail), null);
+    ItemSwitchBinding useH265 = createSwitchCard(context, "优先使用H265", new Pair<>(device.useH265, Device.useH265Detail), null);
+    ItemSwitchBinding useTunnel = createSwitchCard(context, "使用隧道传输", new Pair<>(device.useTunnel, Device.useTunnelDetail), null);
     itemAddDeviceBinding.options.addView(maxSize.getRoot());
     itemAddDeviceBinding.options.addView(maxFps.getRoot());
     itemAddDeviceBinding.options.addView(maxVideoBit.getRoot());
@@ -111,6 +113,8 @@ public class PublicTools {
     itemAddDeviceBinding.options.addView(turnOffScreen.getRoot());
     itemAddDeviceBinding.options.addView(autoControlScreen.getRoot());
     itemAddDeviceBinding.options.addView(defaultFull.getRoot());
+    itemAddDeviceBinding.options.addView(useH265.getRoot());
+    itemAddDeviceBinding.options.addView(useTunnel.getRoot());
     // 特殊设备不允许修改
     if (!device.isNormalDevice()) itemAddDeviceBinding.address.setEnabled(false);
     // 是否显示高级选项
@@ -129,7 +133,9 @@ public class PublicTools {
         setResolution.itemSwitch.isChecked(),
         turnOffScreen.itemSwitch.isChecked(),
         autoControlScreen.itemSwitch.isChecked(),
-        defaultFull.itemSwitch.isChecked()
+        defaultFull.itemSwitch.isChecked(),
+        useH265.itemSwitch.isChecked(),
+        useTunnel.itemSwitch.isChecked()
       );
       if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(newDevice);
       else AppData.dbHelper.insert(newDevice);

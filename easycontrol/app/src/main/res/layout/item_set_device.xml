@@ -36,7 +36,7 @@
       android:padding="8dp"
       android:text="打开"
       android:textColor="@color/onButton"
-      android:textSize="@dimen/middleFont" />
+      android:textSize="@dimen/smallFont" />
 
     <Space
       android:layout_width="0dp"
@@ -54,7 +54,7 @@
       android:padding="8dp"
       android:text="设为默认"
       android:textColor="@color/onButton"
-      android:textSize="@dimen/middleFont" />
+      android:textSize="@dimen/smallFont" />
   </LinearLayout>
 
   <LinearLayout
@@ -76,7 +76,7 @@
       android:padding="8dp"
       android:text="修改"
       android:textColor="@color/onButtonSecond"
-      android:textSize="@dimen/middleFont" />
+      android:textSize="@dimen/smallFont" />
 
     <Space
       android:layout_width="0dp"
@@ -94,7 +94,7 @@
       android:padding="8dp"
       android:text="删除"
       android:textColor="@color/onButtonSecond"
-      android:textSize="@dimen/middleFont" />
+      android:textSize="@dimen/smallFont" />
   </LinearLayout>
 
 </LinearLayout>
