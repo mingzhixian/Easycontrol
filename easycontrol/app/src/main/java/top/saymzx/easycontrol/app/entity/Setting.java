@@ -10,8 +10,8 @@ public final class Setting {
 
   private final SharedPreferences.Editor editor;
 
-  public Pair<Boolean, String> getDefaultIsAudio() {
-    return new Pair(sharedPreferences.getBoolean("defaultIsAudio", true), "开启后将尝试传输音频，被控端需要安卓12之上");
+  public boolean getDefaultIsAudio() {
+    return sharedPreferences.getBoolean("defaultIsAudio", true);
   }
 
   public void setDefaultIsAudio(boolean value) {
@@ -55,12 +55,21 @@ public final class Setting {
     editor.apply();
   }
 
-  public Pair<Boolean, String> getDefaultH265() {
-    return new Pair<>(sharedPreferences.getBoolean("defaultH265", true), "优先使用H265格式，视频体积小延迟低，实际以主备控端支持情况为主，若视频异常可尝试关闭");
+  public boolean getUseH265() {
+    return sharedPreferences.getBoolean("useH265", true);
   }
 
-  public void setDefaultH265(boolean value) {
-    editor.putBoolean("defaultH265", value);
+  public void setUseH265(boolean value) {
+    editor.putBoolean("useH265", value);
+    editor.apply();
+  }
+
+  public boolean getUseTunnel() {
+    return sharedPreferences.getBoolean("useTunnel", false);
+  }
+
+  public void setUseTunnel(boolean value) {
+    editor.putBoolean("useTunnel", value);
     editor.apply();
   }
 

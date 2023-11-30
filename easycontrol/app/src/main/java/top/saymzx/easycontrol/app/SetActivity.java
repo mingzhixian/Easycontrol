@@ -37,12 +37,13 @@ public class SetActivity extends Activity {
     ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.maxFpsList);
     ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.videoBitList);
     // 默认参数
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使能音频", AppData.setting.getDefaultIsAudio(), isChecked -> AppData.setting.setDefaultIsAudio(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使能音频", new Pair<>(AppData.setting.getDefaultIsAudio(), Device.isAudioDetail), isChecked -> AppData.setting.setDefaultIsAudio(isChecked)).getRoot());
     setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大大小", maxSizeAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxSize()), Device.maxSizeDetail), str -> AppData.setting.setDefaultMaxSize(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxFps()), Device.maxFpsDetail), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxVideoBit()), Device.maxVideoBitDetail), str -> AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", new Pair<>(AppData.setting.getDefaultSetResolution(), Device.setResolutionDetail), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先H265", AppData.setting.getDefaultH265(), isChecked -> AppData.setting.setDefaultH265(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先H265", new Pair<>(AppData.setting.getUseH265(), Device.useH265Detail), isChecked -> AppData.setting.setUseH265(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使用隧道传输", new Pair<>(AppData.setting.getUseTunnel(), Device.useTunnelDetail), isChecked -> AppData.setting.setUseTunnel(isChecked)).getRoot());
     // 显示
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", new Pair<>(AppData.setting.getTurnOffScreen(), Device.turnOffScreenDetail), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", new Pair<>(AppData.setting.getAutoControlScreen(), Device.autoControlScreenDetail), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());

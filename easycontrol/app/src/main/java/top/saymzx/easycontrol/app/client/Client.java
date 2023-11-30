@@ -4,22 +4,19 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.app.Dialog;
 import android.content.ClipData;
-import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 import android.widget.Toast;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import top.saymzx.easycontrol.adb.Adb;
+import top.saymzx.easycontrol.adb.AdbStream;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.client.view.FullActivity;
@@ -34,9 +31,7 @@ public class Client {
 
   // 连接
   private Adb adb;
-  private Socket socket;
-  private OutputStream outputStream;
-  private DataInputStream inputStream;
+  ClientStream clientStream;
 
   // 子服务
   private final ArrayList<Thread> threads = new ArrayList<>();
@@ -53,7 +48,7 @@ public class Client {
     Dialog dialog = PublicTools.createClientLoading(AppData.main);
     dialog.show();
     // 启动超时监听
-    new Handler().postDelayed(() -> {
+    AppData.handler.postDelayed(() -> {
       if (status == 0) {
         if (dialog.isShowing()) dialog.cancel();
         Toast.makeText(AppData.main, "连接超时", Toast.LENGTH_SHORT).show();
@@ -70,7 +65,7 @@ public class Client {
         // 启动server
         startServer(device, address);
         // 连接server
-        connectServer(address);
+        connectServer(device, address);
         // 创建子服务
         createSubService();
         // 更新UI
@@ -78,7 +73,7 @@ public class Client {
         createUI(device);
       } catch (Exception e) {
         if (dialog.isShowing()) AppData.main.runOnUiThread(dialog::cancel);
-        String error=String.valueOf(e);
+        String error = String.valueOf(e);
         Log.e("Easycontrol", error);
         AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
         release();
@@ -100,19 +95,23 @@ public class Client {
       + " turnOffScreen=" + (device.turnOffScreen ? 1 : 0)
       + " autoControlScreen=" + (device.autoControlScreen ? 1 : 0)
       + " reSize=" + reSize
-      + " useH265=" + ((AppData.setting.getDefaultH265().first && supportH265) ? 1 : 0) + " > /dev/null 2>&1 &", false);
+      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0) + " > /dev/null 2>&1 &", false);
   }
 
   // 连接Server
-  private void connectServer(Pair<String, Integer> address) throws Exception {
+  private void connectServer(Device device, Pair<String, Integer> address) throws Exception {
     Thread.sleep(100);
     for (int i = 0; i < 60; i++) {
       try {
-        socket = new Socket();
-        socket.setTcpNoDelay(true);
-        socket.connect(new InetSocketAddress(address.first, address.second + 1));
-        inputStream = new DataInputStream(socket.getInputStream());
-        outputStream = socket.getOutputStream();
+        if (device.useTunnel) {
+          AdbStream adbStream = adb.tcpForward(address.second + 1, true);
+          clientStream = new ClientStream(adb,adbStream);
+        } else {
+          Socket socket = new Socket();
+          socket.setTcpNoDelay(true);
+          socket.connect(new InetSocketAddress(address.first, address.second + 1));
+          clientStream = new ClientStream(socket);
+        }
         return;
       } catch (Exception ignored) {
         Thread.sleep(50);
@@ -122,35 +121,33 @@ public class Client {
   }
 
   // 创建子服务
-  private void createSubService() throws IOException {
+  private void createSubService() throws IOException, InterruptedException {
     // 控制
     controller = new Controller(this);
     // 是否支持H265编码
-    boolean isH265Support = inputStream.readByte() == 1;
+    boolean isH265Support = clientStream.readByte() == 1;
     // 视频大小
-    if (inputStream.readByte() != CHANGE_SIZE_EVENT) throw new IOException("启动Client失败:数据错误-应为CHANGE_SIZE_EVENT");
-    Pair<Integer, Integer> newVideoSize = new Pair<>(inputStream.readInt(), inputStream.readInt());
+    if (clientStream.readByte() != CHANGE_SIZE_EVENT) throw new IOException("启动Client失败:数据错误-应为CHANGE_SIZE_EVENT");
+    Pair<Integer, Integer> newVideoSize = new Pair<>(clientStream.readInt(), clientStream.readInt());
     clientView.updateVideoSize(newVideoSize);
     // 视频解码
-    if (inputStream.readByte() != VIDEO_EVENT) throw new IOException("启动Client失败:数据错误-应为VIDEO_EVENT-1");
-    Pair<Long, byte[]> csd0 = readFrame();
+    if (clientStream.readByte() != VIDEO_EVENT) throw new IOException("启动Client失败:数据错误-应为VIDEO_EVENT-1");
+    Pair<Long, byte[]> csd0 = clientStream.readFrame();
     Pair<Long, byte[]> csd1 = null;
     if (!isH265Support) {
-      if (inputStream.readByte() != VIDEO_EVENT) throw new IOException("启动Client失败:数据错误-应为VIDEO_EVENT-2");
-      csd1 = readFrame();
+      if (clientStream.readByte() != VIDEO_EVENT) throw new IOException("启动Client失败:数据错误-应为VIDEO_EVENT-2");
+      csd1 = clientStream.readFrame();
     }
     videoDecode = new VideoDecode(newVideoSize, csd0, csd1);
     // 音频解码
-    if (inputStream.readByte() == 1) {
-      if (inputStream.readByte() != AUDIO_EVENT) throw new IOException("启动Client失败:数据错误-应为AUDIO_EVENT");
-      csd0 = readFrame();
+    if (clientStream.readByte() == 1) {
+      if (clientStream.readByte() != AUDIO_EVENT) throw new IOException("启动Client失败:数据错误-应为AUDIO_EVENT");
+      csd0 = clientStream.readFrame();
       audioDecode = new AudioDecode(csd0);
     }
     threads.add(new Thread(this::executeVideoDecodeOut));
     if (audioDecode != null) threads.add(new Thread(this::executeAudioDecodeOut));
     threads.add(new Thread(this::executeStreamIn));
-    threads.add(new Thread(this::executeStreamOut));
-    threads.add(new Thread(this::executeOtherService));
   }
 
   // 创建UI
@@ -169,6 +166,7 @@ public class Client {
       thread.setPriority(Thread.MAX_PRIORITY);
       thread.start();
     }
+    AppData.handler.post(this::executeOtherService);
     // 运行中
     status = 1;
   }
@@ -182,20 +180,20 @@ public class Client {
   private void executeStreamIn() {
     try {
       while (!Thread.interrupted()) {
-        switch (inputStream.readByte()) {
+        switch (clientStream.readByte()) {
           case VIDEO_EVENT:
-            videoDecode.decodeIn(readFrame());
+            videoDecode.decodeIn(clientStream.readFrame());
             break;
           case AUDIO_EVENT:
-            Pair<Long, byte[]> audioFrame = readFrame();
+            Pair<Long, byte[]> audioFrame = clientStream.readFrame();
             if (clientView.checkIsNeedPlay()) audioDecode.decodeIn(audioFrame);
             break;
           case CLIPBOARD_EVENT:
-            controller.nowClipboardText = new String(readByteArray(inputStream.readInt()));
+            controller.nowClipboardText = new String(clientStream.readByteArray(clientStream.readInt()));
             AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, controller.nowClipboardText));
             break;
           case CHANGE_SIZE_EVENT:
-            Pair<Integer, Integer> newVideoSize = new Pair<>(inputStream.readInt(), inputStream.readInt());
+            Pair<Integer, Integer> newVideoSize = new Pair<>(clientStream.readInt(), clientStream.readInt());
             AppData.main.runOnUiThread(() -> clientView.updateVideoSize(newVideoSize));
             break;
         }
@@ -213,40 +211,19 @@ public class Client {
     while (!Thread.interrupted()) audioDecode.decodeOut();
   }
 
-  private void executeStreamOut() {
+
+  private void executeOtherService() {
+    controller.checkClipBoard();
+    controller.sendKeepAlive();
+    AppData.handler.postDelayed(this::executeOtherService, 1500);
+  }
+
+  public void write(byte[] buffer) {
     try {
-      while (!Thread.interrupted()) outputStream.write(writeBuffer.take());
+      clientStream.write(buffer);
     } catch (Exception ignored) {
       release();
     }
-  }
-
-  private void executeOtherService() {
-    while (!Thread.interrupted()) {
-      controller.checkClipBoard();
-      controller.sendKeepAlive();
-      try {
-        Thread.sleep(1500);
-      } catch (InterruptedException ignored) {
-      }
-    }
-  }
-
-  private byte[] readByteArray(int size) throws IOException {
-    byte[] buffer = new byte[size];
-    inputStream.readFully(buffer);
-    return buffer;
-  }
-
-  private Pair<Long, byte[]> readFrame() throws IOException {
-    long pts = inputStream.readLong();
-    return new Pair<>(pts, readByteArray(inputStream.readInt()));
-  }
-
-  private final LinkedBlockingQueue<byte[]> writeBuffer = new LinkedBlockingQueue<>();
-
-  public void write(byte[] buffer) {
-    writeBuffer.offer(buffer);
   }
 
   public void release() {
@@ -262,12 +239,10 @@ public class Client {
             clientView.hide(true);
             break;
           case 2:
-            adb.close();
+            clientStream.close();
             break;
           case 3:
-            inputStream.close();
-            outputStream.close();
-            socket.close();
+            adb.close();
             break;
           case 4:
             videoDecode.release();
