@@ -215,22 +215,42 @@ public class PublicTools {
   // 分离地址和端口号
   public static Pair<String, Integer> getIpAndPort(String address) throws IOException {
     String pattern;
-    if (address.contains("*")) pattern = "(\\*.*?\\*):(\\d+)";
-    else if (address.contains("[")) pattern = "(\\[.*?]):(\\d+)";
-    else if (Pattern.matches(".*[a-zA-Z].*", address)) pattern = "(.*?):(\\d+)";
-    else pattern = "(.*?):(\\d+)";
+    int type;
+    // 特殊格式
+    if (address.contains("*")) {
+      type = 2;
+      pattern = "(\\*.*?\\*):(\\d+)";
+    }
+    // IPv6
+    else if (address.contains("[")) {
+      type = 6;
+      pattern = "(\\[.*?]):(\\d+)";
+    }
+    // 域名
+    else if (Pattern.matches(".*[a-zA-Z].*", address)) {
+      type = 1;
+      pattern = "(.*?):(\\d+)";
+    }
+    // IPv4
+    else {
+      type = 4;
+      pattern = "(.*?):(\\d+)";
+    }
     Pattern regex = Pattern.compile(pattern);
     Matcher matcher = regex.matcher(address);
-    if (matcher.find()) {
-      String ip = matcher.group(1);
-      String port = matcher.group(2);
-      if (ip == null || port == null) throw new IOException("地址格式错误");
-      // 特殊格式
+    if (!matcher.find()) throw new IOException("地址格式错误");
+    String ip = matcher.group(1);
+    String port = matcher.group(2);
+    if (ip == null || port == null) throw new IOException("地址格式错误");
+    // 特殊格式
+    if (type == 2) {
       if (ip.equals("*gateway*")) ip = getGateway();
-      else ip = InetAddress.getByName(ip).getHostAddress();
-      return new Pair<>(ip, Integer.parseInt(port));
     }
-    throw new IOException("地址格式错误");
+    // 域名解析
+    else if (type == 1) {
+      ip = InetAddress.getByName(ip).getHostAddress();
+    }
+    return new Pair<>(ip, Integer.parseInt(port));
   }
 
   // 获取IP地址

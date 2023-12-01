@@ -2,13 +2,17 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.KeyEvent;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,7 +22,7 @@ import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
-public class FullActivity extends Activity {
+public class FullActivity extends Activity implements SensorEventListener {
   @SuppressLint("StaticFieldLeak")
   private static FullActivity context;
   private static Controller controller;
@@ -26,6 +30,7 @@ public class FullActivity extends Activity {
   private static ClientView clientView;
 
   private ActivityFullBinding fullActivity;
+  private int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
   public static boolean isShow = false;
 
@@ -46,22 +51,8 @@ public class FullActivity extends Activity {
     fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
     // 主控端自动旋转
     if (AppData.setting.getMasterAudoRotation().first) {
-      new OrientationEventListener(this) {
-        private int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-
-        @Override
-        public void onOrientationChanged(int i) {
-          int newOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-          if (i < 45 || i > 315) newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-          else if (i > 45 && i < 135) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-          else if (i > 135 && i < 225) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-          else if (i > 225 && i < 315) newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-          if (lastOrientation != newOrientation) {
-            lastOrientation = newOrientation;
-            setRequestedOrientation(newOrientation);
-          }
-        }
-      }.enable();
+      SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+      sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
     // 被控端旋转跟随
     if (AppData.setting.getSlaveAudoRotation().first) {
@@ -76,6 +67,12 @@ public class FullActivity extends Activity {
       // 非正常退出页面
     else if (isShow) clientView.changeToMini();
     super.onPause();
+  }
+
+  @Override
+  protected void onDestroy() {
+    ((SensorManager) getSystemService(Context.SENSOR_SERVICE)).unregisterListener(this);
+    super.onDestroy();
   }
 
   @Override
@@ -133,6 +130,11 @@ public class FullActivity extends Activity {
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     fullActivity.buttonNavBar.setOnClickListener(v -> setNavBarHide());
+    fullActivity.buttonRotate.setOnClickListener(v -> {
+      int newOrientation = lastOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+      lastOrientation = newOrientation;
+      setRequestedOrientation(newOrientation);
+    });
     fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
   }
 
@@ -152,4 +154,27 @@ public class FullActivity extends Activity {
     }));
   }
 
+  @Override
+  public void onSensorChanged(SensorEvent sensorEvent) {
+    if (Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()) return;
+    float[] values = sensorEvent.values;
+    float x = values[0];
+    float y = values[1];
+    int newOrientation = lastOrientation;
+
+    if (x > -3 && x < 3 && y >= 4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    else if (y > -3 && y < 3 && x >= 4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    else if (y > -3 && y < 3 && x <= -4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+    else if (x > -3 && x < 3 && y <= -4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+
+    if (lastOrientation != newOrientation) {
+      lastOrientation = newOrientation;
+      setRequestedOrientation(newOrientation);
+    }
+  }
+
+  @Override
+  public void onAccuracyChanged(Sensor sensor, int i) {
+
+  }
 }

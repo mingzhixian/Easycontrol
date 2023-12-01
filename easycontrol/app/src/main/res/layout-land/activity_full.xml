@@ -27,8 +27,15 @@
       android:layout_gravity="end"
       android:gravity="center"
       android:orientation="vertical"
-      android:paddingTop="40dp"
       android:paddingBottom="40dp">
+
+      <ImageView
+        android:id="@+id/button_rotate"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:padding="4dp"
+        android:src="@drawable/rotate"
+        android:tint="#fff" />
 
       <ImageView
         android:id="@+id/button_switch"
