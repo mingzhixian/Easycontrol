@@ -11,12 +11,10 @@ import android.os.Build;
 import android.system.ErrnoException;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Options;
-import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 
 public final class AudioEncode {
   private static MediaCodec encedec;
@@ -31,11 +29,11 @@ public final class AudioEncode {
       encedec.start();
       audioCapture = AudioCapture.init();
     } catch (Exception ignored) {
-      Server.write(bytes);
+      Server.writeMain(bytes);
       return false;
     }
     bytes[0] = 1;
-    Server.write(bytes);
+    Server.writeMain(bytes);
     encodeIn();
     encodeOut();
     return true;
@@ -64,19 +62,18 @@ public final class AudioEncode {
 
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public static void encodeOut()  {
+  public static void encodeOut() throws IOException {
     try {
       // 找到已完成的输出缓冲区
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
-      ByteBuffer byteBuffer = ByteBuffer.allocate(13 + bufferInfo.size);
-      byteBuffer.put((byte) 2);
-      byteBuffer.putLong(bufferInfo.presentationTimeUs);
+      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + bufferInfo.size);
+      byteBuffer.put((byte) 1);
       byteBuffer.putInt(bufferInfo.size);
       byteBuffer.put(buffer);
       byteBuffer.flip();
-      Server.write(byteBuffer.array());
+      Server.writeMain(byteBuffer.array());
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

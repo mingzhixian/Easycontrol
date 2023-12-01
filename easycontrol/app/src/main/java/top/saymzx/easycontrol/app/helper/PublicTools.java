@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -16,13 +17,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -212,19 +213,24 @@ public class PublicTools {
   }
 
   // 分离地址和端口号
-  public static Pair<String, Integer> getIpAndPort(String address) {
+  public static Pair<String, Integer> getIpAndPort(String address) throws IOException {
     String pattern;
-    if (address.contains("[")) pattern = "(\\[.*?]):(\\d+)";
+    if (address.contains("*")) pattern = "(\\*.*?\\*):(\\d+)";
+    else if (address.contains("[")) pattern = "(\\[.*?]):(\\d+)";
     else if (Pattern.matches(".*[a-zA-Z].*", address)) pattern = "(.*?):(\\d+)";
     else pattern = "(.*?):(\\d+)";
     Pattern regex = Pattern.compile(pattern);
     Matcher matcher = regex.matcher(address);
     if (matcher.find()) {
-      final String[] ip = {matcher.group(1)};
-      int port = Integer.parseInt(Objects.requireNonNull(matcher.group(2)));
-      return new Pair<>(ip[0], port);
+      String ip = matcher.group(1);
+      String port = matcher.group(2);
+      if (ip == null || port == null) throw new IOException("地址格式错误");
+      // 特殊格式
+      if (ip.equals("*gateway*")) ip = getGateway();
+      else ip = InetAddress.getByName(ip).getHostAddress();
+      return new Pair<>(ip, Integer.parseInt(port));
     }
-    return null;
+    throw new IOException("地址格式错误");
   }
 
   // 获取IP地址
@@ -246,6 +252,13 @@ public class PublicTools {
     } catch (Exception ignored) {
     }
     return new Pair<>(ipv4Addresses, ipv6Addresses);
+  }
+
+  // 获取网关地址
+  public static String getGateway() {
+    WifiManager wm = (WifiManager) AppData.main.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    long gateway = wm.getDhcpInfo().gateway;
+    return (int) (gateway & 0xff) + "." + (int) ((gateway >> 8) & 0xff) + "." + (int) ((gateway >> 16) & 0xff) + "." + (int) ((gateway >> 24) & 0xff);
   }
 
   // 获取是否支持H265

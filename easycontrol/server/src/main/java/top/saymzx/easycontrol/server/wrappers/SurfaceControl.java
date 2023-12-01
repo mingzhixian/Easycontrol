@@ -39,9 +39,9 @@ public final class SurfaceControl {
     }
   }
 
+  // 安卓14之后部分函数转移到了DisplayControl
   @SuppressLint({"PrivateApi", "SoonBlockedPrivateApi", "BlockedPrivateApi"})
   private static void getMethodAndroid14() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    // 安卓14之后部分函数转移到了DisplayControl
     Method createClassLoaderMethod = Class.forName("com.android.internal.os.ClassLoaderFactory").getDeclaredMethod("createClassLoader", String.class, String.class, String.class, ClassLoader.class, int.class, boolean.class, String.class);
     ClassLoader classLoader = (ClassLoader) createClassLoaderMethod.invoke(null, "/system/framework/services.jar", null, null, ClassLoader.getSystemClassLoader(), 0, true, null);
     Class<?> displayControlClass = classLoader.loadClass("com.android.server.display.DisplayControl");
