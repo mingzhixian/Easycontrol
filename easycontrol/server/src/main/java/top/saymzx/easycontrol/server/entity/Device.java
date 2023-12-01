@@ -88,10 +88,10 @@ public final class Device {
     deviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
     layerStack = displayInfo.layerStack;
-    compute8Size();
+    getVideoSize();
   }
 
-  private static void compute8Size() {
+  private static void getVideoSize() {
     boolean isPortrait = deviceSize.first < deviceSize.second;
     int major = isPortrait ? deviceSize.second : deviceSize.first;
     int minor = isPortrait ? deviceSize.first : deviceSize.second;
@@ -118,11 +118,15 @@ public final class Device {
           if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return;
           nowClipboardText = newClipboardText;
           ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
-          byteBuffer.put((byte) 3);
+          byteBuffer.put((byte) 2);
           byteBuffer.putInt(tmpTextByte.length);
           byteBuffer.put(tmpTextByte);
           byteBuffer.flip();
-            Server.write(byteBuffer.array());
+          try {
+            Server.writeMain(byteBuffer.array());
+          } catch (IOException ignored) {
+            Server.errorClose();
+          }
         }
       }
     });

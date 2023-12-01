@@ -55,15 +55,6 @@
         <task path="$PROJECT_DIR$/center">
           <activation />
         </task>
-        <task path="$PROJECT_DIR$/app">
-          <activation />
-        </task>
-        <task path="$PROJECT_DIR$/center">
-          <activation />
-        </task>
-        <task path="$PROJECT_DIR$/server">
-          <activation />
-        </task>
         <projects_view>
           <option name="groupModules" value="false" />
           <tree_state>

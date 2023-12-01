@@ -29,9 +29,11 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static Socket socket;
-  public static DataInputStream inputStream;
-  public static OutputStream outputStream;
+  private static Socket mainSocket;
+  private static Socket videoSocket;
+  public static DataInputStream mainInputStream;
+  public static OutputStream mainOutputStream;
+  public static OutputStream videoOutputStream;
 
   private static final Object object = new Object();
 
@@ -118,10 +120,11 @@ public final class Server {
 
   private static void connectClient() throws IOException {
     try (ServerSocket serverSocket = new ServerSocket(Options.tcpPort)) {
-      socket = serverSocket.accept();
-      socket.setTcpNoDelay(true);
-      inputStream = new DataInputStream(socket.getInputStream());
-      outputStream = socket.getOutputStream();
+      mainSocket = serverSocket.accept();
+      videoSocket = serverSocket.accept();
+      mainInputStream = new DataInputStream(mainSocket.getInputStream());
+      mainOutputStream = mainSocket.getOutputStream();
+      videoOutputStream = videoSocket.getOutputStream();
     }
   }
 
@@ -145,7 +148,11 @@ public final class Server {
   }
 
   private static void executeAudioOut() {
-    while (!Thread.interrupted()) AudioEncode.encodeOut();
+    try {
+      while (!Thread.interrupted()) AudioEncode.encodeOut();
+    } catch (IOException ignored) {
+      errorClose();
+    }
   }
 
   private static void executeControlIn() {
@@ -169,15 +176,17 @@ public final class Server {
     }
   }
 
-  public synchronized static void write(byte[] buffer) {
-    try {
-      outputStream.write(buffer);
-    } catch (IOException ignored) {
-      errorClose();
+  public static void writeMain(byte[] buffer) throws IOException {
+    synchronized (mainOutputStream) {
+      mainOutputStream.write(buffer);
     }
   }
 
-  private static void errorClose() {
+  public static void writeVideo(byte[] buffer) throws IOException {
+    videoOutputStream.write(buffer);
+  }
+
+  public static void errorClose() {
     synchronized (object) {
       object.notify();
     }
@@ -189,9 +198,11 @@ public final class Server {
       try {
         switch (i) {
           case 0:
-            inputStream.close();
-            outputStream.close();
-            socket.close();
+            videoOutputStream.close();
+            mainOutputStream.close();
+            mainInputStream.close();
+            mainSocket.close();
+            videoSocket.close();
             break;
           case 1:
             if (Options.reSize != -1) Device.execReadOutput("wm size reset");

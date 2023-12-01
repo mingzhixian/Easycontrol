@@ -34,7 +34,7 @@
     android:id="@+id/address"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]-.:"
+    android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]-.:*"
     android:hint="支持IPv4/v6地址、域名"
     android:textColor="@color/onCardBackground"
     android:textColorHint="@color/onCardBackgroundSecond"

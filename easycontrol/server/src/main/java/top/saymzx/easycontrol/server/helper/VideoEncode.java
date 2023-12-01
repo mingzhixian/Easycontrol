@@ -14,7 +14,6 @@ import android.system.ErrnoException;
 import android.view.Surface;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 
@@ -36,7 +35,7 @@ public final class VideoEncode {
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 检查解码器
     isH265EncoderSupport = isH265EncoderSupport();
-    Server.write(new byte[]{(byte) (isH265EncoderSupport ? 1 : 0)});
+    Server.writeMain(new byte[]{(byte) (isH265EncoderSupport ? 1 : 0)});
     // 创建Codec
     createEncodecFormat();
     startEncode();
@@ -48,7 +47,7 @@ public final class VideoEncode {
   // 初始化编码器
   private static Surface surface;
 
-  public static void startEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException{
+  public static void startEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
     encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
     encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
@@ -58,11 +57,11 @@ public final class VideoEncode {
     // 启动编码
     encedec.start();
     ByteBuffer byteBuffer = ByteBuffer.allocate(9);
-    byteBuffer.put((byte) 4);
+    byteBuffer.put((byte) 3);
     byteBuffer.putInt(Device.videoSize.first);
     byteBuffer.putInt(Device.videoSize.second);
     byteBuffer.flip();
-    Server.write(byteBuffer.array());
+    Server.writeMain(byteBuffer.array());
   }
 
   private static void createEncodecFormat() throws IOException {
@@ -101,18 +100,17 @@ public final class VideoEncode {
 
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public static void encodeOut()  {
+  public static void encodeOut() throws IOException {
     try {
       // 找到已完成的输出缓冲区
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
-      ByteBuffer byteBuffer = ByteBuffer.allocate(13 + bufferInfo.size);
-      byteBuffer.put((byte) 1);
-      byteBuffer.putLong(bufferInfo.presentationTimeUs);
+      ByteBuffer byteBuffer = ByteBuffer.allocate(12 + bufferInfo.size);
       byteBuffer.putInt(bufferInfo.size);
       byteBuffer.put(encedec.getOutputBuffer(outIndex));
+      byteBuffer.putLong(bufferInfo.presentationTimeUs);
       byteBuffer.flip();
-      Server.write(byteBuffer.array());
+      Server.writeVideo(byteBuffer.array());
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

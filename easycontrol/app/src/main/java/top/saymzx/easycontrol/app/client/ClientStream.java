@@ -1,7 +1,5 @@
 package top.saymzx.easycontrol.app.client;
 
-import android.util.Pair;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,9 +63,9 @@ public class ClientStream {
     } else return adbStream.readByteArray(size).array();
   }
 
-  public Pair<Long, byte[]> readFrame() throws IOException, InterruptedException {
+  public byte[] readFrame() throws IOException, InterruptedException {
     if (mode == 2) adb.sendMoreOk(adbStream);
-    return new Pair<>(readLong(), readByteArray(readInt()));
+    return readByteArray(readInt());
   }
 
   private final LinkedBlockingQueue<byte[]> writeBuffer = new LinkedBlockingQueue<>();
