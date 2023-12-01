@@ -85,7 +85,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     uiMode = UI_MODE_NONE;
     if (isRelease) {
       if (surfaceTexture != null) surfaceTexture.release();
-      client.release();
+      client.release(null);
     }
   }
 
