@@ -101,7 +101,7 @@ public final class Setting {
   }
 
   public Pair<Boolean, String> getMasterAudoRotation() {
-    return new Pair<>(sharedPreferences.getBoolean("masterAudoRotation", true), "仅在全屏状态下生效，开启后当旋转主控端时会自动旋转页面");
+    return new Pair<>(sharedPreferences.getBoolean("masterAudoRotation", true), "仅全屏有效，开启后界面跟随手机传感器方向，关闭后将锁死界面方向（可通过导航栏控制旋转界面）");
   }
 
   public void setMasterAudoRotation(boolean value) {
@@ -110,7 +110,7 @@ public final class Setting {
   }
 
   public Pair<Boolean, String> getSlaveAudoRotation() {
-    return new Pair<>(sharedPreferences.getBoolean("slaveAudoRotation", true), "仅在全屏状态下生效，开启后当主控端页面旋转时，会尝试旋转被控端");
+    return new Pair<>(sharedPreferences.getBoolean("slaveAudoRotation", true), "仅全屏有效，开启后当主控端页面旋转时，会尝试旋转被控端");
   }
 
   public void setSlaveAudoRotation(boolean value) {
