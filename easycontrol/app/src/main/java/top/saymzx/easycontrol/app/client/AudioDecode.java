@@ -8,8 +8,11 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.audiofx.LoudnessEnhancer;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class AudioDecode {
   public MediaCodec decodec;
@@ -36,27 +39,15 @@ public class AudioDecode {
     }
   }
 
+  private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
+
   public void decodeIn(byte[] data) {
     try {
-      int inIndex = decodec.dequeueInputBuffer(0);
-      // 缓冲区已满丢帧
-      if (inIndex < 0) return;
+      Integer inIndex = intputBufferQueue.poll();
+      if (inIndex == null) return;
       decodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
       decodec.queueInputBuffer(inIndex, 0, data.length, 0, 0);
-    } catch (IllegalStateException ignored) {
-    }
-  }
-
-  private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-
-  public void decodeOut() {
-    try {
-      int outIndex = decodec.dequeueOutputBuffer(bufferInfo, -1);
-      if (outIndex >= 0) {
-        audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
-        decodec.releaseOutputBuffer(outIndex, false);
-      }
     } catch (IllegalStateException ignored) {
     }
   }
@@ -74,6 +65,28 @@ public class AudioDecode {
     decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头
     decodecFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0));
+    // 异步解码
+    decodec.setCallback(new MediaCodec.Callback() {
+      @Override
+      public void onInputBufferAvailable(MediaCodec mediaCodec, int inIndex) {
+        intputBufferQueue.offer(inIndex);
+      }
+
+      @Override
+      public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
+        audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
+        decodec.releaseOutputBuffer(outIndex, false);
+      }
+
+      @Override
+      public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
+
+      }
+
+      @Override
+      public void onOutputFormatChanged(MediaCodec mediaCodec, MediaFormat format) {
+      }
+    });
     // 配置解码器
     decodec.configure(decodecFormat, null, null, 0);
     // 启动解码器

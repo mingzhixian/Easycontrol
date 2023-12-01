@@ -5,8 +5,12 @@ import android.media.MediaFormat;
 import android.util.Pair;
 import android.view.Surface;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class VideoDecode {
 
@@ -31,28 +35,18 @@ public class VideoDecode {
     }
   }
 
-  public void decodeIn(byte[] data, long pts) {
+  private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
+
+  public boolean decodeIn(byte[] data, long pts) throws InterruptedException {
     try {
-      int inIndex = decodec.dequeueInputBuffer(20_000);
-      // 缓冲区已满则丢帧
-      if (inIndex < 0) return;
+      Integer inIndex = intputBufferQueue.poll(20, TimeUnit.MILLISECONDS);
+      if (inIndex == null) return false;
       decodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
       decodec.queueInputBuffer(inIndex, 0, data.length, pts, 0);
+      return true;
     } catch (IllegalStateException ignored) {
-    }
-  }
-
-  private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-
-  public void decodeOut(boolean isNormalPlay) {
-    try {
-      int outIndex = decodec.dequeueOutputBuffer(bufferInfo, -1);
-      if (outIndex >= 0) {
-        if (!isNormalPlay) decodec.releaseOutputBuffer(outIndex, false);
-        else decodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
-      }
-    } catch (IllegalStateException ignored) {
+      return false;
     }
   }
 
@@ -65,6 +59,26 @@ public class VideoDecode {
     // 获取视频标识头
     decodecFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0.first));
     if (!isH265Support) decodecFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd1.first));
+    // 异步解码
+    decodec.setCallback(new MediaCodec.Callback() {
+      @Override
+      public void onInputBufferAvailable(MediaCodec mediaCodec, int inIndex) {
+        intputBufferQueue.offer(inIndex);
+      }
+
+      @Override
+      public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
+        decodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
+      }
+
+      @Override
+      public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
+      }
+
+      @Override
+      public void onOutputFormatChanged(MediaCodec mediaCodec, MediaFormat format) {
+      }
+    });
   }
 
   public void setSurface(Surface surface) {
@@ -72,9 +86,12 @@ public class VideoDecode {
     decodec.configure(decodecFormat, surface, null, 0);
     // 启动解码器
     decodec.start();
-    // 解析首帧，解决开始黑屏问题
-    decodeIn(csd0.first, csd0.second);
-    if (!isH265Support) decodeIn(csd1.first, csd0.second);
+  }
+
+  // 解析首帧，解决开始黑屏问题
+  public void decodeInSpsPps() throws InterruptedException {
+    for (int i = 0; i < 3; i++) if (decodeIn(csd0.first, csd0.second)) break;
+    if (!isH265Support) for (int i = 0; i < 3; i++) if (decodeIn(csd1.first, csd1.second)) break;
   }
 
 }

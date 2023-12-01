@@ -50,8 +50,7 @@ public class Client {
     AppData.handler.postDelayed(() -> {
       if (status == 0) {
         if (dialog.isShowing()) dialog.cancel();
-        Toast.makeText(AppData.main, "连接超时", Toast.LENGTH_SHORT).show();
-        release();
+        release("连接超时");
       }
     }, timeoutDelay);
     // 启动Client
@@ -70,10 +69,7 @@ public class Client {
         createUI(device);
       } catch (Exception e) {
         if (dialog.isShowing()) AppData.main.runOnUiThread(dialog::cancel);
-        String error = String.valueOf(e);
-        Log.e("Easycontrol", error);
-        AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
-        release();
+        release(String.valueOf(e));
       }
     }).start();
   }
@@ -107,7 +103,7 @@ public class Client {
           }
           if (videoClientStream == null) {
             AdbStream adbStream = adb.tcpForward(address.second + 1, true);
-            mainClientStream = new ClientStream(adb, adbStream);
+            videoClientStream = new ClientStream(adb, adbStream);
           }
         } else {
           if (mainClientStream == null) {
@@ -149,10 +145,8 @@ public class Client {
       if (mainClientStream.readByte() != AUDIO_EVENT) throw new IOException("启动Client失败:数据错误-应为AUDIO_EVENT");
       audioDecode = new AudioDecode(mainClientStream.readFrame());
     }
-    threads.add(new Thread(this::executeVideoDecodeIn));
-    threads.add(new Thread(this::executeVideoDecodeOut));
-    if (audioDecode != null) threads.add(new Thread(this::executeAudioDecodeOut));
-    threads.add(new Thread(this::executeStreamIn));
+    threads.add(new Thread(this::executeMainStreamIn));
+    threads.add(new Thread(this::executeVideoStreamIn));
   }
 
   // 创建UI
@@ -181,7 +175,7 @@ public class Client {
   private static final int CLIPBOARD_EVENT = 2;
   private static final int CHANGE_SIZE_EVENT = 3;
 
-  private void executeStreamIn() {
+  private void executeMainStreamIn() {
     try {
       while (!Thread.interrupted()) {
         switch (mainClientStream.readByte()) {
@@ -200,26 +194,18 @@ public class Client {
         }
       }
     } catch (Exception ignored) {
-      release();
+      release("连接断开，读取流错误");
     }
   }
 
-  private void executeVideoDecodeIn() {
+  private void executeVideoStreamIn() {
     try {
+      videoDecode.decodeInSpsPps();
       while (!Thread.interrupted()) videoDecode.decodeIn(videoClientStream.readFrame(), videoClientStream.readLong());
     } catch (Exception ignored) {
-      release();
+      release("连接断开，读取视频错误");
     }
   }
-
-  private void executeVideoDecodeOut() {
-    while (!Thread.interrupted()) videoDecode.decodeOut(clientView.checkIsNeedPlay());
-  }
-
-  private void executeAudioDecodeOut() {
-    while (!Thread.interrupted()) audioDecode.decodeOut();
-  }
-
 
   private void executeOtherService() {
     controller.checkClipBoard();
@@ -231,13 +217,17 @@ public class Client {
     try {
       mainClientStream.write(buffer);
     } catch (Exception ignored) {
-      release();
+      release("连接断开，写入错误");
     }
   }
 
-  public void release() {
+  public void release(String error) {
     if (status == -1) return;
     status = -1;
+    if (error != null) {
+      Log.e("Easycontrol", error);
+      AppData.main.runOnUiThread(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
+    }
     for (int i = 0; i < 6; i++) {
       try {
         switch (i) {

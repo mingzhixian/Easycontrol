@@ -5,7 +5,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Pair;
 import android.view.Gravity;
@@ -61,6 +60,7 @@ public class SmallView extends ViewOutlineProvider {
   public SmallView(ClientView clientView) {
     this.clientView = clientView;
     smallViewParams.gravity = Gravity.START | Gravity.TOP;
+    backgroundWindowParams.gravity = Gravity.START | Gravity.TOP;
     // 设置监听控制
     setFloatVideoListener();
     setReSizeListener();
@@ -81,10 +81,6 @@ public class SmallView extends ViewOutlineProvider {
       isShow = true;
       // 初始化
       smallView.barView.setVisibility(View.GONE);
-      ViewGroup.LayoutParams layoutParams = smallView.textureViewLayout.getLayoutParams();
-      layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-      layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-      smallView.textureViewLayout.setLayoutParams(layoutParams);
       // 设置监听
       setButtonListener(controller);
       // 显示
@@ -93,24 +89,18 @@ public class SmallView extends ViewOutlineProvider {
           smallView.getRoot().setVisibility(View.VISIBLE);
           AppData.windowManager.addView(backgroundWindow, backgroundWindowParams);
           AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
+          smallView.textureViewLayout.addView(clientView.textureView, 0);
         }
       }));
-      // 更新TextureView
-      smallView.textureViewLayout.addView(clientView.textureView, 0);
     }
   }
 
   public void hide() {
     if (isShow) {
       isShow = false;
-      ViewGroup.LayoutParams layoutParams = smallView.textureViewLayout.getLayoutParams();
-      layoutParams.width = smallView.textureViewLayout.getMeasuredWidth();
-      layoutParams.height = smallView.textureViewLayout.getMeasuredHeight();
-      smallView.textureViewLayout.setLayoutParams(layoutParams);
       smallView.textureViewLayout.removeView(clientView.textureView);
       clientView.viewAnim(smallView.getRoot(), false, 0, PublicTools.dp2px(40f), (isStart -> {
         if (!isStart) {
-          smallView.getRoot().setVisibility(View.GONE);
           AppData.windowManager.removeView(smallView.getRoot());
           AppData.windowManager.removeView(backgroundWindow);
         }
@@ -249,10 +239,7 @@ public class SmallView extends ViewOutlineProvider {
   public void getOutline(View view, Outline outline) {
     Rect rect = new Rect();
     view.getGlobalVisibleRect(rect);
-    int leftMargin = 0;
-    int topMargin = 0;
-    Rect selfRect = new Rect(leftMargin, topMargin, rect.right - rect.left - leftMargin, rect.bottom - rect.top - topMargin);
-    outline.setRoundRect(selfRect, AppData.main.getResources().getDimension(R.dimen.round));
+    outline.setRoundRect(rect, AppData.main.getResources().getDimension(R.dimen.round));
   }
 
 }

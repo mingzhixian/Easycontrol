@@ -183,6 +183,7 @@ public final class Server {
   }
 
   public static void writeVideo(byte[] buffer) throws IOException {
+    // 因为只有视频流使用，所以此处不做同步限制
     videoOutputStream.write(buffer);
   }
 
