@@ -39,7 +39,8 @@ public class Client {
   public Controller controller;
   private final ClientView clientView;
   private static final int timeoutDelay = 1000 * 10;
-  private static final boolean supportH265 = PublicTools.isH265DecoderSupport();
+  private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
+  private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
 
   public Client(Device device) {
     // 初始化
@@ -88,7 +89,8 @@ public class Client {
       + " turnOffScreen=" + (device.turnOffScreen ? 1 : 0)
       + " autoControlScreen=" + (device.autoControlScreen ? 1 : 0)
       + " reSize=" + reSize
-      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0) + " > /dev/null 2>&1 &", false);
+      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0)
+      + " useOpus=" + ((device.useOpus && supportOpus) ? 1 : 0) + " > /dev/null 2>&1 &", false);
   }
 
   // 连接Server
@@ -128,7 +130,7 @@ public class Client {
     // 控制
     controller = new Controller(this);
     // 是否支持H265编码
-    boolean isH265Support = mainClientStream.readByte() == 1;
+    boolean useH265 = mainClientStream.readByte() == 1;
     // 视频大小
     if (mainClientStream.readByte() != CHANGE_SIZE_EVENT) throw new IOException("启动Client失败:数据错误-应为CHANGE_SIZE_EVENT");
     Pair<Integer, Integer> newVideoSize = new Pair<>(mainClientStream.readInt(), mainClientStream.readInt());
@@ -136,14 +138,13 @@ public class Client {
     // 视频解码
     Pair<byte[], Long> csd0 = new Pair<>(videoClientStream.readFrame(), videoClientStream.readLong());
     Pair<byte[], Long> csd1 = null;
-    if (!isH265Support) {
-      csd1 = new Pair<>(videoClientStream.readFrame(), videoClientStream.readLong());
-    }
+    if (!useH265) csd1 = new Pair<>(videoClientStream.readFrame(), videoClientStream.readLong());
     videoDecode = new VideoDecode(newVideoSize, csd0, csd1);
     // 音频解码
     if (mainClientStream.readByte() == 1) {
+      boolean useOpus = mainClientStream.readByte() == 1;
       if (mainClientStream.readByte() != AUDIO_EVENT) throw new IOException("启动Client失败:数据错误-应为AUDIO_EVENT");
-      audioDecode = new AudioDecode(mainClientStream.readFrame());
+      audioDecode = new AudioDecode(useOpus,mainClientStream.readFrame());
     }
     threads.add(new Thread(this::executeMainStreamIn));
     threads.add(new Thread(this::executeVideoStreamIn));
@@ -181,7 +182,7 @@ public class Client {
         switch (mainClientStream.readByte()) {
           case AUDIO_EVENT:
             byte[] audioFrame = mainClientStream.readFrame();
-            if (clientView.checkIsNeedPlay()) audioDecode.decodeIn(audioFrame);
+            audioDecode.decodeIn(audioFrame);
             break;
           case CLIPBOARD_EVENT:
             controller.nowClipboardText = new String(mainClientStream.readByteArray(mainClientStream.readInt()));

@@ -19,8 +19,7 @@
     tools:targetApi="31">
     <activity
       android:name=".MainActivity"
-      android:exported="true"
-      android:screenOrientation="portrait">
+      android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -28,22 +27,18 @@
     </activity>
     <activity
       android:name=".IpActivity"
-      android:exported="false"
-      android:screenOrientation="portrait" />
+      android:exported="false" />
     <activity
       android:name=".SetActivity"
-      android:exported="false"
-      android:screenOrientation="portrait" />
+      android:exported="false" />
     <activity
       android:name=".CenterActivity"
-      android:exported="false"
-      android:screenOrientation="portrait" />
+      android:exported="false" />
     <activity
       android:name=".client.view.FullActivity"
       android:exported="false"
       android:hardwareAccelerated="true"
-      android:launchMode="singleTask"
-      android:screenOrientation="portrait" />
+      android:launchMode="singleTask" />
 
   </application>
 

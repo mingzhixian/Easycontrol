@@ -15,7 +15,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 4;
+  private static final int version = 5;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -24,13 +24,13 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoControlScreen integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useTunnel integer" + ")");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoControlScreen integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useOpus integer ," + "\t useTunnel integer" + ")");
   }
 
   @SuppressLint("Range")
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    if (oldVersion < 4) {
+    if (oldVersion < 5) {
       // 获取旧数据
       ArrayList<Device> devices = getAll(db);
       // 修改表名
@@ -102,6 +102,7 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("autoControlScreen", device.autoControlScreen);
     values.put("defaultFull", device.defaultFull);
     values.put("useH265", device.useH265);
+    values.put("useOpus", device.useOpus);
     values.put("useTunnel", device.useTunnel);
     return values;
   }
@@ -122,6 +123,7 @@ public class DbHelper extends SQLiteOpenHelper {
       cursor.getInt(cursor.getColumnIndex("autoControlScreen")) == 1,
       cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
       cursor.getColumnIndex("useH265") == -1 ? AppData.setting.getUseH265() : cursor.getInt(cursor.getColumnIndex("useH265")) == 1,
+      cursor.getColumnIndex("useOpus") == -1 ? AppData.setting.getUseOpus() : cursor.getInt(cursor.getColumnIndex("useOpus")) == 1,
       cursor.getColumnIndex("useTunnel") == -1 ? AppData.setting.getUseTunnel() : cursor.getInt(cursor.getColumnIndex("useTunnel")) == 1);
   }
 }

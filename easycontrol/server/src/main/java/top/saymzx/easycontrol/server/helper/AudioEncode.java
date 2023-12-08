@@ -14,17 +14,20 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.server.Server;
+import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
 
 public final class AudioEncode {
   private static MediaCodec encedec;
   private static AudioRecord audioCapture;
+  private static boolean isOpusEncoderSupport;
 
   public static boolean init() throws IOException, ErrnoException {
     byte[] bytes = new byte[]{0};
     try {
       // 从安卓12开始支持音频
       if (!Options.isAudio || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) throw new Exception("版本低");
+      isOpusEncoderSupport = Options.useOpus && Device.isEncoderSupport("opus");
       setAudioEncodec();
       encedec.start();
       audioCapture = AudioCapture.init();
@@ -34,21 +37,23 @@ public final class AudioEncode {
     }
     bytes[0] = 1;
     Server.writeMain(bytes);
+    bytes[0] = (byte) (isOpusEncoderSupport ? 1 : 0);
+    Server.writeMain(bytes);
     encodeIn();
     encodeOut();
     return true;
   }
 
   private static void setAudioEncodec() throws IOException {
-    String codecMime = MediaFormat.MIMETYPE_AUDIO_AAC;
+    String codecMime = isOpusEncoderSupport ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     encedec = MediaCodec.createEncoderByType(codecMime);
     MediaFormat encodecFormat = MediaFormat.createAudioFormat(codecMime, AudioCapture.SAMPLE_RATE, AudioCapture.CHANNELS);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
-    encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+    if (!isOpusEncoderSupport) encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
   }
 
-  private static final int frameSize = AudioCapture.millisToBytes(10);
+  private static final int frameSize = AudioCapture.millisToBytes(20);
 
   public static void encodeIn() {
     try {
@@ -68,9 +73,22 @@ public final class AudioEncode {
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
-      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + bufferInfo.size);
+      if (isOpusEncoderSupport) {
+        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+          buffer.getLong();
+          int size = (int) buffer.getLong();
+          buffer.limit(buffer.position() + size);
+        }
+        // 当无声音时不发送
+        if (buffer.remaining() < 5) {
+          encedec.releaseOutputBuffer(outIndex, false);
+          return;
+        }
+      }
+      int frameSize = buffer.remaining();
+      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + frameSize);
       byteBuffer.put((byte) 1);
-      byteBuffer.putInt(bufferInfo.size);
+      byteBuffer.putInt(frameSize);
       byteBuffer.put(buffer);
       byteBuffer.flip();
       Server.writeMain(byteBuffer.array());
@@ -79,7 +97,7 @@ public final class AudioEncode {
     }
   }
 
-  public static void release(){
+  public static void release() {
     try {
       audioCapture.stop();
       audioCapture.release();

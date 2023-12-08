@@ -13,15 +13,16 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class AudioDecode {
   public MediaCodec decodec;
   public AudioTrack audioTrack;
   public LoudnessEnhancer loudnessEnhancer;
 
-  public AudioDecode(byte[] csd0) throws IOException {
+  public AudioDecode(boolean useOpus, byte[] csd0) throws IOException {
     // 创建Codec
-    setAudioDecodec(csd0);
+    setAudioDecodec(useOpus, csd0);
     // 创建AudioTrack
     setAudioTrack();
     // 创建音频放大器
@@ -41,9 +42,9 @@ public class AudioDecode {
 
   private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
-  public void decodeIn(byte[] data) {
+  public void decodeIn(byte[] data) throws InterruptedException {
     try {
-      Integer inIndex = intputBufferQueue.poll();
+      Integer inIndex = intputBufferQueue.poll(20, TimeUnit.MILLISECONDS);
       if (inIndex == null) return;
       decodec.getInputBuffer(inIndex).put(data);
       // 提交解码器解码
@@ -53,9 +54,9 @@ public class AudioDecode {
   }
 
   // 创建Codec
-  private void setAudioDecodec(byte[] csd0) throws IOException {
+  private void setAudioDecodec(boolean useOpus, byte[] csd0) throws IOException {
     // 创建解码器
-    String codecMime = MediaFormat.MIMETYPE_AUDIO_AAC;
+    String codecMime = useOpus ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     decodec = MediaCodec.createDecoderByType(codecMime);
     // 音频参数
     int sampleRate = 48000;
@@ -65,6 +66,11 @@ public class AudioDecode {
     decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头
     decodecFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0));
+    if (useOpus) {
+      ByteBuffer csd12ByteBuffer = ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+      decodecFormat.setByteBuffer("csd-1", csd12ByteBuffer);
+      decodecFormat.setByteBuffer("csd-2", csd12ByteBuffer);
+    }
     // 异步解码
     decodec.setCallback(new MediaCodec.Callback() {
       @Override
@@ -121,7 +127,7 @@ public class AudioDecode {
   // 创建音频放大器
   private void setLoudnessEnhancer() {
     loudnessEnhancer = new LoudnessEnhancer(audioTrack.getAudioSessionId());
-    loudnessEnhancer.setTargetGain(3500);
+    loudnessEnhancer.setTargetGain(3200);
     loudnessEnhancer.setEnabled(true);
   }
 }

@@ -74,10 +74,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     miniView.show();
   }
 
-  public boolean checkIsNeedPlay() {
-    return uiMode != UI_MODE_MINI;
-  }
-
   public void hide(boolean isRelease) {
     if (uiMode == UI_MODE_FULL) FullActivity.hide();
     else if (uiMode == UI_MODE_SMALL) smallView.hide();

@@ -43,13 +43,14 @@ public class SetActivity extends Activity {
     setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxVideoBit()), Device.maxVideoBitDetail), str -> AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str))).getRoot());
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", new Pair<>(AppData.setting.getDefaultSetResolution(), Device.setResolutionDetail), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先H265", new Pair<>(AppData.setting.getUseH265(), Device.useH265Detail), isChecked -> AppData.setting.setUseH265(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先Opus", new Pair<>(AppData.setting.getUseOpus(), Device.useOpusDetail), isChecked -> AppData.setting.setUseOpus(isChecked)).getRoot());
     setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使用隧道传输", new Pair<>(AppData.setting.getUseTunnel(), Device.useTunnelDetail), isChecked -> AppData.setting.setUseTunnel(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "熄屏控制", new Pair<>(AppData.setting.getTurnOffScreen(), Device.turnOffScreenDetail), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", new Pair<>(AppData.setting.getAutoControlScreen(), Device.autoControlScreenDetail), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
+    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "默认全屏启动", new Pair<>(AppData.setting.getDefaultFull(), Device.defaultFullDetail), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
     // 显示
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "熄屏控制", new Pair<>(AppData.setting.getTurnOffScreen(), Device.turnOffScreenDetail), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", new Pair<>(AppData.setting.getAutoControlScreen(), Device.autoControlScreenDetail), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "默认全屏启动", new Pair<>(AppData.setting.getDefaultFull(), Device.defaultFullDetail), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "主控端自动旋转", AppData.setting.getMasterAudoRotation(), isChecked -> AppData.setting.setMasterAudoRotation(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "被控端跟随旋转", AppData.setting.getSlaveAudoRotation(), isChecked -> AppData.setting.setSlaveAudoRotation(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "被控端方向跟随", AppData.setting.getSlaveAudoRotation(), isChecked -> AppData.setting.setSlaveAudoRotation(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(PublicTools.createTextCard(this, "清除默认设备", () -> {
       AppData.setting.setDefaultDevice("");

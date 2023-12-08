@@ -22,13 +22,15 @@ public class Device {
   public boolean turnOffScreen;
   public static final String turnOffScreenDetail = "开启后会在控制过程中保持被控端屏幕关闭";
   public boolean autoControlScreen;
-  public static final String autoControlScreenDetail = "开启后会在连接时自动唤醒被控端，在连接中被控端待机后自动唤醒，断开后会自动将被控端锁定";
+  public static final String autoControlScreenDetail = "开启后会在连接时自动唤醒被控端，在连接中被控端待机后自动唤醒";
   public boolean defaultFull;
   public static final String defaultFullDetail = "开启后在连接成功后直接进入全屏状态";
   public boolean useH265;
-  public static final String useH265Detail = "优先使用H265格式，视频体积小延迟低，实际以主备控端支持情况为主，若视频异常可尝试关闭";
+  public static final String useH265Detail = "优先使用H265，视频体积小延迟低，实际以支持情况为主，若视频异常可尝试关闭";
+  public boolean useOpus;
+  public static final String useOpusDetail = "优先使用OPUS，音频体积小延迟低，实际以支持情况为主";
   public boolean useTunnel;
-  public static final String useTunnelDetail = "使用隧道传输，开启后使用ADB隧道传输数据，否则使用单独端口(ADB端口加1)传输数据";
+  public static final String useTunnelDetail = "开启后使用ADB隧道传输数据，否则使用单独端口(ADB端口加1)传输数据";
 
   public Device(String uuid,
                 Integer type,
@@ -43,6 +45,7 @@ public class Device {
                 boolean autoControlScreen,
                 boolean defaultFull,
                 boolean useH265,
+                boolean useOpus,
                 boolean useTunnel) {
     this.uuid = uuid;
     this.type = type;
@@ -57,11 +60,12 @@ public class Device {
     this.autoControlScreen = autoControlScreen;
     this.defaultFull = defaultFull;
     this.useH265 = useH265;
+    this.useOpus=useOpus;
     this.useTunnel = useTunnel;
   }
 
   public static Device getDefaultDevice(String uuid, int type) {
-    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getTurnOffScreen(), AppData.setting.getAutoControlScreen(), AppData.setting.getDefaultFull(), AppData.setting.getUseH265(), AppData.setting.getUseTunnel());
+    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getTurnOffScreen(), AppData.setting.getAutoControlScreen(), AppData.setting.getDefaultFull(), AppData.setting.getUseH265(),AppData.setting.getUseOpus(), AppData.setting.getUseTunnel());
   }
 
   public boolean isNormalDevice() {

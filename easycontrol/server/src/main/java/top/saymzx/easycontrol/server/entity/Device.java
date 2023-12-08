@@ -4,6 +4,8 @@
 package top.saymzx.easycontrol.server.entity;
 
 import android.content.IOnPrimaryClipChangedListener;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -220,5 +222,11 @@ public final class Device {
     int exitCode = process.waitFor();
     if (exitCode != 0) throw new IOException("命令执行错误" + cmd);
     return builder.toString();
+  }
+
+  public static boolean isEncoderSupport(String mimeName) {
+    MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains(mimeName)) return true;
+    return false;
   }
 }
