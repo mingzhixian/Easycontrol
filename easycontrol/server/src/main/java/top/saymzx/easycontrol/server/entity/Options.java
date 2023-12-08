@@ -13,6 +13,7 @@ public final class Options {
   public static boolean autoControlScreen = true;
   public static float reSize = -1;
   public static boolean useH265 = true;
+  public static boolean useOpus=true;
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -47,6 +48,9 @@ public final class Options {
           break;
         case "useH265":
           useH265 = Integer.parseInt(value) == 1;
+          break;
+        case "useOpus":
+          useOpus = Integer.parseInt(value) == 1;
           break;
       }
     }

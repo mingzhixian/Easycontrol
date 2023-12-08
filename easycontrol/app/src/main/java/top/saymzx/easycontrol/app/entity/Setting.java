@@ -64,6 +64,15 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getUseOpus() {
+    return sharedPreferences.getBoolean("useOpus", true);
+  }
+
+  public void setUseOpus(boolean value) {
+    editor.putBoolean("useOpus", value);
+    editor.apply();
+  }
+
   public boolean getUseTunnel() {
     return sharedPreferences.getBoolean("useTunnel", false);
   }

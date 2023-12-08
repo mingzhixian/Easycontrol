@@ -195,7 +195,7 @@ public final class Server {
 
   // 释放资源
   private static void release() {
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
       try {
         switch (i) {
           case 0:
@@ -215,10 +215,6 @@ public final class Server {
             AudioEncode.release();
             break;
           case 4:
-            if (Options.autoControlScreen) Controller.checkScreenOff(false);
-            if (Options.turnOffScreen) Device.setScreenPowerMode(1);
-            break;
-          case 5:
             Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
             break;
         }

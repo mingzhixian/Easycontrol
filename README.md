@@ -29,7 +29,7 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 [点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)
 
 ## 发行版本下载
-因项目开发以及反馈群答疑给本人带来一定负担，本项目此后不会免费提供发行版本，请前往[易控下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp))付费下载(捐赠10元及以上)。（项目代码仍为开源状态，若您有一定能力，可自行下载源码编译使用）
+因项目开发以及反馈群答疑给本人带来一定负担，本项目此后不会免费提供发行版本，请前往[易控下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)付费下载(捐赠10元及以上)。（项目代码仍为开源状态，若您有一定能力，可自行下载源码编译使用）
 
 ## 截图
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/main.webp" width="200px">

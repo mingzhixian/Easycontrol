@@ -30,7 +30,7 @@ public class FullActivity extends Activity implements SensorEventListener {
   private static ClientView clientView;
 
   private ActivityFullBinding fullActivity;
-  private int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+  private static int lastOrientation = -1;
 
   public static boolean isShow = false;
 
@@ -40,6 +40,8 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity = ActivityFullBinding.inflate(this.getLayoutInflater());
     setContentView(fullActivity.getRoot());
     context = this;
+    // 初始时锁定当前方向
+    if (lastOrientation == -1) setRotation(-1);
     // 全屏
     PublicTools.setFullScreen(this);
     // 隐藏工具栏
@@ -55,24 +57,16 @@ public class FullActivity extends Activity implements SensorEventListener {
       sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
     // 被控端旋转跟随
-    if (AppData.setting.getSlaveAudoRotation().first) {
-      int rotation = getWindowManager().getDefaultDisplay().getRotation();
-      controller.sendRotateEvent(rotation == 0 || rotation == 2);
-    }
+    if (AppData.setting.getSlaveAudoRotation().first) controller.sendRotateEvent(lastOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT || lastOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
   }
 
   @Override
   protected void onPause() {
-    if (isChangingConfigurations()) context.fullActivity.textureViewLayout.removeView(clientView.textureView);
-      // 非正常退出页面
-    else if (isShow) clientView.changeToMini();
-    super.onPause();
-  }
-
-  @Override
-  protected void onDestroy() {
     ((SensorManager) getSystemService(Context.SENSOR_SERVICE)).unregisterListener(this);
-    super.onDestroy();
+    fullActivity.textureViewLayout.removeView(clientView.textureView);
+    // 非正常退出页面
+    if (!isChangingConfigurations() && isShow) clientView.changeToMini();
+    super.onPause();
   }
 
   @Override
@@ -95,11 +89,11 @@ public class FullActivity extends Activity implements SensorEventListener {
     return super.onKeyDown(keyCode, event);
   }
 
-  public static void show(ClientView clientView, Controller controller) {
+  public static void show(ClientView cli, Controller con) {
     if (!isShow) {
       isShow = true;
-      FullActivity.clientView = clientView;
-      FullActivity.controller = controller;
+      clientView = cli;
+      controller = con;
       AppData.main.startActivity(new Intent(AppData.main, FullActivity.class));
     }
   }
@@ -107,11 +101,9 @@ public class FullActivity extends Activity implements SensorEventListener {
   public static void hide() {
     if (isShow) {
       isShow = false;
-      context.fullActivity.textureViewLayout.removeView(clientView.textureView);
+      lastOrientation = -1;
       context.finish();
       context = null;
-      FullActivity.clientView = null;
-      FullActivity.controller = null;
     }
   }
 
@@ -130,11 +122,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
     fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     fullActivity.buttonNavBar.setOnClickListener(v -> setNavBarHide());
-    fullActivity.buttonRotate.setOnClickListener(v -> {
-      int newOrientation = lastOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-      lastOrientation = newOrientation;
-      setRequestedOrientation(newOrientation);
-    });
+    fullActivity.buttonRotate.setOnClickListener(v -> setRotation(-2));
     fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
   }
 
@@ -154,6 +142,20 @@ public class FullActivity extends Activity implements SensorEventListener {
     }));
   }
 
+  // 设置页面方向
+  private void setRotation(int rotation) {
+    // 设置-1为锁定当前方向
+    if (rotation == -1) {
+      rotation = getResources().getConfiguration().orientation == 1 ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    }
+    // 设置-2为反转当前方向
+    else if (rotation == -2) {
+      rotation = getResources().getConfiguration().orientation == 1 ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    }
+    lastOrientation = rotation;
+    setRequestedOrientation(rotation);
+  }
+
   @Override
   public void onSensorChanged(SensorEvent sensorEvent) {
     if (Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()) return;
@@ -167,10 +169,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     else if (y > -3 && y < 3 && x <= -4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
     else if (x > -3 && x < 3 && y <= -4.5) newOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 
-    if (lastOrientation != newOrientation) {
-      lastOrientation = newOrientation;
-      setRequestedOrientation(newOrientation);
-    }
+    if (lastOrientation != newOrientation) setRotation(newOrientation);
   }
 
   @Override

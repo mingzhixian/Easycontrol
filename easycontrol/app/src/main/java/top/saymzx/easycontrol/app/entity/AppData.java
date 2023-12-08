@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.hardware.usb.UsbManager;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -30,6 +31,9 @@ public class AppData {
   // 剪切板
   public static ClipboardManager clipBoard;
 
+  // Wifi
+  public static WifiManager wifiManager;
+
   // USB
   public static UsbManager usbManager;
 
@@ -50,6 +54,7 @@ public class AppData {
     handler = new android.os.Handler(m.getMainLooper());
     dbHelper = new DbHelper(main);
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
+    wifiManager = (WifiManager) main.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     usbManager = (UsbManager) main.getSystemService(Context.USB_SERVICE);
     windowManager = main.getWindowManager();
     getRealScreenSize(m);

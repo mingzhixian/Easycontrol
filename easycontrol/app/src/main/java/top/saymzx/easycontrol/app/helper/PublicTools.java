@@ -7,8 +7,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
-import android.net.wifi.WifiManager;
+import android.net.DhcpInfo;
 import android.os.Build;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -106,6 +107,7 @@ public class PublicTools {
     ItemSwitchBinding autoControlScreen = createSwitchCard(context, "自动屏幕控制", new Pair<>(device.autoControlScreen, Device.autoControlScreenDetail), null);
     ItemSwitchBinding defaultFull = createSwitchCard(context, "默认全屏", new Pair<>(device.defaultFull, Device.defaultFullDetail), null);
     ItemSwitchBinding useH265 = createSwitchCard(context, "优先使用H265", new Pair<>(device.useH265, Device.useH265Detail), null);
+    ItemSwitchBinding useOpus = createSwitchCard(context, "优先使用Opus", new Pair<>(device.useOpus, Device.useOpusDetail), null);
     ItemSwitchBinding useTunnel = createSwitchCard(context, "使用隧道传输", new Pair<>(device.useTunnel, Device.useTunnelDetail), null);
     itemAddDeviceBinding.options.addView(maxSize.getRoot());
     itemAddDeviceBinding.options.addView(maxFps.getRoot());
@@ -115,6 +117,7 @@ public class PublicTools {
     itemAddDeviceBinding.options.addView(autoControlScreen.getRoot());
     itemAddDeviceBinding.options.addView(defaultFull.getRoot());
     itemAddDeviceBinding.options.addView(useH265.getRoot());
+    itemAddDeviceBinding.options.addView(useOpus.getRoot());
     itemAddDeviceBinding.options.addView(useTunnel.getRoot());
     // 特殊设备不允许修改
     if (!device.isNormalDevice()) itemAddDeviceBinding.address.setEnabled(false);
@@ -136,6 +139,7 @@ public class PublicTools {
         autoControlScreen.itemSwitch.isChecked(),
         defaultFull.itemSwitch.isChecked(),
         useH265.itemSwitch.isChecked(),
+        useOpus.itemSwitch.isChecked(),
         useTunnel.itemSwitch.isChecked()
       );
       if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(newDevice);
@@ -219,7 +223,7 @@ public class PublicTools {
     // 特殊格式
     if (address.contains("*")) {
       type = 2;
-      pattern = "(\\*.*?\\*):(\\d+)";
+      pattern = "(\\*.*?\\*.*):(\\d+)";
     }
     // IPv6
     else if (address.contains("[")) {
@@ -245,6 +249,7 @@ public class PublicTools {
     // 特殊格式
     if (type == 2) {
       if (ip.equals("*gateway*")) ip = getGateway();
+      if (ip.contains("*netAddress*")) ip = ip.replace("*netAddress*", getNetAddress());
     }
     // 域名解析
     else if (type == 1) {
@@ -276,15 +281,46 @@ public class PublicTools {
 
   // 获取网关地址
   public static String getGateway() {
-    WifiManager wm = (WifiManager) AppData.main.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-    long gateway = wm.getDhcpInfo().gateway;
-    return (int) (gateway & 0xff) + "." + (int) ((gateway >> 8) & 0xff) + "." + (int) ((gateway >> 16) & 0xff) + "." + (int) ((gateway >> 24) & 0xff);
+    return decodeIntToIp(AppData.wifiManager.getDhcpInfo().gateway, 4);
   }
 
-  // 获取是否支持H265
-  public static boolean isH265DecoderSupport() {
+  // 获取子网地址
+  public static String getNetAddress() {
+    DhcpInfo dhcpInfo = AppData.wifiManager.getDhcpInfo();
+    int gateway = dhcpInfo.gateway;
+    int ipAddress = dhcpInfo.ipAddress;
+    // 因为dhcpInfo.netmask兼容性不好，部分设备获取值为0，所以此处使用对比方法
+    int len;
+    if (((gateway >> 8) & 0xff) == ((ipAddress >> 8) & 0xff)) len = 3;
+    else if (((gateway >> 16) & 0xff) == ((ipAddress >> 16) & 0xff)) len = 2;
+    else len = 1;
+    return decodeIntToIp(gateway, len);
+  }
+
+  // 解析地址
+  private static String decodeIntToIp(int ip, int len) {
+    if (len < 1 || len > 4) return "";
+    StringBuilder builder = new StringBuilder();
+    builder.append((int) (ip & 0xff));
+    if (len > 1) {
+      builder.append(".");
+      builder.append((ip >> 8) & 0xff);
+      if (len > 2) {
+        builder.append(".");
+        builder.append((ip >> 16) & 0xff);
+        if (len > 3) {
+          builder.append(".");
+          builder.append((ip >> 24) & 0xff);
+        }
+      }
+    }
+    return builder.toString();
+  }
+
+  // 获取解码器是否支持
+  public static boolean isDecoderSupport(String mimeName) {
     MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
+    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains(mimeName)) return true;
     return false;
   }
 

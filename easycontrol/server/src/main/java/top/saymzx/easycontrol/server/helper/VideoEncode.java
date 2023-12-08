@@ -6,7 +6,6 @@ package top.saymzx.easycontrol.server.helper;
 import android.graphics.Rect;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.IBinder;
@@ -34,7 +33,7 @@ public final class VideoEncode {
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 检查解码器
-    isH265EncoderSupport = isH265EncoderSupport();
+    isH265EncoderSupport = Options.useH265 && Device.isEncoderSupport("hevc");
     Server.writeMain(new byte[]{(byte) (isH265EncoderSupport ? 1 : 0)});
     // 创建Codec
     createEncodecFormat();
@@ -114,14 +113,6 @@ public final class VideoEncode {
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }
-  }
-
-  private static boolean isH265EncoderSupport() {
-    if (Options.useH265) {
-      MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-      for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains("hevc")) return true;
-    }
-    return false;
   }
 
   public static void release() {
