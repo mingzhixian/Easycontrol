@@ -81,7 +81,10 @@ public class AudioDecode {
       @Override
       public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
         audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
-        decodec.releaseOutputBuffer(outIndex, false);
+        try {
+          decodec.releaseOutputBuffer(outIndex, false);
+        } catch (IllegalStateException ignored) {
+        }
       }
 
       @Override

@@ -28,9 +28,9 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginStart="10dp"
-      android:thumbTint="@color/cardContainerBackground"
+      android:thumbTint="@color/button"
       android:thumbTintMode="multiply"
-      android:trackTint="@color/primary"
+      android:trackTint="@color/button"
       android:trackTintMode="multiply"
       tools:ignore="UseSwitchCompatOrMaterialXml" />
   </LinearLayout>

@@ -53,7 +53,7 @@ public class DeviceListAdapter extends BaseAdapter {
     }
     // 获取设备
     Device device = devices.get(i);
-    if (device.isCenterDevice()) setView(view, device, R.drawable.center);
+    if (device.isCenterDevice()) setView(view, device, R.drawable.cloud);
     else setView(view, device, R.drawable.phone);
     return view;
   }

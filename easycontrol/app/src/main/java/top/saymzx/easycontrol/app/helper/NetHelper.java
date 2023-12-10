@@ -12,12 +12,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class NetHelper {
-
-  public static final int POST_DEVICE = 1;
-  public static final int DELETE_DEVICE = 2;
-  public static final int GET_DEVICE = 3;
-  public static final int CHANGE_PASSWORD = 4;
-
   public static final int RESPONSE_ERROR = 100;
   public static final int RESPONSE_OK = 101;
 

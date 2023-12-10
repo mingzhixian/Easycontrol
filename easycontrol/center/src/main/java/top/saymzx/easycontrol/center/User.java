@@ -1,5 +1,7 @@
 package top.saymzx.easycontrol.center;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -19,13 +21,34 @@ public class User {
   }
 
   static class Device {
-    public final String uuid;
-    public String ip;
-    public long lastPostTime;
+    private final String uuid;
+    private int adbPort;
+    private String ipv6;
+    private String ipv4;
+    private long lastPostTime;
 
-    public Device(String uuid, String ip) {
+    public Device(String uuid) {
       this.uuid = uuid;
-      this.ip = ip;
+    }
+
+    public void update(String ipv4, String ipv6, int adbPort, long lastPostTime) {
+      this.ipv4 = ipv4;
+      this.ipv6 = ipv6;
+      this.adbPort = adbPort;
+      this.lastPostTime = lastPostTime;
+    }
+
+    public JSONObject toJson() {
+      JSONObject tmp = new JSONObject();
+      tmp.put("uuid", uuid);
+      tmp.put("ipv4", ipv4);
+      tmp.put("ipv6", ipv6);
+      tmp.put("adbPort", adbPort);
+      return tmp;
+    }
+
+    public long getLastPostTime() {
+      return lastPostTime;
     }
   }
 }

@@ -7,6 +7,12 @@
   android:keepScreenOn="true"
   tools:context=".client.view.FullActivity">
 
+  <EditText
+    android:id="@+id/edit_text"
+    android:layout_width="10dp"
+    android:layout_height="10dp"
+    android:inputType="textVisiblePassword" />
+
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -33,7 +39,8 @@
         android:id="@+id/button_rotate"
         android:layout_width="40dp"
         android:layout_height="match_parent"
-        android:padding="4dp"
+        android:focusable="false"
+        android:padding="5dp"
         android:src="@drawable/rotate"
         android:tint="#fff" />
 
@@ -42,8 +49,9 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:padding="4dp"
-        android:src="@drawable/menu"
+        android:focusable="false"
+        android:padding="5dp"
+        android:src="@drawable/square"
         android:tint="#fff" />
 
       <ImageView
@@ -51,8 +59,9 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:padding="4dp"
-        android:src="@drawable/round"
+        android:focusable="false"
+        android:padding="5dp"
+        android:src="@drawable/o"
         android:tint="#fff" />
 
       <ImageView
@@ -60,8 +69,9 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:padding="4dp"
-        android:src="@drawable/caret"
+        android:focusable="false"
+        android:padding="5dp"
+        android:src="@drawable/caret_left"
         android:tint="#fff" />
 
     </LinearLayout>
@@ -72,8 +82,9 @@
     android:layout_width="40dp"
     android:layout_height="32dp"
     android:layout_gravity="end|bottom"
-    android:padding="4dp"
-    android:src="@drawable/more"
+    android:focusable="false"
+    android:padding="5dp"
+    android:src="@drawable/ellipsis_vertical"
     android:tint="#fff" />
 
   <LinearLayout
@@ -84,49 +95,45 @@
     android:layout_marginEnd="10dp"
     android:layout_marginBottom="42dp"
     android:background="@drawable/background_cron"
-    android:backgroundTint="@color/cardBackgroundTranslucent"
+    android:backgroundTint="@color/cardBackground"
     android:orientation="horizontal"
     android:padding="5dp">
 
     <ImageView
       android:id="@+id/button_nav_bar"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_margin="1dp"
-      android:src="@drawable/hide_nav"
-      android:tint="@color/onCardBackground" />
-
-    <ImageView
-      android:id="@+id/button_power"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_margin="1dp"
-      android:src="@drawable/power"
+      android:layout_width="22dp"
+      android:layout_height="22dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/divide"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_mini"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_margin="1dp"
-      android:src="@drawable/mini"
+      android:layout_width="22dp"
+      android:layout_height="22dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/minus"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_full_exit"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_margin="1dp"
-      android:src="@drawable/exit_fullscreen"
+      android:layout_width="22dp"
+      android:layout_height="22dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/compress"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_close"
-      android:layout_width="28dp"
-      android:layout_height="28dp"
-      android:layout_margin="1dp"
-      android:src="@drawable/close"
-      android:tint="@color/buttonSecond" />
+      android:layout_width="22dp"
+      android:layout_height="22dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/x"
+      android:tint="@color/alert" />
 
   </LinearLayout>
 

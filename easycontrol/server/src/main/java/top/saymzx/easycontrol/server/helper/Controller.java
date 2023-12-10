@@ -26,12 +26,9 @@ public final class Controller {
         handleKeepAliveEvent();
         break;
       case 5:
-        handlePowerEvent();
-        break;
-      case 6:
         handleChangeSizeEvent();
         break;
-      case 7:
+      case 6:
         handleRotateEvent();
         break;
     }
@@ -48,7 +45,8 @@ public final class Controller {
 
   private static void handleKeyEvent() throws IOException {
     int keyCode = Server.mainInputStream.readInt();
-    Device.keyEvent(keyCode);
+    int meta = Server.mainInputStream.readInt();
+    Device.keyEvent(keyCode,meta);
   }
 
   private static void handleClipboardEvent() throws IOException {
@@ -65,10 +63,6 @@ public final class Controller {
     lastKeepAliveTime = System.currentTimeMillis();
   }
 
-  private static void handlePowerEvent() {
-    Device.keyEvent(26);
-  }
-
   private static void handleChangeSizeEvent() throws IOException, InterruptedException {
     Device.changeDeviceSize(Server.mainInputStream.readFloat());
   }
@@ -83,7 +77,7 @@ public final class Controller {
     if (output.contains("mScreenOn=true")) isScreenOn = true;
     else if (output.contains("mScreenOn=false")) isScreenOn = false;
     // 如果屏幕状态和要求状态不同，则模拟按下电源键
-    if (isScreenOn != null && isScreenOn ^ turnOn) Device.keyEvent(26);
+    if (isScreenOn != null && isScreenOn ^ turnOn) Device.keyEvent(26,0);
   }
 
 }

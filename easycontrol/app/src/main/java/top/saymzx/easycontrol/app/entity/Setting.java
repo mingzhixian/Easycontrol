@@ -55,48 +55,48 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getUseH265() {
-    return sharedPreferences.getBoolean("useH265", true);
+  public boolean getDefaultUseH265() {
+    return sharedPreferences.getBoolean("defaultUseH265", true);
   }
 
-  public void setUseH265(boolean value) {
-    editor.putBoolean("useH265", value);
+  public void setDefaultUseH265(boolean value) {
+    editor.putBoolean("defaultUseH265", value);
     editor.apply();
   }
 
-  public boolean getUseOpus() {
-    return sharedPreferences.getBoolean("useOpus", true);
+  public boolean getDefaultUseOpus() {
+    return sharedPreferences.getBoolean("defaultUseOpus", true);
   }
 
-  public void setUseOpus(boolean value) {
-    editor.putBoolean("useOpus", value);
+  public void setDefaultUseOpus(boolean value) {
+    editor.putBoolean("defaultUseOpus", value);
     editor.apply();
   }
 
-  public boolean getUseTunnel() {
-    return sharedPreferences.getBoolean("useTunnel", false);
+  public boolean getDefaultUseTunnel() {
+    return sharedPreferences.getBoolean("defaultUseTunnel", false);
   }
 
-  public void setUseTunnel(boolean value) {
-    editor.putBoolean("useTunnel", value);
+  public void setDefaultUseTunnel(boolean value) {
+    editor.putBoolean("defaultUseTunnel", value);
     editor.apply();
   }
 
-  public boolean getTurnOffScreen() {
-    return sharedPreferences.getBoolean("turnOffScreen", true);
+  public boolean getDefaultTurnOffScreen() {
+    return sharedPreferences.getBoolean("defaultTurnOffScreen", true);
   }
 
-  public void setTurnOffScreen(boolean value) {
-    editor.putBoolean("turnOffScreen", value);
+  public void setDefaultTurnOffScreen(boolean value) {
+    editor.putBoolean("defaultTurnOffScreen", value);
     editor.apply();
   }
 
-  public boolean getAutoControlScreen() {
-    return sharedPreferences.getBoolean("autoControlScreen", true);
+  public boolean getDefaultAutoLockAfterControl() {
+    return sharedPreferences.getBoolean("defaultAutoLockAfterControl", true);
   }
 
-  public void setAutoControlScreen(boolean value) {
-    editor.putBoolean("autoControlScreen", value);
+  public void setDefaultAutoLockAfterControl(boolean value) {
+    editor.putBoolean("defaultAutoLockAfterControl", value);
     editor.apply();
   }
 

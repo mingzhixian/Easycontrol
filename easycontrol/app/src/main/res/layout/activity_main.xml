@@ -10,60 +10,59 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/cardContainerBackground"
-    android:elevation="6dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="5dp">
-
-    <ImageView
-      android:layout_width="50dp"
-      android:layout_height="50dp"
-      android:layout_marginStart="10dp"
-      android:scaleX="1.6"
-      android:scaleY="1.6"
-      android:src="@drawable/ic_launcher_foreground" />
-
-    <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="易控"
-      android:textColor="@color/onCardContainerBackground"
-      android:textSize="@dimen/largeFont"
-      android:textStyle="bold" />
-
-    <Space
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1" />
-
-    <ImageView
-      android:id="@+id/button_add"
-      android:layout_width="30dp"
-      android:layout_height="30dp"
-      android:layout_marginEnd="4dp"
-      android:src="@drawable/add"
-      android:tint="@color/onBackground" />
+    android:paddingTop="5dp"
+    android:paddingBottom="15dp">
 
     <ImageView
       android:id="@+id/button_set"
-      android:layout_width="30dp"
-      android:layout_height="30dp"
-      android:layout_marginEnd="12dp"
-      android:src="@drawable/more"
+      android:layout_width="54dp"
+      android:layout_height="54dp"
+      android:padding="15dp"
+      android:src="@drawable/bars"
       android:tint="@color/onBackground" />
+
+    <LinearLayout
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:orientation="vertical">
+
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="易控"
+        android:textColor="@color/onBackground"
+        android:textSize="@dimen/largeFont" />
+
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="不知江月待何人，但见长江送流水"
+        android:textColor="@color/onBackgroundSecond"
+        android:textSize="@dimen/smallSmallFont" />
+    </LinearLayout>
+
+    <ImageView
+      android:id="@+id/button_add"
+      android:layout_width="54dp"
+      android:layout_height="54dp"
+      android:padding="15dp"
+      android:src="@drawable/plus"
+      android:tint="@color/onBackground" />
+
   </LinearLayout>
 
   <ListView
     android:id="@+id/devices_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginStart="15dp"
-    android:layout_marginEnd="15dp"
     android:clipToPadding="false"
     android:divider="#00000000"
     android:dividerHeight="12dp"
-    android:paddingTop="30dp"
+    android:paddingStart="15dp"
+    android:paddingEnd="15dp"
     android:paddingBottom="60dp"
     tools:listitem="@layout/item_devices_item" />
 

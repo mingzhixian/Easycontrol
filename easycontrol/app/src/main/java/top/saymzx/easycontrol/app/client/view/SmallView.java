@@ -6,8 +6,10 @@ import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
+import android.text.InputType;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,10 +54,10 @@ public class SmallView extends ViewOutlineProvider {
       PixelFormat.TRANSLUCENT
     );
 
-  private static final int baseLayoutParamsFlag = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-  private static final int LayoutParamsFlagFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-  private static final int LayoutParamsFlagNoFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-  private static final int backgroundWindowFlag = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+  private static final int baseLayoutParamsFlag = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+  private static final int LayoutParamsFlagFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+  private static final int LayoutParamsFlagNoFocus = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+  private static final int backgroundWindowFlag = baseLayoutParamsFlag | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
   public SmallView(ClientView clientView) {
     this.clientView = clientView;
@@ -83,6 +85,7 @@ public class SmallView extends ViewOutlineProvider {
       smallView.barView.setVisibility(View.GONE);
       // 设置监听
       setButtonListener(controller);
+      setKeyEvent(controller);
       // 显示
       clientView.viewAnim(smallView.getRoot(), true, 0, PublicTools.dp2px(40f), (isStart -> {
         if (isStart) {
@@ -126,10 +129,12 @@ public class SmallView extends ViewOutlineProvider {
 
   public void setViewFocus(boolean toFocus) {
     if (!toFocus && viewFocus) {
+      smallView.editText.clearFocus();
       smallViewParams.flags = LayoutParamsFlagNoFocus;
       AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
       viewFocus = false;
     } else if (toFocus && !viewFocus) {
+      smallView.editText.requestFocus();
       smallViewParams.flags = LayoutParamsFlagFocus;
       AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
       viewFocus = true;
@@ -192,10 +197,9 @@ public class SmallView extends ViewOutlineProvider {
 
   // 设置按钮监听
   private void setButtonListener(Controller controller) {
-    smallView.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4));
-    smallView.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3));
-    smallView.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187));
-    smallView.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
+    smallView.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4, 0));
+    smallView.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3, 0));
+    smallView.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187, 0));
     smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonMiniCircle.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
@@ -209,7 +213,7 @@ public class SmallView extends ViewOutlineProvider {
     changeBarView();
     boolean isShow = smallView.navBar.getVisibility() == View.GONE;
     smallView.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    smallView.buttonNavBar.setImageResource(isShow ? R.drawable.hide_nav : R.drawable.show_nav);
+    smallView.buttonNavBar.setImageResource(isShow ? R.drawable.divide : R.drawable.equals);
   }
 
   private void changeBarView() {
@@ -231,6 +235,15 @@ public class SmallView extends ViewOutlineProvider {
         if (sizeX < minSize || sizeY < minSize) return true;
         clientView.updateMaxSize(new Pair<>(sizeX, sizeY));
       }
+      return true;
+    });
+  }
+
+  // 设置键盘监听
+  private void setKeyEvent(Controller controller) {
+    smallView.editText.setInputType(InputType.TYPE_NULL);
+    smallView.editText.setOnKeyListener((v, keyCode, event) -> {
+      if (event.getAction() == KeyEvent.ACTION_DOWN) controller.sendKeyEvent(event.getKeyCode(), event.getMetaState());
       return true;
     });
   }

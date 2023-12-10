@@ -11,8 +11,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Center {
-  public static final Double version = 3.1;
-
   // 线程池
   private static final ExecutorService executor = new ThreadPoolExecutor(5, 20, 60, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -37,8 +35,7 @@ public class Center {
         return;
       }
       long now = System.currentTimeMillis();
-      for (User user : users.values())
-        user.devices.removeIf(address -> now - address.lastPostTime > 1000 * 60 * 90);
+      for (User user : users.values()) user.devices.removeIf(address -> now - address.getLastPostTime() > 1000 * 60 * 90);
     }
   }
 }

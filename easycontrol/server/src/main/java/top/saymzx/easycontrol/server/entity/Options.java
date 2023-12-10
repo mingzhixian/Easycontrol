@@ -4,16 +4,16 @@
 package top.saymzx.easycontrol.server.entity;
 
 public final class Options {
-  public static int tcpPort=5556;
+  public static int tcpPort = 5556;
   public static boolean isAudio = true;
   public static int maxSize = 1600;
   public static int maxVideoBit = 8000000;
   public static int maxFps = 60;
   public static boolean turnOffScreen = true;
-  public static boolean autoControlScreen = true;
+  public static boolean autoLockAfterControl = true;
   public static float reSize = -1;
   public static boolean useH265 = true;
-  public static boolean useOpus=true;
+  public static boolean useOpus = true;
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -40,8 +40,8 @@ public final class Options {
         case "turnOffScreen":
           turnOffScreen = Integer.parseInt(value) == 1;
           break;
-        case "autoControlScreen":
-          autoControlScreen = Integer.parseInt(value) == 1;
+        case "autoLockAfterControl":
+          autoLockAfterControl = Integer.parseInt(value) == 1;
           break;
         case "reSize":
           reSize = Float.parseFloat(value);

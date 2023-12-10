@@ -87,7 +87,7 @@ public class Client {
       + " maxFps=" + device.maxFps
       + " maxVideoBit=" + device.maxVideoBit
       + " turnOffScreen=" + (device.turnOffScreen ? 1 : 0)
-      + " autoControlScreen=" + (device.autoControlScreen ? 1 : 0)
+      + " autoLockAfterControl=" + (device.autoLockAfterControl ? 1 : 0)
       + " reSize=" + reSize
       + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0)
       + " useOpus=" + ((device.useOpus && supportOpus) ? 1 : 0) + " > /dev/null 2>&1 &", false);
@@ -144,7 +144,7 @@ public class Client {
     if (mainClientStream.readByte() == 1) {
       boolean useOpus = mainClientStream.readByte() == 1;
       if (mainClientStream.readByte() != AUDIO_EVENT) throw new IOException("启动Client失败:数据错误-应为AUDIO_EVENT");
-      audioDecode = new AudioDecode(useOpus,mainClientStream.readFrame());
+      audioDecode = new AudioDecode(useOpus, mainClientStream.readFrame());
     }
     threads.add(new Thread(this::executeMainStreamIn));
     threads.add(new Thread(this::executeVideoStreamIn));

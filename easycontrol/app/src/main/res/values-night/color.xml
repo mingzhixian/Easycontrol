@@ -11,13 +11,11 @@
   <color name="onCardContainerBackground">#cbcbcb</color>
 
   <!-- 特殊色彩 -->
-  <color name="primary">#33B5E5</color>
-  <color name="button">#5b76b4</color>
-  <color name="onButton">#f5f8ff</color>
-  <color name="buttonSecond">#ca5357</color>
-  <color name="onButtonSecond">#ded8d8</color>
+  <color name="button">#FFFFFF</color>
+  <color name="onButton">#414141</color>
+  <color name="alert">#ca5357</color>
+  <color name="onAlert">#ded8d8</color>
   <color name="translucent">#000000ff</color>
-  <color name="cardBackgroundTranslucent">#d03d4043</color>
 
   <!-- 客户端界面色彩 -->
   <color name="clientBar">#579CF9</color>

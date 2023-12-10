@@ -166,7 +166,7 @@ public final class Server {
   private static void executeOtherService() {
     try {
       while (!Thread.interrupted()) {
-        if (Options.autoControlScreen) Controller.checkScreenOff(true);
+        Controller.checkScreenOff(true);
         if (Options.turnOffScreen) Device.setScreenPowerMode(0);
         if (System.currentTimeMillis() - Controller.lastKeepAliveTime > timeoutDelay) throw new IOException("连接断开");
         Thread.sleep(1500);
@@ -195,7 +195,7 @@ public final class Server {
 
   // 释放资源
   private static void release() {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
       try {
         switch (i) {
           case 0:
@@ -209,12 +209,14 @@ public final class Server {
             if (Options.reSize != -1) Device.execReadOutput("wm size reset");
             break;
           case 2:
+            if (Options.autoLockAfterControl) Controller.checkScreenOff(false);
+          case 3:
             VideoEncode.release();
             break;
-          case 3:
+          case 4:
             AudioEncode.release();
             break;
-          case 4:
+          case 5:
             Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
             break;
         }
