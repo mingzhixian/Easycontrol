@@ -7,22 +7,13 @@
   android:orientation="vertical"
   tools:context=".IpActivity">
 
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/cardContainerBackground"
-    android:elevation="6dp"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="15dp">
-
-    <ImageView
-      android:id="@+id/back_button"
-      android:layout_width="30dp"
-      android:layout_height="30dp"
-      android:src="@drawable/back"
-      android:tint="@color/onBackground" />
-  </LinearLayout>
+  <ImageView
+    android:id="@+id/back_button"
+    android:layout_width="54dp"
+    android:layout_height="54dp"
+    android:padding="15dp"
+    android:src="@drawable/chevron_left"
+    android:tint="@color/onBackground" />
 
   <ScrollView
     android:layout_width="match_parent"
@@ -31,15 +22,14 @@
     <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginStart="15dp"
-      android:layout_marginEnd="15dp"
+      android:paddingStart="15dp"
+      android:paddingEnd="15dp"
       android:orientation="vertical">
 
       <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
         android:layout_marginBottom="5dp"
         android:text="本机地址"
         android:textColor="@color/onBackground"

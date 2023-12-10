@@ -71,11 +71,11 @@
       android:layout_height="match_parent"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
-      android:backgroundTint="@color/buttonSecond"
+      android:backgroundTint="@color/alert"
       android:gravity="center"
       android:padding="8dp"
       android:text="修改"
-      android:textColor="@color/onButtonSecond"
+      android:textColor="@color/onAlert"
       android:textSize="@dimen/smallFont" />
 
     <Space
@@ -89,11 +89,11 @@
       android:layout_height="match_parent"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
-      android:backgroundTint="@color/buttonSecond"
+      android:backgroundTint="@color/alert"
       android:gravity="center"
       android:padding="8dp"
       android:text="删除"
-      android:textColor="@color/onButtonSecond"
+      android:textColor="@color/onAlert"
       android:textSize="@dimen/smallFont" />
   </LinearLayout>
 

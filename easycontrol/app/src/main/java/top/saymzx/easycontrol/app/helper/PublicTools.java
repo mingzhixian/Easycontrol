@@ -9,10 +9,10 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.net.DhcpInfo;
 import android.os.Build;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -60,7 +60,7 @@ public class PublicTools {
     // 状态栏
     context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-    context.getWindow().setStatusBarColor(context.getResources().getColor(R.color.cardContainerBackground));
+    context.getWindow().setStatusBarColor(context.getResources().getColor(R.color.background));
     if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES)
       context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
   }
@@ -94,31 +94,8 @@ public class PublicTools {
     // 设置值
     itemAddDeviceBinding.name.setText(device.name);
     itemAddDeviceBinding.address.setText(device.address);
-    itemAddDeviceBinding.isAudio.setChecked(device.isAudio);
     // 创建View
-    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, maxSizeList);
-    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, maxFpsList);
-    ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(context, R.layout.item_spinner_item, videoBitList);
-    ItemSpinnerBinding maxSize = createSpinnerCard(context, "最大大小", maxSizeAdapter, new Pair<>(device.maxSize.toString(), Device.maxSizeDetail), null);
-    ItemSpinnerBinding maxFps = createSpinnerCard(context, "最大帧率", maxFpsAdapter, new Pair<>(device.maxFps.toString(), Device.maxFpsDetail), null);
-    ItemSpinnerBinding maxVideoBit = createSpinnerCard(context, "最大码率", videoBitAdapter, new Pair<>(device.maxVideoBit.toString(), Device.maxVideoBitDetail), null);
-    ItemSwitchBinding setResolution = createSwitchCard(context, "修改分辨率", new Pair<>(device.setResolution, Device.setResolutionDetail), null);
-    ItemSwitchBinding turnOffScreen = createSwitchCard(context, "熄屏控制", new Pair<>(device.turnOffScreen, Device.turnOffScreenDetail), null);
-    ItemSwitchBinding autoControlScreen = createSwitchCard(context, "自动屏幕控制", new Pair<>(device.autoControlScreen, Device.autoControlScreenDetail), null);
-    ItemSwitchBinding defaultFull = createSwitchCard(context, "默认全屏", new Pair<>(device.defaultFull, Device.defaultFullDetail), null);
-    ItemSwitchBinding useH265 = createSwitchCard(context, "优先使用H265", new Pair<>(device.useH265, Device.useH265Detail), null);
-    ItemSwitchBinding useOpus = createSwitchCard(context, "优先使用Opus", new Pair<>(device.useOpus, Device.useOpusDetail), null);
-    ItemSwitchBinding useTunnel = createSwitchCard(context, "使用隧道传输", new Pair<>(device.useTunnel, Device.useTunnelDetail), null);
-    itemAddDeviceBinding.options.addView(maxSize.getRoot());
-    itemAddDeviceBinding.options.addView(maxFps.getRoot());
-    itemAddDeviceBinding.options.addView(maxVideoBit.getRoot());
-    itemAddDeviceBinding.options.addView(setResolution.getRoot());
-    itemAddDeviceBinding.options.addView(turnOffScreen.getRoot());
-    itemAddDeviceBinding.options.addView(autoControlScreen.getRoot());
-    itemAddDeviceBinding.options.addView(defaultFull.getRoot());
-    itemAddDeviceBinding.options.addView(useH265.getRoot());
-    itemAddDeviceBinding.options.addView(useOpus.getRoot());
-    itemAddDeviceBinding.options.addView(useTunnel.getRoot());
+    createDeviceOptionSet(context, itemAddDeviceBinding.options, device);
     // 特殊设备不允许修改
     if (!device.isNormalDevice()) itemAddDeviceBinding.address.setEnabled(false);
     // 是否显示高级选项
@@ -126,28 +103,73 @@ public class PublicTools {
     // 设置确认按钮监听
     itemAddDeviceBinding.ok.setOnClickListener(v -> {
       if (device.type == Device.TYPE_NORMAL && String.valueOf(itemAddDeviceBinding.address.getText()).equals("")) return;
-      Device newDevice = new Device(
-        device.uuid, device.type,
-        String.valueOf(itemAddDeviceBinding.name.getText()),
-        String.valueOf(itemAddDeviceBinding.address.getText()),
-        itemAddDeviceBinding.isAudio.isChecked(),
-        Integer.parseInt(String.valueOf(maxSize.itemSpinner.getSelectedItem())),
-        Integer.parseInt(String.valueOf(maxFps.itemSpinner.getSelectedItem())),
-        Integer.parseInt(String.valueOf(maxVideoBit.itemSpinner.getSelectedItem())),
-        setResolution.itemSwitch.isChecked(),
-        turnOffScreen.itemSwitch.isChecked(),
-        autoControlScreen.itemSwitch.isChecked(),
-        defaultFull.itemSwitch.isChecked(),
-        useH265.itemSwitch.isChecked(),
-        useOpus.itemSwitch.isChecked(),
-        useTunnel.itemSwitch.isChecked()
-      );
-      if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(newDevice);
-      else AppData.dbHelper.insert(newDevice);
+      device.name = String.valueOf(itemAddDeviceBinding.name.getText());
+      device.address = String.valueOf(itemAddDeviceBinding.address.getText());
+      if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(device);
+      else AppData.dbHelper.insert(device);
       deviceListAdapter.update();
       dialog.cancel();
     });
     return dialog;
+  }
+
+  // 创建设备参数设置页面
+  private static final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
+  private static final String[] maxFpsList = new String[]{"90", "60", "40", "30", "20", "10"};
+  private static final String[] maxVideoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
+
+  public static void createDeviceOptionSet(Context context, ViewGroup fatherLayout, Device device) {
+    // Device为null，则视为设置默认参数
+    boolean setDefault = device == null;
+    // 数组适配器
+    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxSizeList);
+    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxFpsList);
+    ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxVideoBitList);
+    // 添加参数视图
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "使能音频", new Pair<>(setDefault ? AppData.setting.getDefaultIsAudio() : device.isAudio, "开启后将尝试传输音频，被控端需要安卓12之上"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultIsAudio(isChecked);
+      else device.isAudio = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSpinnerCard(context, "最大大小", maxSizeAdapter, new Pair<>(String.valueOf(setDefault ? AppData.setting.getDefaultMaxSize() : device.maxSize), "开启后将尝试传输音频，被控端需要安卓12之上"), str -> {
+      if (setDefault) AppData.setting.setDefaultMaxSize(Integer.parseInt(str));
+      else device.maxSize = Integer.parseInt(str);
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSpinnerCard(context, "最大帧率", maxFpsAdapter, new Pair<>(String.valueOf(setDefault ? AppData.setting.getDefaultMaxFps() : device.maxFps), "最大帧率限制，值越低画面越卡顿，但流量也越小，延迟也会降低"), str -> {
+      if (setDefault) AppData.setting.setDefaultMaxFps(Integer.parseInt(str));
+      else device.maxFps = Integer.parseInt(str);
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSpinnerCard(context, "最大码率", videoBitAdapter, new Pair<>(String.valueOf(setDefault ? AppData.setting.getDefaultMaxVideoBit() : device.maxVideoBit), "码率越大视频损失越小体积越大，建议设置为4，过高会导致延迟增加"), str -> {
+      if (setDefault) AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str));
+      else device.maxVideoBit = Integer.parseInt(str);
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "优先H265", new Pair<>(setDefault ? AppData.setting.getDefaultUseH265() : device.useH265, "优先使用H265，视频体积小延迟低，实际以支持情况为主，若视频异常可尝试关闭"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultUseH265(isChecked);
+      else device.useH265 = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "优先Opus", new Pair<>(setDefault ? AppData.setting.getDefaultUseOpus() : device.useOpus, "优先使用OPUS，音频体积小延迟低，实际以支持情况为主"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultUseOpus(isChecked);
+      else device.useOpus = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "熄屏控制", new Pair<>(setDefault ? AppData.setting.getDefaultTurnOffScreen() : device.turnOffScreen, "开启后会在控制过程中保持被控端屏幕关闭"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultTurnOffScreen(isChecked);
+      else device.turnOffScreen = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "断开后锁定", new Pair<>(setDefault ? AppData.setting.getDefaultAutoLockAfterControl() : device.autoLockAfterControl, "开启后断开连接后自动锁定被控端"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultAutoLockAfterControl(isChecked);
+      else device.autoLockAfterControl = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "默认全屏启动", new Pair<>(setDefault ? AppData.setting.getDefaultFull() : device.defaultFull, "开启后在连接成功后直接进入全屏状态"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultFull(isChecked);
+      else device.defaultFull = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "修改分辨率", new Pair<>(setDefault ? AppData.setting.getDefaultSetResolution() : device.setResolution, "开启后会自动修改被控端分辨率，可能会无法自动恢复(可手动恢复)，慎重考虑"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultSetResolution(isChecked);
+      else device.setResolution = isChecked;
+    }).getRoot());
+    fatherLayout.addView(PublicTools.createSwitchCard(context, "使用隧道传输", new Pair<>(setDefault ? AppData.setting.getDefaultUseTunnel() : device.useTunnel, "开启后使用ADB隧道传输数据，否则使用单独端口(ADB端口加1)传输数据"), isChecked -> {
+      if (setDefault) AppData.setting.setDefaultUseTunnel(isChecked);
+      else device.useTunnel = isChecked;
+    }).getRoot());
   }
 
   // 创建Client加载框
@@ -186,10 +208,6 @@ public class PublicTools {
   }
 
   // 创建列表卡片
-  public static final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
-  public static final String[] maxFpsList = new String[]{"90", "60", "40", "30", "20", "10"};
-  public static final String[] videoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
-
   public static ItemSpinnerBinding createSpinnerCard(
     Context context,
     String text,
@@ -269,9 +287,10 @@ public class PublicTools {
         Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
         while (inetAddresses.hasMoreElements()) {
           InetAddress inetAddress = inetAddresses.nextElement();
-          if (!inetAddress.isLoopbackAddress())
+          if (!inetAddress.isLoopbackAddress()) {
             if (inetAddress instanceof Inet4Address) ipv4Addresses.add(inetAddress.getHostAddress());
-            else if (inetAddress instanceof Inet6Address && !inetAddress.isLinkLocalAddress()) ipv6Addresses.add(inetAddress.getHostAddress());
+            else if (inetAddress instanceof Inet6Address && !inetAddress.isLinkLocalAddress()) ipv6Addresses.add("[" + inetAddress.getHostAddress() + "]");
+          }
         }
       }
     } catch (Exception ignored) {
@@ -301,7 +320,7 @@ public class PublicTools {
   private static String decodeIntToIp(int ip, int len) {
     if (len < 1 || len > 4) return "";
     StringBuilder builder = new StringBuilder();
-    builder.append((int) (ip & 0xff));
+    builder.append(ip & 0xff);
     if (len > 1) {
       builder.append(".");
       builder.append((ip >> 8) & 0xff);

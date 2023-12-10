@@ -68,7 +68,10 @@ public class VideoDecode {
 
       @Override
       public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
-        decodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
+        try {
+          decodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
+        } catch (IllegalStateException ignored) {
+        }
       }
 
       @Override

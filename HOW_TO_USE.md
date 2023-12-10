@@ -1,12 +1,17 @@
 # 易控(Easycontrol)使用说明
 
-## 被控端准备
+## 相关文件或链接
+1. 视频教程（旧版本教程，新版本以文本说明为准）：[B站](https://www.bilibili.com/video/BV1vu411j7rh)
+2. 电脑ADB文件：[蓝奏云](https://cloudstar.lanzoue.com/iAWKJ128mnif) 密码:scrcpy
+3. 易控软件：新版本不再免费提供安装包，需前往下载群付费下载(10元)，或下载源码手动编译，[下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)
 
+## 被控端准备
 1. 被控端手机连续点击关于手机-版本号，直至提示打开开发者选项
 2. 开发者选项打开USB调试
 3. 电脑下载解压ADB文件
 4. 被控端手机连接电脑
-5. 在ADB所在文件夹按住Shift+右击打开命令行
+5. 电脑下载ADB文件并解压：[蓝奏云](https://cloudstar.lanzoue.com/iAWKJ128mnif) 密码:scrcpy
+6. 在ADB所在文件夹按住Shift+右击打开命令行
 6. 执行以下命令开启无线调试：
 ``` shell
 // root用户（永久）：
@@ -19,7 +24,6 @@ adb tcpip 5555
 7. 网络环境拥有防火墙或使用内网穿透的用户，请注意放通被控端ADB端口以及端口号+1端口，例如，上面开启无线调试时设置了ADB端口为5555，则需放行5555端口以及5556端口
 
 ## 软件使用
-
 1. 简单使用
 	- 主控端安装易控，打开软件进行悬浮窗授权，添加设备（地址为被控端地址加ADB端口号），点击添加后的设备，被控端同意永久调试，开始投屏
 	- 设备地址格式：

@@ -57,12 +57,13 @@ public class Controller {
   }
 
   // 发送按键事件
-  public void sendKeyEvent(int key) {
-    ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+  public void sendKeyEvent(int key, int meta) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
     // 输入事件
     byteBuffer.put((byte) 2);
     // 按键类型
     byteBuffer.putInt(key);
+    byteBuffer.putInt(meta);
     byteBuffer.flip();
     client.write(byteBuffer.array());
   }
@@ -84,15 +85,10 @@ public class Controller {
     client.write(new byte[]{4});
   }
 
-  // 发送按键事件
-  public void sendPowerEvent() {
-    client.write(new byte[]{5});
-  }
-
   // 发送修改分辨率事件
   public void sendChangeSizeEvent(float newSize) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(5);
-    byteBuffer.put((byte) 6);
+    byteBuffer.put((byte) 5);
     byteBuffer.putFloat(newSize);
     byteBuffer.flip();
     client.write(byteBuffer.array());
@@ -100,7 +96,7 @@ public class Controller {
 
   // 发送旋转请求事件
   public void sendRotateEvent(boolean isPortrait) {
-    client.write(new byte[]{7, (byte) (isPortrait ? 0 : 1)});
+    client.write(new byte[]{6, (byte) (isPortrait ? 0 : 1)});
   }
 
 }

@@ -14,10 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class MyHttpHandler implements HttpHandler {
+  private static final Double VERSION = 4.0;
   private static final int POST_DEVICE = 1;
-  private static final int DELETE_DEVICE = 2;
-  private static final int GET_DEVICE = 3;
-  private static final int CHANGE_PASSWORD = 4;
+  private static final int GET_DEVICE = 2;
 
   private static final int RESPONSE_ERROR = 100;
   private static final int RESPONSE_OK = 101;
@@ -39,13 +38,13 @@ public class MyHttpHandler implements HttpHandler {
   private static void handleParam(JSONObject params, JSONObject response) {
     // 版本不符
     double clientVersion = params.getDouble("version");
-    if (clientVersion < Center.version.intValue() || clientVersion > Center.version.intValue() + 1) {
+    if (clientVersion < VERSION.intValue() || clientVersion > VERSION.intValue() + 1) {
       response.put("status", RESPONSE_ERROR);
-      response.put("msg", "版本不符，Center版本为" + Center.version);
+      response.put("msg", "版本不符，Center版本为" + VERSION);
       return;
     }
     // 获取用户
-    User user = getUser(params.getString("easycontrol_name"), params.getString("easycontrol_password"));
+    User user = getUser(params.getString("easycontrol_one_one"), params.getString("easycontrol_two_two"));
     // 用户不存在
     if (user == null) {
       response.put("status", RESPONSE_ERROR);
@@ -60,16 +59,8 @@ public class MyHttpHandler implements HttpHandler {
         postDevice(user, params, response);
         break;
       }
-      case DELETE_DEVICE: {
-        deleteDevice(user, params, response);
-        break;
-      }
       case GET_DEVICE: {
         getDevice(user, params, response);
-        break;
-      }
-      case CHANGE_PASSWORD: {
-        changePassword(user, params, response);
         break;
       }
     }
@@ -86,39 +77,23 @@ public class MyHttpHandler implements HttpHandler {
 
   private static void postDevice(User user, JSONObject params, JSONObject response) {
     String uuid = params.getString("uuid");
-    String ip = params.getString("ip");
+    int adbPort = params.getInt("adbPort");
+    String ipv4 = params.getString("ipv4");
+    String ipv6 = params.getString("ipv6");
     User.Device postDevice = user.getDevice(uuid);
     if (postDevice == null) {
-      postDevice = new User.Device(uuid, ip);
+      postDevice = new User.Device(uuid);
       user.devices.add(postDevice);
     }
-    postDevice.ip = ip;
-    postDevice.lastPostTime = System.currentTimeMillis();
+    postDevice.update(ipv4, ipv6, adbPort, System.currentTimeMillis());
     System.out.print("Post Device,Name=" + user.name + ",Password=" + user.password + ",UUID=" + uuid + "\n");
-  }
-
-  private static void deleteDevice(User user, JSONObject params, JSONObject response) {
-    String uuid = params.getString("uuid");
-    User.Device deleteDevice = user.getDevice(uuid);
-    if (deleteDevice != null) user.devices.remove(deleteDevice);
-    System.out.print("Delete Device,Name=" + user.name + ",Password=" + user.password + ",UUID=" + uuid + "\n");
   }
 
   private static void getDevice(User user, JSONObject params, JSONObject response) {
     JSONArray deviceArray = new JSONArray();
-    for (User.Device device : user.devices) {
-      JSONObject tmp = new JSONObject();
-      tmp.put("uuid", device.uuid);
-      tmp.put("ip", device.ip);
-      deviceArray.put(tmp);
-    }
+    for (User.Device device : user.devices) deviceArray.put(device.toJson());
     response.put("deviceArray", deviceArray);
     System.out.print("Get Device,Name=" + user.name + ",Password=" + user.password + "\n");
-  }
-
-  private static void changePassword(User user, JSONObject params, JSONObject response) {
-    user.password = params.getString("newPassword");
-    System.out.print("Change Password,Name=" + user.name + ",Password=" + user.password + "\n");
   }
 
   private static User getUser(String name, String password) {

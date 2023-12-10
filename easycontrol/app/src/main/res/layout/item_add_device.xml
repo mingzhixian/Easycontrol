@@ -40,32 +40,15 @@
     android:textColorHint="@color/onCardBackgroundSecond"
     android:textSize="@dimen/smallFont" />
 
-  <LinearLayout
-    android:layout_width="match_parent"
+  <CheckBox
+    android:id="@+id/is_options"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
-
-    <CheckBox
-      android:id="@+id/is_audio"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="4dp"
-      android:buttonTint="@color/onCardBackground"
-      android:text="使能音频"
-      android:textColor="@color/onCardBackgroundSecond"
-      android:textSize="@dimen/smallFont" />
-
-    <CheckBox
-      android:id="@+id/is_options"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="12dp"
-      android:layout_marginTop="4dp"
-      android:buttonTint="@color/onCardBackground"
-      android:text="高级选项"
-      android:textColor="@color/onCardBackgroundSecond"
-      android:textSize="@dimen/smallFont" />
-  </LinearLayout>
+    android:layout_marginTop="4dp"
+    android:buttonTint="@color/onCardBackground"
+    android:text="高级选项"
+    android:textColor="@color/onCardBackgroundSecond"
+    android:textSize="@dimen/smallFont" />
 
   <LinearLayout
     android:id="@+id/options"

@@ -11,6 +11,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -48,6 +49,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity.barView.setVisibility(View.GONE);
     // 按键监听
     setButtonListener();
+    setKeyEvent();
     // 更新textureView
     fullActivity.textureViewLayout.addView(clientView.textureView, 0);
     fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
@@ -63,11 +65,11 @@ public class FullActivity extends Activity implements SensorEventListener {
   @Override
   protected void onPause() {
     ((SensorManager) getSystemService(Context.SENSOR_SERVICE)).unregisterListener(this);
-    fullActivity.textureViewLayout.removeView(clientView.textureView);
-    // 非正常退出页面
-    if (!isChangingConfigurations() && isShow) clientView.changeToMini();
+    if (isChangingConfigurations()) context.fullActivity.textureViewLayout.removeView(clientView.textureView);
+    else if (isShow) clientView.changeToMini();
     super.onPause();
   }
+
 
   @Override
   public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
@@ -76,17 +78,8 @@ public class FullActivity extends Activity implements SensorEventListener {
   }
 
   @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {
-      Toast.makeText(AppData.main, "全屏状态会拦截返回", Toast.LENGTH_SHORT).show();
-      return true;
-    }
-    // 为不影响主机功能，仅传送常用输入字符
-    else if ((keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) || (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) || (keyCode >= KeyEvent.KEYCODE_COMMA && keyCode <= KeyEvent.KEYCODE_PLUS)) {
-      controller.sendKeyEvent(keyCode);
-      return true;
-    }
-    return super.onKeyDown(keyCode, event);
+  public void onBackPressed() {
+    Toast.makeText(AppData.main, "全屏状态会拦截返回", Toast.LENGTH_SHORT).show();
   }
 
   public static void show(ClientView cli, Controller con) {
@@ -102,6 +95,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     if (isShow) {
       isShow = false;
       lastOrientation = -1;
+      context.fullActivity.textureViewLayout.removeView(clientView.textureView);
       context.finish();
       context = null;
     }
@@ -114,13 +108,12 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   // 设置按钮监听
   private void setButtonListener() {
-    fullActivity.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4));
-    fullActivity.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3));
-    fullActivity.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187));
+    fullActivity.buttonBack.setOnClickListener(v -> controller.sendKeyEvent(4, 0));
+    fullActivity.buttonHome.setOnClickListener(v -> controller.sendKeyEvent(3, 0));
+    fullActivity.buttonSwitch.setOnClickListener(v -> controller.sendKeyEvent(187, 0));
     fullActivity.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
     fullActivity.buttonClose.setOnClickListener(v -> clientView.hide(true));
-    fullActivity.buttonPower.setOnClickListener(v -> controller.sendPowerEvent());
     fullActivity.buttonNavBar.setOnClickListener(v -> setNavBarHide());
     fullActivity.buttonRotate.setOnClickListener(v -> setRotation(-2));
     fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
@@ -131,12 +124,13 @@ public class FullActivity extends Activity implements SensorEventListener {
     changeBarView();
     boolean isShow = fullActivity.navBar.getVisibility() == View.GONE;
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    fullActivity.buttonNavBar.setImageResource(isShow ? R.drawable.hide_nav : R.drawable.show_nav);
+    fullActivity.buttonNavBar.setImageResource(isShow ? R.drawable.divide : R.drawable.equals);
   }
 
   private void changeBarView() {
     boolean toShowView = fullActivity.barView.getVisibility() == View.GONE;
-    clientView.viewAnim(fullActivity.barView, toShowView, 0, PublicTools.dp2px(40f), (isStart -> {
+    boolean isLandscape = lastOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || lastOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+    clientView.viewAnim(fullActivity.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
       if (isStart && toShowView) fullActivity.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) fullActivity.barView.setVisibility(View.GONE);
     }));
@@ -175,5 +169,15 @@ public class FullActivity extends Activity implements SensorEventListener {
   @Override
   public void onAccuracyChanged(Sensor sensor, int i) {
 
+  }
+
+  // 设置键盘监听
+  private void setKeyEvent() {
+    fullActivity.editText.requestFocus();
+    fullActivity.editText.setInputType(InputType.TYPE_NULL);
+    fullActivity.editText.setOnKeyListener((v, keyCode, event) -> {
+      if (event.getAction() == KeyEvent.ACTION_DOWN) controller.sendKeyEvent(event.getKeyCode(), event.getMetaState());
+      return true;
+    });
   }
 }

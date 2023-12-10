@@ -1,8 +1,5 @@
 package top.saymzx.easycontrol.adb;
 
-import android.hardware.usb.UsbDevice;
-import android.util.Log;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;

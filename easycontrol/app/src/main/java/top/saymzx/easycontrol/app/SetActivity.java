@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Pair;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.io.File;
@@ -13,7 +11,6 @@ import java.io.File;
 import top.saymzx.easycontrol.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class SetActivity extends Activity {
@@ -33,21 +30,8 @@ public class SetActivity extends Activity {
 
   // 设置默认值
   private void drawUi() {
-    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.maxSizeList);
-    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.maxFpsList);
-    ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_item, PublicTools.videoBitList);
     // 默认参数
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使能音频", new Pair<>(AppData.setting.getDefaultIsAudio(), Device.isAudioDetail), isChecked -> AppData.setting.setDefaultIsAudio(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大大小", maxSizeAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxSize()), Device.maxSizeDetail), str -> AppData.setting.setDefaultMaxSize(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大帧率", maxFpsAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxFps()), Device.maxFpsDetail), str -> AppData.setting.setDefaultMaxFps(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSpinnerCard(this, "最大码率", videoBitAdapter, new Pair<>(String.valueOf(AppData.setting.getDefaultMaxVideoBit()), Device.maxVideoBitDetail), str -> AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str))).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "修改分辨率", new Pair<>(AppData.setting.getDefaultSetResolution(), Device.setResolutionDetail), isChecked -> AppData.setting.setDefaultSetResolution(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先H265", new Pair<>(AppData.setting.getUseH265(), Device.useH265Detail), isChecked -> AppData.setting.setUseH265(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "优先Opus", new Pair<>(AppData.setting.getUseOpus(), Device.useOpusDetail), isChecked -> AppData.setting.setUseOpus(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "使用隧道传输", new Pair<>(AppData.setting.getUseTunnel(), Device.useTunnelDetail), isChecked -> AppData.setting.setUseTunnel(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "熄屏控制", new Pair<>(AppData.setting.getTurnOffScreen(), Device.turnOffScreenDetail), isChecked -> AppData.setting.setTurnOffScreen(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "自动屏幕控制", new Pair<>(AppData.setting.getAutoControlScreen(), Device.autoControlScreenDetail), isChecked -> AppData.setting.setAutoControlScreen(isChecked)).getRoot());
-    setActivity.setDefault.addView(PublicTools.createSwitchCard(this, "默认全屏启动", new Pair<>(AppData.setting.getDefaultFull(), Device.defaultFullDetail), isChecked -> AppData.setting.setDefaultFull(isChecked)).getRoot());
+    PublicTools.createDeviceOptionSet(this, setActivity.setDefault, null);
     // 显示
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "主控端自动旋转", AppData.setting.getMasterAudoRotation(), isChecked -> AppData.setting.setMasterAudoRotation(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, "被控端方向跟随", AppData.setting.getSlaveAudoRotation(), isChecked -> AppData.setting.setSlaveAudoRotation(isChecked)).getRoot());
