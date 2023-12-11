@@ -117,7 +117,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="0123456789"
-          android:hint="可选，不填写则不会作为被控端"
+          android:hint="可选，仅被控端需要填写"
           android:textColor="@color/onCardBackground"
           android:textColorHint="@color/onCardBackgroundSecond"
           android:textSize="@dimen/smallFont" />

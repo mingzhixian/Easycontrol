@@ -1,7 +1,10 @@
 # 易控(Easycontrol)使用说明
 
 ## 相关文件或链接
-1. 视频教程（旧版本教程，新版本以文本说明为准）：[B站](https://www.bilibili.com/video/BV1vu411j7rh)
+1. 视频教程：
+	1. [视频1](https://www.bilibili.com/video/BV1Wu4y1u7vD/)
+	2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
+	3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
 2. 电脑ADB文件：[蓝奏云](https://cloudstar.lanzoue.com/iAWKJ128mnif) 密码:scrcpy
 3. 易控软件：新版本不再免费提供安装包，需前往下载群付费下载(10元)，或下载源码手动编译，[下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)
 
