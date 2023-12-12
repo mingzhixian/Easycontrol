@@ -40,13 +40,11 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 ## 捐赠鼓励
 
 如果您觉得我的软件对您有帮助，可以赞助我一个硬币，十分感谢！
-
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/wechat.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/alipay.webp" width="200px">
 
 ## 反馈
 
 请在Github或Gitee提出Issue，或进入易控反馈群反馈BUG或建议。
-
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_issue.webp" width="200px">
