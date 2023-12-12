@@ -11,15 +11,14 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 ## 功能特色
 - 使用简单
 - 支持音频传输
+- 多设备连接
+- 多设备剪切板同步
+- 多设备共享主控端物理键盘(需配合微信输入法或QQ输入法等输入中文)
 - 启动迅速
 - 低延迟
 - 支持分辨率自适应
 - 良好的旋转支持
-- 支持自动控制被控端屏幕，控制更加便捷
 - 支持小窗显示与全屏显示
-- 支持多设备同时连接
-- 支持多设备之间剪切板无感同步
-- 支持物理键盘输入(需配合微信输入法或QQ输入法等输入中文)
 
 ## 使用说明
 [点击此处前往易控使用说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md)<br/>
@@ -33,6 +32,7 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 
 ## 截图
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/main.webp" width="200px">
+<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/set.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/small.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/mini.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/full.webp" width="200px">
