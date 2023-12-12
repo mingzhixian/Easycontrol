@@ -2,9 +2,8 @@
 
 ## 注意
 Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅在QQ群发布（付费）。
-[Gitee地址](https://gitee.com/mingzhixianweb/easycontrol)
-
-[Github地址](https://github.com/mingzhixian/Easycontrol)
+- [Gitee地址](https://gitee.com/mingzhixianweb/easycontrol)
+- [Github地址](https://github.com/mingzhixian/Easycontrol)
 
 ## 简介
 本软件基于开源项目Scrcpy，对其进行了大量魔改，实现了其安卓客户端，并添加了一些功能，实现了安卓端控制安卓端。
@@ -22,12 +21,11 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 - 支持小窗显示与全屏显示
 
 ## 使用说明
-[点击此处前往易控使用说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md)
-
-[点击此处前往Center中心服务器搭建说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE_CENTER.md)
+- [点击此处前往易控使用说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md)
+- [点击此处前往Center中心服务器搭建说明](https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE_CENTER.md)
 
 ## 更新日志
-[点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)
+- [点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)
 
 ## 发行版本下载
 因项目开发以及反馈群答疑给本人带来一定负担，本项目此后不会免费提供发行版本，请前往[易控下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)付费下载(捐赠10元及以上)。（项目代码仍为开源状态，若您有一定能力，可自行下载源码编译使用）
