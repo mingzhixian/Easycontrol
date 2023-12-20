@@ -29,26 +29,15 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static Socket mainSocket;
-  private static Socket videoSocket;
-  public static DataInputStream mainInputStream;
-  public static OutputStream mainOutputStream;
-  public static OutputStream videoOutputStream;
+  private static Socket socket;
+  public static DataInputStream inputStream;
+  public static OutputStream outputStream;
 
   private static final Object object = new Object();
 
   private static final int timeoutDelay = 1000 * 10;
 
   public static void main(String... args) {
-    // 启动超时
-    Thread startCheckThread = new Thread(() -> {
-      try {
-        Thread.sleep(timeoutDelay);
-        release();
-      } catch (InterruptedException ignored) {
-      }
-    });
-    startCheckThread.start();
     try {
       // 解析参数
       Options.parse(args);
@@ -58,8 +47,8 @@ public final class Server {
       // 连接
       connectClient();
       // 初始化子服务
-      VideoEncode.init();
       boolean canAudio = AudioEncode.init();
+      VideoEncode.init();
       // 启动
       ArrayList<Thread> threads = new ArrayList<>();
       threads.add(new Thread(Server::executeVideoOut));
@@ -72,7 +61,6 @@ public final class Server {
       for (Thread thread : threads) thread.setPriority(Thread.MAX_PRIORITY);
       for (Thread thread : threads) thread.start();
       // 程序运行
-      startCheckThread.interrupt();
       synchronized (object) {
         object.wait();
       }
@@ -120,11 +108,10 @@ public final class Server {
 
   private static void connectClient() throws IOException {
     try (ServerSocket serverSocket = new ServerSocket(Options.tcpPort)) {
-      mainSocket = serverSocket.accept();
-      videoSocket = serverSocket.accept();
-      mainInputStream = new DataInputStream(mainSocket.getInputStream());
-      mainOutputStream = mainSocket.getOutputStream();
-      videoOutputStream = videoSocket.getOutputStream();
+      serverSocket.setSoTimeout(timeoutDelay);
+      socket = serverSocket.accept();
+      inputStream = new DataInputStream(socket.getInputStream());
+      outputStream = socket.getOutputStream();
     }
   }
 
@@ -157,7 +144,28 @@ public final class Server {
 
   private static void executeControlIn() {
     try {
-      while (!Thread.interrupted()) Controller.handleIn();
+      while (!Thread.interrupted()) {
+        switch (Server.inputStream.readByte()) {
+          case 1:
+            Controller.handleTouchEvent();
+            break;
+          case 2:
+            Controller.handleKeyEvent();
+            break;
+          case 3:
+            Controller.handleClipboardEvent();
+            break;
+          case 4:
+            Controller.handleKeepAliveEvent();
+            break;
+          case 5:
+            Controller.handleChangeSizeEvent();
+            break;
+          case 6:
+            Controller.handleRotateEvent();
+            break;
+        }
+      }
     } catch (Exception ignored) {
       errorClose();
     }
@@ -176,15 +184,8 @@ public final class Server {
     }
   }
 
-  public static void writeMain(byte[] buffer) throws IOException {
-    synchronized (mainOutputStream) {
-      mainOutputStream.write(buffer);
-    }
-  }
-
-  public static void writeVideo(byte[] buffer) throws IOException {
-    // 因为只有视频流使用，所以此处不做同步限制
-    videoOutputStream.write(buffer);
+  public synchronized static void write(byte[] buffer) throws IOException {
+    outputStream.write(buffer);
   }
 
   public static void errorClose() {
@@ -195,28 +196,21 @@ public final class Server {
 
   // 释放资源
   private static void release() {
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 3; i++) {
       try {
         switch (i) {
           case 0:
-            videoOutputStream.close();
-            mainOutputStream.close();
-            mainInputStream.close();
-            mainSocket.close();
-            videoSocket.close();
+            outputStream.close();
+            inputStream.close();
+            socket.close();
             break;
           case 1:
-            if (Options.reSize != -1) Device.execReadOutput("wm size reset");
-            break;
-          case 2:
-            if (Options.autoLockAfterControl) Controller.checkScreenOff(false);
-          case 3:
             VideoEncode.release();
-            break;
-          case 4:
             AudioEncode.release();
             break;
-          case 5:
+          case 2:
+            if (Options.reSize != -1) Device.execReadOutput("wm size reset");
+            if (Options.autoLockAfterControl) Controller.checkScreenOff(false);
             Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
             break;
         }

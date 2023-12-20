@@ -7,22 +7,43 @@ import android.media.AudioTrack;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.audiofx.LoudnessEnhancer;
+import android.os.Build;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class AudioDecode {
   public MediaCodec decodec;
   public AudioTrack audioTrack;
   public LoudnessEnhancer loudnessEnhancer;
+  private final MediaCodec.Callback callback = new MediaCodec.Callback() {
+    @Override
+    public void onInputBufferAvailable(MediaCodec mediaCodec, int inIndex) {
+      intputBufferQueue.offer(inIndex);
+      checkDecode();
+    }
 
-  public AudioDecode(boolean useOpus, byte[] csd0) throws IOException {
+    @Override
+    public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
+      mediaCodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
+    }
+
+    @Override
+    public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
+    }
+
+    @Override
+    public void onOutputFormatChanged(MediaCodec mediaCodec, MediaFormat format) {
+    }
+  };
+
+  public AudioDecode(boolean useOpus, byte[] csd0, Handler handler) throws IOException {
     // 创建Codec
-    setAudioDecodec(useOpus, csd0);
+    setAudioDecodec(useOpus, csd0, handler);
     // 创建AudioTrack
     setAudioTrack();
     // 创建音频放大器
@@ -40,21 +61,25 @@ public class AudioDecode {
     }
   }
 
+  private final LinkedBlockingQueue<byte[]> intputDataQueue = new LinkedBlockingQueue<>();
   private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
-  public void decodeIn(byte[] data) throws InterruptedException {
-    try {
-      Integer inIndex = intputBufferQueue.poll(20, TimeUnit.MILLISECONDS);
-      if (inIndex == null) return;
-      decodec.getInputBuffer(inIndex).put(data);
-      // 提交解码器解码
-      decodec.queueInputBuffer(inIndex, 0, data.length, 0, 0);
-    } catch (IllegalStateException ignored) {
-    }
+  public void decodeIn(byte[] data) {
+    intputDataQueue.offer(data);
+    checkDecode();
+  }
+
+  private synchronized void checkDecode() {
+    if (intputDataQueue.isEmpty() || intputBufferQueue.isEmpty()) return;
+    Integer inIndex = intputBufferQueue.poll();
+    byte[] data = intputDataQueue.poll();
+    decodec.getInputBuffer(inIndex).put(data);
+    decodec.queueInputBuffer(inIndex, 0, data.length, 0, 0);
+    checkDecode();
   }
 
   // 创建Codec
-  private void setAudioDecodec(boolean useOpus, byte[] csd0) throws IOException {
+  private void setAudioDecodec(boolean useOpus, byte[] csd0, Handler handler) throws IOException {
     // 创建解码器
     String codecMime = useOpus ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     decodec = MediaCodec.createDecoderByType(codecMime);
@@ -72,30 +97,9 @@ public class AudioDecode {
       decodecFormat.setByteBuffer("csd-2", csd12ByteBuffer);
     }
     // 异步解码
-    decodec.setCallback(new MediaCodec.Callback() {
-      @Override
-      public void onInputBufferAvailable(MediaCodec mediaCodec, int inIndex) {
-        intputBufferQueue.offer(inIndex);
-      }
-
-      @Override
-      public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
-        audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
-        try {
-          decodec.releaseOutputBuffer(outIndex, false);
-        } catch (IllegalStateException ignored) {
-        }
-      }
-
-      @Override
-      public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-
-      }
-
-      @Override
-      public void onOutputFormatChanged(MediaCodec mediaCodec, MediaFormat format) {
-      }
-    });
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      decodec.setCallback(callback, handler);
+    } else decodec.setCallback(callback);
     // 配置解码器
     decodec.configure(decodecFormat, null, null, 0);
     // 启动解码器

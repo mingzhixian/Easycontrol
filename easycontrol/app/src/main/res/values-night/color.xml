@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <!-- 主界面色彩 -->
-  <color name="background">#101010</color>
-  <color name="onBackground">#c8c8c8</color>
-  <color name="onBackgroundSecond">#a9a9a9</color>
-  <color name="cardBackground">#3d4043</color>
-  <color name="onCardBackground">#c7c7c7</color>
-  <color name="onCardBackgroundSecond">#606060</color>
-  <color name="cardContainerBackground">#0a0a0a</color>
-  <color name="onCardContainerBackground">#cbcbcb</color>
+  <color name="background">#222325</color>
+  <color name="onBackground">#DEDEDE</color>
+  <color name="onBackgroundSecond">#A7A7A7</color>
+  <color name="cardBackground">#3D3D3D</color>
+  <color name="onCardBackground">#FFFFFF</color>
+  <color name="onCardBackgroundSecond">#8B8B8B</color>
 
   <!-- 特殊色彩 -->
   <color name="button">#FFFFFF</color>

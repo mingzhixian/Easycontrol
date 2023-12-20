@@ -3,7 +3,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="#000"
+  android:background="@color/cardBackground"
   android:keepScreenOn="true"
   tools:context=".client.view.FullActivity">
 
@@ -42,7 +42,7 @@
         android:focusable="false"
         android:padding="5dp"
         android:src="@drawable/rotate"
-        android:tint="#fff" />
+        android:tint="@color/onCardBackground" />
 
       <ImageView
         android:id="@+id/button_switch"
@@ -52,7 +52,7 @@
         android:focusable="false"
         android:padding="5dp"
         android:src="@drawable/square"
-        android:tint="#fff" />
+        android:tint="@color/onCardBackground" />
 
       <ImageView
         android:id="@+id/button_home"
@@ -62,7 +62,7 @@
         android:focusable="false"
         android:padding="5dp"
         android:src="@drawable/o"
-        android:tint="#fff" />
+        android:tint="@color/onCardBackground" />
 
       <ImageView
         android:id="@+id/button_back"
@@ -72,7 +72,7 @@
         android:focusable="false"
         android:padding="5dp"
         android:src="@drawable/caret_left"
-        android:tint="#fff" />
+        android:tint="@color/onCardBackground" />
 
     </LinearLayout>
   </LinearLayout>
@@ -85,7 +85,7 @@
     android:focusable="false"
     android:padding="5dp"
     android:src="@drawable/ellipsis_vertical"
-    android:tint="#fff" />
+    android:tint="@color/onCardBackground" />
 
   <LinearLayout
     android:id="@+id/bar_view"
@@ -95,7 +95,7 @@
     android:layout_marginEnd="10dp"
     android:layout_marginBottom="42dp"
     android:background="@drawable/background_cron"
-    android:backgroundTint="@color/cardBackground"
+    android:elevation="6dp"
     android:orientation="horizontal"
     android:padding="5dp">
 

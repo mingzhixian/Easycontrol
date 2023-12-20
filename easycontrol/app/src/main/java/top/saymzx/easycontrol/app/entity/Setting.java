@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.entity;
 
 import android.content.SharedPreferences;
-import android.util.Pair;
 
 import java.util.UUID;
 
@@ -109,8 +108,17 @@ public final class Setting {
     editor.apply();
   }
 
-  public Pair<Boolean, String> getMasterAudoRotation() {
-    return new Pair<>(sharedPreferences.getBoolean("masterAudoRotation", true), "仅全屏有效，开启后界面跟随手机传感器方向，关闭后将锁死界面方向（可通过导航栏控制旋转界面）");
+  public boolean getDefaultShowNavBar() {
+    return sharedPreferences.getBoolean("defaultShowNavBar", true);
+  }
+
+  public void setDefaultShowNavBar(boolean value) {
+    editor.putBoolean("defaultShowNavBar", value);
+    editor.apply();
+  }
+
+  public boolean getMasterAudoRotation() {
+    return sharedPreferences.getBoolean("masterAudoRotation", true);
   }
 
   public void setMasterAudoRotation(boolean value) {
@@ -118,8 +126,8 @@ public final class Setting {
     editor.apply();
   }
 
-  public Pair<Boolean, String> getSlaveAudoRotation() {
-    return new Pair<>(sharedPreferences.getBoolean("slaveAudoRotation", true), "仅全屏有效，开启后当主控端页面旋转时，会尝试旋转被控端");
+  public boolean getSlaveAudoRotation() {
+    return sharedPreferences.getBoolean("slaveAudoRotation", true);
   }
 
   public void setSlaveAudoRotation(boolean value) {

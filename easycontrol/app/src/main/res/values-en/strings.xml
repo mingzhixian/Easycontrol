@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">EasyControl</string>
+
+  <!-- 主页 -->
+  <string name="main_poem">Hope you know a lot and still love life</string>
+  <string name="main_float_permission">Please grant hover window privileges</string>
+  <string name="main_battery_permission">Please grant unlimited rights to the battery</string>
+
+  <!-- 设置页面 -->
+  <string name="set_center">Login</string>
+  <string name="set_default">Default</string>
+  <string name="set_display">Display</string>
+  <string name="set_display_master_audo_rotation">Automatically rotates</string>
+  <string name="set_display_master_audo_rotation_detail">It is only valid in full screen. The interface follows the direction of the phone sensor when it is turned on, and locks the direction of the interface when it is turned off. (The rotation interface can be controlled by the navigation button)</string>
+  <string name="set_display_slave_audo_rotation">Slave follow direction</string>
+  <string name="set_display_slave_audo_rotation_detail">This function is valid only in full-screen mode. When the page of the master terminal is rotated, it attempts to rotate the controlled terminal</string>
+  <string name="set_display_default_show_nav_bar">Default show navigation bar</string>
+  <string name="set_display_default_show_nav_bar_detail">Sets whether the navigation bar is displayed by default in small window and full screen modes</string>
+  <string name="set_other">Other</string>
+  <string name="set_other_clear_default">Clear default device</string>
+  <string name="set_other_clear_default_code">Cleared</string>
+  <string name="set_other_clear_key">Regenerate the key (reauthorization required)</string>
+  <string name="set_other_clear_key_code">Already refreshed</string>
+  <string name="set_other_local_recover">Restore native resolution</string>
+  <string name="set_other_local_recover_code_error_adb">Please set the local ADB port first (on the login page)</string>
+  <string name="set_other_local_recover_code_error_connect">Failed. Please check whether wireless debugging is enabled</string>
+  <string name="set_other_local_recover_code_success">Recovery success</string>
+  <string name="set_about">About</string>
+  <string name="set_about_ip">View local address</string>
+  <string name="set_about_how_to_use">Instructions for use</string>
+  <string name="set_about_privacy">Privacy Policy</string>
+  <string name="set_about_version">Version: </string>
+
+  <!-- 中心服务器页面 -->
+  <string name="center_address">Server Address</string>
+  <string name="center_address_hint">Non-null</string>
+  <string name="center_name">User Name</string>
+  <string name="center_name_hint">Only letters and numbers</string>
+  <string name="center_password">Password</string>
+  <string name="center_password_hint">Only letters and numbers</string>
+  <string name="center_adb_port">Adb Port</string>
+  <string name="center_adb_port_hint">Optional</string>
+  <string name="center_button">Login</string>
+  <string name="center_hint">* Currently, the account is only used to automatically add reachable devices</string>
+  <string name="center_button_code">Success</string>
+
+  <!-- 查看IP地址页面 -->
+  <string name="ip_title">Local Address</string>
+  <string name="ip_ipv4">IPv4(Click to copy)</string>
+  <string name="ip_ipv6">IPv6(Click to copy)</string>
+  <string name="ip_copy">Copied</string>
+
+  <!-- 设备添加模块 -->
+  <string name="add_device_name">Name</string>
+  <string name="add_device_name_hint">Non-null</string>
+  <string name="add_device_address">Address:Port</string>
+  <string name="add_device_address_hint">IPv4/v6 addresses or domain names</string>
+  <string name="add_device_option">Advanced options</string>
+  <string name="add_device_button">Ok</string>
+
+  <!-- 设备设置模块 -->
+  <string name="set_device_title">Do what◔ ‸◔?</string>
+  <string name="set_device_button_recover">Recover</string>
+  <string name="set_device_button_set_default">Default</string>
+  <string name="set_device_button_change">Change</string>
+  <string name="set_device_button_delete">Delete</string>
+
+  <!-- 加载中模块 -->
+  <string name="loading_text">Loading</string>
+
+  <!-- 错误提示 -->
+  <string name="error_no_browser">No default browser</string>
+  <string name="error_address_error">Address format error</string>
+  <string name="error_refused_back">The full screen status will intercept the return</string>
+  <string name="error_connect_server">Failed to connect</string>
+  <string name="error_stream_closed">Disconnect</string>
+  <string name="error_center_error">Access server error</string>
+
+  <!-- 设备参数设置及注释说明 -->
+  <string name="option_is_audio">Enable audio</string>
+  <string name="option_is_audio_detail">When turned on, it will attempt to transmit audio, and the controlled end needs to be on Android 12</string>
+  <string name="option_max_size">Max Size</string>
+  <string name="option_max_size_detail">Sets the maximum size of the screen length and width</string>
+  <string name="option_max_fps">Max Fps</string>
+  <string name="option_max_fps_detail">Maximum frame rate limit, the lower the value, the more sluggish the picture, but the smaller the traffic, the delay will be reduced</string>
+  <string name="option_max_video_bit">Max Video Bit</string>
+  <string name="option_max_video_bit_detail">The larger the bit rate, the smaller the video loss, and the larger the video volume. You are advised to set the value to 4. If the bit rate is too high, the delay increases</string>
+  <string name="option_use_h265">Use H265</string>
+  <string name="option_use_h265_detail">H265 is preferred, the video size is small and the delay is low. The actual situation is mainly supported. If the video is abnormal, try to close it</string>
+  <string name="option_use_opus">Use Opus</string>
+  <string name="option_use_opus_detail">OPUS is preferred, the audio volume is small and the delay is low, and the actual support is mainly</string>
+  <string name="option_turn_off_screen">Turn off screen</string>
+  <string name="option_turn_off_screen_detail">When enabled, the controlled screen is kept closed during the control process</string>
+  <string name="option_auto_lock_after_control">Lock device after disconnect</string>
+  <string name="option_auto_lock_after_control_detail">After this function is enabled, the controlled terminal is automatically locked when the connection is disconnected</string>
+  <string name="option_default_full">Default full</string>
+  <string name="option_default_full_detail">After this function is enabled, the system enters the full-screen state directly after the connection is successful</string>
+  <string name="option_set_resolution">Auto set resolution</string>
+  <string name="option_set_resolution_detail">After this function is enabled, the resolution of the controlled end will be automatically changed. Therefore, the resolution may not be automatically restored (you can manually restore it)</string>
+  <string name="option_use_tunnel">Use tunnel</string>
+  <string name="option_use_tunnel_detail">When enabled, use ADB tunnel to transmit data, otherwise use a separate port (ADB port plus 1) to transmit data</string>
+
+</resources>

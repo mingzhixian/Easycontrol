@@ -24,6 +24,15 @@ public class Adb {
   }
 
   private void connect(AdbKeyPair keyPair) throws Exception {
+    // 授权超时
+    Thread startListener = new Thread(() -> {
+      try {
+        Thread.sleep(10 * 1000);
+        close();
+      } catch (InterruptedException ignored) {
+      }
+    });
+    startListener.start();
     // 连接ADB并认证
     channel.write(AdbProtocol.generateConnect());
     AdbProtocol.AdbMessage message = AdbProtocol.AdbMessage.parseAdbMessage(channel);
@@ -37,10 +46,9 @@ public class Adb {
     }
     if (message.command != AdbProtocol.CMD_CNXN) throw new Exception("ADB连接失败: " + message.command + "-" + new String(message.payload));
     // 启动后台进程
-    handleIn.setPriority(Thread.MAX_PRIORITY);
     handleIn.start();
-    handleOut.setPriority(Thread.MAX_PRIORITY);
     handleOut.start();
+    startListener.interrupt();
   }
 
   private AdbStream open(String destination, boolean isNeedSource, boolean canMultipleSend) throws IOException, InterruptedException {

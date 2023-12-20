@@ -22,9 +22,9 @@
     <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:orientation="vertical"
       android:paddingStart="15dp"
-      android:paddingEnd="15dp"
-      android:orientation="vertical">
+      android:paddingEnd="15dp">
 
       <LinearLayout
         android:layout_width="match_parent"
@@ -36,7 +36,7 @@
         <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:text="中心服务器地址:"
+          android:text="@string/center_address"
           android:textColor="@color/onCardBackground"
           android:textSize="@dimen/smallFont" />
 
@@ -44,8 +44,8 @@
           android:id="@+id/center_address"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:/."
-          android:hint="不可为空"
+          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:/.[]"
+          android:hint="@string/center_address_hint"
           android:textColor="@color/onCardBackground"
           android:textColorHint="@color/onCardBackgroundSecond"
           android:textSize="@dimen/smallFont" />
@@ -62,7 +62,7 @@
         <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:text="用户名:"
+          android:text="@string/center_name"
           android:textColor="@color/onCardBackground"
           android:textSize="@dimen/smallFont" />
 
@@ -71,7 +71,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-          android:hint="仅包含大小写字母和数字"
+          android:hint="@string/center_name_hint"
           android:textColor="@color/onCardBackground"
           android:textColorHint="@color/onCardBackgroundSecond"
           android:textSize="@dimen/smallFont" />
@@ -80,7 +80,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_marginTop="4dp"
-          android:text="密码:"
+          android:text="@string/center_password"
           android:textColor="@color/onCardBackground"
           android:textSize="@dimen/smallFont" />
 
@@ -89,7 +89,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-          android:hint="仅包含大小写字母和数字"
+          android:hint="@string/center_password_hint"
           android:inputType="textPassword"
           android:textColor="@color/onCardBackground"
           android:textColorHint="@color/onCardBackgroundSecond"
@@ -100,7 +100,7 @@
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
         android:padding="15dp">
@@ -108,7 +108,7 @@
         <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:text="本机ADB端口:"
+          android:text="@string/center_adb_port"
           android:textColor="@color/onCardBackground"
           android:textSize="@dimen/smallFont" />
 
@@ -117,11 +117,19 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="0123456789"
-          android:hint="可选，仅被控端需要填写"
+          android:hint="@string/center_adb_port_hint"
           android:textColor="@color/onCardBackground"
           android:textColorHint="@color/onCardBackgroundSecond"
           android:textSize="@dimen/smallFont" />
       </LinearLayout>
+
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:text="@string/center_hint"
+        android:textColor="@color/onBackgroundSecond"
+        android:textSize="@dimen/smallSmallFont" />
 
       <Button
         android:id="@+id/ok"
@@ -133,7 +141,7 @@
         android:background="@drawable/background_cron"
         android:backgroundTint="@color/button"
         android:gravity="center"
-        android:text="保存设置"
+        android:text="@string/center_button"
         android:textColor="@color/onButton"
         android:textSize="@dimen/smallFont" />
     </LinearLayout>

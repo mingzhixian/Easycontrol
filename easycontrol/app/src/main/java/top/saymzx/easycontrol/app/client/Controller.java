@@ -8,12 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class Controller {
-  private final Client client;
+  private final PublicTools.MyFunctionBytes write;
 
-  public Controller(Client client) {
-    this.client = client;
+  public Controller(PublicTools.MyFunctionBytes write) {
+    this.write = write;
   }
 
   // 剪切板
@@ -53,7 +54,7 @@ public class Controller {
     // 时间偏移
     byteBuffer.putInt(offsetTime);
     byteBuffer.flip();
-    client.write(byteBuffer.array());
+    write.run(byteBuffer.array());
   }
 
   // 发送按键事件
@@ -65,7 +66,7 @@ public class Controller {
     byteBuffer.putInt(key);
     byteBuffer.putInt(meta);
     byteBuffer.flip();
-    client.write(byteBuffer.array());
+    write.run(byteBuffer.array());
   }
 
   // 发送剪切板事件
@@ -77,12 +78,12 @@ public class Controller {
     byteBuffer.putInt(tmpTextByte.length);
     byteBuffer.put(tmpTextByte);
     byteBuffer.flip();
-    client.write(byteBuffer.array());
+    write.run(byteBuffer.array());
   }
 
   // 发送心跳包
   public void sendKeepAlive() {
-    client.write(new byte[]{4});
+    write.run(new byte[]{4});
   }
 
   // 发送修改分辨率事件
@@ -91,12 +92,12 @@ public class Controller {
     byteBuffer.put((byte) 5);
     byteBuffer.putFloat(newSize);
     byteBuffer.flip();
-    client.write(byteBuffer.array());
+    write.run(byteBuffer.array());
   }
 
   // 发送旋转请求事件
   public void sendRotateEvent(boolean isPortrait) {
-    client.write(new byte[]{6, (byte) (isPortrait ? 0 : 1)});
+    write.run(new byte[]{6, (byte) (isPortrait ? 0 : 1)});
   }
 
 }

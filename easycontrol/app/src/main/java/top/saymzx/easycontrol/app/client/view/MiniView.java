@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,8 +22,8 @@ public class MiniView {
   private final ClientView clientView;
 
   // 迷你悬浮窗
-  private final ModuleMiniViewBinding miniView = ModuleMiniViewBinding.inflate(AppData.main.getLayoutInflater());
-  private boolean isShow = false;
+  private final ModuleMiniViewBinding miniView = ModuleMiniViewBinding.inflate(LayoutInflater.from(AppData.main));
+  public boolean isShow = false;
   private final WindowManager.LayoutParams miniViewParams = new WindowManager.LayoutParams(
     WindowManager.LayoutParams.WRAP_CONTENT,
     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -66,16 +67,15 @@ public class MiniView {
     }
   }
 
-  public void hide() {
-    if (isShow) {
-      isShow = false;
-      num--;
-      clientView.viewAnim(miniView.getRoot(), false, PublicTools.dp2px(-40f), 0, (isStart -> {
-        if (!isStart) {
-          miniView.getRoot().setVisibility(View.GONE);
-          AppData.windowManager.removeView(miniView.getRoot());
-        }
-      }));
+  public void hide(boolean force) {
+    try {
+      if (force || isShow) {
+        isShow = false;
+        num--;
+        miniView.getRoot().setVisibility(View.GONE);
+        AppData.windowManager.removeView(miniView.getRoot());
+      }
+    } catch (Exception ignored) {
     }
   }
 

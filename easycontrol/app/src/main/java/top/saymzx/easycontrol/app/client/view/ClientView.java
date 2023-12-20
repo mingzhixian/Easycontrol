@@ -2,6 +2,7 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -11,32 +12,22 @@ import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-
-import java.util.ArrayList;
 
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientView implements TextureView.SurfaceTextureListener {
-  public static final ArrayList<ClientView> allClientVuews = new ArrayList<>();
-  private final Client client;
+  public final Client client;
   private final boolean setResolution;
   public final TextureView textureView = new TextureView(AppData.main);
   private SurfaceTexture surfaceTexture;
 
-  // UI模式，0为未显示，1为全屏，2为小窗，3为mini侧边条
-  private int uiMode = UI_MODE_NONE;
-  private static final int UI_MODE_NONE = 0;
-  private static final int UI_MODE_FULL = 1;
-  private static final int UI_MODE_SMALL = 2;
-  private static final int UI_MODE_MINI = 3;
-
   private final SmallView smallView = new SmallView(this);
   private final MiniView miniView = new MiniView(this);
+  private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
   private Pair<Integer, Integer> maxSize;
@@ -47,45 +38,36 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     this.setResolution = setResolution;
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
-    allClientVuews.add(this);
   }
 
-  public void changeToFull() {
-    if (FullActivity.isShow) {
-      Toast.makeText(AppData.main, "有设备正在全屏控制", Toast.LENGTH_SHORT).show();
-    } else {
-      hide(false);
-      uiMode = UI_MODE_FULL;
-      if (surfaceSize != null && setResolution) client.controller.sendChangeSizeEvent(FullActivity.getResolution());
-      FullActivity.show(this, client.controller);
-    }
-  }
-
-  public void changeToSmall() {
+  public synchronized void changeToFull() {
     hide(false);
-    uiMode = UI_MODE_SMALL;
-    if (surfaceSize != null && setResolution) client.controller.sendChangeSizeEvent(SmallView.getResolution());
-    smallView.show(client.controller);
+    if (setResolution) client.controller.sendChangeSizeEvent(FullActivity.getResolution());
+    FullActivity.show(this);
   }
 
-  public void changeToMini() {
+  public synchronized void changeToSmall() {
     hide(false);
-    uiMode = UI_MODE_MINI;
+    if (setResolution) client.controller.sendChangeSizeEvent(SmallView.getResolution());
+    smallView.show();
+  }
+
+  public synchronized void changeToMini() {
+    hide(false);
     miniView.show();
   }
 
-  public void hide(boolean isRelease) {
-    if (uiMode == UI_MODE_FULL) FullActivity.hide();
-    else if (uiMode == UI_MODE_SMALL) smallView.hide();
-    else if (uiMode == UI_MODE_MINI) miniView.hide();
-    uiMode = UI_MODE_NONE;
-    if (isRelease) {
-      if (surfaceTexture != null) surfaceTexture.release();
-      client.release(null);
-    }
+  public synchronized void hide(boolean isRelease) {
+    if (fullView != null) fullView.hide(isRelease);
+    smallView.hide(isRelease);
+    miniView.hide(isRelease);
+    if (isRelease && surfaceTexture != null) surfaceTexture.release();
   }
 
-  // 重新计算TextureView大小
+  public void setFullView(FullActivity fullView) {
+    this.fullView = fullView;
+  }
+
   public void updateMaxSize(Pair<Integer, Integer> maxSize) {
     this.maxSize = maxSize;
     reCalculateTextureViewSize();
@@ -94,8 +76,18 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   public void updateVideoSize(Pair<Integer, Integer> videoSize) {
     this.videoSize = videoSize;
     reCalculateTextureViewSize();
+    if (smallView.isShow) smallView.calculateSite();
   }
 
+  public Pair<Integer, Integer> getVideoSize() {
+    return videoSize;
+  }
+
+  public Surface getSurface() {
+    return new Surface(surfaceTexture);
+  }
+
+  // 重新计算TextureView大小
   private void reCalculateTextureViewSize() {
     if (maxSize == null || videoSize == null) return;
     // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
@@ -121,7 +113,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
         pointerDownTime[i] = event.getEventTime();
         createTouchPacket(event, MotionEvent.ACTION_DOWN, i);
         // 如果是小窗模式则需获取焦点，以获取剪切板同步
-        if (uiMode == UI_MODE_SMALL) smallView.setViewFocus(true);
+        if (smallView.isShow) smallView.setViewFocus(true);
       } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) createTouchPacket(event, MotionEvent.ACTION_UP, event.getActionIndex());
       else for (int i = 0; i < event.getPointerCount(); i++) createTouchPacket(event, MotionEvent.ACTION_MOVE, i);
       return true;
@@ -183,7 +175,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     // 初始化
     if (this.surfaceTexture == null) {
       this.surfaceTexture = surfaceTexture;
-      client.startSubService(new Surface(surfaceTexture));
+      client.startSubService();
     } else textureView.setSurfaceTexture(this.surfaceTexture);
   }
 

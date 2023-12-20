@@ -55,7 +55,7 @@ public class CenterActivity extends Activity {
       AppData.setting.setCenterAddress(centerAddress);
       AppData.setting.setCenterName(centerName);
       if (!centerPassword.equals("")) AppData.setting.setCenterPassword(md5Encode(centerPassword));
-      if (!centerAdbPort.equals("")) AppData.setting.setCenterAdbPort(Integer.parseInt(centerAdbPort));
+      AppData.setting.setCenterAdbPort(centerAdbPort.equals("") ? -1 : Integer.parseInt(centerAdbPort));
       Dialog dialog = PublicTools.createClientLoading(this);
       dialog.show();
       CenterHelper.checkCenter(str -> runOnUiThread(() -> {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -77,23 +78,23 @@ public class DeviceListAdapter extends BaseAdapter {
   private void onLongClickCard(Device device) {
     ItemSetDeviceBinding itemSetDeviceBinding = ItemSetDeviceBinding.inflate(LayoutInflater.from(context));
     Dialog dialog = PublicTools.createDialog(context, true, itemSetDeviceBinding.getRoot());
-    itemSetDeviceBinding.open.setOnClickListener(v -> {
+    itemSetDeviceBinding.buttonRecover.setOnClickListener(v -> {
       dialog.cancel();
-      new Client(device);
+      Client.recover(device.address, result -> AppData.handler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_other_local_recover_code_success : R.string.set_other_local_recover_code_error_connect), Toast.LENGTH_SHORT).show()));
     });
-    itemSetDeviceBinding.defult.setOnClickListener(v -> {
+    itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
       dialog.cancel();
       if (!device.isNormalDevice()) return;
       AppData.setting.setDefaultDevice(device.uuid);
     });
-    itemSetDeviceBinding.delete.setOnClickListener(v -> {
+    itemSetDeviceBinding.buttonChange.setOnClickListener(v -> {
+      dialog.cancel();
+      PublicTools.createAddDeviceView(context, device, this).show();
+    });
+    itemSetDeviceBinding.buttonDelete.setOnClickListener(v -> {
       AppData.dbHelper.delete(device);
       update();
       dialog.cancel();
-    });
-    itemSetDeviceBinding.change.setOnClickListener(v -> {
-      dialog.cancel();
-      PublicTools.createAddDeviceView(context, device, this).show();
     });
     dialog.show();
   }

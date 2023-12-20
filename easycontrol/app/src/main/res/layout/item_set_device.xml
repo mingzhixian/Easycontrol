@@ -13,28 +13,27 @@
     android:layout_marginTop="25dp"
     android:layout_marginEnd="25dp"
     android:layout_marginBottom="25dp"
-    android:text="干什么◔ ‸◔？ "
+    android:text="@string/set_device_title"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/middleFont" />
 
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="25dp"
-    android:layout_marginEnd="25dp"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
     android:layout_marginBottom="12dp"
     android:orientation="horizontal">
 
     <Button
-      android:id="@+id/open"
+      android:id="@+id/button_recover"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"
       android:gravity="center"
-      android:padding="8dp"
-      android:text="打开"
+      android:text="@string/set_device_button_recover"
       android:textColor="@color/onButton"
       android:textSize="@dimen/smallFont" />
 
@@ -44,15 +43,14 @@
       android:layout_weight="2" />
 
     <Button
-      android:id="@+id/defult"
+      android:id="@+id/button_set_default"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"
       android:gravity="center"
-      android:padding="8dp"
-      android:text="设为默认"
+      android:text="@string/set_device_button_set_default"
       android:textColor="@color/onButton"
       android:textSize="@dimen/smallFont" />
   </LinearLayout>
@@ -60,21 +58,20 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="25dp"
-    android:layout_marginEnd="25dp"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
     android:layout_marginBottom="25dp"
     android:orientation="horizontal">
 
     <Button
-      android:id="@+id/change"
+      android:id="@+id/button_change"
       android:layout_width="0dp"
       android:layout_height="match_parent"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/alert"
       android:gravity="center"
-      android:padding="8dp"
-      android:text="修改"
+      android:text="@string/set_device_button_change"
       android:textColor="@color/onAlert"
       android:textSize="@dimen/smallFont" />
 
@@ -84,15 +81,14 @@
       android:layout_weight="2" />
 
     <Button
-      android:id="@+id/delete"
+      android:id="@+id/button_delete"
       android:layout_width="0dp"
       android:layout_height="match_parent"
       android:layout_weight="9"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/alert"
       android:gravity="center"
-      android:padding="8dp"
-      android:text="删除"
+      android:text="@string/set_device_button_delete"
       android:textColor="@color/onAlert"
       android:textSize="@dimen/smallFont" />
   </LinearLayout>
