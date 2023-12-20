@@ -29,7 +29,8 @@ public class AudioDecode {
 
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
-      mediaCodec.releaseOutputBuffer(outIndex, bufferInfo.presentationTimeUs);
+      audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
+      decodec.releaseOutputBuffer(outIndex, false);
     }
 
     @Override
