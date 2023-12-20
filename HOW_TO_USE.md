@@ -16,13 +16,20 @@
 5. 电脑下载ADB文件并解压：[蓝奏云](https://cloudstar.lanzoue.com/iAWKJ128mnif) 密码:scrcpy
 6. 在ADB所在文件夹按住Shift+右击打开命令行
 6. 执行以下命令开启无线调试：
-``` shell
 // root用户（永久）：
+``` shell
 adb shell
+<回车>
 su
-echo "sleep 5 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh && chmod +x /data/adb/service.d/adb.sh
+<回车>
+echo "sleep 10 && setprop service.adb.tcp.port 5555 && stop adbd && start adbd" > /data/adb/service.d/adb.sh && chmod +x /data/adb/service.d/adb.sh
+<回车>
+<重启>
+```
 // 无root（每次重启后需重复操作一次）：
+``` shell
 adb tcpip 5555
+<回车>
 ```
 7. 网络环境拥有防火墙或使用内网穿透的用户，请注意放通被控端ADB端口以及端口号+1端口，例如，上面开启无线调试时设置了ADB端口为5555，则需放行5555端口以及5556端口
 

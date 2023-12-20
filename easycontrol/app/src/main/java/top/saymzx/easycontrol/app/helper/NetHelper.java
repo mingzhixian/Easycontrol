@@ -11,6 +11,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.entity.AppData;
+
 public class NetHelper {
   public static final int RESPONSE_ERROR = 100;
   public static final int RESPONSE_OK = 101;
@@ -45,7 +48,7 @@ public class NetHelper {
       return jsonObject;
     } else {
       connection.disconnect();
-      throw new IOException("错误");
+      throw new IOException(AppData.main.getString(R.string.error_center_error));
     }
   }
 }

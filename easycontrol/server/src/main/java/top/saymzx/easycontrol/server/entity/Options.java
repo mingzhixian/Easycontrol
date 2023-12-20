@@ -43,9 +43,6 @@ public final class Options {
         case "autoLockAfterControl":
           autoLockAfterControl = Integer.parseInt(value) == 1;
           break;
-        case "reSize":
-          reSize = Float.parseFloat(value);
-          break;
         case "useH265":
           useH265 = Integer.parseInt(value) == 1;
           break;

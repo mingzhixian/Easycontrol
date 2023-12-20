@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.databinding.ItemAddDeviceBinding;
-import top.saymzx.easycontrol.app.databinding.ItemClientLoadingBinding;
+import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
@@ -124,49 +124,49 @@ public class PublicTools {
     // 数组适配器
     ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxSizeList);
     ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxFpsList);
-    ArrayAdapter<String> videoBitAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxVideoBitList);
+    ArrayAdapter<String> maxVideoBitAdapter = new ArrayAdapter<>(AppData.main, R.layout.item_spinner_item, maxVideoBitList);
     // 添加参数视图
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "使能音频", new Pair<>(setDefault ? AppData.setting.getDefaultIsAudio() : device.isAudio, "开启后将尝试传输音频，被控端需要安卓12之上"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_is_audio), context.getString(R.string.option_is_audio_detail), setDefault ? AppData.setting.getDefaultIsAudio() : device.isAudio, isChecked -> {
       if (setDefault) AppData.setting.setDefaultIsAudio(isChecked);
       else device.isAudio = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSpinnerCard(context, "最大大小", maxSizeAdapter, new Pair<>(String.valueOf(setDefault ? AppData.setting.getDefaultMaxSize() : device.maxSize), "开启后将尝试传输音频，被控端需要安卓12之上"), str -> {
+    fatherLayout.addView(PublicTools.createSpinnerCard(context, context.getString(R.string.option_max_size), context.getString(R.string.option_max_size_detail), String.valueOf(setDefault ? AppData.setting.getDefaultMaxSize() : device.maxSize), maxSizeAdapter, str -> {
       if (setDefault) AppData.setting.setDefaultMaxSize(Integer.parseInt(str));
       else device.maxSize = Integer.parseInt(str);
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSpinnerCard(context, "最大帧率", maxFpsAdapter, new Pair<>(String.valueOf(setDefault ? AppData.setting.getDefaultMaxFps() : device.maxFps), "最大帧率限制，值越低画面越卡顿，但流量也越小，延迟也会降低"), str -> {
+    fatherLayout.addView(PublicTools.createSpinnerCard(context, context.getString(R.string.option_max_fps), context.getString(R.string.option_max_fps_detail), String.valueOf(setDefault ? AppData.setting.getDefaultMaxFps() : device.maxFps), maxFpsAdapter, str -> {
       if (setDefault) AppData.setting.setDefaultMaxFps(Integer.parseInt(str));
       else device.maxFps = Integer.parseInt(str);
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSpinnerCard(context, "最大码率", videoBitAdapter, new Pair<>(String.valueOf(setDefault ? AppData.setting.getDefaultMaxVideoBit() : device.maxVideoBit), "码率越大视频损失越小体积越大，建议设置为4，过高会导致延迟增加"), str -> {
+    fatherLayout.addView(PublicTools.createSpinnerCard(context, context.getString(R.string.option_max_video_bit), context.getString(R.string.option_max_video_bit_detail), String.valueOf(setDefault ? AppData.setting.getDefaultMaxVideoBit() : device.maxVideoBit), maxVideoBitAdapter, str -> {
       if (setDefault) AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str));
       else device.maxVideoBit = Integer.parseInt(str);
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "优先H265", new Pair<>(setDefault ? AppData.setting.getDefaultUseH265() : device.useH265, "优先使用H265，视频体积小延迟低，实际以支持情况为主，若视频异常可尝试关闭"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_use_h265), context.getString(R.string.option_use_h265_detail), setDefault ? AppData.setting.getDefaultUseH265() : device.useH265, isChecked -> {
       if (setDefault) AppData.setting.setDefaultUseH265(isChecked);
       else device.useH265 = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "优先Opus", new Pair<>(setDefault ? AppData.setting.getDefaultUseOpus() : device.useOpus, "优先使用OPUS，音频体积小延迟低，实际以支持情况为主"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_use_opus), context.getString(R.string.option_use_opus_detail), setDefault ? AppData.setting.getDefaultUseOpus() : device.useOpus, isChecked -> {
       if (setDefault) AppData.setting.setDefaultUseOpus(isChecked);
       else device.useOpus = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "熄屏控制", new Pair<>(setDefault ? AppData.setting.getDefaultTurnOffScreen() : device.turnOffScreen, "开启后会在控制过程中保持被控端屏幕关闭"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_turn_off_screen), context.getString(R.string.option_turn_off_screen_detail), setDefault ? AppData.setting.getDefaultTurnOffScreen() : device.turnOffScreen, isChecked -> {
       if (setDefault) AppData.setting.setDefaultTurnOffScreen(isChecked);
       else device.turnOffScreen = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "断开后锁定", new Pair<>(setDefault ? AppData.setting.getDefaultAutoLockAfterControl() : device.autoLockAfterControl, "开启后断开连接后自动锁定被控端"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_auto_lock_after_control), context.getString(R.string.option_auto_lock_after_control_detail), setDefault ? AppData.setting.getDefaultAutoLockAfterControl() : device.autoLockAfterControl, isChecked -> {
       if (setDefault) AppData.setting.setDefaultAutoLockAfterControl(isChecked);
       else device.autoLockAfterControl = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "默认全屏启动", new Pair<>(setDefault ? AppData.setting.getDefaultFull() : device.defaultFull, "开启后在连接成功后直接进入全屏状态"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_default_full), context.getString(R.string.option_default_full_detail), setDefault ? AppData.setting.getDefaultFull() : device.defaultFull, isChecked -> {
       if (setDefault) AppData.setting.setDefaultFull(isChecked);
       else device.defaultFull = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "修改分辨率", new Pair<>(setDefault ? AppData.setting.getDefaultSetResolution() : device.setResolution, "开启后会自动修改被控端分辨率，可能会无法自动恢复(可手动恢复)，慎重考虑"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_set_resolution), context.getString(R.string.option_set_resolution_detail), setDefault ? AppData.setting.getDefaultSetResolution() : device.setResolution, isChecked -> {
       if (setDefault) AppData.setting.setDefaultSetResolution(isChecked);
       else device.setResolution = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, "使用隧道传输", new Pair<>(setDefault ? AppData.setting.getDefaultUseTunnel() : device.useTunnel, "开启后使用ADB隧道传输数据，否则使用单独端口(ADB端口加1)传输数据"), isChecked -> {
+    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_use_tunnel), context.getString(R.string.option_use_tunnel_detail), setDefault ? AppData.setting.getDefaultUseTunnel() : device.useTunnel, isChecked -> {
       if (setDefault) AppData.setting.setDefaultUseTunnel(isChecked);
       else device.useTunnel = isChecked;
     }).getRoot());
@@ -176,7 +176,7 @@ public class PublicTools {
   public static Dialog createClientLoading(
     Context context
   ) {
-    ItemClientLoadingBinding loadingView = ItemClientLoadingBinding.inflate(LayoutInflater.from(context));
+    ItemLoadingBinding loadingView = ItemLoadingBinding.inflate(LayoutInflater.from(context));
     return createDialog(context, false, loadingView.getRoot());
   }
 
@@ -196,13 +196,14 @@ public class PublicTools {
   public static ItemSwitchBinding createSwitchCard(
     Context context,
     String text,
-    Pair<Boolean, String> config,
+    String textDetail,
+    boolean config,
     MyFunctionBoolean function
   ) {
     ItemSwitchBinding switchView = ItemSwitchBinding.inflate(LayoutInflater.from(context));
     switchView.itemText.setText(text);
-    switchView.itemDetail.setText(config.second);
-    switchView.itemSwitch.setChecked(config.first);
+    switchView.itemDetail.setText(textDetail);
+    switchView.itemSwitch.setChecked(config);
     if (function != null) switchView.itemSwitch.setOnCheckedChangeListener((buttonView, checked) -> function.run(checked));
     return switchView;
   }
@@ -211,15 +212,16 @@ public class PublicTools {
   public static ItemSpinnerBinding createSpinnerCard(
     Context context,
     String text,
+    String textDetail,
+    String config,
     ArrayAdapter<String> adapter,
-    Pair<String, String> config,
     MyFunctionString function
   ) {
     ItemSpinnerBinding spinnerView = ItemSpinnerBinding.inflate(LayoutInflater.from(context));
     spinnerView.itemText.setText(text);
-    spinnerView.itemDetail.setText(config.second);
+    spinnerView.itemDetail.setText(textDetail);
     spinnerView.itemSpinner.setAdapter(adapter);
-    spinnerView.itemSpinner.setSelection(adapter.getPosition(config.first));
+    spinnerView.itemSpinner.setSelection(adapter.getPosition(config));
     spinnerView.itemSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -260,10 +262,10 @@ public class PublicTools {
     }
     Pattern regex = Pattern.compile(pattern);
     Matcher matcher = regex.matcher(address);
-    if (!matcher.find()) throw new IOException("地址格式错误");
+    if (!matcher.find()) throw new IOException(AppData.main.getString(R.string.error_address_error));
     String ip = matcher.group(1);
     String port = matcher.group(2);
-    if (ip == null || port == null) throw new IOException("地址格式错误");
+    if (ip == null || port == null) throw new IOException(AppData.main.getString(R.string.error_address_error));
     // 特殊格式
     if (type == 2) {
       if (ip.equals("*gateway*")) ip = getGateway();
@@ -353,6 +355,10 @@ public class PublicTools {
 
   public interface MyFunctionString {
     void run(String str);
+  }
+
+  public interface MyFunctionBytes {
+    void run(byte[] buffer);
   }
 
 }

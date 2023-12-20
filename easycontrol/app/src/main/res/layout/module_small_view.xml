@@ -122,7 +122,7 @@
     android:layout_gravity="center_horizontal"
     android:layout_marginTop="24dp"
     android:background="@drawable/background_cron"
-    android:backgroundTint="@color/cardBackground"
+    android:elevation="6dp"
     android:padding="5dp">
 
     <ImageView

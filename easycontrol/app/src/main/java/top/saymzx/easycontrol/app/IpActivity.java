@@ -37,14 +37,14 @@ public class IpActivity extends Activity {
     for (String i : listPair.first) {
       ItemTextBinding text = PublicTools.createTextCard(context, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-        Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
       });
       ipActivity.ipv4.addView(text.getRoot());
     }
     for (String i : listPair.second) {
       ItemTextBinding text = PublicTools.createTextCard(context, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-        Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
       });
       ipActivity.ipv6.addView(text.getRoot());
     }

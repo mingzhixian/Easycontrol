@@ -19,7 +19,7 @@ import top.saymzx.easycontrol.app.helper.DbHelper;
 
 public class AppData {
   @SuppressLint("StaticFieldLeak")
-  public static Activity main;
+  public static Context main;
   public static Handler handler;
 
   // 数据库工具库
@@ -56,7 +56,7 @@ public class AppData {
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
     wifiManager = (WifiManager) main.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     usbManager = (UsbManager) main.getSystemService(Context.USB_SERVICE);
-    windowManager = main.getWindowManager();
+    windowManager = (WindowManager) main.getSystemService(Context.WINDOW_SERVICE);
     getRealScreenSize(m);
     setting = new Setting(main.getSharedPreferences("setting", Context.MODE_PRIVATE));
     // 读取密钥文件

@@ -42,10 +42,9 @@
           android:layout_weight="1"
           android:includeFontPadding="false"
           android:maxLines="1"
-          android:text="中心服务设置"
+          android:text="@string/set_center"
           android:textColor="@color/onCardBackground"
-          android:textSize="@dimen/middleFont"
-          tools:ignore="HardcodedText" />
+          android:textSize="@dimen/middleFont" />
 
         <ImageView
           android:layout_width="24dp"
@@ -62,10 +61,9 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="5dp"
-        android:text="默认参数"
+        android:text="@string/set_default"
         android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont"
-        tools:ignore="HardcodedText" />
+        android:textSize="@dimen/middleFont" />
 
       <LinearLayout
         android:id="@+id/set_default"
@@ -81,7 +79,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="5dp"
-        android:text="显示"
+        android:text="@string/set_display"
         android:textColor="@color/onBackground"
         android:textSize="@dimen/middleFont" />
 
@@ -99,7 +97,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="5dp"
-        android:text="其他"
+        android:text="@string/set_other"
         android:textColor="@color/onBackground"
         android:textSize="@dimen/middleFont" />
 
@@ -117,7 +115,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="5dp"
-        android:text="关于"
+        android:text="@string/set_about"
         android:textColor="@color/onBackground"
         android:textSize="@dimen/middleFont" />
 

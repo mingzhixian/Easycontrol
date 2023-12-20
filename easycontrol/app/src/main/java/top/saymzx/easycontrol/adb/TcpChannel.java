@@ -13,7 +13,7 @@ public class TcpChannel implements AdbChannel {
 
   public TcpChannel(String host, int port) throws IOException {
     socket.setTcpNoDelay(true);
-    socket.connect(new InetSocketAddress(host, port));
+    socket.connect(new InetSocketAddress(host, port), 2000);
     inputStream = socket.getInputStream();
     outputStream = socket.getOutputStream();
   }

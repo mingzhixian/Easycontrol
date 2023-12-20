@@ -13,12 +13,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AbsListView;
 import android.widget.Toast;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import top.saymzx.easycontrol.app.client.Client;
-import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -87,7 +91,7 @@ public class MainActivity extends Activity {
       Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
       intent.setData(Uri.parse("package:$packageName"));
       startActivity(intent);
-      Toast.makeText(this, "请授予悬浮窗权限", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, getString(R.string.main_float_permission), Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -118,7 +122,7 @@ public class MainActivity extends Activity {
     }
 
     private void handleScreenOff() {
-      for (ClientView clientView : ClientView.allClientVuews) clientView.hide(true);
+      for (Client client : Client.allClient) client.release(null);
     }
   };
 

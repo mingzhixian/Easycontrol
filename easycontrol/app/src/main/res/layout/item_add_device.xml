@@ -9,7 +9,7 @@
   <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="设备名称:"
+    android:text="@string/add_device_name"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/smallFont" />
 
@@ -17,7 +17,7 @@
     android:id="@+id/name"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="不可为空"
+    android:hint="@string/add_device_name_hint"
     android:textColor="@color/onCardBackground"
     android:textColorHint="@color/onCardBackgroundSecond"
     android:textSize="@dimen/smallFont" />
@@ -26,7 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="4dp"
-    android:text="地址:端口号"
+    android:text="@string/add_device_address"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/smallFont" />
 
@@ -35,7 +35,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]-.:*"
-    android:hint="支持IPv4/v6地址、域名"
+    android:hint="@string/add_device_address_hint"
     android:textColor="@color/onCardBackground"
     android:textColorHint="@color/onCardBackgroundSecond"
     android:textSize="@dimen/smallFont" />
@@ -46,7 +46,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="4dp"
     android:buttonTint="@color/onCardBackground"
-    android:text="高级选项"
+    android:text="@string/add_device_option"
     android:textColor="@color/onCardBackgroundSecond"
     android:textSize="@dimen/smallFont" />
 
@@ -66,7 +66,7 @@
     android:background="@drawable/background_cron"
     android:backgroundTint="@color/button"
     android:gravity="center"
-    android:text="确认"
+    android:text="@string/add_device_button"
     android:textColor="@color/onButton"
     android:textSize="@dimen/smallFont" />
 

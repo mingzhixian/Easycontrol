@@ -24,23 +24,36 @@ import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 public final class VideoEncode {
   private static MediaCodec encedec;
   private static MediaFormat encodecFormat;
-  public static boolean isHasChangeConfig;
-  private static boolean isH265EncoderSupport;
+  public static boolean isHasChangeConfig = false;
+  private static boolean useH265;
 
   private static IBinder display;
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
+    useH265 = Options.useH265 && Device.isEncoderSupport("hevc");
+    Server.write(new byte[]{(byte) (useH265 ? 1 : 0)});
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
-    // 检查解码器
-    isH265EncoderSupport = Options.useH265 && Device.isEncoderSupport("hevc");
-    Server.writeMain(new byte[]{(byte) (isH265EncoderSupport ? 1 : 0)});
     // 创建Codec
     createEncodecFormat();
     startEncode();
-    encodeOut();
-    if (!isH265EncoderSupport) encodeOut();
-    isHasChangeConfig = false;
+  }
+
+  private static void createEncodecFormat() throws IOException {
+    String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
+    encedec = MediaCodec.createEncoderByType(codecMime);
+    encodecFormat = new MediaFormat();
+
+    encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
+
+    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.maxVideoBit);
+    encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
+    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 3);
+    encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
+
+    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000);
+    encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
   }
 
   // 初始化编码器
@@ -56,28 +69,11 @@ public final class VideoEncode {
     // 启动编码
     encedec.start();
     ByteBuffer byteBuffer = ByteBuffer.allocate(9);
-    byteBuffer.put((byte) 3);
+    byteBuffer.put((byte) 4);
     byteBuffer.putInt(Device.videoSize.first);
     byteBuffer.putInt(Device.videoSize.second);
     byteBuffer.flip();
-    Server.writeMain(byteBuffer.array());
-  }
-
-  private static void createEncodecFormat() throws IOException {
-    String codecMime = isH265EncoderSupport ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
-    encedec = MediaCodec.createEncoderByType(codecMime);
-    encodecFormat = new MediaFormat();
-
-    encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
-
-    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.maxVideoBit);
-    encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
-    encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 3);
-    encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
-
-    encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000);
-    encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+    Server.write(byteBuffer.array());
   }
 
   public static void stopEncode() {
@@ -104,12 +100,13 @@ public final class VideoEncode {
       // 找到已完成的输出缓冲区
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
-      ByteBuffer byteBuffer = ByteBuffer.allocate(12 + bufferInfo.size);
+      ByteBuffer byteBuffer = ByteBuffer.allocate(13 + bufferInfo.size);
+      byteBuffer.put((byte) 1);
       byteBuffer.putInt(bufferInfo.size);
       byteBuffer.put(encedec.getOutputBuffer(outIndex));
       byteBuffer.putLong(bufferInfo.presentationTimeUs);
       byteBuffer.flip();
-      Server.writeVideo(byteBuffer.array());
+      Server.write(byteBuffer.array());
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

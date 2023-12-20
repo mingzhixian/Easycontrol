@@ -42,8 +42,7 @@ public final class Device {
 
   public static void init() throws IOException, InterruptedException {
     getRealDeviceSize();
-    if (Options.reSize != -1) changeDeviceSize(Options.reSize);
-    else getDeivceSize();
+    getDeivceSize();
     // 旋转监听
     setRotationListener();
     // 剪切板监听
@@ -56,33 +55,6 @@ public final class Device {
     realDeviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
     if (deviceRotation == 1 || deviceRotation == 3) realDeviceSize = new Pair<>(realDeviceSize.second, realDeviceSize.first);
-  }
-
-  // 计算最佳的分辨率大小
-  public static void changeDeviceSize(float reSize) throws IOException, InterruptedException {
-    // 竖向比例最大为1
-    if (reSize > 1) reSize = 1;
-    boolean isPortrait = realDeviceSize.first < realDeviceSize.second;
-    int major = isPortrait ? realDeviceSize.second : realDeviceSize.first;
-    int minor = isPortrait ? realDeviceSize.first : realDeviceSize.second;
-
-    int newWidth;
-    int newHeight;
-    if ((float) minor / (float) major > reSize) {
-      newWidth = (int) (reSize * major);
-      newHeight = major;
-    } else {
-      newWidth = minor;
-      newHeight = (int) (minor / reSize);
-    }
-    // 修改分辨率
-    Pair<Integer, Integer> newDeivceSize = new Pair<>((isPortrait ? newWidth : newHeight), (isPortrait ? newHeight : newWidth));
-    newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
-    Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
-    // 更新
-    Thread.sleep(500);
-    getDeivceSize();
-    VideoEncode.isHasChangeConfig = true;
   }
 
   private static void getDeivceSize() {
@@ -107,6 +79,33 @@ public final class Device {
     videoSize = isPortrait ? new Pair<>(minor, major) : new Pair<>(major, minor);
   }
 
+  // 修改分辨率
+  public static void changeDeviceSize() throws IOException, InterruptedException {
+    // 竖向比例最大为1
+    if (Options.reSize > 1) Options.reSize = 1;
+    boolean isPortrait = realDeviceSize.first < realDeviceSize.second;
+    int major = isPortrait ? realDeviceSize.second : realDeviceSize.first;
+    int minor = isPortrait ? realDeviceSize.first : realDeviceSize.second;
+
+    int newWidth;
+    int newHeight;
+    if ((float) minor / (float) major > Options.reSize) {
+      newWidth = (int) (Options.reSize * major);
+      newHeight = major;
+    } else {
+      newWidth = minor;
+      newHeight = (int) (minor / Options.reSize);
+    }
+    // 修改分辨率
+    Pair<Integer, Integer> newDeivceSize = new Pair<>((isPortrait ? newWidth : newHeight), (isPortrait ? newHeight : newWidth));
+    newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
+    Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
+    // 更新，需延迟一段时间，否则会导致画面卡顿，尚未查清原因
+    Thread.sleep(500);
+    getDeivceSize();
+    VideoEncode.isHasChangeConfig = true;
+  }
+
   private static String nowClipboardText = "";
 
   private static void setClipBoardListener() {
@@ -120,12 +119,12 @@ public final class Device {
           if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return;
           nowClipboardText = newClipboardText;
           ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
-          byteBuffer.put((byte) 2);
+          byteBuffer.put((byte) 3);
           byteBuffer.putInt(tmpTextByte.length);
           byteBuffer.put(tmpTextByte);
           byteBuffer.flip();
           try {
-            Server.writeMain(byteBuffer.array());
+            Server.write(byteBuffer.array());
           } catch (IOException ignored) {
             Server.errorClose();
           }

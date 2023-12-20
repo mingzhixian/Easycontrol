@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 
@@ -41,7 +42,7 @@ public class CenterHelper {
         // 获取设备列表
         getDevice(centerAddress, ipAddressList.second.size() > 0);
         // 结束
-        if (handleFunction != null) handleFunction.run("连接成功");
+        if (handleFunction != null) handleFunction.run(AppData.main.getString(R.string.center_button_code));
       } catch (Exception e) {
         String error = String.valueOf(e);
         Log.e("Easycontrol", error);
@@ -100,7 +101,7 @@ public class CenterHelper {
       }
       deviceListAdapter.centerDevices.add(uuid);
     }
-    AppData.main.runOnUiThread(deviceListAdapter::update);
+    AppData.handler.post(deviceListAdapter::update);
   }
 
   private static JSONObject createCenterPacket(int handle) throws JSONException {
