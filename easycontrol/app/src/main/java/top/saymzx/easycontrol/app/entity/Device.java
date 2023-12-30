@@ -3,7 +3,7 @@ package top.saymzx.easycontrol.app.entity;
 public class Device {
   public static final int TYPE_NORMAL = 1;
   public static final int TYPE_LINK = 2;
-  public static final int TYPE_CENTER = 3;
+  public static final int TYPE_CLOUD = 3;
 
   public final String uuid;
   public final Integer type;
@@ -61,7 +61,7 @@ public class Device {
     return type == TYPE_NORMAL;
   }
 
-  public boolean isCenterDevice() {
-    return type == TYPE_CENTER;
+  public boolean isCloudDevice() {
+    return type == TYPE_CLOUD;
   }
 }

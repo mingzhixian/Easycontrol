@@ -19,9 +19,6 @@ import top.saymzx.easycontrol.app.entity.Device;
 
 public class DeviceListAdapter extends BaseAdapter {
 
-  // 特殊设备的名单，在该名单的设备则显示，不在则不显示
-  public ArrayList<String> centerDevices = new ArrayList<>();
-
   private final ArrayList<Device> devices = new ArrayList<>();
   private final Context context;
 
@@ -54,7 +51,7 @@ public class DeviceListAdapter extends BaseAdapter {
     }
     // 获取设备
     Device device = devices.get(i);
-    if (device.isCenterDevice()) setView(view, device, R.drawable.cloud);
+    if (device.isCloudDevice()) setView(view, device, R.drawable.cloud);
     else setView(view, device, R.drawable.phone);
     return view;
   }
@@ -80,7 +77,7 @@ public class DeviceListAdapter extends BaseAdapter {
     Dialog dialog = PublicTools.createDialog(context, true, itemSetDeviceBinding.getRoot());
     itemSetDeviceBinding.buttonRecover.setOnClickListener(v -> {
       dialog.cancel();
-      Client.recover(device.address, result -> AppData.handler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_other_local_recover_code_success : R.string.set_other_local_recover_code_error_connect), Toast.LENGTH_SHORT).show()));
+      Client.recover(device.address, result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_other_local_recover_code_success : R.string.set_other_local_recover_code_error_connect), Toast.LENGTH_SHORT).show()));
     });
     itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
       dialog.cancel();
@@ -104,7 +101,7 @@ public class DeviceListAdapter extends BaseAdapter {
     ArrayList<Device> tmp1 = new ArrayList<>();
     ArrayList<Device> tmp2 = new ArrayList<>();
     for (Device device : rawDevices) {
-      if (device.isCenterDevice() && centerDevices.contains(device.uuid)) tmp1.add(device);
+      if (device.isCloudDevice() && CloudHelper.cloudDevices.contains(device.uuid)) tmp1.add(device);
       else if (device.isNormalDevice()) tmp2.add(device);
     }
     devices.clear();

@@ -306,8 +306,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="app_icon" />
-                            <entry key="sourceFile" value="E:\Download\svg (1).svg" />
+                            <entry key="outputName" value="not_equal" />
+                            <entry key="sourceFile" value="E:\Download\svg (3).svg" />
                           </map>
                         </option>
                       </PersistentState>

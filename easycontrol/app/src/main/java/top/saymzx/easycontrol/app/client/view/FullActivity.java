@@ -112,7 +112,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity.buttonSwitch.setOnClickListener(v -> clientView.client.controller.sendKeyEvent(187, 0));
     fullActivity.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
-    fullActivity.buttonClose.setOnClickListener(v -> clientView.client.release(null));
+    fullActivity.buttonClose.setOnClickListener(v -> clientView.client.release());
     fullActivity.buttonNavBar.setOnClickListener(v -> setNavBarHide(fullActivity.navBar.getVisibility() == View.GONE));
     fullActivity.buttonRotate.setOnClickListener(v -> setRotation(-2));
     fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
@@ -121,7 +121,7 @@ public class FullActivity extends Activity implements SensorEventListener {
   // 导航栏隐藏
   private void setNavBarHide(boolean isShow) {
     fullActivity.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    fullActivity.buttonNavBar.setImageResource(isShow ? R.drawable.divide : R.drawable.equals);
+    fullActivity.buttonNavBar.setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
   }
 
   private void changeBarView() {

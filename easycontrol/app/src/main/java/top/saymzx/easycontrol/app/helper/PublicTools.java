@@ -9,6 +9,7 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.net.DhcpInfo;
 import android.os.Build;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -260,8 +262,7 @@ public class PublicTools {
       type = 4;
       pattern = "(.*?):(\\d+)";
     }
-    Pattern regex = Pattern.compile(pattern);
-    Matcher matcher = regex.matcher(address);
+    Matcher matcher = Pattern.compile(pattern).matcher(address);
     if (!matcher.find()) throw new IOException(AppData.main.getString(R.string.error_address_error));
     String ip = matcher.group(1);
     String port = matcher.group(2);
@@ -343,6 +344,12 @@ public class PublicTools {
     MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
     for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains(mimeName)) return true;
     return false;
+  }
+
+  // 日志
+  public static void logToast(String str){
+    Log.e("Easycontrol", str);
+    AppData.uiHandler.post(() -> Toast.makeText(AppData.main, str, Toast.LENGTH_SHORT).show());
   }
 
   public interface MyFunction {
