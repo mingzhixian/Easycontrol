@@ -7,20 +7,21 @@ import android.content.Context;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.File;
 
-import top.saymzx.easycontrol.adb.AdbKeyPair;
-import top.saymzx.easycontrol.app.BuildConfig;
+import top.saymzx.adb.AdbBase64;
+import top.saymzx.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.helper.DbHelper;
 
 public class AppData {
   @SuppressLint("StaticFieldLeak")
   public static Context main;
-  public static Handler handler;
+  public static Handler uiHandler;
 
   // 数据库工具库
   public static DbHelper dbHelper;
@@ -46,12 +47,9 @@ public class AppData {
   // 系统分辨率
   public static final DisplayMetrics realScreenSize = new DisplayMetrics();
 
-  // 当前版本号
-  public static String serverName = "/data/local/tmp/easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
-
   public static void init(Activity m) {
     main = m;
-    handler = new android.os.Handler(m.getMainLooper());
+    uiHandler = new android.os.Handler(m.getMainLooper());
     dbHelper = new DbHelper(main);
     clipBoard = (ClipboardManager) main.getSystemService(Context.CLIPBOARD_SERVICE);
     wifiManager = (WifiManager) main.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -61,6 +59,17 @@ public class AppData {
     setting = new Setting(main.getSharedPreferences("setting", Context.MODE_PRIVATE));
     // 读取密钥文件
     try {
+      AdbKeyPair.setAdbBase64(new AdbBase64() {
+        @Override
+        public String encodeToString(byte[] data) {
+          return Base64.encodeToString(data, Base64.DEFAULT);
+        }
+
+        @Override
+        public byte[] decode(byte[] data) {
+          return Base64.decode(data, Base64.DEFAULT);
+        }
+      });
       File privateKey = new File(main.getApplicationContext().getFilesDir(), "private.key");
       File publicKey = new File(main.getApplicationContext().getFilesDir(), "public.key");
       if (!privateKey.isFile() || !publicKey.isFile()) AdbKeyPair.generate(privateKey, publicKey);

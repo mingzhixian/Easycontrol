@@ -15,5 +15,6 @@ dependencyResolutionManagement {
 rootProject.name = "Easycontrol"
 include ':app'
 include ':server'
-include ':center'
+include ':cloud'
 include ':buffer'
+include ':adb'

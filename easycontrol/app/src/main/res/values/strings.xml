@@ -20,6 +20,7 @@
   <string name="set_other">其他</string>
   <string name="set_other_clear_default">清除默认设备</string>
   <string name="set_other_clear_default_code">已清除</string>
+  <string name="set_other_custom_key">自定义密钥(需重新授权)</string>
   <string name="set_other_clear_key">重新生成密钥(需重新授权)</string>
   <string name="set_other_clear_key_code">已刷新</string>
   <string name="set_other_local_recover">恢复本机分辨率</string>
@@ -33,7 +34,7 @@
   <string name="set_about_version">版本: </string>
 
   <!-- 中心服务器页面 -->
-  <string name="center_address">服务器地址</string>
+  <string name="center_address">云服务器地址</string>
   <string name="center_address_hint">不可为空</string>
   <string name="center_name">用户名</string>
   <string name="center_name_hint">仅字母和数字</string>
@@ -41,8 +42,8 @@
   <string name="center_password_hint">仅字母和数字</string>
   <string name="center_adb_port">本机ADB端口</string>
   <string name="center_adb_port_hint">可选，仅被控端需要填写</string>
+  <string name="center_hint">* 云服务器需自行搭建，或另外购买官方服务器</string>
   <string name="center_button">登录/注册</string>
-  <string name="center_hint">* 目前账号仅用于自动添加可达设备</string>
   <string name="center_button_code">成功</string>
 
   <!-- 查看IP地址页面 -->
@@ -50,6 +51,12 @@
   <string name="ip_ipv4">IPv4(点击复制)</string>
   <string name="ip_ipv6">IPv6(点击复制)</string>
   <string name="ip_copy">已复制</string>
+
+  <!-- 查看密钥页面 -->
+  <string name="adb_key_pub">公钥(Base64编码)</string>
+  <string name="adb_key_pri">私钥(Base64编码)</string>
+  <string name="adb_key_button">保存</string>
+  <string name="adb_key_button_code">已保存</string>
 
   <!-- 设备添加模块 -->
   <string name="add_device_name">设备名称</string>
@@ -75,7 +82,7 @@
   <string name="error_refused_back">全屏状态会拦截返回</string>
   <string name="error_connect_server">连接被控端失败</string>
   <string name="error_stream_closed">连接断开</string>
-  <string name="error_center_error">访问服务器错误</string>
+  <string name="error_cloud_error">连接云服务失败，请检查云服务地址</string>
 
   <!-- 设备参数设置及注释说明 -->
   <string name="option_is_audio">使能音频</string>

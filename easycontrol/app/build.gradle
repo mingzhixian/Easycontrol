@@ -47,5 +47,6 @@ android {
 }
 
 dependencies {
+  implementation project(':adb')
   implementation project(':buffer')
 }
