@@ -40,8 +40,10 @@ public class Client {
   private AudioDecode audioDecode;
   public Controller controller = new Controller(this::write);
   private final ClientView clientView;
+  public static Device device;
 
   public Client(Device device) {
+    Client.device = device;
     allClient.add(this);
     // 初始化
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -236,4 +238,17 @@ public class Client {
 
   private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
   private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
+
+  // 保存悬浮窗位置及大小
+  public static void writeDb(int x, int y, int width, int height) {
+    try {
+      device.window_x = x;
+      device.window_y = y;
+      device.window_width = width;
+      device.window_height = height;
+      AppData.dbHelper.update(device);
+    } catch (Exception e) {
+      Log.e("Easycontrol", String.valueOf(e));
+    }
+  }
 }
