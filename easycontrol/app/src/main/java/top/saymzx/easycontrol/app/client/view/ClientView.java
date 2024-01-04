@@ -30,7 +30,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
-  private Pair<Integer, Integer> maxSize;
+  public Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
   public ClientView(Client client, boolean setResolution) {

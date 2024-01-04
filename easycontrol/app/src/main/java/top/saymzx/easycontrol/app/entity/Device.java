@@ -20,6 +20,10 @@ public class Device {
   public boolean useH265;
   public boolean useOpus;
   public boolean useTunnel;
+  public Integer window_x;
+  public Integer window_y;
+  public Integer window_width;
+  public Integer window_height;
 
   public Device(String uuid,
                 Integer type,
@@ -35,7 +39,11 @@ public class Device {
                 boolean defaultFull,
                 boolean useH265,
                 boolean useOpus,
-                boolean useTunnel) {
+                boolean useTunnel,
+                Integer window_x,
+                Integer window_y,
+                Integer window_width,
+                Integer window_height) {
     this.uuid = uuid;
     this.type = type;
     this.name = name;
@@ -51,10 +59,14 @@ public class Device {
     this.useH265 = useH265;
     this.useOpus = useOpus;
     this.useTunnel = useTunnel;
+    this.window_x = window_x;
+    this.window_y = window_y;
+    this.window_width = window_width;
+    this.window_height = window_height;
   }
 
   public static Device getDefaultDevice(String uuid, int type) {
-    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getDefaultTurnOffScreen(), AppData.setting.getDefaultAutoLockAfterControl(), AppData.setting.getDefaultFull(), AppData.setting.getDefaultUseH265(), AppData.setting.getDefaultUseOpus(), AppData.setting.getDefaultUseTunnel());
+    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getDefaultTurnOffScreen(), AppData.setting.getDefaultAutoLockAfterControl(), AppData.setting.getDefaultFull(), AppData.setting.getDefaultUseH265(), AppData.setting.getDefaultUseOpus(), AppData.setting.getDefaultUseTunnel(), 0, 0, 0, 0);
   }
 
   public boolean isNormalDevice() {

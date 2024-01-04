@@ -21,9 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class SmallView extends ViewOutlineProvider {
@@ -112,6 +114,8 @@ public class SmallView extends ViewOutlineProvider {
   public void hide(boolean force) {
     try {
       if (force || isShow) {
+        // 保存悬浮窗位置及大小
+        Client.writeDb(smallViewParams.x, smallViewParams.y, clientView.maxSize.first, clientView.maxSize.second);
         isShow = false;
         isPortal = null;
         smallView.textureViewLayout.removeView(clientView.textureView);
@@ -204,11 +208,21 @@ public class SmallView extends ViewOutlineProvider {
 
   // 计算位置，居中显示
   public void calculateSite() {
-    Pair<Integer, Integer> screenSize = new Pair<>(backgroundWindow.getMeasuredWidth(), backgroundWindow.getMeasuredHeight() + statusBarHeight);
-    ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
-    smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
-    smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
-    AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+    Device device = Client.device;
+    if (device.window_x != 0 || device.window_y != 0 || device.window_width != 0 || device.window_height != 0) {
+      smallViewParams.x = device.window_x;
+      smallViewParams.y = device.window_y;
+      clientView.updateMaxSize(new Pair<>(device.window_width, device.window_height));
+      AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+    }
+    else
+    {
+      Pair<Integer, Integer> screenSize = new Pair<>(backgroundWindow.getMeasuredWidth(), backgroundWindow.getMeasuredHeight() + statusBarHeight);
+      ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+      smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
+      smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
+      AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+    }
   }
 
   // 设置按钮监听

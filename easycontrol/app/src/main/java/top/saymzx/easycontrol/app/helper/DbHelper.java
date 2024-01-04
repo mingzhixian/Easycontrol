@@ -24,7 +24,20 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoLockAfterControl integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useOpus integer ," + "\t useTunnel integer" + ")");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t turnOffScreen integer," + "\t autoLockAfterControl integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useOpus integer ," + "\t useTunnel integer ," + "\t window_x integer ," + "\t window_y integer ," + "\t window_width integer ," + "\t window_height integer " + ");");
+  }
+
+  @Override
+  public void onOpen(SQLiteDatabase db) {
+    // 检测表中是否存在window_x列
+    try (Cursor cursor = db.rawQuery("select * from " + tableName + " limit 0", null)) {
+      if (cursor.getColumnIndex("window_x") == -1) {
+        db.execSQL("alter table " + tableName + " add column window_x integer");
+        db.execSQL("alter table " + tableName + " add column window_y integer");
+        db.execSQL("alter table " + tableName + " add column window_width integer");
+        db.execSQL("alter table " + tableName + " add column window_height integer");
+      }
+    }
   }
 
   @SuppressLint("Range")
@@ -104,6 +117,10 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("useH265", device.useH265);
     values.put("useOpus", device.useOpus);
     values.put("useTunnel", device.useTunnel);
+    values.put("window_x", device.window_x);
+    values.put("window_y", device.window_y);
+    values.put("window_width", device.window_width);
+    values.put("window_height", device.window_height);
     return values;
   }
 
@@ -124,6 +141,11 @@ public class DbHelper extends SQLiteOpenHelper {
       cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
       cursor.getColumnIndex("useH265") == -1 ? AppData.setting.getDefaultUseH265() : cursor.getInt(cursor.getColumnIndex("useH265")) == 1,
       cursor.getColumnIndex("useOpus") == -1 ? AppData.setting.getDefaultUseOpus() : cursor.getInt(cursor.getColumnIndex("useOpus")) == 1,
-      cursor.getColumnIndex("useTunnel") == -1 ? AppData.setting.getDefaultUseTunnel() : cursor.getInt(cursor.getColumnIndex("useTunnel")) == 1);
+      cursor.getColumnIndex("useTunnel") == -1 ? AppData.setting.getDefaultUseTunnel() : cursor.getInt(cursor.getColumnIndex("useTunnel")) == 1,
+      cursor.getInt(cursor.getColumnIndex("window_x")),
+      cursor.getInt(cursor.getColumnIndex("window_y")),
+      cursor.getInt(cursor.getColumnIndex("window_width")),
+      cursor.getInt(cursor.getColumnIndex("window_height"))
+    );
   }
 }
