@@ -10,13 +10,14 @@ public class BufferNew {
     dataQueue.offerLast(data);
   }
 
-  public ByteBuffer read(int size) throws InterruptedException {
-    ByteBuffer data = ByteBuffer.allocate(size);
+  public ByteBuffer read(int len) throws InterruptedException {
+    if (len < 0) return null;
+    ByteBuffer data = ByteBuffer.allocate(len);
     int readBytes = 0;
-    synchronized (dataQueue) {
-      while (readBytes < size) {
+    synchronized (this) {
+      while (readBytes < len) {
         ByteBuffer tmpData = dataQueue.takeFirst();
-        int needReadSize = size - readBytes;
+        int needReadSize = len - readBytes;
         if (tmpData.remaining() > needReadSize) {
           readBytes += needReadSize;
           int oldLimit = tmpData.limit();
@@ -34,16 +35,16 @@ public class BufferNew {
     return data;
   }
 
-  // 队列为空时返回null
-  public ByteBuffer readNext() {
-    return dataQueue.pollFirst();
+  public ByteBuffer readNext() throws InterruptedException {
+    synchronized (this) {
+      return dataQueue.takeFirst();
+    }
   }
 
   public boolean isEmpty() {
     return dataQueue.isEmpty();
   }
 
-  // 此操作速度较慢，慎用
   public int getSize() {
     int size = 0;
     for (ByteBuffer byteBuffer : dataQueue) size += byteBuffer.remaining();

@@ -233,15 +233,15 @@ public class SmallView extends ViewOutlineProvider {
     smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonMiniCircle.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
-    smallView.buttonClose.setOnClickListener(v -> clientView.client.release(null));
-    smallView.buttonCloseCircle.setOnClickListener(v -> clientView.client.release(null));
+    smallView.buttonClose.setOnClickListener(v -> clientView.client.release());
+    smallView.buttonCloseCircle.setOnClickListener(v -> clientView.client.release());
     smallView.buttonNavBar.setOnClickListener(v -> setNavBarHide(smallView.navBar.getVisibility() == View.GONE));
   }
 
   // 导航栏隐藏
   private void setNavBarHide(boolean isShow) {
     smallView.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
-    smallView.buttonNavBar.setImageResource(isShow ? R.drawable.divide : R.drawable.equals);
+    smallView.buttonNavBar.setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
   }
 
   private void changeBarView() {

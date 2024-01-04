@@ -28,7 +28,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[192.168.43.225:5555]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[192.168.221.140:5555]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -150,10 +150,10 @@
       <list>
         <option value="Kotlin Object" />
         <option value="Kotlin Class" />
-        <option value="Interface" />
         <option value="resourceFile" />
-        <option value="Class" />
         <option value="valueResourceFile" />
+        <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -184,7 +184,7 @@
     &quot;ExportApk.ApkPathForeasycontrol.app&quot;: &quot;E:\\Code\\easycontrol\\easycontrol\\app&quot;,
     &quot;ExportApk.ApkPathForscrcpy_android.app&quot;: &quot;E:\\Code\\scrcpy\\scrcpy_android\\app&quot;,
     &quot;ResourceManagerPrefKey.ModuleName&quot;: &quot;Easycontrol.app.main&quot;,
-    &quot;ResourceManagerPrefKey.ResourceType&quot;: &quot;STRING&quot;,
+    &quot;ResourceManagerPrefKey.ResourceType&quot;: &quot;DRAWABLE&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
@@ -242,6 +242,9 @@
       <recent name="top.saymzx.scrcpy.server.entity" />
       <recent name="top.saymzx.scrcpy.server.helper" />
     </key>
+    <key name="android.template.1440091398">
+      <recent name="top.saymzx.easycontrol.app" />
+    </key>
     <key name="android.template.-859879336">
       <recent name="top.saymzx.scrcpy.android" />
     </key>
@@ -253,11 +256,11 @@
       <recent name="top.saymzx.scrcpy.android.adb" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="top.saymzx.buffer" />
       <recent name="top.saymzx.easycontrol.server.entity" />
       <recent name="top.saymzx.easycontrol.server.helper" />
       <recent name="top.saymzx.scrcpy.server.entity" />
       <recent name="top.saymzx.scrcpy.server.helper" />
-      <recent name="top.saymzx.scrcpy.server" />
     </key>
   </component>
   <component name="RunManager" selected="Android App.app">
@@ -374,14 +377,14 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Center" type="Application" factoryName="Application" nameIsGenerated="true">
+    <configuration name="Cloud" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="jbr-11" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-      <option name="MAIN_CLASS_NAME" value="top.saymzx.easycontrol.center.Center" />
-      <module name="Easycontrol.center.main" />
+      <option name="MAIN_CLASS_NAME" value="top.saymzx.easycontrol.cloud.Cloud" />
+      <module name="easycontrol.Easycontrol.cloud.main" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="top.saymzx.easycontrol.center.*" />
+          <option name="PATTERN" value="top.saymzx.easycontrol.cloud.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -473,6 +476,19 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="Easycontrol.cloud" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="Easycontrol.cloud" />
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="Android App.server" />
       <item itemvalue="Android App.app" />
@@ -480,7 +496,7 @@
       <item itemvalue="Gradle.easycontrol:server [copyRelease]" />
       <item itemvalue="Gradle.easycontrol:center [shadowJar]" />
       <item itemvalue="Gradle.easycontrol:server [copyRelease] (1)" />
-      <item itemvalue="应用程序.Center" />
+      <item itemvalue="应用程序.Cloud" />
     </list>
     <recent_temporary>
       <list>

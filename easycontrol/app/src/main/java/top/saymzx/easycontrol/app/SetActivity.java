@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import top.saymzx.easycontrol.adb.AdbKeyPair;
+import top.saymzx.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -38,10 +38,17 @@ public class SetActivity extends Activity {
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_master_audo_rotation), getString(R.string.set_display_master_audo_rotation_detail), AppData.setting.getMasterAudoRotation(), isChecked -> AppData.setting.setMasterAudoRotation(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_slave_audo_rotation), getString(R.string.set_display_slave_audo_rotation_detail), AppData.setting.getSlaveAudoRotation(), isChecked -> AppData.setting.setSlaveAudoRotation(isChecked)).getRoot());
     // 其他
+    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_about_ip), () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_clear_default), () -> {
       AppData.setting.setDefaultDevice("");
       Toast.makeText(this, getString(R.string.set_other_clear_default_code), Toast.LENGTH_SHORT).show();
     }).getRoot());
+    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_local_recover), () -> {
+      int port = AppData.setting.getLocalAdbPort();
+      if (port == -1) Toast.makeText(this, getString(R.string.set_other_local_recover_code_error_adb), Toast.LENGTH_SHORT).show();
+      else Client.recover("127.0.0.1:" + port, result -> Toast.makeText(this, getString(result ? R.string.set_other_local_recover_code_success : R.string.set_other_local_recover_code_error_connect), Toast.LENGTH_SHORT).show());
+    }).getRoot());
+    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_custom_key), () -> startActivity(new Intent(this, AdbKeyActivity.class))).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_clear_key), () -> {
       try {
         // 读取密钥文件
@@ -53,13 +60,7 @@ public class SetActivity extends Activity {
       } catch (Exception ignored) {
       }
     }).getRoot());
-    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_local_recover), () -> {
-      int port = AppData.setting.getCenterAdbPort();
-      if (port == -1) Toast.makeText(this, getString(R.string.set_other_local_recover_code_error_adb), Toast.LENGTH_SHORT).show();
-      else Client.recover("127.0.0.1:" + port, result -> Toast.makeText(this, getString(result ? R.string.set_other_local_recover_code_success : R.string.set_other_local_recover_code_error_connect), Toast.LENGTH_SHORT).show());
-    }).getRoot());
     // 关于
-    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_ip), () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_how_to_use), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_privacy), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_version) + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
@@ -81,6 +82,6 @@ public class SetActivity extends Activity {
   // 设置返回按钮监听
   private void setButtonListener() {
     setActivity.backButton.setOnClickListener(v -> finish());
-    setActivity.setCenter.setOnClickListener(v -> startActivity(new Intent(this, CenterActivity.class)));
+    setActivity.setCenter.setOnClickListener(v -> startActivity(new Intent(this, CloudActivity.class)));
   }
 }
