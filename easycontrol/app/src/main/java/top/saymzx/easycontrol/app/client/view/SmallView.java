@@ -89,7 +89,14 @@ public class SmallView extends ViewOutlineProvider {
       boolean nowPortal = screenSize.first > screenSize.second;
       if (isPortal == null || nowPortal ^ isPortal) {
         isPortal = nowPortal;
-        clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+        // 恢复显示大小
+        if (Client.device.window_width == 0 || Client.device.window_height == 0) {
+          clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+        }
+        else
+        {
+          clientView.updateMaxSize(new Pair<>(Client.device.window_width, Client.device.window_height));
+        }
         calculateSite();
       }
     });
@@ -114,8 +121,8 @@ public class SmallView extends ViewOutlineProvider {
   public void hide(boolean force) {
     try {
       if (force || isShow) {
-        // 保存悬浮窗位置及大小
-        Client.writeDb(smallViewParams.x, smallViewParams.y, clientView.maxSize.first, clientView.maxSize.second);
+        // 保存悬浮窗位置
+        clientView.saveWindowPosition(smallViewParams.x, smallViewParams.y);
         isShow = false;
         isPortal = null;
         smallView.textureViewLayout.removeView(clientView.textureView);
@@ -206,13 +213,11 @@ public class SmallView extends ViewOutlineProvider {
     });
   }
 
-  // 计算位置，居中显示
+  // 恢复显示位置
   public void calculateSite() {
-    Device device = Client.device;
-    if (device.window_x != 0 || device.window_y != 0 || device.window_width != 0 || device.window_height != 0) {
-      smallViewParams.x = device.window_x;
-      smallViewParams.y = device.window_y;
-      clientView.updateMaxSize(new Pair<>(device.window_width, device.window_height));
+    if (Client.device.window_x != 0 || Client.device.window_y != 0) {
+      smallViewParams.x = Client.device.window_x;
+      smallViewParams.y = Client.device.window_y;
       AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
     }
     else

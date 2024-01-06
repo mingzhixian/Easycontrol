@@ -30,7 +30,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
-  public Pair<Integer, Integer> maxSize;
+  private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
   public ClientView(Client client, boolean setResolution) {
@@ -190,5 +190,10 @@ public class ClientView implements TextureView.SurfaceTextureListener {
 
   @Override
   public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
+  }
+
+  // 保存悬浮窗大小
+  public void saveWindowPosition(int x, int y) {
+    Client.writeDb(x, y, maxSize.first, maxSize.second);
   }
 }
