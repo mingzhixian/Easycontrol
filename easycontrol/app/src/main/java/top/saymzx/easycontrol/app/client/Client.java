@@ -4,6 +4,7 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.app.Dialog;
 import android.content.ClipData;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -117,8 +118,24 @@ public class Client {
   private void createUI(Device device) {
     AppData.handler.post(() -> {
       if (device.defaultFull) clientView.changeToFull();
-      else clientView.changeToSmall();
+      else {
+        clientView.changeToSmall();
+        // 延迟0.5秒返回主屏幕
+        AppData.handler.postDelayed(() -> {
+          if (status == 1) {
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.addCategory(Intent.CATEGORY_HOME);
+            home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            AppData.main.startActivity(home);
+          }
+        }, 500);
+      }
     });
+  }
+
+  // 检查是否启动完成
+  public boolean isStarted() {
+    return status == 1 && clientView != null;
   }
 
   // 启动子服务
