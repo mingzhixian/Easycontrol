@@ -4,6 +4,7 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.app.Dialog;
 import android.content.ClipData;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -34,8 +35,10 @@ public class Client {
   private AudioDecode audioDecode;
   public Controller controller = new Controller(this::write);
   private final ClientView clientView;
+  public static Device device;
 
   public Client(Device device) {
+    Client.device = device;
     allClient.add(this);
     // 初始化
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -54,6 +57,11 @@ public class Client {
         else clientView.changeToSmall();
       } else release();
     }));
+  }
+
+  // 检查是否启动完成
+  public boolean isStarted() {
+    return status == 1 && clientView != null;
   }
 
   // 启动子服务
@@ -166,6 +174,23 @@ public class Client {
         handle.run(false);
       }
     }).start();
+  }
+
+
+  private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
+  private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
+
+  // 保存悬浮窗位置及大小
+  public static void writeDb(int x, int y, int width, int height) {
+    try {
+      device.window_x = x;
+      device.window_y = y;
+      device.window_width = width;
+      device.window_height = height;
+      AppData.dbHelper.update(device);
+    } catch (Exception e) {
+      Log.e("Easycontrol", String.valueOf(e));
+    }
   }
 
 }

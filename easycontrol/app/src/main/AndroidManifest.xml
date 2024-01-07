@@ -44,6 +44,13 @@
       android:exported="false"
       android:hardwareAccelerated="true"
       android:launchMode="singleTask" />
+    <activity
+      android:name=".StartDefaultActivity"
+      android:exported="true"
+      android:hardwareAccelerated="true"
+      android:theme="@style/Transparent"
+      android:launchMode="singleTask" />
+
   </application>
 
 </manifest>

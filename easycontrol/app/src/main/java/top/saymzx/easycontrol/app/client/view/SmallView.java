@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -77,6 +78,7 @@ public class SmallView extends ViewOutlineProvider {
     // 设置监听控制
     setFloatVideoListener();
     setReSizeListener();
+    setRotateListener();
     setBarListener();
     // 设置圆角
     smallView.getRoot().setOutlineProvider(this);
@@ -87,7 +89,14 @@ public class SmallView extends ViewOutlineProvider {
       boolean nowPortal = screenSize.first > screenSize.second;
       if (isPortal == null || nowPortal ^ isPortal) {
         isPortal = nowPortal;
-        clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+        // 恢复显示大小
+        if (Client.device.window_width == 0 || Client.device.window_height == 0) {
+          clientView.updateMaxSize(new Pair<>(screenSize.first * 4 / 5, screenSize.second * 4 / 5));
+        }
+        else
+        {
+          clientView.updateMaxSize(new Pair<>(Client.device.window_width, Client.device.window_height));
+        }
         calculateSite();
       }
     });
@@ -112,6 +121,8 @@ public class SmallView extends ViewOutlineProvider {
   public void hide(boolean force) {
     try {
       if (force || isShow) {
+        // 保存悬浮窗位置
+        clientView.saveWindowPosition(smallViewParams.x, smallViewParams.y);
         isShow = false;
         isPortal = null;
         smallView.textureViewLayout.removeView(clientView.textureView);
@@ -202,13 +213,21 @@ public class SmallView extends ViewOutlineProvider {
     });
   }
 
-  // 计算位置，居中显示
+  // 恢复显示位置
   public void calculateSite() {
-    Pair<Integer, Integer> screenSize = new Pair<>(backgroundWindow.getMeasuredWidth(), backgroundWindow.getMeasuredHeight() + statusBarHeight);
-    ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
-    smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
-    smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
-    AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+    if (Client.device.window_x != 0 || Client.device.window_y != 0) {
+      smallViewParams.x = Client.device.window_x;
+      smallViewParams.y = Client.device.window_y;
+      AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+    }
+    else
+    {
+      Pair<Integer, Integer> screenSize = new Pair<>(backgroundWindow.getMeasuredWidth(), backgroundWindow.getMeasuredHeight() + statusBarHeight);
+      ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+      smallViewParams.x = (screenSize.first - layoutParams.width) / 2;
+      smallViewParams.y = (screenSize.second - layoutParams.height) / 2;
+      AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+    }
   }
 
   // 设置按钮监听
@@ -248,6 +267,20 @@ public class SmallView extends ViewOutlineProvider {
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
         if (sizeX < minSize || sizeY < minSize) return true;
         clientView.updateMaxSize(new Pair<>(sizeX, sizeY));
+      }
+      return true;
+    });
+  }
+
+  // 设置旋转按钮监听控制
+  @SuppressLint("ClickableViewAccessibility")
+  private void setRotateListener() {
+    // 双击旋转
+    smallView.rotate.setOnTouchListener((v, event) -> {
+      if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        if (event.getEventTime() - event.getDownTime() < 200) {
+          clientView.client.controller.sendRotateEvent(clientView.textureView.getLayoutParams().width > clientView.textureView.getLayoutParams().height);
+        }
       }
       return true;
     });

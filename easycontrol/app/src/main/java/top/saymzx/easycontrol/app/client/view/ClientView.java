@@ -191,4 +191,9 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   @Override
   public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
   }
+
+  // 保存悬浮窗大小
+  public void saveWindowPosition(int x, int y) {
+    Client.writeDb(x, y, maxSize.first, maxSize.second);
+  }
 }

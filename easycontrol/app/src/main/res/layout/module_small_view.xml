@@ -167,4 +167,11 @@
     android:layout_height="25dp"
     android:layout_gravity="end|bottom"
     android:focusable="false" />
+
+  <View
+    android:id="@+id/rotate"
+    android:layout_width="25dp"
+    android:layout_height="25dp"
+    android:layout_gravity="bottom|start"
+    android:focusable="false"/>
 </FrameLayout>
