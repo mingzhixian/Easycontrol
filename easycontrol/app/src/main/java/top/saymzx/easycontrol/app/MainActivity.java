@@ -2,8 +2,6 @@ package top.saymzx.easycontrol.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,22 +9,16 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.provider.Settings;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.AbsListView;
 import android.widget.Toast;
 
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
-import top.saymzx.easycontrol.app.helper.CenterHelper;
+import top.saymzx.easycontrol.app.helper.CloudHelper;
 import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
@@ -52,21 +44,18 @@ public class MainActivity extends Activity {
     // 设置设备列表适配器
     deviceListAdapter = new DeviceListAdapter(this);
     mainActivity.devicesList.setAdapter(deviceListAdapter);
-    CenterHelper.initCenterHelper(deviceListAdapter);
     // 设置按钮监听
     setButtonListener();
     // 启动默认设备
     startDefault();
     // 注册广播监听
     IntentFilter filter = new IntentFilter();
-    filter.addAction(ACTION_CENTER_SERVICE);
+    filter.addAction(ACTION_DEVICE_LIST_UPDATE);
     filter.addAction(ACTION_SCREEN_OFF);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiver(broadcastReceiver, filter, RECEIVER_EXPORTED);
     else registerReceiver(broadcastReceiver, filter);
     // 启动Center检查服务
-    CenterHelper.checkCenter(null);
-    alarmPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_CENTER_SERVICE), PendingIntent.FLAG_IMMUTABLE);
-    ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 1000 * 60 * 5, alarmPendingIntent);
+    startService(new Intent(this, CloudHelper.class));
   }
 
   @Override
@@ -78,8 +67,6 @@ public class MainActivity extends Activity {
 
   @Override
   protected void onDestroy() {
-    // 注销广播监听
-    ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).cancel(alarmPendingIntent);
     unregisterReceiver(broadcastReceiver);
     super.onDestroy();
   }
@@ -111,18 +98,17 @@ public class MainActivity extends Activity {
   }
 
   // 广播处理
-  private static final String ACTION_CENTER_SERVICE = "top.saymzx.easycontrol.app.CENTER_SERVICE";
+  public static final String ACTION_DEVICE_LIST_UPDATE = "top.saymzx.easycontrol.app.DEVICE_LIST_UPDATE";
   private static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
-  private PendingIntent alarmPendingIntent;
   private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      if (ACTION_CENTER_SERVICE.equals(intent.getAction())) CenterHelper.checkCenter(null);
+      if (ACTION_DEVICE_LIST_UPDATE.equals(intent.getAction())) deviceListAdapter.update();
       else if (ACTION_SCREEN_OFF.equals(intent.getAction())) handleScreenOff();
     }
 
     private void handleScreenOff() {
-      for (Client client : Client.allClient) client.release(null);
+      for (Client client : Client.allClient) client.release();
     }
   };
 

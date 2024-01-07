@@ -106,7 +106,7 @@
       android:layout_height="22dp"
       android:layout_margin="2dp"
       android:focusable="false"
-      android:src="@drawable/divide"
+      android:src="@drawable/not_equal"
       android:tint="@color/onCardBackground" />
 
     <ImageView
