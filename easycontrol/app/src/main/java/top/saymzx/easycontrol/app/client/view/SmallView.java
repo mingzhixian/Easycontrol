@@ -25,7 +25,6 @@ import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class SmallView extends ViewOutlineProvider {
@@ -79,6 +78,7 @@ public class SmallView extends ViewOutlineProvider {
     // 设置监听控制
     setFloatVideoListener();
     setReSizeListener();
+    setRotateListener();
     setBarListener();
     // 设置圆角
     smallView.getRoot().setOutlineProvider(this);
@@ -267,6 +267,20 @@ public class SmallView extends ViewOutlineProvider {
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
         if (sizeX < minSize || sizeY < minSize) return true;
         clientView.updateMaxSize(new Pair<>(sizeX, sizeY));
+      }
+      return true;
+    });
+  }
+
+  // 设置旋转按钮监听控制
+  @SuppressLint("ClickableViewAccessibility")
+  private void setRotateListener() {
+    // 双击旋转
+    smallView.rotate.setOnTouchListener((v, event) -> {
+      if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        if (event.getEventTime() - event.getDownTime() < 200) {
+          clientView.client.controller.sendRotateEvent(clientView.textureView.getLayoutParams().width > clientView.textureView.getLayoutParams().height);
+        }
       }
       return true;
     });
