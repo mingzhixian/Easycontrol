@@ -8,16 +8,11 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
-import java.net.Socket;
 import java.util.ArrayList;
 
-import top.saymzx.easycontrol.adb.Adb;
-import top.saymzx.easycontrol.adb.AdbStream;
-import top.saymzx.easycontrol.app.BuildConfig;
+import top.saymzx.adb.Adb;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -30,8 +25,7 @@ public class Client {
   public static final ArrayList<Client> allClient = new ArrayList<>();
 
   // 连接
-  private Adb adb;
-  ClientStream clientStream;
+  final ClientStream clientStream;
 
   // 子服务
   private final Thread executeStreamInThread = new Thread(this::executeStreamIn);
@@ -55,82 +49,14 @@ public class Client {
     clientView = new ClientView(this, device.setResolution);
     Dialog dialog = PublicTools.createClientLoading(AppData.main);
     dialog.show();
-    // 启动线程
-    Thread startThread = new Thread(() -> {
-      try {
-        // 解析地址
-        Pair<String, Integer> address = PublicTools.getIpAndPort(device.address);
-        // 启动server
-        startServer(device, address);
-        // 连接server
-        connectServer(device, address);
-        // 更新UI
-        AppData.handler.post(dialog::cancel);
-        createUI(device);
-      } catch (Exception e) {
-        if (dialog.isShowing()) AppData.handler.post(dialog::cancel);
-        release(String.valueOf(e));
-      }
-    });
-    // 启动Client
-    startThread.start();
-  }
-
-  // 启动Server
-  private void startServer(Device device, Pair<String, Integer> address) throws Exception {
-    adb = new Adb(address.first, address.second, AppData.keyPair);
-    if (BuildConfig.ENABLE_DEBUG_FEATURE || !adb.runAdbCmd("ls -l /data/local/tmp/easycontrol_*", true).contains(AppData.serverName)) {
-      adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), AppData.serverName);
-    }
-    adb.runAdbCmd("app_process -Djava.class.path=" + AppData.serverName + " / top.saymzx.easycontrol.server.Server"
-      + " tcpPort=" + (address.second + 1)
-      + " isAudio=" + (device.isAudio ? 1 : 0)
-      + " maxSize=" + device.maxSize
-      + " maxFps=" + device.maxFps
-      + " maxVideoBit=" + device.maxVideoBit
-      + " turnOffScreen=" + (device.turnOffScreen ? 1 : 0)
-      + " autoLockAfterControl=" + (device.autoLockAfterControl ? 1 : 0)
-      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0)
-      + " useOpus=" + ((device.useOpus && supportOpus) ? 1 : 0) + " > /dev/null 2>&1 &", false);
-  }
-
-  // 连接Server
-  private void connectServer(Device device, Pair<String, Integer> address) throws Exception {
-    Thread.sleep(50);
-    for (int i = 0; i < 60; i++) {
-      try {
-        if (device.useTunnel) {
-          AdbStream adbStream = adb.tcpForward(address.second + 1, true);
-          clientStream = new ClientStream(adb, adbStream);
-        } else {
-          Socket socket = new Socket(address.first, address.second + 1);
-          clientStream = new ClientStream(socket);
-        }
-        return;
-      } catch (Exception ignored) {
-        Thread.sleep(50);
-      }
-    }
-    throw new Exception(AppData.main.getString(R.string.error_connect_server));
-  }
-
-  // 创建UI
-  private void createUI(Device device) {
-    AppData.handler.post(() -> {
-      if (device.defaultFull) clientView.changeToFull();
-      else {
-        clientView.changeToSmall();
-        // 延迟0.5秒返回主屏幕
-        AppData.handler.postDelayed(() -> {
-          if (status == 1) {
-            Intent home = new Intent(Intent.ACTION_MAIN);
-            home.addCategory(Intent.CATEGORY_HOME);
-            home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            AppData.main.startActivity(home);
-          }
-        }, 500);
-      }
-    });
+    // 连接
+    clientStream = new ClientStream(device, result -> AppData.uiHandler.post(() -> {
+      dialog.cancel();
+      if (result) {
+        if (device.defaultFull) clientView.changeToFull();
+        else clientView.changeToSmall();
+      } else release();
+    }));
   }
 
   // 检查是否启动完成
@@ -144,7 +70,7 @@ public class Client {
     status = 1;
     // 启动子服务
     executeStreamInThread.start();
-    AppData.handler.post(this::executeOtherService);
+    AppData.uiHandler.post(this::executeOtherService);
   }
 
   // 服务分发
@@ -182,12 +108,13 @@ public class Client {
             break;
           case CHANGE_SIZE_EVENT:
             Pair<Integer, Integer> newVideoSize = new Pair<>(clientStream.readInt(), clientStream.readInt());
-            AppData.handler.post(() -> clientView.updateVideoSize(newVideoSize));
+            AppData.uiHandler.post(() -> clientView.updateVideoSize(newVideoSize));
             break;
         }
       }
     } catch (Exception ignored) {
-      release(AppData.main.getString(R.string.error_stream_closed));
+      PublicTools.logToast(AppData.main.getString(R.string.error_stream_closed));
+      release();
     }
   }
 
@@ -195,7 +122,7 @@ public class Client {
     if (status == 1) {
       controller.checkClipBoard();
       controller.sendKeepAlive();
-      AppData.handler.postDelayed(this::executeOtherService, 1500);
+      AppData.uiHandler.postDelayed(this::executeOtherService, 1500);
     }
   }
 
@@ -203,18 +130,15 @@ public class Client {
     try {
       clientStream.write(buffer);
     } catch (Exception ignored) {
-      release(AppData.main.getString(R.string.error_stream_closed));
+      PublicTools.logToast(AppData.main.getString(R.string.error_stream_closed));
+      release();
     }
   }
 
-  public void release(String error) {
+  public void release() {
     if (status == -1) return;
     status = -1;
     allClient.remove(this);
-    if (error != null) {
-      Log.e("Easycontrol", error);
-      AppData.handler.post(() -> Toast.makeText(AppData.main, error, Toast.LENGTH_SHORT).show());
-    }
     for (int i = 0; i < 4; i++) {
       try {
         switch (i) {
@@ -223,11 +147,10 @@ public class Client {
             if (handlerThread != null) handlerThread.quit();
             break;
           case 1:
-            AppData.handler.post(() -> clientView.hide(true));
+            AppData.uiHandler.post(() -> clientView.hide(true));
             break;
           case 2:
             clientStream.close();
-            adb.close();
             break;
           case 3:
             videoDecode.release();
@@ -253,6 +176,7 @@ public class Client {
     }).start();
   }
 
+
   private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
   private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
 
@@ -268,4 +192,5 @@ public class Client {
       Log.e("Easycontrol", String.valueOf(e));
     }
   }
+
 }

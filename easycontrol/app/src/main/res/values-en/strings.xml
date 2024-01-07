@@ -20,6 +20,7 @@
   <string name="set_other">Other</string>
   <string name="set_other_clear_default">Clear default device</string>
   <string name="set_other_clear_default_code">Cleared</string>
+  <string name="set_other_custom_key">Custom key (reauthorization required)</string>
   <string name="set_other_clear_key">Regenerate the key (reauthorization required)</string>
   <string name="set_other_clear_key_code">Already refreshed</string>
   <string name="set_other_local_recover">Restore native resolution</string>
@@ -42,7 +43,7 @@
   <string name="center_adb_port">Adb Port</string>
   <string name="center_adb_port_hint">Optional</string>
   <string name="center_button">Login</string>
-  <string name="center_hint">* Currently, the account is only used to automatically add reachable devices</string>
+  <string name="center_hint">* You need to build your own Cloud server or purchase an official server</string>
   <string name="center_button_code">Success</string>
 
   <!-- 查看IP地址页面 -->
@@ -50,6 +51,12 @@
   <string name="ip_ipv4">IPv4(Click to copy)</string>
   <string name="ip_ipv6">IPv6(Click to copy)</string>
   <string name="ip_copy">Copied</string>
+
+  <!-- 查看密钥页面 -->
+  <string name="adb_key_pub">Public key (Base64 encoded)</string>
+  <string name="adb_key_pri">Private key (Base64 encoded)</string>
+  <string name="adb_key_button">Save</string>
+  <string name="adb_key_button_code">Saved</string>
 
   <!-- 设备添加模块 -->
   <string name="add_device_name">Name</string>
@@ -75,7 +82,7 @@
   <string name="error_refused_back">The full screen status will intercept the return</string>
   <string name="error_connect_server">Failed to connect</string>
   <string name="error_stream_closed">Disconnect</string>
-  <string name="error_center_error">Access server error</string>
+  <string name="error_cloud_error">Failed to connect to the cloud service. Check the cloud service address</string>
 
   <!-- 设备参数设置及注释说明 -->
   <string name="option_is_audio">Enable audio</string>

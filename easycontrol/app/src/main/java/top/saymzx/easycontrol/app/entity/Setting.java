@@ -144,39 +144,39 @@ public final class Setting {
     editor.apply();
   }
 
-  public String getCenterAddress() {
-    return sharedPreferences.getString("centerAddress", "");
+  public String getCloudAddress() {
+    return sharedPreferences.getString("cloudAddress", "");
   }
 
-  public void setCenterAddress(String value) {
-    editor.putString("centerAddress", value);
+  public void setCloudAddress(String value) {
+    editor.putString("cloudAddress", value);
     editor.apply();
   }
 
-  public String getCenterName() {
-    return sharedPreferences.getString("centerName", "");
+  public String getCloudName() {
+    return sharedPreferences.getString("cloudName", "");
   }
 
-  public void setCenterName(String value) {
-    editor.putString("centerName", value);
+  public void setCloudName(String value) {
+    editor.putString("cloudName", value);
     editor.apply();
   }
 
-  public String getCenterPassword() {
-    return sharedPreferences.getString("centerPassword", "");
+  public String getCloudPassword() {
+    return sharedPreferences.getString("cloudPassword", "");
   }
 
-  public void setCenterPassword(String value) {
-    editor.putString("centerPassword", value);
+  public void setCloudPassword(String value) {
+    editor.putString("cloudPassword", value);
     editor.apply();
   }
 
-  public int getCenterAdbPort() {
-    return sharedPreferences.getInt("centerAdbPort", -1);
+  public int getLocalAdbPort() {
+    return sharedPreferences.getInt("localAdbPort", -1);
   }
 
-  public void setCenterAdbPort(int value) {
-    editor.putInt("centerAdbPort", value);
+  public void setLocalAdbPort(int value) {
+    editor.putInt("localAdbPort", value);
     editor.apply();
   }
 

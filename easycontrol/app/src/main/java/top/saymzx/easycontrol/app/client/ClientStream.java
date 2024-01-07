@@ -1,102 +1,143 @@
 package top.saymzx.easycontrol.app.client;
 
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.util.Pair;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import top.saymzx.easycontrol.adb.Adb;
-import top.saymzx.easycontrol.adb.AdbStream;
+import top.saymzx.adb.Adb;
+import top.saymzx.buffer.Stream;
+import top.saymzx.easycontrol.app.BuildConfig;
+import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientStream {
-  private final int mode;
-  private boolean isClosed = false;
-  private final Socket socket;
-  private final OutputStream outputStream;
-  private final DataInputStream inputStream;
-  private final Thread executeStreamOutThread = new Thread(this::executeStreamOut);
+  private static Handler handler;
 
-  private final Adb adb;
-  private final AdbStream adbStream;
+  private Adb adb;
+  private Stream tunnelStream;
+  private Socket normalsocket;
+  private OutputStream normalOutputStream;
+  private DataInputStream normalInputStream;
 
-  public ClientStream(Socket socket) throws IOException {
-    this.mode = 1;
-    this.socket = socket;
-    this.outputStream = socket.getOutputStream();
-    this.inputStream = new DataInputStream(socket.getInputStream());
-    this.adb = null;
-    this.adbStream = null;
-    executeStreamOutThread.start();
+  public static final String serverName = "/data/local/tmp/easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
+  private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
+  private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
+
+  public ClientStream(Device device, PublicTools.MyFunctionBoolean handle) {
+    if (handler == null) {
+      HandlerThread handlerThread = new HandlerThread("easycontrol_clientStream");
+      handlerThread.start();
+      handler = new Handler(handlerThread.getLooper());
+    }
+    new Thread(() -> {
+      try {
+        // 解析地址
+        Pair<String, Integer> address = PublicTools.getIpAndPort(device.address);
+        // 启动server
+        startServer(device, address);
+        // 连接server
+        connectServer(device, address);
+        handle.run(true);
+      } catch (Exception e) {
+        PublicTools.logToast(e.toString());
+        handle.run(false);
+      }
+    }).start();
   }
 
-  public ClientStream(Adb adb, AdbStream adbStream) {
-    this.mode = 2;
-    this.adb = adb;
-    this.adbStream = adbStream;
-    this.socket = null;
-    this.outputStream = null;
-    this.inputStream = null;
+  // 启动Server
+  private void startServer(Device device, Pair<String, Integer> address) throws Exception {
+    adb = new Adb(address.first, address.second, AppData.keyPair);
+    if (BuildConfig.ENABLE_DEBUG_FEATURE || !adb.runAdbCmd("ls /data/local/tmp/easycontrol_*", true).contains(serverName)) {
+      adb.runAdbCmd("rm /data/local/tmp/easycontrol_*", true);
+      adb.pushFile(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), serverName);
+    }
+    adb.runAdbCmd("app_process -Djava.class.path=" + serverName + " / top.saymzx.easycontrol.server.Server"
+      + " tcpPort=" + (address.second + 1)
+      + " isAudio=" + (device.isAudio ? 1 : 0)
+      + " maxSize=" + device.maxSize
+      + " maxFps=" + device.maxFps
+      + " maxVideoBit=" + device.maxVideoBit
+      + " turnOffScreen=" + (device.turnOffScreen ? 1 : 0)
+      + " autoLockAfterControl=" + (device.autoLockAfterControl ? 1 : 0)
+      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0)
+      + " useOpus=" + ((device.useOpus && supportOpus) ? 1 : 0) + " > /dev/null 2>&1 &", false);
+  }
+
+  // 连接Server
+  private void connectServer(Device device, Pair<String, Integer> address) throws Exception {
+    Thread.sleep(50);
+    for (int i = 0; i < 60; i++) {
+      try {
+        if (device.useTunnel) tunnelStream = adb.tcpForward(address.second + 1);
+        else {
+          normalsocket = new Socket(address.first, address.second + 1);
+          normalInputStream = new DataInputStream(normalsocket.getInputStream());
+          normalOutputStream = normalsocket.getOutputStream();
+        }
+        return;
+      } catch (Exception ignored) {
+        Thread.sleep(50);
+      }
+    }
+    throw new Exception(AppData.main.getString(R.string.error_connect_server));
   }
 
   public byte readByte() throws IOException, InterruptedException {
-    if (mode == 1) return inputStream.readByte();
-    else return adbStream.readByte();
+    if (tunnelStream == null) return normalInputStream.readByte();
+    else return tunnelStream.readByte();
   }
 
   public int readInt() throws IOException, InterruptedException {
-    if (mode == 1) return inputStream.readInt();
-    else return adbStream.readInt();
+    if (tunnelStream == null) return normalInputStream.readInt();
+    else return tunnelStream.readInt();
   }
 
   public long readLong() throws IOException, InterruptedException {
-    if (mode == 1) return inputStream.readLong();
-    else return adbStream.readLong();
+    if (tunnelStream == null) return normalInputStream.readLong();
+    else return tunnelStream.readLong();
   }
 
   public byte[] readByteArray(int size) throws IOException, InterruptedException {
-    if (mode == 1) {
+    if (tunnelStream == null) {
       byte[] buffer = new byte[size];
-      inputStream.readFully(buffer);
+      normalInputStream.readFully(buffer);
       return buffer;
-    } else return adbStream.readByteArray(size).array();
+    } else return tunnelStream.readByteArray(size).array();
   }
 
   public byte[] readFrame() throws IOException, InterruptedException {
-    if (mode == 2) adb.sendMoreOk(adbStream);
     return readByteArray(readInt());
   }
 
-  private final LinkedBlockingQueue<byte[]> writeBuffer = new LinkedBlockingQueue<>();
-
   public void write(byte[] buffer) throws IOException, InterruptedException {
-    if (isClosed) throw new IOException("连接已断开");
-    if (mode == 1) writeBuffer.offer(buffer);
-    else adbStream.write(ByteBuffer.wrap(buffer));
-  }
-
-  private void executeStreamOut() {
-    try {
-      while (!Thread.interrupted()) outputStream.write(writeBuffer.take());
-    } catch (Exception ignored) {
-      close();
-    }
+    if (tunnelStream == null) {
+      handler.post(() -> {
+        try {
+          normalOutputStream.write(buffer);
+        } catch (IOException ignored) {
+          close();
+        }
+      });
+    } else tunnelStream.write(ByteBuffer.wrap(buffer));
   }
 
   public void close() {
-    if (isClosed) return;
-    isClosed = true;
-    if (mode == 1) {
+    if (tunnelStream == null) {
       try {
-        executeStreamOutThread.interrupt();
-        inputStream.close();
-        outputStream.close();
-        socket.close();
-      } catch (Exception ignored) {
+        normalOutputStream.close();
+        normalInputStream.close();
+        normalsocket.close();
+      } catch (IOException ignored) {
       }
-    } else {
-      adbStream.close();
-    }
+    } else tunnelStream.close();
   }
 }

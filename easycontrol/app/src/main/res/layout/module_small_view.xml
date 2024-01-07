@@ -22,8 +22,7 @@
       android:id="@+id/nav_bar"
       android:layout_width="match_parent"
       android:layout_height="24dp"
-      android:gravity="center"
-      android:visibility="gone">
+      android:gravity="center">
 
       <Space
         android:layout_width="0dp"
@@ -66,7 +65,6 @@
         android:layout_weight="1" />
     </LinearLayout>
   </LinearLayout>
-
 
   <ImageView
     android:id="@+id/button_mini_circle"
@@ -131,7 +129,7 @@
       android:layout_height="20dp"
       android:layout_margin="1dp"
       android:focusable="false"
-      android:src="@drawable/equals"
+      android:src="@drawable/not_equal"
       android:tint="@color/onCardBackground" />
 
     <ImageView
