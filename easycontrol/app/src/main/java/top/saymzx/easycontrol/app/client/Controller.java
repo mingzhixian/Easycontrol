@@ -96,8 +96,8 @@ public class Controller {
   }
 
   // 发送旋转请求事件
-  public void sendRotateEvent(boolean isPortrait) {
-    write.run(new byte[]{6, (byte) (isPortrait ? 0 : 1)});
+  public void sendRotateEvent() {
+    write.run(new byte[]{6});
   }
 
 }

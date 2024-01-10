@@ -118,7 +118,7 @@ public class ClientStream {
     return readByteArray(readInt());
   }
 
-  public void write(byte[] buffer) throws IOException, InterruptedException {
+  public void write(byte[] buffer) throws Exception {
     if (tunnelStream == null) {
       handler.post(() -> {
         try {

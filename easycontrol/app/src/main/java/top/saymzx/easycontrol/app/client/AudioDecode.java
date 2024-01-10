@@ -22,7 +22,7 @@ public class AudioDecode {
   public LoudnessEnhancer loudnessEnhancer;
   private final MediaCodec.Callback callback = new MediaCodec.Callback() {
     @Override
-    public void onInputBufferAvailable(MediaCodec mediaCodec, int inIndex) {
+    public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int inIndex) {
       intputBufferQueue.offer(inIndex);
       checkDecode();
     }
@@ -38,7 +38,7 @@ public class AudioDecode {
     }
 
     @Override
-    public void onOutputFormatChanged(MediaCodec mediaCodec, MediaFormat format) {
+    public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat format) {
     }
   };
 
@@ -87,7 +87,7 @@ public class AudioDecode {
     // 音频参数
     int sampleRate = 48000;
     int channelCount = 2;
-    int bitRate = 96000;
+    int bitRate = 128000;
     MediaFormat decodecFormat = MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount);
     decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头

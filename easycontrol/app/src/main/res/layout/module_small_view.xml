@@ -3,7 +3,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content"
-  android:background="@color/cardBackground"
   android:elevation="8dp">
 
   <EditText
@@ -13,27 +12,56 @@
     android:inputType="textVisiblePassword" />
 
   <LinearLayout
-    android:id="@+id/texture_view_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
+
+    <FrameLayout
+      android:id="@+id/bar"
+      android:layout_width="70dp"
+      android:layout_height="22dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/translucent">
+
+      <View
+        android:layout_width="50dp"
+        android:layout_height="5dp"
+        android:layout_gravity="center"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/clientBar"
+        android:elevation="2dp"
+        android:focusable="false" />
+    </FrameLayout>
+
+    <LinearLayout
+      android:id="@+id/texture_view_layout"
+      android:layout_width="200dp"
+      android:layout_height="200dp"
+      android:orientation="vertical" />
 
     <LinearLayout
       android:id="@+id/nav_bar"
       android:layout_width="match_parent"
       android:layout_height="24dp"
-      android:gravity="center">
+      android:background="@color/cardBackground"
+      android:gravity="center"
+      android:paddingEnd="30dp">
 
-      <Space
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+      <ImageView
+        android:id="@+id/button_rotate"
+        android:layout_width="30dp"
+        android:layout_height="match_parent"
+        android:focusable="false"
+        android:padding="5dp"
+        android:src="@drawable/rotate"
+        android:tint="@color/onCardBackground" />
 
       <ImageView
         android:id="@+id/button_switch"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:focusable="false"
         android:padding="4dp"
         android:src="@drawable/square"
@@ -43,7 +71,7 @@
         android:id="@+id/button_home"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:focusable="false"
         android:padding="4dp"
         android:src="@drawable/o"
@@ -53,65 +81,14 @@
         android:id="@+id/button_back"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:focusable="false"
         android:padding="4dp"
         android:src="@drawable/caret_left"
         android:tint="@color/onCardBackground" />
 
-      <Space
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
     </LinearLayout>
   </LinearLayout>
-
-  <ImageView
-    android:id="@+id/button_mini_circle"
-    android:layout_width="18dp"
-    android:layout_height="18dp"
-    android:layout_gravity="start|top"
-    android:layout_marginStart="6dp"
-    android:layout_marginTop="3dp"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/clientBarSecond"
-    android:focusable="false"
-    android:padding="4dp"
-    android:src="@drawable/minus"
-    android:tint="@color/onCardBackground" />
-
-  <FrameLayout
-    android:id="@+id/bar"
-    android:layout_width="70dp"
-    android:layout_height="22dp"
-    android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="1dp"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/translucent"
-    android:paddingBottom="1dp">
-
-    <View
-      android:layout_width="50dp"
-      android:layout_height="5dp"
-      android:layout_gravity="center"
-      android:background="@drawable/background_cron"
-      android:backgroundTint="@color/clientBar"
-      android:focusable="false" />
-  </FrameLayout>
-
-  <ImageView
-    android:id="@+id/button_close_circle"
-    android:layout_width="18dp"
-    android:layout_height="18dp"
-    android:layout_gravity="end|top"
-    android:layout_marginTop="3dp"
-    android:layout_marginEnd="6dp"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/clientBarSecond"
-    android:focusable="false"
-    android:padding="4dp"
-    android:src="@drawable/x"
-    android:tint="@color/onCardBackground" />
 
   <LinearLayout
     android:id="@+id/bar_view"
@@ -168,10 +145,4 @@
     android:layout_gravity="end|bottom"
     android:focusable="false" />
 
-  <View
-    android:id="@+id/rotate"
-    android:layout_width="25dp"
-    android:layout_height="25dp"
-    android:layout_gravity="bottom|start"
-    android:focusable="false"/>
 </FrameLayout>

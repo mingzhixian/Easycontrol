@@ -3,7 +3,7 @@
   <string name="app_name">EasyControl</string>
 
   <!-- 主页 -->
-  <string name="main_poem">Hope you know a lot and still love life</string>
+  <string name="main_poem">No one but ourselves can degrade us</string>
   <string name="main_float_permission">Please grant hover window privileges</string>
   <string name="main_battery_permission">Please grant unlimited rights to the battery</string>
 
@@ -11,10 +11,6 @@
   <string name="set_center">Login</string>
   <string name="set_default">Default</string>
   <string name="set_display">Display</string>
-  <string name="set_display_master_audo_rotation">Automatically rotates</string>
-  <string name="set_display_master_audo_rotation_detail">It is only valid in full screen. The interface follows the direction of the phone sensor when it is turned on, and locks the direction of the interface when it is turned off. (The rotation interface can be controlled by the navigation button)</string>
-  <string name="set_display_slave_audo_rotation">Slave follow direction</string>
-  <string name="set_display_slave_audo_rotation_detail">This function is valid only in full-screen mode. When the page of the master terminal is rotated, it attempts to rotate the controlled terminal</string>
   <string name="set_display_default_show_nav_bar">Default show navigation bar</string>
   <string name="set_display_default_show_nav_bar_detail">Sets whether the navigation bar is displayed by default in small window and full screen modes</string>
   <string name="set_other">Other</string>

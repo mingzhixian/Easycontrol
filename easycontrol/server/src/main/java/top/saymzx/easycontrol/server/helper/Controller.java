@@ -47,7 +47,7 @@ public final class Controller {
   }
 
   public static void handleRotateEvent() throws IOException {
-    Device.rotateDevice(Server.inputStream.readByte());
+    Device.rotateDevice();
   }
 
   public static void checkScreenOff(boolean turnOn) throws IOException, InterruptedException {

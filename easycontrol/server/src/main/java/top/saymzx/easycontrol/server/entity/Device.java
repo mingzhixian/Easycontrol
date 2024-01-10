@@ -205,9 +205,9 @@ public final class Device {
     }
   }
 
-  public static void rotateDevice(int rotation) {
+  public static void rotateDevice() {
     boolean accelerometerRotation = !WindowManager.isRotationFrozen();
-    WindowManager.freezeRotation(rotation);
+    WindowManager.freezeRotation(deviceRotation == 0 || deviceRotation == 3 ? 1 : 0);
     if (accelerometerRotation) WindowManager.thawRotation();
   }
 

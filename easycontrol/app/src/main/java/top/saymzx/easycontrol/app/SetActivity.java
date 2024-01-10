@@ -35,8 +35,6 @@ public class SetActivity extends Activity {
     PublicTools.createDeviceOptionSet(this, setActivity.setDefault, null);
     // 显示
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_default_show_nav_bar), getString(R.string.set_display_default_show_nav_bar_detail), AppData.setting.getDefaultShowNavBar(), isChecked -> AppData.setting.setDefaultShowNavBar(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_master_audo_rotation), getString(R.string.set_display_master_audo_rotation_detail), AppData.setting.getMasterAudoRotation(), isChecked -> AppData.setting.setMasterAudoRotation(isChecked)).getRoot());
-    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_slave_audo_rotation), getString(R.string.set_display_slave_audo_rotation_detail), AppData.setting.getSlaveAudoRotation(), isChecked -> AppData.setting.setSlaveAudoRotation(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_about_ip), () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_clear_default), () -> {

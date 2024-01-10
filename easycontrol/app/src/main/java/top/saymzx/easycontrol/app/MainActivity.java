@@ -73,12 +73,15 @@ public class MainActivity extends Activity {
 
   // 检查权限
   private void checkPermission() {
-    // 检查悬浮窗权限
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-      Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-      intent.setData(Uri.parse("package:$packageName"));
-      startActivity(intent);
-      Toast.makeText(this, getString(R.string.main_float_permission), Toast.LENGTH_SHORT).show();
+    // 检查悬浮窗权限，防止某些设备如鸿蒙不兼容
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:$packageName"));
+        startActivity(intent);
+        Toast.makeText(this, getString(R.string.main_float_permission), Toast.LENGTH_SHORT).show();
+      }
+    } catch (Exception ignored) {
     }
   }
 

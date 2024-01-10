@@ -2,7 +2,6 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
-import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -16,12 +15,16 @@ import android.view.animation.OvershootInterpolator;
 import androidx.annotation.NonNull;
 
 import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.Controller;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientView implements TextureView.SurfaceTextureListener {
-  public final Client client;
-  private final boolean setResolution;
+  public final Device device;
+  public final Controller controller;
+  private final PublicTools.MyFunction onReady;
+  public final PublicTools.MyFunction onClose;
   public final TextureView textureView = new TextureView(AppData.main);
   private SurfaceTexture surfaceTexture;
 
@@ -33,22 +36,24 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
-  public ClientView(Client client, boolean setResolution) {
-    this.client = client;
-    this.setResolution = setResolution;
+  public ClientView(Device device, Controller controller, PublicTools.MyFunction onReady, PublicTools.MyFunction onClose) {
+    this.device = device;
+    this.controller = controller;
+    this.onReady = onReady;
+    this.onClose=onClose;
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
   }
 
   public synchronized void changeToFull() {
     hide(false);
-    if (setResolution) client.controller.sendChangeSizeEvent(FullActivity.getResolution());
+    if (device.setResolution) controller.sendChangeSizeEvent(FullActivity.getResolution());
     FullActivity.show(this);
   }
 
   public synchronized void changeToSmall() {
     hide(false);
-    if (setResolution) client.controller.sendChangeSizeEvent(SmallView.getResolution());
+    if (device.setResolution) controller.sendChangeSizeEvent(SmallView.getResolution());
     smallView.show();
   }
 
@@ -76,7 +81,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   public void updateVideoSize(Pair<Integer, Integer> videoSize) {
     this.videoSize = videoSize;
     reCalculateTextureViewSize();
-    if (smallView.isShow) smallView.calculateSite();
   }
 
   public Pair<Integer, Integer> getVideoSize() {
@@ -138,7 +142,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     }
     pointerList[p] = x;
     pointerList[10 + p] = y;
-    client.controller.sendTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
+    controller.sendTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
   }
 
   // 更改View的形态
@@ -175,7 +179,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     // 初始化
     if (this.surfaceTexture == null) {
       this.surfaceTexture = surfaceTexture;
-      client.startSubService();
+      onReady.run();
     } else textureView.setSurfaceTexture(this.surfaceTexture);
   }
 
@@ -192,8 +196,4 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
   }
 
-  // 保存悬浮窗大小
-  public void saveWindowPosition(int x, int y) {
-    Client.writeDb(x, y, maxSize.first, maxSize.second);
-  }
 }

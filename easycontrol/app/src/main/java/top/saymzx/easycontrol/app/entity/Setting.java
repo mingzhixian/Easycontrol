@@ -117,24 +117,6 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getMasterAudoRotation() {
-    return sharedPreferences.getBoolean("masterAudoRotation", true);
-  }
-
-  public void setMasterAudoRotation(boolean value) {
-    editor.putBoolean("masterAudoRotation", value);
-    editor.apply();
-  }
-
-  public boolean getSlaveAudoRotation() {
-    return sharedPreferences.getBoolean("slaveAudoRotation", true);
-  }
-
-  public void setSlaveAudoRotation(boolean value) {
-    editor.putBoolean("slaveAudoRotation", value);
-    editor.apply();
-  }
-
   public String getDefaultDevice() {
     return sharedPreferences.getString("defaultDevice", "");
   }

@@ -3,7 +3,7 @@
   <string name="app_name">易控</string>
 
   <!-- 主页 -->
-  <string name="main_poem">不知江月待何人，但见长江送流水</string>
+  <string name="main_poem">我年华虚度，空有一身疲倦</string>
   <string name="main_float_permission">请授予悬浮窗权限</string>
   <string name="main_battery_permission">请授予电池无限制权限</string>
 
@@ -11,10 +11,6 @@
   <string name="set_center">登录账号</string>
   <string name="set_default">默认参数</string>
   <string name="set_display">显示</string>
-  <string name="set_display_master_audo_rotation">主控端自动旋转</string>
-  <string name="set_display_master_audo_rotation_detail">仅全屏有效，开启后界面跟随手机传感器方向，关闭后将锁死界面方向（可通过导航栏控制旋转界面）</string>
-  <string name="set_display_slave_audo_rotation">被控端方向跟随</string>
-  <string name="set_display_slave_audo_rotation_detail">仅全屏有效，开启后当主控端页面旋转时，会尝试旋转被控端</string>
   <string name="set_display_default_show_nav_bar">默认显示导航栏</string>
   <string name="set_display_default_show_nav_bar_detail">设置小窗和全屏模式默认是否显示导航栏</string>
   <string name="set_other">其他</string>
