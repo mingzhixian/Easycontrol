@@ -2,12 +2,19 @@ package top.saymzx.easycontrol.app.entity;
 
 import android.content.SharedPreferences;
 
-import java.util.UUID;
-
 public final class Setting {
   private final SharedPreferences sharedPreferences;
 
   private final SharedPreferences.Editor editor;
+
+  public String getDefaultLocale() {
+    return sharedPreferences.getString("defaultLocale", "");
+  }
+
+  public void setDefaultLocale(String value) {
+    editor.putString("defaultLocale", value);
+    editor.apply();
+  }
 
   public boolean getDefaultIsAudio() {
     return sharedPreferences.getBoolean("defaultIsAudio", true);
@@ -72,39 +79,30 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getDefaultUseTunnel() {
-    return sharedPreferences.getBoolean("defaultUseTunnel", false);
-  }
-
-  public void setDefaultUseTunnel(boolean value) {
-    editor.putBoolean("defaultUseTunnel", value);
-    editor.apply();
-  }
-
-  public boolean getDefaultTurnOffScreen() {
-    return sharedPreferences.getBoolean("defaultTurnOffScreen", true);
-  }
-
-  public void setDefaultTurnOffScreen(boolean value) {
-    editor.putBoolean("defaultTurnOffScreen", value);
-    editor.apply();
-  }
-
-  public boolean getDefaultAutoLockAfterControl() {
-    return sharedPreferences.getBoolean("defaultAutoLockAfterControl", true);
-  }
-
-  public void setDefaultAutoLockAfterControl(boolean value) {
-    editor.putBoolean("defaultAutoLockAfterControl", value);
-    editor.apply();
-  }
-
   public boolean getDefaultFull() {
     return sharedPreferences.getBoolean("defaultFull", false);
   }
 
   public void setDefaultFull(boolean value) {
     editor.putBoolean("defaultFull", value);
+    editor.apply();
+  }
+
+  public boolean getAutoBackOnStartDefault() {
+    return sharedPreferences.getBoolean("autoBackOnStartDefault", false);
+  }
+
+  public void setAutoBackOnStartDefault(boolean value) {
+    editor.putBoolean("autoBackOnStartDefault", value);
+    editor.apply();
+  }
+
+  public boolean getKeepAwake() {
+    return sharedPreferences.getBoolean("keepAwake", true);
+  }
+
+  public void setKeepAwake(boolean value) {
+    editor.putBoolean("keepAwake", value);
     editor.apply();
   }
 
@@ -117,6 +115,15 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getDefaultMiniOnOutside() {
+    return sharedPreferences.getBoolean("defaultMiniOnOutside", false);
+  }
+
+  public void setDefaultMiniOnOutside(boolean value) {
+    editor.putBoolean("defaultMiniOnOutside", value);
+    editor.apply();
+  }
+
   public String getDefaultDevice() {
     return sharedPreferences.getString("defaultDevice", "");
   }
@@ -124,50 +131,6 @@ public final class Setting {
   public void setDefaultDevice(String value) {
     editor.putString("defaultDevice", value);
     editor.apply();
-  }
-
-  public String getCloudAddress() {
-    return sharedPreferences.getString("cloudAddress", "");
-  }
-
-  public void setCloudAddress(String value) {
-    editor.putString("cloudAddress", value);
-    editor.apply();
-  }
-
-  public String getCloudName() {
-    return sharedPreferences.getString("cloudName", "");
-  }
-
-  public void setCloudName(String value) {
-    editor.putString("cloudName", value);
-    editor.apply();
-  }
-
-  public String getCloudPassword() {
-    return sharedPreferences.getString("cloudPassword", "");
-  }
-
-  public void setCloudPassword(String value) {
-    editor.putString("cloudPassword", value);
-    editor.apply();
-  }
-
-  public int getLocalAdbPort() {
-    return sharedPreferences.getInt("localAdbPort", -1);
-  }
-
-  public void setLocalAdbPort(int value) {
-    editor.putInt("localAdbPort", value);
-    editor.apply();
-  }
-
-  public String getLocalUUID() {
-    if (!sharedPreferences.contains("UUID")) {
-      editor.putString("UUID", UUID.randomUUID().toString());
-      editor.apply();
-    }
-    return sharedPreferences.getString("UUID", "");
   }
 
   public Setting(SharedPreferences sharedPreferences) {

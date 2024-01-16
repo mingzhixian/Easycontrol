@@ -58,7 +58,7 @@ public final class AudioCapture {
       audioFormatBuilder.setSampleRate(SAMPLE_RATE);
       audioFormatBuilder.setChannelMask(CHANNEL_CONFIG);
       audioRecordBuilder.setAudioFormat(audioFormatBuilder.build());
-      audioRecordBuilder.setBufferSizeInBytes(8 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
+      audioRecordBuilder.setBufferSizeInBytes(16 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
       return audioRecordBuilder.build();
     }
     return null;

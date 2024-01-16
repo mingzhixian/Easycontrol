@@ -2,25 +2,27 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
+  android:layout_height="wrap_content"
+  android:paddingTop="10dp"
+  android:paddingEnd="10dp"
+  android:paddingBottom="10dp">
 
   <FrameLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="-10dp"
     android:background="@drawable/background_cron"
-    android:backgroundTint="@color/cardBackground"
     android:elevation="8dp"
     tools:ignore="UselessParent">
 
     <View
       android:id="@+id/bar"
-      android:layout_width="6dp"
-      android:layout_height="40dp"
-      android:layout_marginStart="18dp"
-      android:layout_marginTop="10dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginBottom="10dp"
+      android:layout_width="12dp"
+      android:layout_height="60dp"
+      android:layout_marginStart="22dp"
+      android:layout_marginTop="12dp"
+      android:layout_marginEnd="12dp"
+      android:layout_marginBottom="12dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/bar1" />
   </FrameLayout>

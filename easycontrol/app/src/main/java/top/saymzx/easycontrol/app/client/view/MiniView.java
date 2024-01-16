@@ -23,7 +23,6 @@ public class MiniView {
 
   // 迷你悬浮窗
   private final ModuleMiniViewBinding miniView = ModuleMiniViewBinding.inflate(LayoutInflater.from(AppData.main));
-  public boolean isShow = false;
   private final WindowManager.LayoutParams miniViewParams = new WindowManager.LayoutParams(
     WindowManager.LayoutParams.WRAP_CONTENT,
     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -33,13 +32,11 @@ public class MiniView {
   );
 
   private static int num = 0;
-  private int id;
-  private static final int[] site = new int[10];
-  private final int height = PublicTools.dp2px(60f);
 
   public MiniView(ClientView clientView) {
     this.clientView = clientView;
     miniViewParams.gravity = Gravity.START | Gravity.TOP;
+    miniViewParams.x = 0;
     // Bar颜色
     int colorNum = num++ % 4;
     int barColor = R.color.bar1;
@@ -47,76 +44,52 @@ public class MiniView {
     else if (colorNum == 2) barColor = R.color.bar3;
     else if (colorNum == 3) barColor = R.color.bar4;
     miniView.bar.setBackgroundTintList(ColorStateList.valueOf(AppData.main.getResources().getColor(barColor)));
-    miniViewParams.x = 0;
   }
 
   public void show() {
-    if (!isShow) {
-      isShow = true;
-      id = num++;
-      // 设置监听控制
-      setBarListener();
-      // 显示
-      clientView.viewAnim(miniView.getRoot(), true, PublicTools.dp2px(-40f), 0, (isStart -> {
-        if (isStart) {
-          miniView.getRoot().setVisibility(View.VISIBLE);
-          AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
-          calculateSite();
-        }
-      }));
-    }
+    miniViewParams.y = clientView.device.mini_y;
+    // 设置监听控制
+    setBarListener();
+    // 显示
+    clientView.viewAnim(miniView.getRoot(), true, PublicTools.dp2px(-40f), 0, (isStart -> {
+      if (isStart) {
+        miniView.getRoot().setVisibility(View.VISIBLE);
+        AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
+      }
+    }));
   }
 
-  public void hide(boolean force) {
+  public void hide() {
     try {
-      if (force || isShow) {
-        isShow = false;
-        num--;
-        miniView.getRoot().setVisibility(View.GONE);
-        AppData.windowManager.removeView(miniView.getRoot());
-      }
+      miniView.getRoot().setVisibility(View.GONE);
+      AppData.windowManager.removeView(miniView.getRoot());
+      AppData.dbHelper.update(clientView.device);
     } catch (Exception ignored) {
     }
-  }
-
-  // 计算合适位置
-  private void calculateSite() {
-    int startY;
-    boolean isConflict;
-    for (startY = 100; startY < 1000; startY += height / 2) {
-      isConflict = false;
-      for (int i = 0; i < num; i++) {
-        if (site[i] > startY - height || site[i] < startY + height) {
-          isConflict = true;
-          break;
-        }
-      }
-      if (isConflict) break;
-    }
-    miniViewParams.y = startY;
-    site[id] = startY;
-    AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
   }
 
   // 设置监听控制
   @SuppressLint("ClickableViewAccessibility")
   private void setBarListener() {
     AtomicInteger yy = new AtomicInteger();
+    AtomicInteger oldYy = new AtomicInteger();
     miniView.getRoot().setOnTouchListener((v, event) -> {
       switch (event.getActionMasked()) {
         case MotionEvent.ACTION_DOWN: {
           yy.set((int) event.getRawY());
+          oldYy.set(miniViewParams.y);
           break;
         }
         case MotionEvent.ACTION_MOVE: {
-          miniViewParams.y = site[id] + (int) event.getRawY() - yy.get();
+          miniViewParams.y = oldYy.get() + (int) event.getRawY() - yy.get();
+          clientView.device.mini_y = miniViewParams.y;
           AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
           break;
         }
         case MotionEvent.ACTION_UP:
           int flipY = (int) (yy.get() - event.getRawY());
           if (flipY * flipY < 16) clientView.changeToSmall();
-          else site[id] = miniViewParams.y;
+          break;
       }
       return true;
     });

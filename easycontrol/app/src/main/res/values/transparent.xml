@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
   <style name="Transparent" parent="android:Theme.Holo.Light.Dialog">
     <item name="android:windowFullscreen">true</item>
     <item name="android:fitsSystemWindows">true</item>

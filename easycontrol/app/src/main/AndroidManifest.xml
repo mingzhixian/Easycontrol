@@ -7,19 +7,19 @@
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 悬浮窗 -->
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-permission android:name="android.permission.USB_PERMISSION" /> <!-- USB -->
+
+  <uses-feature android:name="android.hardware.usb.host" />
 
   <application
-    android:icon="@mipmap/ic_launcher"
+    android:icon="${app_icon}"
     android:installLocation="internalOnly"
-    android:label="@string/app_name"
-    android:roundIcon="@mipmap/ic_launcher_round"
+    android:label="${app_name}"
+    android:roundIcon="${app_icon_round}"
     android:supportsRtl="true"
     android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
     android:usesCleartextTraffic="true"
     tools:targetApi="31">
-    <activity
-      android:name=".AdbKeyActivity"
-      android:exported="false" />
     <activity
       android:name=".MainActivity"
       android:exported="true"
@@ -37,13 +37,12 @@
       android:name=".SetActivity"
       android:exported="false" />
     <activity
-      android:name=".CloudActivity"
-      android:exported="false" />
-    <activity
       android:name=".client.view.FullActivity"
       android:exported="false"
-      android:hardwareAccelerated="true"
-      android:launchMode="singleTask" />
+      android:hardwareAccelerated="true" />
+    <activity
+      android:name=".AdbKeyActivity"
+      android:exported="false" />
 
   </application>
 

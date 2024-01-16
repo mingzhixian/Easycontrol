@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -15,14 +16,14 @@ import android.view.animation.OvershootInterpolator;
 import androidx.annotation.NonNull;
 
 import top.saymzx.easycontrol.app.client.Client;
-import top.saymzx.easycontrol.app.client.Controller;
+import top.saymzx.easycontrol.app.client.ControlPacket;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientView implements TextureView.SurfaceTextureListener {
   public final Device device;
-  public final Controller controller;
+  public final ControlPacket controlPacket;
   private final PublicTools.MyFunction onReady;
   public final PublicTools.MyFunction onClose;
   public final TextureView textureView = new TextureView(AppData.main);
@@ -36,24 +37,31 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
-  public ClientView(Device device, Controller controller, PublicTools.MyFunction onReady, PublicTools.MyFunction onClose) {
+  public ClientView(Device device, ControlPacket controlPacket, PublicTools.MyFunction onReady, PublicTools.MyFunction onClose) {
     this.device = device;
-    this.controller = controller;
+    this.controlPacket = controlPacket;
     this.onReady = onReady;
-    this.onClose=onClose;
+    this.onClose = onClose;
     setTouchListener();
     textureView.setSurfaceTextureListener(this);
   }
 
   public synchronized void changeToFull() {
     hide(false);
-    if (device.setResolution) controller.sendChangeSizeEvent(FullActivity.getResolution());
-    FullActivity.show(this);
+    if (device.setResolution) controlPacket.sendChangeSizeEvent(FullActivity.getResolution());
+    Intent intent=new Intent(AppData.main, FullActivity.class);
+    int i=0;
+    for (Client client:Client.allClient){
+      if (client.clientView==this)break;
+      i++;
+    }
+    intent.putExtra("index",i);
+    AppData.main.startActivity(intent);
   }
 
   public synchronized void changeToSmall() {
     hide(false);
-    if (device.setResolution) controller.sendChangeSizeEvent(SmallView.getResolution());
+    if (device.setResolution) controlPacket.sendChangeSizeEvent(SmallView.getResolution());
     smallView.show();
   }
 
@@ -63,9 +71,9 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   }
 
   public synchronized void hide(boolean isRelease) {
-    if (fullView != null) fullView.hide(isRelease);
-    smallView.hide(isRelease);
-    miniView.hide(isRelease);
+    if (fullView != null) fullView.hide();
+    smallView.hide();
+    miniView.hide();
     if (isRelease && surfaceTexture != null) surfaceTexture.release();
   }
 
@@ -116,8 +124,6 @@ public class ClientView implements TextureView.SurfaceTextureListener {
         int i = event.getActionIndex();
         pointerDownTime[i] = event.getEventTime();
         createTouchPacket(event, MotionEvent.ACTION_DOWN, i);
-        // 如果是小窗模式则需获取焦点，以获取剪切板同步
-        if (smallView.isShow) smallView.setViewFocus(true);
       } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) createTouchPacket(event, MotionEvent.ACTION_UP, event.getActionIndex());
       else for (int i = 0; i < event.getPointerCount(); i++) createTouchPacket(event, MotionEvent.ACTION_MOVE, i);
       return true;
@@ -142,7 +148,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
     }
     pointerList[p] = x;
     pointerList[10 + p] = y;
-    controller.sendTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
+    controlPacket.sendTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime);
   }
 
   // 更改View的形态

@@ -4,15 +4,21 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 import android.app.Dialog;
 import android.content.ClipData;
+import android.hardware.usb.UsbDevice;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Pair;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import top.saymzx.adb.Adb;
+import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.adb.Adb;
+import top.saymzx.easycontrol.app.buffer.BufferStream;
 import top.saymzx.easycontrol.app.client.view.ClientView;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -24,7 +30,9 @@ public class Client {
   public static final ArrayList<Client> allClient = new ArrayList<>();
 
   // 连接
-  final ClientStream clientStream;
+  private Adb adb;
+  private BufferStream bufferStream;
+  private BufferStream shell;
 
   // 子服务
   private final Thread executeStreamInThread = new Thread(this::executeStreamIn);
@@ -32,32 +40,94 @@ public class Client {
   private Handler handler;
   private VideoDecode videoDecode;
   private AudioDecode audioDecode;
-  private final Controller controller = new Controller(this::write);
-  private final ClientView clientView;
+  private final ControlPacket controlPacket = new ControlPacket(this::write);
+  public final ClientView clientView;
+  public final String uuid;
 
-  public Client(Device device) {
+  private static final String serverName = "/data/local/tmp/easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
+  private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
+  private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
+
+  public Client(Device device, UsbDevice usbDevice) {
     allClient.add(this);
     // 初始化
+    uuid = device.uuid;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       handlerThread = new HandlerThread("easycontrol_mediacodec");
       handlerThread.start();
       handler = new Handler(handlerThread.getLooper());
     }
-    clientView = new ClientView(device, controller, () -> {
+    clientView = new ClientView(device, controlPacket, () -> {
       status = 1;
       executeStreamInThread.start();
       AppData.uiHandler.post(this::executeOtherService);
-    }, this::release);
+    }, () -> release(null));
     Dialog dialog = PublicTools.createClientLoading(AppData.main);
     dialog.show();
     // 连接
-    clientStream = new ClientStream(device, result -> AppData.uiHandler.post(() -> {
-      dialog.cancel();
-      if (result) {
-        if (device.defaultFull) clientView.changeToFull();
-        else clientView.changeToSmall();
-      } else release();
-    }));
+    Thread timeOutThread = new Thread(() -> {
+      try {
+        Thread.sleep(10 * 1000);
+        if (dialog.isShowing()) AppData.uiHandler.post(dialog::cancel);
+        release(null);
+      } catch (InterruptedException ignored) {
+      }
+    });
+    new Thread(() -> {
+      try {
+        adb = connectADB(device, usbDevice);
+        startServer(device);
+        connectServer();
+        AppData.uiHandler.post(() -> {
+          if (device.defaultFull) clientView.changeToFull();
+          else clientView.changeToSmall();
+        });
+        timeOutThread.interrupt();
+      } catch (Exception e) {
+        release(Arrays.toString(e.getStackTrace()));
+      } finally {
+        dialog.cancel();
+      }
+    }).start();
+  }
+
+  // 连接ADB
+  private static Adb connectADB(Device device, UsbDevice usbDevice) throws Exception {
+    if (usbDevice == null) {
+      Pair<String, Integer> address = PublicTools.getIpAndPort(device.address);
+      return new Adb(address.first, address.second, AppData.keyPair);
+    } else return new Adb(usbDevice, AppData.keyPair);
+  }
+
+  // 启动Server
+  private void startServer(Device device) throws Exception {
+    if (BuildConfig.ENABLE_DEBUG_FEATURE || !adb.runAdbCmd("ls /data/local/tmp/easycontrol_*").contains(serverName)) {
+      adb.runAdbCmd("rm /data/local/tmp/easycontrol_* ");
+      adb.pushFileByShell(AppData.main.getResources().openRawResource(R.raw.easycontrol_server), serverName);
+    }
+    shell = adb.getShell();
+    shell.write(ByteBuffer.wrap(("app_process -Djava.class.path=" + serverName + " / top.saymzx.easycontrol.server.Server"
+      + " isAudio=" + (device.isAudio ? 1 : 0)
+      + " maxSize=" + device.maxSize
+      + " maxFps=" + device.maxFps
+      + " maxVideoBit=" + device.maxVideoBit
+      + " keepAwake=" + (AppData.setting.getKeepAwake() ? 1 : 0)
+      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0)
+      + " useOpus=" + ((device.useOpus && supportOpus) ? 1 : 0) + " \n").getBytes()));
+  }
+
+  // 连接Server
+  private void connectServer() throws Exception {
+    Thread.sleep(50);
+    for (int i = 0; i < 60; i++) {
+      try {
+        bufferStream = adb.localSocketForward("easycontrol");
+        return;
+      } catch (Exception ignored) {
+        Thread.sleep(50);
+      }
+    }
+    throw new Exception(AppData.main.getString(R.string.error_connect_server));
   }
 
   // 服务分发
@@ -71,61 +141,73 @@ public class Client {
       Pair<byte[], Long> videoCsd = null;
       // 音视频流参数
       boolean useOpus = true;
-      if (clientStream.readByte() == 1) useOpus = clientStream.readByte() == 1;
-      boolean useH265 = clientStream.readByte() == 1;
+      if (bufferStream.readByte() == 1) useOpus = bufferStream.readByte() == 1;
+      boolean useH265 = bufferStream.readByte() == 1;
       // 循环处理报文
       while (!Thread.interrupted()) {
-        switch (clientStream.readByte()) {
+        switch (bufferStream.readByte()) {
           case VIDEO_EVENT:
-            if (videoDecode != null) videoDecode.decodeIn(clientStream.readFrame(), clientStream.readLong());
+            byte[] videoFrame = controlPacket.readFrame(bufferStream);
+            if (videoDecode != null) videoDecode.decodeIn(videoFrame, bufferStream.readLong());
             else {
-              if (videoCsd == null) {
-                videoCsd = new Pair<>(clientStream.readFrame(), clientStream.readLong());
-                if (useH265) videoDecode = new VideoDecode(clientView.getVideoSize(), clientView.getSurface(), videoCsd, null, handler);
-              } else videoDecode = new VideoDecode(clientView.getVideoSize(), clientView.getSurface(), videoCsd, new Pair<>(clientStream.readFrame(), clientStream.readLong()), handler);
+              if (useH265) videoDecode = new VideoDecode(clientView.getVideoSize(), clientView.getSurface(), new Pair<>(videoFrame, bufferStream.readLong()), null, handler);
+              else {
+                if (videoCsd == null) videoCsd = new Pair<>(videoFrame, bufferStream.readLong());
+                else videoDecode = new VideoDecode(clientView.getVideoSize(), clientView.getSurface(), videoCsd, new Pair<>(videoFrame, bufferStream.readLong()), handler);
+              }
             }
             break;
           case AUDIO_EVENT:
-            if (audioDecode != null) audioDecode.decodeIn(clientStream.readFrame());
-            else audioDecode = new AudioDecode(useOpus, clientStream.readFrame(), handler);
+            byte[] audioFrame = controlPacket.readFrame(bufferStream);
+            if (audioDecode != null) audioDecode.decodeIn(audioFrame);
+            else audioDecode = new AudioDecode(useOpus, audioFrame, handler);
             break;
           case CLIPBOARD_EVENT:
-            controller.nowClipboardText = new String(clientStream.readByteArray(clientStream.readInt()));
-            AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, controller.nowClipboardText));
+            controlPacket.nowClipboardText = new String(bufferStream.readByteArray(bufferStream.readInt()).array());
+            AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, controlPacket.nowClipboardText));
             break;
           case CHANGE_SIZE_EVENT:
-            Pair<Integer, Integer> newVideoSize = new Pair<>(clientStream.readInt(), clientStream.readInt());
+            Pair<Integer, Integer> newVideoSize = new Pair<>(bufferStream.readInt(), bufferStream.readInt());
             AppData.uiHandler.post(() -> clientView.updateVideoSize(newVideoSize));
             break;
         }
       }
     } catch (Exception ignored) {
-      PublicTools.logToast(AppData.main.getString(R.string.error_stream_closed));
-      release();
+      String serverError = "";
+      try {
+        serverError = new String(shell.readAllBytes().array());
+      } catch (IOException | InterruptedException ignored1) {
+      }
+      release(AppData.main.getString(R.string.error_stream_closed) + serverError);
     }
   }
 
   private void executeOtherService() {
     if (status == 1) {
-      controller.checkClipBoard();
-      controller.sendKeepAlive();
+      controlPacket.checkClipBoard();
+      controlPacket.sendKeepAlive();
       AppData.uiHandler.postDelayed(this::executeOtherService, 1500);
     }
   }
 
-  private void write(byte[] buffer) {
+  private void write(ByteBuffer byteBuffer) {
     try {
-      clientStream.write(buffer);
+      bufferStream.write(byteBuffer);
     } catch (Exception ignored) {
-      PublicTools.logToast(AppData.main.getString(R.string.error_stream_closed));
-      release();
+      String serverError = "";
+      try {
+        serverError = new String(shell.readAllBytes().array());
+      } catch (IOException | InterruptedException ignored1) {
+      }
+      release(AppData.main.getString(R.string.error_stream_closed) + serverError);
     }
   }
 
-  public void release() {
+  public void release(String error) {
     if (status == -1) return;
     status = -1;
     allClient.remove(this);
+    if (error != null) PublicTools.logToast(error);
     for (int i = 0; i < 4; i++) {
       try {
         switch (i) {
@@ -137,7 +219,8 @@ public class Client {
             AppData.uiHandler.post(() -> clientView.hide(true));
             break;
           case 2:
-            clientStream.close();
+            bufferStream.close();
+            adb.close();
             break;
           case 3:
             videoDecode.release();
@@ -149,14 +232,26 @@ public class Client {
     }
   }
 
-  public static void recover(String addressStr, PublicTools.MyFunctionBoolean handle) {
+  public static void runOnceCmd(Device device, UsbDevice usbDevice, String cmd, PublicTools.MyFunctionBoolean handle) {
     new Thread(() -> {
       try {
-        Pair<String, Integer> address = PublicTools.getIpAndPort(addressStr);
-        Adb adb1 = new Adb(address.first, address.second, AppData.keyPair);
-        adb1.runAdbCmd("wm size reset", true);
-        adb1.close();
+        Adb adb = connectADB(device, usbDevice);
+        adb.runAdbCmd(cmd);
+        adb.close();
         handle.run(true);
+      } catch (Exception ignored) {
+        handle.run(false);
+      }
+    }).start();
+  }
+
+  public static void restartOnTcpip(Device device, UsbDevice usbDevice, PublicTools.MyFunctionBoolean handle) {
+    new Thread(() -> {
+      try {
+        Adb adb = connectADB(device, usbDevice);
+        String output = adb.restartOnTcpip(5555);
+        adb.close();
+        handle.run(output.contains("restarting"));
       } catch (Exception ignored) {
         handle.run(false);
       }

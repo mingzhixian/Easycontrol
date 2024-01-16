@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">易控</string>
+  <string name="app_name_dev">易控测试版</string>
 
   <!-- 主页 -->
   <string name="main_poem">我年华虚度，空有一身疲倦</string>
@@ -11,36 +12,28 @@
   <string name="set_center">登录账号</string>
   <string name="set_default">默认参数</string>
   <string name="set_display">显示</string>
+  <string name="set_display_keep_screen_awake">被控端保持唤醒</string>
+  <string name="set_display_keep_screen_awake_detail">连接过程中被控端不锁定（即修改自动锁定时间）</string>
+  <string name="set_display_auto_back_on_start_default">打开默认后返回</string>
+  <string name="set_display_auto_back_on_start_default_detail">启动时打开默认后是否自动返回桌面</string>
   <string name="set_display_default_show_nav_bar">默认显示导航栏</string>
   <string name="set_display_default_show_nav_bar_detail">设置小窗和全屏模式默认是否显示导航栏</string>
+  <string name="set_display_default_mini_on_outside">触摸外界时最小化</string>
+  <string name="set_display_default_mini_on_outside_detail">(小窗模式)触摸小窗以外位置时最小化</string>
   <string name="set_other">其他</string>
-  <string name="set_other_clear_default">清除默认设备</string>
+  <string name="set_other_clear_default">清除默认打开设备</string>
   <string name="set_other_clear_default_code">已清除</string>
   <string name="set_other_custom_key">自定义密钥(需重新授权)</string>
   <string name="set_other_clear_key">重新生成密钥(需重新授权)</string>
   <string name="set_other_clear_key_code">已刷新</string>
-  <string name="set_other_local_recover">恢复本机分辨率</string>
-  <string name="set_other_local_recover_code_error_adb">请先设置本机ADB端口(在登录账号页面)</string>
-  <string name="set_other_local_recover_code_error_connect">连接失败，请检查是否开启无线调试</string>
-  <string name="set_other_local_recover_code_success">恢复成功</string>
+  <string name="set_other_locale">语言切换(中文/English)</string>
+  <string name="set_other_locale_code">Ok, you may need to restart the APP</string>
   <string name="set_about">关于</string>
   <string name="set_about_ip">查看本机IP</string>
+  <string name="set_about_website">项目主页</string>
   <string name="set_about_how_to_use">使用说明</string>
   <string name="set_about_privacy">隐私政策</string>
   <string name="set_about_version">版本: </string>
-
-  <!-- 中心服务器页面 -->
-  <string name="center_address">云服务器地址</string>
-  <string name="center_address_hint">不可为空</string>
-  <string name="center_name">用户名</string>
-  <string name="center_name_hint">仅字母和数字</string>
-  <string name="center_password">密码</string>
-  <string name="center_password_hint">仅字母和数字</string>
-  <string name="center_adb_port">本机ADB端口</string>
-  <string name="center_adb_port_hint">可选，仅被控端需要填写</string>
-  <string name="center_hint">* 云服务器需自行搭建，或另外购买官方服务器</string>
-  <string name="center_button">登录/注册</string>
-  <string name="center_button_code">成功</string>
 
   <!-- 查看IP地址页面 -->
   <string name="ip_title">本机地址</string>
@@ -64,8 +57,14 @@
 
   <!-- 设备设置模块 -->
   <string name="set_device_title">干什么◔ ‸◔?</string>
-  <string name="set_device_button_recover">恢复</string>
-  <string name="set_device_button_set_default">默认</string>
+  <string name="set_device_button_recover">恢复分辨率</string>
+  <string name="set_device_button_recover_success">恢复成功</string>
+  <string name="set_device_button_recover_error">连接失败，请检查ADB和网络</string>
+  <string name="set_device_button_set_default">启动时打开</string>
+  <string name="set_device_button_get_uuid">获取ID</string>
+  <string name="set_device_button_get_uuid_success">已复制</string>
+  <string name="set_device_button_start_wireless">打开无线</string>
+  <string name="set_device_button_start_wireless_success">成功</string>
   <string name="set_device_button_change">修改</string>
   <string name="set_device_button_delete">删除</string>
 
@@ -93,15 +92,9 @@
   <string name="option_use_h265_detail">优先使用H265，视频体积小延迟低，实际以支持情况为主，若视频异常可尝试关闭</string>
   <string name="option_use_opus">优先Opus</string>
   <string name="option_use_opus_detail">优先使用OPUS，音频体积小延迟低，实际以支持情况为主</string>
-  <string name="option_turn_off_screen">熄屏控制</string>
-  <string name="option_turn_off_screen_detail">开启后会在控制过程中保持被控端屏幕关闭</string>
-  <string name="option_auto_lock_after_control">断开后锁定</string>
-  <string name="option_auto_lock_after_control_detail">开启后断开连接后自动锁定被控端</string>
   <string name="option_default_full">默认全屏启动</string>
   <string name="option_default_full_detail">开启后在连接成功后直接进入全屏状态</string>
   <string name="option_set_resolution">修改分辨率</string>
   <string name="option_set_resolution_detail">开启后会自动修改被控端分辨率，可能会无法自动恢复(可手动恢复)，慎重考虑</string>
-  <string name="option_use_tunnel">使用隧道传输</string>
-  <string name="option_use_tunnel_detail">开启后使用ADB隧道传输数据，否则使用单独端口(ADB端口加1)传输数据</string>
 
 </resources>

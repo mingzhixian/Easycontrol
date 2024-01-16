@@ -20,14 +20,14 @@ public class IpActivity extends Activity {
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    PublicTools.setStatusAndNavBar(this);
+    PublicTools.setLocale(this);
     ipActivity = ActivityIpBinding.inflate(this.getLayoutInflater());
     setContentView(ipActivity.getRoot());
-    // 设置状态栏导航栏颜色沉浸
-    PublicTools.setStatusAndNavBar(this);
     setButtonListener();
     // 绘制UI
     drawUi();
+    super.onCreate(savedInstanceState);
   }
 
   private void drawUi() {

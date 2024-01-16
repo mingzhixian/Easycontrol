@@ -62,7 +62,7 @@
     android:layout_width="200dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:layout_marginTop="20dp"
+    android:layout_marginTop="10dp"
     android:background="@drawable/background_cron"
     android:backgroundTint="@color/button"
     android:gravity="center"

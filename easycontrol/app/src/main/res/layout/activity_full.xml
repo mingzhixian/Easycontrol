@@ -3,7 +3,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@color/cardBackground"
+  android:background="#222325"
   android:keepScreenOn="true"
   tools:context=".client.view.FullActivity">
 
@@ -29,20 +29,21 @@
     <LinearLayout
       android:id="@+id/nav_bar"
       android:layout_width="match_parent"
-      android:layout_height="32dp"
+      android:layout_height="35dp"
       android:layout_gravity="bottom"
       android:gravity="center"
       android:orientation="horizontal"
-      android:paddingEnd="40dp">
+      android:paddingEnd="50dp"
+      android:paddingStart="10dp">
 
       <ImageView
         android:id="@+id/button_rotate"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         android:focusable="false"
-        android:padding="5dp"
+        android:padding="4dp"
         android:src="@drawable/rotate"
-        android:tint="@color/onCardBackground" />
+        android:tint="#DEDEDE" />
 
       <ImageView
         android:id="@+id/button_switch"
@@ -50,9 +51,9 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:focusable="false"
-        android:padding="5dp"
+        android:padding="4dp"
         android:src="@drawable/square"
-        android:tint="@color/onCardBackground" />
+        android:tint="#DEDEDE" />
 
       <ImageView
         android:id="@+id/button_home"
@@ -60,9 +61,9 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:focusable="false"
-        android:padding="5dp"
+        android:padding="4dp"
         android:src="@drawable/o"
-        android:tint="@color/onCardBackground" />
+        android:tint="#DEDEDE" />
 
       <ImageView
         android:id="@+id/button_back"
@@ -70,71 +71,97 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:focusable="false"
-        android:padding="5dp"
+        android:padding="4dp"
         android:src="@drawable/caret_left"
-        android:tint="@color/onCardBackground" />
+        android:tint="#DEDEDE" />
 
     </LinearLayout>
   </LinearLayout>
 
   <ImageView
     android:id="@+id/button_more"
-    android:layout_width="40dp"
-    android:layout_height="32dp"
+    android:layout_width="50dp"
+    android:layout_height="35dp"
     android:layout_gravity="end|bottom"
     android:focusable="false"
-    android:padding="5dp"
+    android:padding="4dp"
     android:src="@drawable/ellipsis_vertical"
-    android:tint="@color/onCardBackground" />
+    android:tint="#DEDEDE" />
 
-  <LinearLayout
+  <GridLayout
     android:id="@+id/bar_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom|end"
     android:layout_marginEnd="10dp"
-    android:layout_marginBottom="42dp"
+    android:layout_marginBottom="45dp"
     android:background="@drawable/background_cron"
+    android:columnCount="4"
     android:elevation="6dp"
-    android:orientation="horizontal"
-    android:padding="5dp">
+    android:padding="6dp">
 
     <ImageView
       android:id="@+id/button_nav_bar"
-      android:layout_width="22dp"
-      android:layout_height="22dp"
-      android:layout_margin="2dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
       android:focusable="false"
       android:src="@drawable/not_equal"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_mini"
-      android:layout_width="22dp"
-      android:layout_height="22dp"
-      android:layout_margin="2dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
       android:focusable="false"
       android:src="@drawable/minus"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_full_exit"
-      android:layout_width="22dp"
-      android:layout_height="22dp"
-      android:layout_margin="2dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
       android:focusable="false"
       android:src="@drawable/compress"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_close"
-      android:layout_width="22dp"
-      android:layout_height="22dp"
-      android:layout_margin="2dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
       android:focusable="false"
       android:src="@drawable/x"
       android:tint="@color/alert" />
 
-  </LinearLayout>
+    <ImageView
+      android:id="@+id/button_light"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
+      android:focusable="false"
+      android:src="@drawable/lightbulb"
+      android:tint="@color/onCardBackground" />
 
+    <ImageView
+      android:id="@+id/button_light_off"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
+      android:focusable="false"
+      android:src="@drawable/lightbulb_off"
+      android:tint="@color/onCardBackground" />
+
+    <ImageView
+      android:id="@+id/button_power"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
+      android:focusable="false"
+      android:src="@drawable/power_off"
+      android:tint="@color/onCardBackground" />
+
+  </GridLayout>
 </FrameLayout>

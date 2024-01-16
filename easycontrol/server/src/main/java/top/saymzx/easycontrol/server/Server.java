@@ -4,22 +4,25 @@
 package top.saymzx.easycontrol.server;
 
 import android.annotation.SuppressLint;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.system.ErrnoException;
+import android.system.Os;
 
 import java.io.DataInputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
 import top.saymzx.easycontrol.server.helper.AudioEncode;
-import top.saymzx.easycontrol.server.helper.Controller;
+import top.saymzx.easycontrol.server.helper.ControlPacket;
 import top.saymzx.easycontrol.server.helper.VideoEncode;
 import top.saymzx.easycontrol.server.wrappers.ClipboardManager;
 import top.saymzx.easycontrol.server.wrappers.DisplayManager;
@@ -29,9 +32,9 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static Socket socket;
+  private static LocalSocket socket;
+  private static FileDescriptor fileDescriptor;
   public static DataInputStream inputStream;
-  public static OutputStream outputStream;
 
   private static final Object object = new Object();
 
@@ -39,6 +42,14 @@ public final class Server {
 
   public static void main(String... args) {
     try {
+      Thread timeOutThread = new Thread(() -> {
+        try {
+          Thread.sleep(timeoutDelay);
+          release();
+        } catch (InterruptedException ignored) {
+        }
+      });
+      timeOutThread.start();
       // 解析参数
       Options.parse(args);
       // 初始化
@@ -57,16 +68,17 @@ public final class Server {
         threads.add(new Thread(Server::executeAudioOut));
       }
       threads.add(new Thread(Server::executeControlIn));
-      threads.add(new Thread(Server::executeOtherService));
       for (Thread thread : threads) thread.setPriority(Thread.MAX_PRIORITY);
       for (Thread thread : threads) thread.start();
       // 程序运行
+      timeOutThread.interrupt();
       synchronized (object) {
         object.wait();
       }
       // 终止子服务
       for (Thread thread : threads) thread.interrupt();
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
       // 释放资源
       release();
@@ -107,16 +119,16 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    try (ServerSocket serverSocket = new ServerSocket(Options.tcpPort)) {
-      serverSocket.setSoTimeout(timeoutDelay);
+    try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
       socket = serverSocket.accept();
+      fileDescriptor = socket.getFileDescriptor();
       inputStream = new DataInputStream(socket.getInputStream());
-      outputStream = socket.getOutputStream();
     }
   }
 
   private static void executeVideoOut() {
     try {
+      int frame = 0;
       while (!Thread.interrupted()) {
         if (VideoEncode.isHasChangeConfig) {
           VideoEncode.isHasChangeConfig = false;
@@ -124,9 +136,14 @@ public final class Server {
           VideoEncode.startEncode();
         }
         VideoEncode.encodeOut();
+        frame++;
+        if (frame > 120) {
+          if (System.currentTimeMillis() - lastKeepAliveTime > timeoutDelay) throw new IOException("连接断开");
+          frame = 0;
+        }
       }
-    } catch (Exception ignored) {
-      errorClose();
+    } catch (Exception e) {
+      errorClose(e);
     }
   }
 
@@ -137,58 +154,54 @@ public final class Server {
   private static void executeAudioOut() {
     try {
       while (!Thread.interrupted()) AudioEncode.encodeOut();
-    } catch (IOException ignored) {
-      errorClose();
+    } catch (IOException | ErrnoException e) {
+      errorClose(e);
     }
   }
+
+  private static long lastKeepAliveTime = System.currentTimeMillis();
 
   private static void executeControlIn() {
     try {
       while (!Thread.interrupted()) {
         switch (Server.inputStream.readByte()) {
           case 1:
-            Controller.handleTouchEvent();
+            ControlPacket.handleTouchEvent();
             break;
           case 2:
-            Controller.handleKeyEvent();
+            ControlPacket.handleKeyEvent();
             break;
           case 3:
-            Controller.handleClipboardEvent();
+            ControlPacket.handleClipboardEvent();
             break;
           case 4:
-            Controller.handleKeepAliveEvent();
+            lastKeepAliveTime = System.currentTimeMillis();
             break;
           case 5:
-            Controller.handleChangeSizeEvent();
+            Device.changeDeviceSize(inputStream.readFloat());
             break;
           case 6:
-            Controller.handleRotateEvent();
+            Device.rotateDevice();
+            break;
+          case 7:
+            Device.changeScreenPowerMode(inputStream.readByte());
+            break;
+          case 8:
+            Device.changePower();
             break;
         }
       }
-    } catch (Exception ignored) {
-      errorClose();
+    } catch (Exception e) {
+      errorClose(e);
     }
   }
 
-  private static void executeOtherService() {
-    try {
-      while (!Thread.interrupted()) {
-        Controller.checkScreenOff(true);
-        if (Options.turnOffScreen) Device.setScreenPowerMode(0);
-        if (System.currentTimeMillis() - Controller.lastKeepAliveTime > timeoutDelay) throw new IOException("连接断开");
-        Thread.sleep(1500);
-      }
-    } catch (Exception ignored) {
-      errorClose();
-    }
+  public synchronized static void write(ByteBuffer byteBuffer) throws IOException, ErrnoException {
+    while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
   }
 
-  public synchronized static void write(byte[] buffer) throws IOException {
-    outputStream.write(buffer);
-  }
-
-  public static void errorClose() {
+  public static void errorClose(Exception e) {
+    e.printStackTrace();
     synchronized (object) {
       object.notify();
     }
@@ -196,11 +209,10 @@ public final class Server {
 
   // 释放资源
   private static void release() {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       try {
         switch (i) {
           case 0:
-            outputStream.close();
             inputStream.close();
             socket.close();
             break;
@@ -209,8 +221,9 @@ public final class Server {
             AudioEncode.release();
             break;
           case 2:
-            if (Options.reSize != -1) Device.execReadOutput("wm size reset");
-            if (Options.autoLockAfterControl) Controller.checkScreenOff(false);
+            if (Device.needReset) Device.execReadOutput("wm size reset");
+            if (Options.keepAwake) Device.execReadOutput("settings put system screen_off_timeout " + Device.oldScreenOffTimeout);
+          case 3:
             Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
             break;
         }

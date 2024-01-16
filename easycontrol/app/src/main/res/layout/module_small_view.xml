@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<top.saymzx.easycontrol.app.client.view.MyViewForSmallView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="wrap_content"
-  android:layout_height="wrap_content"
-  android:elevation="8dp">
+  android:layout_height="wrap_content">
 
   <EditText
     android:id="@+id/edit_text"
@@ -11,49 +11,51 @@
     android:layout_height="10dp"
     android:inputType="textVisiblePassword" />
 
+  <FrameLayout
+    android:id="@+id/bar"
+    android:layout_width="120dp"
+    android:layout_height="25dp"
+    android:layout_gravity="top|center_horizontal">
+
+    <View
+      android:layout_width="60dp"
+      android:layout_height="5dp"
+      android:layout_gravity="center"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/clientBar"
+      android:focusable="false" />
+  </FrameLayout>
+
   <LinearLayout
+    android:id="@+id/body"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center_horizontal"
+    android:layout_gravity="top|center_horizontal"
+    android:layout_marginTop="25dp"
+    android:background="@drawable/background_cron"
     android:orientation="vertical">
 
     <FrameLayout
-      android:id="@+id/bar"
-      android:layout_width="70dp"
-      android:layout_height="22dp"
-      android:background="@drawable/background_cron"
-      android:backgroundTint="@color/translucent">
-
-      <View
-        android:layout_width="50dp"
-        android:layout_height="5dp"
-        android:layout_gravity="center"
-        android:background="@drawable/background_cron"
-        android:backgroundTint="@color/clientBar"
-        android:elevation="2dp"
-        android:focusable="false" />
-    </FrameLayout>
-
-    <LinearLayout
       android:id="@+id/texture_view_layout"
-      android:layout_width="200dp"
-      android:layout_height="200dp"
-      android:orientation="vertical" />
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:elevation="8dp" />
 
     <LinearLayout
       android:id="@+id/nav_bar"
       android:layout_width="match_parent"
-      android:layout_height="24dp"
-      android:background="@color/cardBackground"
-      android:gravity="center"
-      android:paddingEnd="30dp">
+      android:layout_height="25dp"
+      android:orientation="horizontal"
+      android:paddingStart="10dp"
+      android:paddingEnd="30dp"
+      tools:ignore="RtlSymmetry">
 
       <ImageView
         android:id="@+id/button_rotate"
-        android:layout_width="30dp"
+        android:layout_width="25dp"
         android:layout_height="match_parent"
         android:focusable="false"
-        android:padding="5dp"
+        android:padding="2dp"
         android:src="@drawable/rotate"
         android:tint="@color/onCardBackground" />
 
@@ -63,7 +65,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:focusable="false"
-        android:padding="4dp"
+        android:padding="2dp"
         android:src="@drawable/square"
         android:tint="@color/onCardBackground" />
 
@@ -73,7 +75,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:focusable="false"
-        android:padding="4dp"
+        android:padding="2dp"
         android:src="@drawable/o"
         android:tint="@color/onCardBackground" />
 
@@ -83,60 +85,89 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:focusable="false"
-        android:padding="4dp"
+        android:padding="2dp"
         android:src="@drawable/caret_left"
         android:tint="@color/onCardBackground" />
 
     </LinearLayout>
   </LinearLayout>
 
-  <LinearLayout
+  <GridLayout
     android:id="@+id/bar_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="24dp"
+    android:layout_gravity="top|center_horizontal"
+    android:layout_marginTop="30dp"
     android:background="@drawable/background_cron"
+    android:columnCount="4"
     android:elevation="6dp"
-    android:padding="5dp">
+    android:padding="6dp">
 
     <ImageView
       android:id="@+id/button_nav_bar"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_margin="1dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
       android:focusable="false"
       android:src="@drawable/not_equal"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_mini"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_margin="1dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
       android:focusable="false"
       android:src="@drawable/minus"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_full"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_margin="1dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
       android:focusable="false"
       android:src="@drawable/expand"
       android:tint="@color/onCardBackground" />
 
     <ImageView
       android:id="@+id/button_close"
-      android:layout_width="20dp"
-      android:layout_height="20dp"
-      android:layout_margin="1dp"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
       android:focusable="false"
       android:src="@drawable/x"
       android:tint="@color/alert" />
 
-  </LinearLayout>
+    <ImageView
+      android:id="@+id/button_light"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/lightbulb"
+      android:tint="@color/onCardBackground" />
+
+    <ImageView
+      android:id="@+id/button_light_off"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/lightbulb_off"
+      android:tint="@color/onCardBackground" />
+
+    <ImageView
+      android:id="@+id/button_power"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/power_off"
+      android:tint="@color/onCardBackground" />
+
+
+  </GridLayout>
 
   <View
     android:id="@+id/re_size"
@@ -145,4 +176,4 @@
     android:layout_gravity="end|bottom"
     android:focusable="false" />
 
-</FrameLayout>
+</top.saymzx.easycontrol.app.client.view.MyViewForSmallView>

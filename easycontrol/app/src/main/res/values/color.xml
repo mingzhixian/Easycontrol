@@ -13,11 +13,9 @@
   <color name="onButton">#E0E0E0</color>
   <color name="alert">#ca5357</color>
   <color name="onAlert">#ded8d8</color>
-  <color name="translucent">#000000ff</color>
 
   <!-- 客户端界面色彩 -->
-  <color name="clientBar">#579CF9</color>
-  <color name="clientBarSecond">#c0d1d1d1</color>
+  <color name="clientBar">#828282</color>
 
   <!-- 迷你界面色彩 -->
   <color name="bar1">#e8b621</color>

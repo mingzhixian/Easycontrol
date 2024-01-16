@@ -32,13 +32,13 @@ public final class AudioEncode {
       encedec.start();
       audioCapture = AudioCapture.init();
     } catch (Exception ignored) {
-      Server.write(bytes);
+      Server.write(ByteBuffer.wrap(bytes));
       return false;
     }
     bytes[0] = 1;
-    Server.write(bytes);
+    Server.write(ByteBuffer.wrap(bytes));
     bytes[0] = (byte) (useOpus ? 1 : 0);
-    Server.write(bytes);
+    Server.write(ByteBuffer.wrap(bytes));
     return true;
   }
 
@@ -47,6 +47,7 @@ public final class AudioEncode {
     encedec = MediaCodec.createEncoderByType(codecMime);
     MediaFormat encodecFormat = MediaFormat.createAudioFormat(codecMime, AudioCapture.SAMPLE_RATE, AudioCapture.CHANNELS);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 128000);
+    encodecFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, frameSize);
     if (!useOpus) encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
   }
@@ -54,18 +55,21 @@ public final class AudioEncode {
   private static final int frameSize = AudioCapture.millisToBytes(50);
 
   public static void encodeIn() {
+    System.out.println(frameSize);
     try {
       int inIndex;
       do inIndex = encedec.dequeueInputBuffer(-1); while (inIndex < 0);
-      audioCapture.read(encedec.getInputBuffer(inIndex), frameSize);
-      encedec.queueInputBuffer(inIndex, 0, frameSize, 0, 0);
+      ByteBuffer buffer = encedec.getInputBuffer(inIndex);
+      int size = Math.min(buffer.remaining(), frameSize);
+      audioCapture.read(buffer, size);
+      encedec.queueInputBuffer(inIndex, 0, size, 0, 0);
     } catch (IllegalStateException ignored) {
     }
   }
 
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public static void encodeOut() throws IOException {
+  public static void encodeOut() throws IOException, ErrnoException {
     try {
       // 找到已完成的输出缓冲区
       int outIndex;
@@ -84,12 +88,7 @@ public final class AudioEncode {
         }
       }
       int frameSize = buffer.remaining();
-      ByteBuffer byteBuffer = ByteBuffer.allocate(5 + frameSize);
-      byteBuffer.put((byte) 2);
-      byteBuffer.putInt(frameSize);
-      byteBuffer.put(buffer);
-      byteBuffer.flip();
-      Server.write(byteBuffer.array());
+      ControlPacket.sendAudioEvent(frameSize, buffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

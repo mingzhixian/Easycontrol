@@ -3,47 +3,44 @@ package top.saymzx.easycontrol.app.entity;
 public class Device {
   public static final int TYPE_NORMAL = 1;
   public static final int TYPE_LINK = 2;
-  public static final int TYPE_CLOUD = 3;
 
   public final String uuid;
-  public final Integer type;
+  public final int type;
   public String name;
   public String address;
   public boolean isAudio;
-  public Integer maxSize;
-  public Integer maxFps;
-  public Integer maxVideoBit;
+  public int maxSize;
+  public int maxFps;
+  public int maxVideoBit;
   public boolean setResolution;
-  public boolean turnOffScreen;
-  public boolean autoLockAfterControl;
   public boolean defaultFull;
   public boolean useH265;
   public boolean useOpus;
-  public boolean useTunnel;
-  public Integer window_x;
-  public Integer window_y;
-  public Integer window_width;
-  public Integer window_height;
+  public int small_x;
+  public static int SMALL_X =100;
+  public int small_y;
+  public static int SMALL_Y =100;
+  public int small_length;
+  public static int SMALL_LENGTH =1000;
+  public int mini_y;
+  public static int MINI_Y =200;
 
   public Device(String uuid,
-                Integer type,
+                int type,
                 String name,
                 String address,
                 boolean isAudio,
-                Integer maxSize,
-                Integer maxFps,
-                Integer maxVideoBit,
+                int maxSize,
+                int maxFps,
+                int maxVideoBit,
                 boolean setResolution,
-                boolean turnOffScreen,
-                boolean autoLockAfterControl,
                 boolean defaultFull,
                 boolean useH265,
                 boolean useOpus,
-                boolean useTunnel,
-                Integer window_x,
-                Integer window_y,
-                Integer window_width,
-                Integer window_height) {
+                int small_x,
+                int small_y,
+                int small_length,
+                int mini_y) {
     this.uuid = uuid;
     this.type = type;
     this.name = name;
@@ -53,27 +50,25 @@ public class Device {
     this.maxFps = maxFps;
     this.maxVideoBit = maxVideoBit;
     this.setResolution = setResolution;
-    this.turnOffScreen = turnOffScreen;
-    this.autoLockAfterControl = autoLockAfterControl;
     this.defaultFull = defaultFull;
     this.useH265 = useH265;
     this.useOpus = useOpus;
-    this.useTunnel = useTunnel;
-    this.window_x = window_x;
-    this.window_y = window_y;
-    this.window_width = window_width;
-    this.window_height = window_height;
+    this.small_x = small_x;
+    this.small_y = small_y;
+    this.small_length = small_length;
+    this.mini_y = mini_y;
   }
 
   public static Device getDefaultDevice(String uuid, int type) {
-    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getDefaultTurnOffScreen(), AppData.setting.getDefaultAutoLockAfterControl(), AppData.setting.getDefaultFull(), AppData.setting.getDefaultUseH265(), AppData.setting.getDefaultUseOpus(), AppData.setting.getDefaultUseTunnel(), -1, -1, -1, -1);
+    return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getDefaultFull(), AppData.setting.getDefaultUseH265(), AppData.setting.getDefaultUseOpus(), SMALL_X, SMALL_Y, SMALL_LENGTH, MINI_Y);
   }
 
   public boolean isNormalDevice() {
     return type == TYPE_NORMAL;
   }
 
-  public boolean isCloudDevice() {
-    return type == TYPE_CLOUD;
+  public boolean isLinkDevice() {
+    return type == TYPE_LINK;
   }
+
 }

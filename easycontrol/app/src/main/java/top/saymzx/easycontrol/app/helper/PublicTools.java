@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.net.DhcpInfo;
@@ -27,6 +28,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +55,17 @@ public class PublicTools {
       View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     // 设置异形屏
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) context.getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+  }
+
+  // 设置语言
+  public static void setLocale(Activity context) {
+    Resources resources = context.getResources();
+    Configuration config = resources.getConfiguration();
+    String locale = AppData.setting.getDefaultLocale();
+    if (locale.equals("")) config.locale = Locale.getDefault();
+    else if (locale.equals("en")) config.locale = Locale.ENGLISH;
+    else if (locale.equals("zh")) config.locale = Locale.CHINESE;
+    resources.updateConfiguration(config, resources.getDisplayMetrics());
   }
 
   // 设置状态栏导航栏颜色
@@ -118,7 +131,7 @@ public class PublicTools {
   // 创建设备参数设置页面
   private static final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
   private static final String[] maxFpsList = new String[]{"90", "60", "40", "30", "20", "10"};
-  private static final String[] maxVideoBitList = new String[]{"16", "12", "8", "4", "2", "1"};
+  private static final String[] maxVideoBitList = new String[]{"12", "8", "4", "2", "1"};
 
   public static void createDeviceOptionSet(Context context, ViewGroup fatherLayout, Device device) {
     // Device为null，则视为设置默认参数
@@ -152,14 +165,6 @@ public class PublicTools {
       if (setDefault) AppData.setting.setDefaultUseOpus(isChecked);
       else device.useOpus = isChecked;
     }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_turn_off_screen), context.getString(R.string.option_turn_off_screen_detail), setDefault ? AppData.setting.getDefaultTurnOffScreen() : device.turnOffScreen, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultTurnOffScreen(isChecked);
-      else device.turnOffScreen = isChecked;
-    }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_auto_lock_after_control), context.getString(R.string.option_auto_lock_after_control_detail), setDefault ? AppData.setting.getDefaultAutoLockAfterControl() : device.autoLockAfterControl, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultAutoLockAfterControl(isChecked);
-      else device.autoLockAfterControl = isChecked;
-    }).getRoot());
     fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_default_full), context.getString(R.string.option_default_full_detail), setDefault ? AppData.setting.getDefaultFull() : device.defaultFull, isChecked -> {
       if (setDefault) AppData.setting.setDefaultFull(isChecked);
       else device.defaultFull = isChecked;
@@ -167,10 +172,6 @@ public class PublicTools {
     fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_set_resolution), context.getString(R.string.option_set_resolution_detail), setDefault ? AppData.setting.getDefaultSetResolution() : device.setResolution, isChecked -> {
       if (setDefault) AppData.setting.setDefaultSetResolution(isChecked);
       else device.setResolution = isChecked;
-    }).getRoot());
-    fatherLayout.addView(PublicTools.createSwitchCard(context, context.getString(R.string.option_use_tunnel), context.getString(R.string.option_use_tunnel_detail), setDefault ? AppData.setting.getDefaultUseTunnel() : device.useTunnel, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultUseTunnel(isChecked);
-      else device.useTunnel = isChecked;
     }).getRoot());
   }
 
@@ -347,7 +348,7 @@ public class PublicTools {
   }
 
   // 日志
-  public static void logToast(String str){
+  public static void logToast(String str) {
     Log.e("Easycontrol", str);
     AppData.uiHandler.post(() -> Toast.makeText(AppData.main, str, Toast.LENGTH_SHORT).show());
   }

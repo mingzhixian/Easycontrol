@@ -11,6 +11,7 @@ import android.view.Surface;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 @SuppressLint("PrivateApi")
 public final class SurfaceControl {
@@ -25,12 +26,11 @@ public final class SurfaceControl {
   public static void init() throws ClassNotFoundException {
     CLASS = Class.forName("android.view.SurfaceControl");
     try {
-      getBuiltInDisplayMethod = (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) ? CLASS.getMethod("getBuiltInDisplay", int.class) : CLASS.getMethod("getInternalDisplayToken");
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         try {
           getPhysicalDisplayIdsMethod = CLASS.getMethod("getPhysicalDisplayIds");
           getPhysicalDisplayTokenMethod = CLASS.getMethod("getPhysicalDisplayToken", long.class);
-        } catch (Exception ignored1) {
+        } catch (Exception ignored) {
           getMethodAndroid14();
         }
       }
@@ -48,8 +48,8 @@ public final class SurfaceControl {
     Method loadMethod = Runtime.class.getDeclaredMethod("loadLibrary0", Class.class, String.class);
     loadMethod.setAccessible(true);
     loadMethod.invoke(Runtime.getRuntime(), displayControlClass, "android_servers");
-    getPhysicalDisplayIdsMethod = CLASS.getMethod("getPhysicalDisplayIds");
-    getPhysicalDisplayTokenMethod = CLASS.getMethod("getPhysicalDisplayToken", long.class);
+    getPhysicalDisplayIdsMethod = displayControlClass.getMethod("getPhysicalDisplayIds");
+    getPhysicalDisplayTokenMethod = displayControlClass.getMethod("getPhysicalDisplayToken", long.class);
   }
 
   public static void openTransaction() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -69,7 +69,7 @@ public final class SurfaceControl {
   }
 
   public static void setDisplaySurface(IBinder displayToken, Surface surface) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    CLASS.getMethod("setDisplaySurface", IBinder.class, Surface.class).invoke(null, displayToken, surface);
+     CLASS.getMethod("setDisplaySurface", IBinder.class, Surface.class).invoke(null, displayToken, surface);
   }
 
   public static IBinder createDisplay(String name, boolean secure) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -81,10 +81,10 @@ public final class SurfaceControl {
   }
 
   public static IBinder getBuiltInDisplay() {
-    if (getBuiltInDisplayMethod == null) return null;
     try {
-      return (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) ? (IBinder) getBuiltInDisplayMethod.invoke(null, 0) : (IBinder) getBuiltInDisplayMethod.invoke(null);
-    } catch (Exception e) {
+      if (getBuiltInDisplayMethod == null) getBuiltInDisplayMethod = CLASS.getMethod("getBuiltInDisplay", int.class);
+      return (IBinder) getBuiltInDisplayMethod.invoke(null, 0);
+    } catch (Exception ignroed) {
       return null;
     }
   }
@@ -93,7 +93,7 @@ public final class SurfaceControl {
     if (getPhysicalDisplayTokenMethod == null) return null;
     try {
       return (IBinder) getPhysicalDisplayTokenMethod.invoke(null, physicalDisplayId);
-    } catch (Exception e) {
+    } catch (Exception ignored) {
       return null;
     }
   }
@@ -102,7 +102,7 @@ public final class SurfaceControl {
     if (getPhysicalDisplayIdsMethod == null) return null;
     try {
       return (long[]) getPhysicalDisplayIdsMethod.invoke(null);
-    } catch (Exception e) {
+    } catch (Exception ignored) {
       return null;
     }
   }

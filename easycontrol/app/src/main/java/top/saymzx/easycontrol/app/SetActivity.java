@@ -6,10 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import java.io.File;
-
-import top.saymzx.adb.AdbKeyPair;
-import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
@@ -19,14 +15,14 @@ public class SetActivity extends Activity {
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    PublicTools.setStatusAndNavBar(this);
+    PublicTools.setLocale(this);
     setActivity = ActivitySetBinding.inflate(this.getLayoutInflater());
     setContentView(setActivity.getRoot());
-    // 设置状态栏导航栏颜色沉浸
-    PublicTools.setStatusAndNavBar(this);
     // 设置页面
     drawUi();
     setButtonListener();
+    super.onCreate(savedInstanceState);
   }
 
   // 设置默认值
@@ -34,6 +30,9 @@ public class SetActivity extends Activity {
     // 默认参数
     PublicTools.createDeviceOptionSet(this, setActivity.setDefault, null);
     // 显示
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_keep_screen_awake), getString(R.string.set_display_keep_screen_awake_detail), AppData.setting.getKeepAwake(), isChecked -> AppData.setting.setKeepAwake(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_auto_back_on_start_default), getString(R.string.set_display_auto_back_on_start_default_detail), AppData.setting.getAutoBackOnStartDefault(), isChecked -> AppData.setting.setAutoBackOnStartDefault(isChecked)).getRoot());
+    setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_default_mini_on_outside), getString(R.string.set_display_default_mini_on_outside_detail), AppData.setting.getDefaultMiniOnOutside(), isChecked -> AppData.setting.setDefaultMiniOnOutside(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_default_show_nav_bar), getString(R.string.set_display_default_show_nav_bar_detail), AppData.setting.getDefaultShowNavBar(), isChecked -> AppData.setting.setDefaultShowNavBar(isChecked)).getRoot());
     // 其他
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_about_ip), () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
@@ -41,24 +40,17 @@ public class SetActivity extends Activity {
       AppData.setting.setDefaultDevice("");
       Toast.makeText(this, getString(R.string.set_other_clear_default_code), Toast.LENGTH_SHORT).show();
     }).getRoot());
-    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_local_recover), () -> {
-      int port = AppData.setting.getLocalAdbPort();
-      if (port == -1) Toast.makeText(this, getString(R.string.set_other_local_recover_code_error_adb), Toast.LENGTH_SHORT).show();
-      else Client.recover("127.0.0.1:" + port, result -> Toast.makeText(this, getString(result ? R.string.set_other_local_recover_code_success : R.string.set_other_local_recover_code_error_connect), Toast.LENGTH_SHORT).show());
-    }).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_custom_key), () -> startActivity(new Intent(this, AdbKeyActivity.class))).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_clear_key), () -> {
-      try {
-        // 读取密钥文件
-        File privateKey = new File(this.getApplicationContext().getFilesDir(), "private.key");
-        File publicKey = new File(this.getApplicationContext().getFilesDir(), "public.key");
-        AdbKeyPair.generate(privateKey, publicKey);
-        AppData.keyPair = AdbKeyPair.read(privateKey, publicKey);
-        Toast.makeText(this, getString(R.string.set_other_clear_key_code), Toast.LENGTH_SHORT).show();
-      } catch (Exception ignored) {
-      }
+      AppData.reGenerateAdbKeyPair(this);
+      Toast.makeText(this, getString(R.string.set_other_clear_key_code), Toast.LENGTH_SHORT).show();
+    }).getRoot());
+    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_locale), () -> {
+      AppData.setting.setDefaultLocale(!AppData.setting.getDefaultLocale().equals("zh") ? "zh" : "en");
+      Toast.makeText(this, getString(R.string.set_other_locale_code), Toast.LENGTH_SHORT).show();
     }).getRoot());
     // 关于
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_website), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_how_to_use), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_privacy), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
     setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_version) + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
@@ -77,9 +69,8 @@ public class SetActivity extends Activity {
     }
   }
 
-  // 设置返回按钮监听
+  // 设置按钮监听
   private void setButtonListener() {
     setActivity.backButton.setOnClickListener(v -> finish());
-    setActivity.setCenter.setOnClickListener(v -> startActivity(new Intent(this, CloudActivity.class)));
   }
 }

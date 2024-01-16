@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import top.saymzx.adb.AdbKeyPair;
+import top.saymzx.easycontrol.app.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.databinding.ActivityAdbKeyBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.PublicTools;
@@ -21,14 +21,14 @@ public class AdbKeyActivity extends Activity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    PublicTools.setStatusAndNavBar(this);
+    PublicTools.setLocale(this);
     activityAdbKeyBinding = ActivityAdbKeyBinding.inflate(this.getLayoutInflater());
     setContentView(activityAdbKeyBinding.getRoot());
-    // 设置状态栏导航栏颜色沉浸
-    PublicTools.setStatusAndNavBar(this);
     readKey();
     activityAdbKeyBinding.backButton.setOnClickListener(v -> finish());
     activityAdbKeyBinding.ok.setOnClickListener(v -> writeKey());
+    super.onCreate(savedInstanceState);
   }
 
   // 读取旧的密钥公钥文件
