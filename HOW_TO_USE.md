@@ -6,7 +6,7 @@
 	2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
 	3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
 2. 电脑ADB文件：[蓝奏云](https://cloudstar.lanzoue.com/iAWKJ128mnif) 密码:scrcpy
-3. 易控软件：新版本不再免费提供安装包，需前往下载群付费下载(10元)，或下载源码手动编译，[下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)
+3. 易控软件：新版本不再免费提供安装包，需前往下载群付费下载(35元)，或下载源码手动编译，[下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)
 
 ## 被控端准备
 1. 被控端手机连续点击关于手机-版本号，直至提示打开开发者选项
