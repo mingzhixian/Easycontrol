@@ -12,6 +12,7 @@ easycontrol/build
 easycontrol/local.properties
 
 easycontrol/app/build
+easycontrol/app/debug
 easycontrol/app/release
 easycontrol/app/src/main/res/raw/easycontrol_server.jar
 

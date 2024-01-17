@@ -28,7 +28,10 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 - [点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)
 
 ## 发行版本下载
-因项目开发以及反馈群答疑给本人带来一定负担，本项目此后不会免费提供发行版本，请前往[易控下载群](https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp)付费下载(需提前在下方捐赠35元及以上)。（项目代码仍为开源状态，若您有一定能力，可自行下载源码编译使用）
+限于成本不再免费提供安装包，需捐赠35元及以上后前往下载群下载，或下载源码手动编译
+	<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/wechat.webp" width="200px">
+	<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/alipay.webp" width="200px">
+	<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp" width="200px">
 
 ## 截图
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/main.webp" width="200px">
@@ -48,5 +51,5 @@ Gitee和GitHub代码将保持同步，请自行选择。软件发行版本将仅
 
 请在Github或Gitee提出Issue，或进入易控反馈群反馈BUG或建议。
 
-<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_issue.webp" width="200px">
+<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp" width="200px">
