@@ -183,7 +183,8 @@ public final class Device {
   private static void injectEvent(InputEvent inputEvent) {
     try {
       InputManager.injectInputEvent(inputEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      System.out.println(e.toString());
     }
   }
 

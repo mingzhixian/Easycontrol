@@ -1,18 +1,19 @@
 # 易控(Easycontrol)使用说明
 
-## 相关文件或链接
-1. 视频教程：
-	1. [视频1](https://www.bilibili.com/video/BV1Wu4y1u7vD/)
-	2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
-	3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
-2. 易控软件：限于成本不再免费提供安装包，需捐赠35元及以上后前往下载群下载，或下载源码手动编译
-	<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/wechat.webp" width="200px">
-	<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/alipay.webp" width="200px">
-	<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_download.webp" width="200px">
+## 视频教程（视频版本更新较慢，请以文本说明为准）
+1. [视频1](https://www.bilibili.com/video/BV1Wu4y1u7vD/)
+2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
+3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
 
 ## 初次使用
 1. 被控端手机连续点击关于手机-版本号，直至提示打开开发者选项
-2. 开发者选项打开USB调试，打开停用adb授权超时功能
+2. 被控端手机设置中找到开发者选项
+	- 打开“USB调试”
+	- 打开“停用ADB授权超时功能”
+	- 打开“USB调试(安全调试)”（MIUI设备）
+	- 打开“USB安装”（如果有则打开）
+	- 打开“关闭权限监控”（如果有则打开）
+3. 重启被控端手机
 
 ## 软件使用
 1. 简单使用-有线连接
@@ -45,6 +46,10 @@
 		- 底部为导航栏，可向被控端发送多任务、桌面、返回按键
 		- 导航栏左边旋转按钮，可以控制被控端页面旋转，仅请求旋转，实际是否旋转看被控端当前应用是否允许
 		- 全屏页面方向跟随手机重力方向（可在工具栏中锁定）
+	5. 图示版：
+		- <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/small.webp" width="200px">
+		- <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/mini.webp" width="200px">
+		- <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/full.webp" width="200px">
 
 3. 高级使用
 	- 在添加设备时或长按设备点击“修改”按钮，设置高级选项，可自定义编解码参数、投屏控制参数等
@@ -68,6 +73,27 @@
 		uuid：设备ID
 	- 目标设备全屏：
 		action：changeToFull
+		uuid：设备ID
+	- 目标设备按下电源键：
+		action：buttonPower
+		uuid：设备ID
+	- 目标设备打开背光：
+		action：buttonLight
+		uuid：设备ID
+	- 目标设备关闭背光：
+		action：buttonLightOff
+		uuid：设备ID
+	- 目标设备按下返回键：
+		action：buttonBack
+		uuid：设备ID
+	- 目标设备按下桌面键：
+		action：buttonHome
+		uuid：设备ID
+	- 目标设备按下最近任务键：
+		action：buttonSwitch
+		uuid：设备ID
+	- 目标设备旋转屏幕：
+		action：buttonRotate
 		uuid：设备ID
 	- 目标设备关闭投屏：
 		action：close

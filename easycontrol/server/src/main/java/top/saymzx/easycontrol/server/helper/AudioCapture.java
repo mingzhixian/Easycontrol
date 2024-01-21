@@ -25,11 +25,11 @@ import java.lang.reflect.Method;
 public final class AudioCapture {
 
   public static final int SAMPLE_RATE = 48000;
-  public static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
+  private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
   public static final int CHANNELS = 2;
-  public static final int CHANNEL_MASK = AudioFormat.CHANNEL_IN_LEFT | AudioFormat.CHANNEL_IN_RIGHT;
+  private static final int CHANNEL_MASK = AudioFormat.CHANNEL_IN_LEFT | AudioFormat.CHANNEL_IN_RIGHT;
   public static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-  public static final int BYTES_PER_SAMPLE = 2;
+  private static final int BYTES_PER_SAMPLE = 2;
 
   public static AudioRecord init() {
     AudioRecord recorder;
@@ -58,7 +58,7 @@ public final class AudioCapture {
       audioFormatBuilder.setSampleRate(SAMPLE_RATE);
       audioFormatBuilder.setChannelMask(CHANNEL_CONFIG);
       audioRecordBuilder.setAudioFormat(audioFormatBuilder.build());
-      audioRecordBuilder.setBufferSizeInBytes(16 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
+      audioRecordBuilder.setBufferSizeInBytes(10 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
       return audioRecordBuilder.build();
     }
     return null;

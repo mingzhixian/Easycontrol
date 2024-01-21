@@ -4,9 +4,8 @@
   <string name="app_name_dev">易控测试版</string>
 
   <!-- 主页 -->
-  <string name="main_poem">我年华虚度，空有一身疲倦</string>
+  <string name="main_poem">风乍起，吹皱一池春水</string>
   <string name="main_float_permission">请授予悬浮窗权限</string>
-  <string name="main_battery_permission">请授予电池无限制权限</string>
 
   <!-- 设置页面 -->
   <string name="set_center">登录账号</string>
@@ -30,6 +29,7 @@
   <string name="set_other_locale_code">Ok, you may need to restart the APP</string>
   <string name="set_about">关于</string>
   <string name="set_about_ip">查看本机IP</string>
+  <string name="set_about_active">重新激活</string>
   <string name="set_about_website">项目主页</string>
   <string name="set_about_how_to_use">使用说明</string>
   <string name="set_about_privacy">隐私政策</string>
@@ -46,6 +46,14 @@
   <string name="adb_key_pri">私钥(Base64编码)</string>
   <string name="adb_key_button">保存</string>
   <string name="adb_key_button_code">已保存</string>
+
+  <!-- 激活页面 -->
+  <string name="active_url">前往捐赠地址</string>
+  <string name="active_key">捐赠订单号: 35元及以上</string>
+  <string name="active_button">激活</string>
+  <string name="active_key_hint">* 捐赠后将于24小时内录入系统，如超时仍不成功，请联系mingzhixian@outlook.com</string>
+  <string name="active_button_error">输入错误或系统仍未录入</string>
+  <string name="active_button_success">激活成功，请查看使用说明后使用</string>
 
   <!-- 设备添加模块 -->
   <string name="add_device_name">设备名称</string>

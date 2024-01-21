@@ -1,7 +1,5 @@
 package top.saymzx.easycontrol.app.adb;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -78,7 +76,7 @@ public class AdbProtocol {
     return buffer;
   }
 
-  public static ByteBuffer generatePushPacket(String id, int arg) {
+  public static ByteBuffer generateSyncHeader(String id, int arg) {
     ByteBuffer tmpBuffer = ByteBuffer.allocate(8);
     tmpBuffer.order(ByteOrder.LITTLE_ENDIAN);
     tmpBuffer.clear();

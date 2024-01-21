@@ -18,8 +18,8 @@ public class ControlPacket {
     this.write = write;
   }
 
-  public byte[] readFrame(BufferStream bufferStream) throws IOException, InterruptedException {
-    return bufferStream.readByteArray(bufferStream.readInt()).array();
+  public ByteBuffer readFrame(BufferStream bufferStream) throws IOException, InterruptedException {
+    return bufferStream.readByteArray(bufferStream.readInt());
   }
 
   // 剪切板

@@ -6,6 +6,7 @@ package top.saymzx.easycontrol.server;
 import android.annotation.SuppressLint;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.system.ErrnoException;
@@ -32,9 +33,11 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static LocalSocket socket;
-  private static FileDescriptor fileDescriptor;
-  public static DataInputStream inputStream;
+  private static LocalSocket mainSocket;
+  private static LocalSocket videoSocket;
+  private static FileDescriptor mainFileDescriptor;
+  private static FileDescriptor videoFileDescriptor;
+  public static DataInputStream mainInputStream;
 
   private static final Object object = new Object();
 
@@ -120,9 +123,11 @@ public final class Server {
 
   private static void connectClient() throws IOException {
     try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
-      socket = serverSocket.accept();
-      fileDescriptor = socket.getFileDescriptor();
-      inputStream = new DataInputStream(socket.getInputStream());
+      mainSocket = serverSocket.accept();
+      videoSocket = serverSocket.accept();
+      mainFileDescriptor = mainSocket.getFileDescriptor();
+      videoFileDescriptor = videoSocket.getFileDescriptor();
+      mainInputStream = new DataInputStream(mainSocket.getInputStream());
     }
   }
 
@@ -164,7 +169,7 @@ public final class Server {
   private static void executeControlIn() {
     try {
       while (!Thread.interrupted()) {
-        switch (Server.inputStream.readByte()) {
+        switch (Server.mainInputStream.readByte()) {
           case 1:
             ControlPacket.handleTouchEvent();
             break;
@@ -178,13 +183,13 @@ public final class Server {
             lastKeepAliveTime = System.currentTimeMillis();
             break;
           case 5:
-            Device.changeDeviceSize(inputStream.readFloat());
+            Device.changeDeviceSize(mainInputStream.readFloat());
             break;
           case 6:
             Device.rotateDevice();
             break;
           case 7:
-            Device.changeScreenPowerMode(inputStream.readByte());
+            Device.changeScreenPowerMode(mainInputStream.readByte());
             break;
           case 8:
             Device.changePower();
@@ -196,8 +201,14 @@ public final class Server {
     }
   }
 
-  public synchronized static void write(ByteBuffer byteBuffer) throws IOException, ErrnoException {
-    while (byteBuffer.remaining() > 0) Os.write(fileDescriptor, byteBuffer);
+  public static void writeMain(ByteBuffer byteBuffer) throws IOException, ErrnoException {
+    synchronized (mainFileDescriptor) {
+      while (byteBuffer.remaining() > 0) Os.write(mainFileDescriptor, byteBuffer);
+    }
+  }
+
+  public static void writeVideo(ByteBuffer byteBuffer) throws IOException, ErrnoException {
+    while (byteBuffer.remaining() > 0) Os.write(videoFileDescriptor, byteBuffer);
   }
 
   public static void errorClose(Exception e) {
@@ -213,8 +224,9 @@ public final class Server {
       try {
         switch (i) {
           case 0:
-            inputStream.close();
-            socket.close();
+            mainInputStream.close();
+            mainSocket.close();
+            videoSocket.close();
             break;
           case 1:
             VideoEncode.release();

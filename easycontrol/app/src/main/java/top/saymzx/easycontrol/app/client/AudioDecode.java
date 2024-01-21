@@ -9,27 +9,32 @@ import android.media.MediaFormat;
 import android.media.audiofx.LoudnessEnhancer;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import top.saymzx.easycontrol.app.buffer.BufferNew;
+
 public class AudioDecode {
-  public MediaCodec decodec;
-  public AudioTrack audioTrack;
-  public LoudnessEnhancer loudnessEnhancer;
+  private MediaCodec decodec;
+  private AudioTrack audioTrack;
+  private LoudnessEnhancer loudnessEnhancer;
   private final MediaCodec.Callback callback = new MediaCodec.Callback() {
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int inIndex) {
-      intputBufferQueue.offer(inIndex);
-      checkDecode();
+      checkDecode(intputDataQueue.poll(), inIndex);
     }
 
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outIndex, @NonNull MediaCodec.BufferInfo bufferInfo) {
-      audioTrack.write(decodec.getOutputBuffer(outIndex), bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
+      ByteBuffer buffer = decodec.getOutputBuffer(outIndex);
+      if (buffer == null) return;
+      audioTrack.write(buffer, bufferInfo.size, AudioTrack.WRITE_NON_BLOCKING);
       decodec.releaseOutputBuffer(outIndex, false);
     }
 
@@ -42,9 +47,9 @@ public class AudioDecode {
     }
   };
 
-  public AudioDecode(boolean useOpus, byte[] csd0, Handler handler) throws IOException {
+  public AudioDecode(boolean useOpus, ByteBuffer csd0) throws IOException {
     // 创建Codec
-    setAudioDecodec(useOpus, csd0, handler);
+    setAudioDecodec(useOpus, csd0);
     // 创建AudioTrack
     setAudioTrack();
     // 创建音频放大器
@@ -62,45 +67,44 @@ public class AudioDecode {
     }
   }
 
-  private final LinkedBlockingQueue<byte[]> intputDataQueue = new LinkedBlockingQueue<>();
-  private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
-
-  public void decodeIn(byte[] data) {
-    intputDataQueue.offer(data);
-    checkDecode();
+  public void decodeIn(ByteBuffer data) {
+    checkDecode(data, intputBufferQueue.poll());
   }
 
-  private synchronized void checkDecode() {
-    if (intputDataQueue.isEmpty() || intputBufferQueue.isEmpty()) return;
-    Integer inIndex = intputBufferQueue.poll();
-    byte[] data = intputDataQueue.poll();
-    decodec.getInputBuffer(inIndex).put(data);
-    decodec.queueInputBuffer(inIndex, 0, data.length, 0, 0);
-    checkDecode();
+  private final ConcurrentLinkedQueue<ByteBuffer> intputDataQueue = new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<Integer> intputBufferQueue = new ConcurrentLinkedQueue<>();
+
+  private synchronized void checkDecode(ByteBuffer data, Integer inIndex) {
+    if (data == null) {
+      intputBufferQueue.offer(inIndex);
+    } else if (inIndex == null) {
+      intputDataQueue.offer(data);
+    } else {
+      decodec.getInputBuffer(inIndex).put(data);
+      decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
+    }
   }
 
   // 创建Codec
-  private void setAudioDecodec(boolean useOpus, byte[] csd0, Handler handler) throws IOException {
+  private void setAudioDecodec(boolean useOpus, ByteBuffer csd0) throws IOException {
     // 创建解码器
     String codecMime = useOpus ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     decodec = MediaCodec.createDecoderByType(codecMime);
     // 音频参数
     int sampleRate = 48000;
     int channelCount = 2;
-    int bitRate = 128000;
+    int bitRate = 96000;
     MediaFormat decodecFormat = MediaFormat.createAudioFormat(codecMime, sampleRate, channelCount);
     decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     // 获取音频标识头
-    decodecFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd0));
+    decodecFormat.setByteBuffer("csd-0", csd0);
     if (useOpus) {
       ByteBuffer csd12ByteBuffer = ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
       decodecFormat.setByteBuffer("csd-1", csd12ByteBuffer);
       decodecFormat.setByteBuffer("csd-2", csd12ByteBuffer);
     }
     // 异步解码
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      decodec.setCallback(callback, handler);
-    } else decodec.setCallback(callback);
+    decodec.setCallback(callback);
     // 配置解码器
     decodec.configure(decodecFormat, null, null, 0);
     // 启动解码器
@@ -110,12 +114,12 @@ public class AudioDecode {
   // 创建AudioTrack
   private void setAudioTrack() {
     int sampleRate = 48000;
-    int bufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT) * 4;
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+    int bufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       AudioTrack.Builder audioTrackBuild = new AudioTrack.Builder();
       // 1
       AudioAttributes.Builder audioAttributesBulider = new AudioAttributes.Builder();
-      audioAttributesBulider.setUsage(AudioAttributes.USAGE_MEDIA);
+      audioAttributesBulider.setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY);
       audioAttributesBulider.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
       // 2
       AudioFormat.Builder audioFormat = new AudioFormat.Builder();
@@ -123,9 +127,10 @@ public class AudioDecode {
       audioFormat.setSampleRate(sampleRate);
       audioFormat.setChannelMask(AudioFormat.CHANNEL_OUT_STEREO);
       // 3
-      audioTrackBuild.setBufferSizeInBytes(bufferSize);
-      audioTrackBuild.setAudioAttributes(audioAttributesBulider.build());
-      audioTrackBuild.setAudioFormat(audioFormat.build());
+      audioTrackBuild.setAudioAttributes(audioAttributesBulider.build())
+        .setAudioFormat(audioFormat.build())
+        .setTransferMode(AudioTrack.MODE_STREAM)
+        .setBufferSizeInBytes(bufferSize);
       // 4
       audioTrack = audioTrackBuild.build();
     } else audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);

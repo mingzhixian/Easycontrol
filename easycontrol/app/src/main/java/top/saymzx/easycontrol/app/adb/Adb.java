@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.adb;
 
 import android.hardware.usb.UsbDevice;
-import android.util.Base64;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,9 +11,11 @@ import top.saymzx.easycontrol.app.buffer.BufferNew;
 import top.saymzx.easycontrol.app.buffer.BufferStream;
 
 // 此部分代码摘抄借鉴了tananaev大佬的开源代码(https://github.com/tananaev/adblib)以及开源库dadb(https://github.com/mobile-dev-inc/dadb)
+// 因为官方adb协议文档写的十分糟糕，因此此部分代码的实现参考了cstyan大佬所整理的文档，再次进行感谢：https://github.com/cstyan/adbDocumentation
 public class Adb {
   private final AdbChannel channel;
   private int localIdPool = 1;
+  private int MAX_DATA = AdbProtocol.CONNECT_MAXDATA;
   private final ConcurrentHashMap<Integer, BufferStream> connectionStreams = new ConcurrentHashMap<>();
   private final BufferNew sendBuffer = new BufferNew();
 
@@ -43,8 +44,13 @@ public class Adb {
         message = AdbProtocol.AdbMessage.parseAdbMessage(channel);
       }
     }
-    if (message.command != AdbProtocol.CMD_CNXN) throw new Exception("ADB连接失败");
+    if (message.command != AdbProtocol.CMD_CNXN) {
+      channel.close();
+      throw new Exception("ADB连接失败");
+    }
+    MAX_DATA = message.arg1;
     // 启动后台进程
+    handleInThread.setPriority(Thread.MAX_PRIORITY);
     handleInThread.start();
     handleOutThread.start();
   }
@@ -72,51 +78,26 @@ public class Adb {
     return new String(bufferStream.readAllBytes().array());
   }
 
-  public void pushFileByShell(InputStream file, String remotePath) throws Exception {
-    BufferStream bufferStream = open("shell:", false);
-    bufferStream.write(ByteBuffer.wrap(("rm " + remotePath + ".tmp \n").getBytes()));
-    // 读取数据并转码
-    byte[] fileBytes = new byte[file.available()];
-    file.read(fileBytes);
-    file.close();
-    String fileBase64 = Base64.encodeToString(fileBytes, Base64.NO_WRAP);
-    // 分段传输
-    for (int start = 0; start < fileBase64.length(); start += 2048) {
-      String fileBase64Part = fileBase64.substring(start, Math.min(fileBase64.length(), start + 2048));
-      bufferStream.write(ByteBuffer.wrap(("echo -n \"" + fileBase64Part + "\" >> " + remotePath + ".tmp \n").getBytes()));
-    }
-    // 关闭传输
-    bufferStream.write(ByteBuffer.wrap((" base64 -d < " + remotePath + ".tmp > " + remotePath + " \n ").getBytes()));
-    Thread.sleep(500);
-    bufferStream.close();
-  }
-
   public void pushFile(InputStream file, String remotePath) throws Exception {
     // 打开链接
     BufferStream bufferStream = open("sync:", false);
     // 发送信令，建立push通道
     String sendString = remotePath + ",33206";
     byte[] bytes = sendString.getBytes();
-    ByteBuffer send = ByteBuffer.allocate(bytes.length + 8);
-    send.put(AdbProtocol.generatePushPacket("SEND", sendString.length()));
-    send.put(bytes);
-    send.flip();
-    bufferStream.write(send);
+    bufferStream.write(AdbProtocol.generateSyncHeader("SEND", sendString.length()));
+    bufferStream.write(ByteBuffer.wrap(bytes));
     // 发送文件
-    byte[] byteArray = new byte[4096 - 8];
+    byte[] byteArray = new byte[10240 - 8];
     int len = file.read(byteArray, 0, byteArray.length);
     do {
-      ByteBuffer data = ByteBuffer.allocate(len + 8);
-      data.put(AdbProtocol.generatePushPacket("DATA", len));
-      data.put(byteArray, 0, len);
-      data.flip();
-      bufferStream.write(data);
+      bufferStream.write(AdbProtocol.generateSyncHeader("DATA", len));
+      bufferStream.write(ByteBuffer.wrap(byteArray, 0, len));
       len = file.read(byteArray, 0, byteArray.length);
     } while (len > 0);
     file.close();
-    // 传输完成
-    bufferStream.write(AdbProtocol.generatePushPacket("DONE", (int) System.currentTimeMillis()));
-    bufferStream.write(AdbProtocol.generatePushPacket("QUIT", 0));
+    // 传输完成，为了方便，文件日期定为2024.1.1 0:0
+    bufferStream.write(AdbProtocol.generateSyncHeader("DONE", 1704038400));
+    bufferStream.write(AdbProtocol.generateSyncHeader("QUIT", 0));
     do {
       synchronized (this) {
         wait();
@@ -135,7 +116,7 @@ public class Adb {
   }
 
   public BufferStream getShell() throws InterruptedException {
-    return open("shell:", false);
+    return open("shell:", true);
   }
 
   public BufferStream tcpForward(int port) throws IOException, InterruptedException {
@@ -168,8 +149,6 @@ public class Adb {
           case AdbProtocol.CMD_WRTE:
             sendBuffer.write(AdbProtocol.generateOkay(message.arg1, message.arg0));
             bufferStream.pushSource(message.payload);
-            // sendMoreOk
-            sendBuffer.write(AdbProtocol.generateOkay(message.arg1, message.arg0));
             break;
           case AdbProtocol.CMD_CLSE:
             bufferStream.close();
@@ -203,7 +182,13 @@ public class Adb {
     return new BufferStream(false, canMultipleSend, new BufferStream.UnderlySocketFunction() {
       @Override
       public void write(ByteBuffer buffer) {
-        sendBuffer.write(AdbProtocol.generateWrite(localId, remoteId, buffer.array()));
+        while (buffer.hasRemaining()) {
+          byte[] byteArray = new byte[Math.min(MAX_DATA - 128, buffer.remaining())];
+          buffer.get(byteArray);
+          sendBuffer.write(AdbProtocol.generateWrite(localId, remoteId, byteArray));
+        }
+        // sendMoreOk
+        sendBuffer.write(AdbProtocol.generateOkay(localId, remoteId));
       }
 
       @Override

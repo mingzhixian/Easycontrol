@@ -7,6 +7,15 @@ public final class Setting {
 
   private final SharedPreferences.Editor editor;
 
+  public String getActiveKey() {
+    return sharedPreferences.getString("activeKey", "");
+  }
+
+  public void setActiveKey(String value) {
+    editor.putString("activeKey", value);
+    editor.apply();
+  }
+
   public String getDefaultLocale() {
     return sharedPreferences.getString("defaultLocale", "");
   }

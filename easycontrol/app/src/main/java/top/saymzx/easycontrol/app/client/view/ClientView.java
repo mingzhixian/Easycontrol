@@ -49,13 +49,13 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   public synchronized void changeToFull() {
     hide(false);
     if (device.setResolution) controlPacket.sendChangeSizeEvent(FullActivity.getResolution());
-    Intent intent=new Intent(AppData.main, FullActivity.class);
-    int i=0;
-    for (Client client:Client.allClient){
-      if (client.clientView==this)break;
+    Intent intent = new Intent(AppData.main, FullActivity.class);
+    int i = 0;
+    for (Client client : Client.allClient) {
+      if (client.clientView == this) break;
       i++;
     }
-    intent.putExtra("index",i);
+    intent.putExtra("index", i);
     AppData.main.startActivity(intent);
   }
 
@@ -119,6 +119,7 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   @SuppressLint("ClickableViewAccessibility")
   private void setTouchListener() {
     textureView.setOnTouchListener((view, event) -> {
+      if (surfaceSize == null) return true;
       int action = event.getActionMasked();
       if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
         int i = event.getActionIndex();

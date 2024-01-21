@@ -1,3 +1,6 @@
+/*
+ * 本页大量借鉴学习了开源ADB库：https://github.com/wuxudong/flashbot/blob/master/adblib/src/main/java/com/cgutman/adblib/UsbChannel.java，在此对该项目表示感谢
+ */
 package top.saymzx.easycontrol.app.adb;
 
 import android.hardware.usb.UsbConstants;
@@ -5,12 +8,15 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbRequest;
 import android.util.Log;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.LinkedList;
 
+import top.saymzx.easycontrol.app.buffer.BufferNew;
 import top.saymzx.easycontrol.app.entity.AppData;
 
 public class UsbChannel implements AdbChannel {
@@ -19,10 +25,14 @@ public class UsbChannel implements AdbChannel {
   private UsbInterface usbInterface = null;
   private UsbEndpoint endpointIn = null;
   private UsbEndpoint endpointOut = null;
+  private final BufferNew sourceBuffer = new BufferNew();
+  private final Thread readBackgroundThread = new Thread(this::readBackground);
+  private final LinkedList<UsbRequest> mInRequestPool = new LinkedList<>();
 
   public UsbChannel(UsbDevice usbDevice) throws IOException {
     // 连接USB设备
     usbConnection = AppData.usbManager.openDevice(usbDevice);
+    if (usbConnection == null) return;
     // 查找ADB的接口
     for (int i = 0; i < usbDevice.getInterfaceCount(); i++) {
       UsbInterface tmpUsbInterface = usbDevice.getInterface(i);
@@ -31,8 +41,9 @@ public class UsbChannel implements AdbChannel {
         break;
       }
     }
+    if (usbInterface == null) return;
     // 宣告独占接口
-    if (usbInterface != null && usbConnection.claimInterface(usbInterface, true)) {
+    if (usbConnection.claimInterface(usbInterface, true)) {
       // 查找输入输出端点
       for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
         UsbEndpoint endpoint = usbInterface.getEndpoint(i);
@@ -40,6 +51,7 @@ public class UsbChannel implements AdbChannel {
           if (endpoint.getDirection() == UsbConstants.USB_DIR_OUT) endpointOut = endpoint;
           else if (endpoint.getDirection() == UsbConstants.USB_DIR_IN) endpointIn = endpoint;
           if (endpointIn != null && endpointOut != null) {
+            readBackgroundThread.start();
             return;
           }
         }
@@ -55,22 +67,64 @@ public class UsbChannel implements AdbChannel {
       // 读取头部
       byte[] header = new byte[AdbProtocol.ADB_HEADER_LENGTH];
       data.get(header);
-      usbConnection.bulkTransfer(endpointOut, header, header.length, 5000);
+      usbConnection.bulkTransfer(endpointOut, header, header.length, 1000);
       // 读取载荷
       int payloadLength = ByteBuffer.wrap(header).order(ByteOrder.LITTLE_ENDIAN).getInt(12);
       if (payloadLength > 0) {
         byte[] payload = new byte[payloadLength];
         data.get(payload);
-        usbConnection.bulkTransfer(endpointOut, payload, payload.length, 5000);
+        usbConnection.bulkTransfer(endpointOut, payload, payload.length, 1000);
       }
     }
   }
 
   @Override
-  public ByteBuffer read(int size) {
-    byte[] buffer = new byte[size];
-    usbConnection.bulkTransfer(endpointIn, buffer, size, 5000);
-    return ByteBuffer.wrap(buffer);
+  public ByteBuffer read(int size) throws InterruptedException {
+    return sourceBuffer.read(size);
+  }
+
+  private void readBackground() {
+    try {
+      while (!Thread.interrupted()) {
+        // 读取头部
+        ByteBuffer header = readRequest(AdbProtocol.ADB_HEADER_LENGTH).order(ByteOrder.LITTLE_ENDIAN);
+        if (header.remaining() < AdbProtocol.ADB_HEADER_LENGTH) throw new IOException("read error");
+        sourceBuffer.write(header);
+        // 读取载荷
+        int payloadLength = header.getInt(12);
+        if (payloadLength > 0) {
+          ByteBuffer payload = readRequest(payloadLength);
+          sourceBuffer.write(payload);
+        }
+      }
+    } catch (IOException ignored) {
+    }
+  }
+
+  private ByteBuffer readRequest(int len) throws IOException {
+    // 获取Request
+    UsbRequest request;
+    if (mInRequestPool.isEmpty()) {
+      request = new UsbRequest();
+      request.initialize(usbConnection, endpointIn);
+    } else request = mInRequestPool.removeFirst();
+    ByteBuffer data = ByteBuffer.allocate(len);
+    request.setClientData(data);
+    // 加入异步请求
+    if (!request.queue(data, len)) throw new IOException("fail to queue read UsbRequest");
+    // 等待请求回应
+    while (true) {
+      UsbRequest wait = usbConnection.requestWait();
+      if (wait == null) throw new IOException("Connection.requestWait return null");
+      if (wait.getEndpoint() == endpointIn) {
+        ByteBuffer clientData = (ByteBuffer) wait.getClientData();
+        mInRequestPool.add(request);
+        if (clientData == data) {
+          data.flip();
+          return data;
+        }
+      }
+    }
   }
 
   @Override
@@ -80,6 +134,7 @@ public class UsbChannel implements AdbChannel {
   @Override
   public void close() {
     try {
+      readBackgroundThread.interrupt();
       // 强制让adb执行错误，从而断开重连USB
       usbConnection.bulkTransfer(endpointOut, new byte[40], 40, 2000);
       usbConnection.claimInterface(usbInterface, false);

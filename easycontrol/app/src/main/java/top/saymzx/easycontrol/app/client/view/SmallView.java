@@ -39,8 +39,8 @@ public class SmallView extends ViewOutlineProvider {
       PixelFormat.TRANSLUCENT
     );
 
-  private static final int LayoutParamsFlagFocus = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-  private static final int LayoutParamsFlagNoFocus = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+  private static final int LayoutParamsFlagFocus = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+  private static final int LayoutParamsFlagNoFocus = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
   public SmallView(ClientView clientView) {
     this.clientView = clientView;
@@ -213,8 +213,11 @@ public class SmallView extends ViewOutlineProvider {
   private void setKeyEvent(ControlPacket controlPacket) {
     smallView.editText.setInputType(InputType.TYPE_NULL);
     smallView.editText.setOnKeyListener((v, keyCode, event) -> {
-      if (event.getAction() == KeyEvent.ACTION_DOWN) controlPacket.sendKeyEvent(event.getKeyCode(), event.getMetaState());
-      return true;
+      if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
+        controlPacket.sendKeyEvent(event.getKeyCode(), event.getMetaState());
+        return true;
+      }
+      return false;
     });
   }
 

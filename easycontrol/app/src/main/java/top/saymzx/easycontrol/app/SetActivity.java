@@ -50,23 +50,11 @@ public class SetActivity extends Activity {
       Toast.makeText(this, getString(R.string.set_other_locale_code), Toast.LENGTH_SHORT).show();
     }).getRoot());
     // 关于
-    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_website), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol")).getRoot());
-    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_how_to_use), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
-    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_privacy), () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
-    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_version) + BuildConfig.VERSION_NAME, () -> startUrl("https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
-  }
-
-  // 浏览器打开
-  private void startUrl(String url) {
-    try {
-      Intent intent = new Intent(Intent.ACTION_VIEW);
-      intent.addCategory(Intent.CATEGORY_BROWSABLE);
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      intent.setData(Uri.parse(url));
-      startActivity(intent);
-    } catch (Exception ignored) {
-      Toast.makeText(this, getString(R.string.error_no_browser), Toast.LENGTH_SHORT).show();
-    }
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_active), () -> startActivity(new Intent(this, ActiveActivity.class))).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_website), () -> PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_how_to_use), () -> PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_privacy), () -> PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/PRIVACY.md")).getRoot());
+    setActivity.setAbout.addView(PublicTools.createTextCard(this, getString(R.string.set_about_version) + BuildConfig.VERSION_NAME, () -> PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/releases")).getRoot());
   }
 
   // 设置按钮监听

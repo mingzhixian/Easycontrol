@@ -32,13 +32,13 @@ public final class AudioEncode {
       encedec.start();
       audioCapture = AudioCapture.init();
     } catch (Exception ignored) {
-      Server.write(ByteBuffer.wrap(bytes));
+      Server.writeMain(ByteBuffer.wrap(bytes));
       return false;
     }
     bytes[0] = 1;
-    Server.write(ByteBuffer.wrap(bytes));
+    Server.writeMain(ByteBuffer.wrap(bytes));
     bytes[0] = (byte) (useOpus ? 1 : 0);
-    Server.write(ByteBuffer.wrap(bytes));
+    Server.writeMain(ByteBuffer.wrap(bytes));
     return true;
   }
 
@@ -46,20 +46,20 @@ public final class AudioEncode {
     String codecMime = useOpus ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     encedec = MediaCodec.createEncoderByType(codecMime);
     MediaFormat encodecFormat = MediaFormat.createAudioFormat(codecMime, AudioCapture.SAMPLE_RATE, AudioCapture.CHANNELS);
-    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 128000);
+    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
     encodecFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, frameSize);
     if (!useOpus) encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
   }
 
-  private static final int frameSize = AudioCapture.millisToBytes(50);
+  private static final int frameSize = AudioCapture.millisToBytes(20);
 
   public static void encodeIn() {
-    System.out.println(frameSize);
     try {
       int inIndex;
       do inIndex = encedec.dequeueInputBuffer(-1); while (inIndex < 0);
       ByteBuffer buffer = encedec.getInputBuffer(inIndex);
+      if (buffer == null) return;
       int size = Math.min(buffer.remaining(), frameSize);
       audioCapture.read(buffer, size);
       encedec.queueInputBuffer(inIndex, 0, size, 0, 0);
@@ -75,6 +75,7 @@ public final class AudioEncode {
       int outIndex;
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
+      if (buffer == null) return;
       if (useOpus) {
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
           buffer.getLong();
@@ -87,8 +88,7 @@ public final class AudioEncode {
           return;
         }
       }
-      int frameSize = buffer.remaining();
-      ControlPacket.sendAudioEvent(frameSize, buffer);
+      ControlPacket.sendAudioEvent(buffer.remaining() , buffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

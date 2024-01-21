@@ -164,6 +164,14 @@
       android:src="@drawable/power_off"
       android:tint="@color/onCardBackground" />
 
+    <ImageView
+      android:id="@+id/button_lock"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="4dp"
+      android:focusable="false"
+      android:src="@drawable/lock"
+      android:tint="@color/onCardBackground" />
   </GridLayout>
 
 </FrameLayout>

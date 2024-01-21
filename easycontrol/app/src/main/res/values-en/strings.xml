@@ -4,9 +4,8 @@
   <string name="app_name_dev">EasyControlDev</string>
 
   <!-- 主页 -->
-  <string name="main_poem">No one but ourselves can degrade us</string>
+  <string name="main_poem">One Day I\'ll Fly Away,leave all this to yesterday</string>
   <string name="main_float_permission">Please grant hover window privileges</string>
-  <string name="main_battery_permission">Please grant unlimited rights to the battery</string>
 
   <!-- 设置页面 -->
   <string name="set_center">Login</string>
@@ -30,6 +29,7 @@
   <string name="set_other_locale_code">已切换，可能需要重启APP</string>
   <string name="set_about">About</string>
   <string name="set_about_ip">View local address</string>
+  <string name="set_about_active">Reactivate</string>
   <string name="set_about_website">Website</string>
   <string name="set_about_how_to_use">Instructions for use</string>
   <string name="set_about_privacy">Privacy Policy</string>
@@ -46,6 +46,14 @@
   <string name="adb_key_pri">Private key (Base64 encoded)</string>
   <string name="adb_key_button">Save</string>
   <string name="adb_key_button_code">Saved</string>
+
+  <!-- 激活页面 -->
+  <string name="active_url">Go to donation address</string>
+  <string name="active_key">Donation Order number: $5 and up</string>
+  <string name="active_button">Active</string>
+  <string name="active_key_hint">* The donation will be logged into the system within 24 hours. If the donation still cannot be activated after timeout, please contact mingzhixian@outlook.com</string>
+  <string name="active_button_error">Input error or system still not entered</string>
+  <string name="active_button_success">Activate successfully, please check the instructions before use</string>
 
   <!-- 设备添加模块 -->
   <string name="add_device_name">Name</string>

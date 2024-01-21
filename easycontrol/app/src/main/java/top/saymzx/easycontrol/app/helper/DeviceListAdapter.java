@@ -6,6 +6,8 @@ import android.app.Dialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbInterface;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 import top.saymzx.easycontrol.app.R;
@@ -25,8 +28,8 @@ import top.saymzx.easycontrol.app.entity.Device;
 
 public class DeviceListAdapter extends BaseAdapter {
 
-  private final ArrayList<Device> devices = new ArrayList<>();
-  public Pair<String, UsbDevice> linkDevice = null;
+  private final ArrayList<Device> devicesList = new ArrayList<>();
+  public final HashMap<String, UsbDevice> linkDevices = new HashMap<>();
   private final Context context;
 
   public DeviceListAdapter(Context c) {
@@ -36,7 +39,7 @@ public class DeviceListAdapter extends BaseAdapter {
 
   @Override
   public int getCount() {
-    return devices.size();
+    return devicesList.size();
   }
 
   @Override
@@ -57,20 +60,19 @@ public class DeviceListAdapter extends BaseAdapter {
       view.setTag(devicesItemBinding);
     }
     // 获取设备
-    Device device = devices.get(i);
-    if (device.isLinkDevice()) setView(view, device, linkDevice.second, R.drawable.link);
-    else setView(view, device, null, R.drawable.phone);
+    Device device = devicesList.get(i);
+    setView(view, device);
     return view;
   }
 
   // 创建View
-  private void setView(View view, Device device, UsbDevice usbDevice, int deviceIcon) {
+  private void setView(View view, Device device) {
     ItemDevicesItemBinding devicesItemBinding = (ItemDevicesItemBinding) view.getTag();
     // 设置卡片值
-    devicesItemBinding.deviceIcon.setImageResource(deviceIcon);
+    devicesItemBinding.deviceIcon.setImageResource(device.isLinkDevice() ? R.drawable.link : R.drawable.wifi);
     devicesItemBinding.deviceName.setText(device.name);
     // 单击事件
-    devicesItemBinding.getRoot().setOnClickListener(v -> new Client(device, usbDevice));
+    devicesItemBinding.getRoot().setOnClickListener(v -> startDevice(device));
     // 长按事件
     devicesItemBinding.getRoot().setOnLongClickListener(v -> {
       onLongClickCard(device);
@@ -85,18 +87,20 @@ public class DeviceListAdapter extends BaseAdapter {
     // 有线设备
     if (device.isLinkDevice()) {
       itemSetDeviceBinding.buttonStartWireless.setVisibility(View.VISIBLE);
-      itemSetDeviceBinding.buttonSetDefault.setVisibility(View.GONE);
       itemSetDeviceBinding.buttonStartWireless.setOnClickListener(v -> {
         dialog.cancel();
-        Client.restartOnTcpip(device, linkDevice.second, result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_start_wireless_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+        UsbDevice usbDevice = linkDevices.get(device.uuid);
+        if (usbDevice == null) return;
+        Client.restartOnTcpip(device, usbDevice, result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_start_wireless_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
       });
-    } else {
-      itemSetDeviceBinding.buttonStartWireless.setVisibility(View.GONE);
-      itemSetDeviceBinding.buttonSetDefault.setVisibility(View.VISIBLE);
-    }
+    } else itemSetDeviceBinding.buttonStartWireless.setVisibility(View.GONE);
     itemSetDeviceBinding.buttonRecover.setOnClickListener(v -> {
       dialog.cancel();
-      Client.runOnceCmd(device, device.isLinkDevice() ? linkDevice.second : null, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+      if (device.isLinkDevice()) {
+        UsbDevice usbDevice = linkDevices.get(device.uuid);
+        if (usbDevice == null) return;
+        Client.runOnceCmd(device, usbDevice, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+      } else Client.runOnceCmd(device, null, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
     });
     itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
       dialog.cancel();
@@ -125,21 +129,26 @@ public class DeviceListAdapter extends BaseAdapter {
     ArrayList<Device> tmp1 = new ArrayList<>();
     ArrayList<Device> tmp2 = new ArrayList<>();
     for (Device device : rawDevices) {
-      if (device.isLinkDevice() && linkDevice != null && Objects.equals(device.uuid, linkDevice.first)) tmp1.add(device);
+      if (device.isLinkDevice() && linkDevices.containsKey(device.uuid)) tmp1.add(device);
       else if (device.isNormalDevice()) tmp2.add(device);
     }
-    devices.clear();
-    devices.addAll(tmp1);
-    devices.addAll(tmp2);
+    devicesList.clear();
+    devicesList.addAll(tmp1);
+    devicesList.addAll(tmp2);
   }
 
   public void startByUUID(String uuid) {
-    for (Device device : devices) {
-      if (Objects.equals(device.uuid, uuid)) {
-        if (device.isLinkDevice()) new Client(device, linkDevice.second);
-        else new Client(device, null);
-      }
+    for (Device device : devicesList) {
+      if (Objects.equals(device.uuid, uuid)) startDevice(device);
     }
+  }
+
+  private void startDevice(Device device) {
+    if (device.isLinkDevice()) {
+      UsbDevice usbDevice = linkDevices.get(device.uuid);
+      if (usbDevice == null) return;
+      new Client(device, usbDevice);
+    } else new Client(device);
   }
 
   public void update() {
