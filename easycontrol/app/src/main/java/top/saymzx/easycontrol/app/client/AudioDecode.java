@@ -115,8 +115,8 @@ public class AudioDecode {
       AudioTrack.Builder audioTrackBuild = new AudioTrack.Builder();
       // 1
       AudioAttributes.Builder audioAttributesBulider = new AudioAttributes.Builder();
-      audioAttributesBulider.setUsage(AudioAttributes.USAGE_MEDIA);
-      audioAttributesBulider.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC);
+      audioAttributesBulider.setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE);
+      audioAttributesBulider.setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN);
       // 2
       AudioFormat.Builder audioFormat = new AudioFormat.Builder();
       audioFormat.setEncoding(AudioFormat.ENCODING_PCM_16BIT);
