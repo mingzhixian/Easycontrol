@@ -26,7 +26,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DeviceListAdapter extends BaseAdapter {
 
   private final ArrayList<Device> devices = new ArrayList<>();
-  public Pair<String, UsbDevice> linkDevice = null;
+  public ArrayList<Pair<String, UsbDevice>> linkDevices = new ArrayList<>();
   private final Context context;
 
   public DeviceListAdapter(Context c) {
@@ -58,7 +58,14 @@ public class DeviceListAdapter extends BaseAdapter {
     }
     // 获取设备
     Device device = devices.get(i);
-    if (device.isLinkDevice()) setView(view, device, linkDevice.second, R.drawable.link);
+    if (device.isLinkDevice()) {
+      for (Pair<String, UsbDevice> pair : linkDevices) {
+        if (Objects.equals(pair.first, device.uuid)) {
+          setView(view, device, pair.second, R.drawable.link);
+          return view;
+        }
+      }
+    }
     else setView(view, device, null, R.drawable.phone);
     return view;
   }
@@ -80,28 +87,46 @@ public class DeviceListAdapter extends BaseAdapter {
 
   // 卡片长按事件
   private void onLongClickCard(Device device) {
+    Pair<String, UsbDevice> linkDevice = null;
+    Pair<String, UsbDevice> linkDevice_final;
     ItemSetDeviceBinding itemSetDeviceBinding = ItemSetDeviceBinding.inflate(LayoutInflater.from(context));
     Dialog dialog = PublicTools.createDialog(context, true, itemSetDeviceBinding.getRoot());
+
+    for (Pair<String, UsbDevice> pair : linkDevices) {
+      if (Objects.equals(pair.first, device.uuid)) {
+        linkDevice = pair;
+        break;
+      }
+    }
+    linkDevice_final = linkDevice;
+
     // 有线设备
     if (device.isLinkDevice()) {
       itemSetDeviceBinding.buttonStartWireless.setVisibility(View.VISIBLE);
-      itemSetDeviceBinding.buttonSetDefault.setVisibility(View.GONE);
+      itemSetDeviceBinding.buttonSetDefault.setText(R.string.set_device_button_set_default_link);
       itemSetDeviceBinding.buttonStartWireless.setOnClickListener(v -> {
         dialog.cancel();
-        Client.restartOnTcpip(device, linkDevice.second, result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_start_wireless_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+        Client.restartOnTcpip(device, linkDevice_final.second, result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_start_wireless_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+      });
+
+      itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
+        dialog.cancel();
+        if (!device.isLinkDevice()) return;
+        AppData.setting.setDefaultUsbDevice(device.uuid);
       });
     } else {
       itemSetDeviceBinding.buttonStartWireless.setVisibility(View.GONE);
-      itemSetDeviceBinding.buttonSetDefault.setVisibility(View.VISIBLE);
+      itemSetDeviceBinding.buttonSetDefault.setText(R.string.set_device_button_set_default);
+
+      itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
+        dialog.cancel();
+        if (!device.isNormalDevice()) return;
+        AppData.setting.setDefaultDevice(device.uuid);
+      });
     }
     itemSetDeviceBinding.buttonRecover.setOnClickListener(v -> {
       dialog.cancel();
-      Client.runOnceCmd(device, device.isLinkDevice() ? linkDevice.second : null, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
-    });
-    itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
-      dialog.cancel();
-      if (!device.isNormalDevice()) return;
-      AppData.setting.setDefaultDevice(device.uuid);
+      Client.runOnceCmd(device, device.isLinkDevice() ? linkDevice_final.second : null, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
     });
     itemSetDeviceBinding.buttonGetUuid.setOnClickListener(v -> {
       dialog.cancel();
@@ -125,7 +150,14 @@ public class DeviceListAdapter extends BaseAdapter {
     ArrayList<Device> tmp1 = new ArrayList<>();
     ArrayList<Device> tmp2 = new ArrayList<>();
     for (Device device : rawDevices) {
-      if (device.isLinkDevice() && linkDevice != null && Objects.equals(device.uuid, linkDevice.first)) tmp1.add(device);
+      if (device.isLinkDevice() && linkDevices != null) {
+        for (Pair<String, UsbDevice> pair : linkDevices) {
+          if (Objects.equals(pair.first, device.uuid)) {
+            tmp1.add(device);
+            break;
+          }
+        }
+      }
       else if (device.isNormalDevice()) tmp2.add(device);
     }
     devices.clear();
@@ -136,7 +168,14 @@ public class DeviceListAdapter extends BaseAdapter {
   public void startByUUID(String uuid) {
     for (Device device : devices) {
       if (Objects.equals(device.uuid, uuid)) {
-        if (device.isLinkDevice()) new Client(device, linkDevice.second);
+        if (device.isLinkDevice()) {
+          for (Pair<String, UsbDevice> pair : linkDevices) {
+            if (Objects.equals(pair.first, device.uuid)) {
+              new Client(device, pair.second);
+              return;
+            }
+          }
+        }
         else new Client(device, null);
       }
     }

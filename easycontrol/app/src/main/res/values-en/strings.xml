@@ -21,8 +21,13 @@
   <string name="set_display_default_mini_on_outside">Minimize when touching the outside world</string>
   <string name="set_display_default_mini_on_outside_detail">(Small window mode) Minimized when touching a location other than a small window</string>
   <string name="set_other">Other</string>
-  <string name="set_other_clear_default">Clear default open devices</string>
-  <string name="set_other_clear_default_code">Cleared</string>
+  <string name="set_if_start_default_usb">Open default USB at startup</string>
+  <string name="set_if_start_default_usb_detail">If the USB device is connected and authorized when starting the app, it will automatically open</string>
+  <string name="set_other_clear_default">Clear default open device</string>
+  <string name="set_other_clear_default_usb">Clear default USB device</string>
+  <string name="set_other_clear_default_code">Cleared default wireless device</string>
+  <string name="set_other_clear_default_usb_code">Cleared default USB device</string>
+  <string name="set_other_no_default">Default device not found</string>
   <string name="set_other_custom_key">Custom key (reauthorization required)</string>
   <string name="set_other_clear_key">Regenerate the key (reauthorization required)</string>
   <string name="set_other_clear_key_code">Already refreshed</string>
@@ -61,6 +66,7 @@
   <string name="set_device_button_recover_success">Recovery success</string>
   <string name="set_device_button_recover_error">Connection failed, please check ADB and network</string>
   <string name="set_device_button_set_default">Open on startup</string>
+  <string name="set_device_button_set_default_link">Set as default USB device</string>
   <string name="set_device_button_get_uuid">Get ID</string>
   <string name="set_device_button_get_uuid_success">Copied</string>
   <string name="set_device_button_start_wireless">Enable wireless</string>

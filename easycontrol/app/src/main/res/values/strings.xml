@@ -21,8 +21,13 @@
   <string name="set_display_default_mini_on_outside">触摸外界时最小化</string>
   <string name="set_display_default_mini_on_outside_detail">(小窗模式)触摸小窗以外位置时最小化</string>
   <string name="set_other">其他</string>
-  <string name="set_other_clear_default">清除默认打开设备</string>
-  <string name="set_other_clear_default_code">已清除</string>
+  <string name="set_if_start_default_usb">启动时打开默认USB设备</string>
+  <string name="set_if_start_default_usb_detail">启动APP时若USB设备已连接并已授权则自动打开</string>
+  <string name="set_other_clear_default">清除默认无线设备</string>
+  <string name="set_other_clear_default_usb">清除默认USB设备</string>
+  <string name="set_other_clear_default_code">已清除默认无线设备</string>
+  <string name="set_other_clear_default_usb_code">已清除默认USB设备</string>
+  <string name="set_other_no_default">没有找到默认设备哦oVo</string>
   <string name="set_other_custom_key">自定义密钥(需重新授权)</string>
   <string name="set_other_clear_key">重新生成密钥(需重新授权)</string>
   <string name="set_other_clear_key_code">已刷新</string>
@@ -61,6 +66,7 @@
   <string name="set_device_button_recover_success">恢复成功</string>
   <string name="set_device_button_recover_error">连接失败，请检查ADB和网络</string>
   <string name="set_device_button_set_default">启动时打开</string>
+  <string name="set_device_button_set_default_link">设为默认USB设备</string>
   <string name="set_device_button_get_uuid">获取ID</string>
   <string name="set_device_button_get_uuid_success">已复制</string>
   <string name="set_device_button_start_wireless">打开无线</string>

@@ -38,6 +38,7 @@ import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
+import top.saymzx.easycontrol.app.databinding.ItemTextDetailBinding;
 import top.saymzx.easycontrol.app.databinding.ModuleDialogBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -91,6 +92,7 @@ public class PublicTools {
     builder.setCancelable(true);
     ScrollView dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).getRoot();
     dialogView.addView(view);
+    dialogView.setPadding(0, 0, 0, 0); // 设置内边距为0
     builder.setView(dialogView);
     Dialog dialog = builder.create();
     dialog.setCanceledOnTouchOutside(canCancel);
@@ -193,6 +195,20 @@ public class PublicTools {
     textView.getRoot().setText(text);
     if (function != null) textView.getRoot().setOnClickListener(v -> function.run());
     return textView;
+  }
+
+  // 创建纯文本带说明卡片
+  public static ItemTextDetailBinding createTextCardDetail(
+          Context context,
+          String text,
+          String textDetail,
+          MyFunction function
+  ) {
+    ItemTextDetailBinding textDetailView = ItemTextDetailBinding.inflate(LayoutInflater.from(context));
+    textDetailView.itemText.setText(text);
+    textDetailView.itemDetail.setText(textDetail);
+    if (function != null) textDetailView.getRoot().setOnClickListener(v -> function.run());
+    return textDetailView;
   }
 
   // 创建开关卡片

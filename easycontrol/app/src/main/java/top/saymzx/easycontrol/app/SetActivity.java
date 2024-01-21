@@ -35,11 +35,45 @@ public class SetActivity extends Activity {
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_default_mini_on_outside), getString(R.string.set_display_default_mini_on_outside_detail), AppData.setting.getDefaultMiniOnOutside(), isChecked -> AppData.setting.setDefaultMiniOnOutside(isChecked)).getRoot());
     setActivity.setDisplay.addView(PublicTools.createSwitchCard(this, getString(R.string.set_display_default_show_nav_bar), getString(R.string.set_display_default_show_nav_bar_detail), AppData.setting.getDefaultShowNavBar(), isChecked -> AppData.setting.setDefaultShowNavBar(isChecked)).getRoot());
     // 其他
+    setActivity.setOther.addView(PublicTools.createSwitchCard(this, getString(R.string.set_if_start_default_usb), getString(R.string.set_if_start_default_usb_detail), AppData.setting.getNeedStartDefaultUsbDevice(), isChecked -> AppData.setting.setNeedStartDefaultUsbDevice(isChecked)).getRoot());
+
+    String defaultDevice = AppData.setting.getDefaultDevice();
+    if (!defaultDevice.isEmpty()) {
+      defaultDevice = AppData.dbHelper.getByUUID(defaultDevice).address;
+      setActivity.setOther.addView(PublicTools.createTextCardDetail(this, getString(R.string.set_other_clear_default), defaultDevice, () -> {
+        AppData.setting.setDefaultDevice("");
+        setActivity.setOther.removeViewAt(1);
+        setActivity.setOther.addView(PublicTools.createTextCardDetail(this, getString(R.string.set_other_clear_default), getString(R.string.set_other_no_default), () -> {
+          Toast.makeText(this, getString(R.string.set_other_no_default), Toast.LENGTH_SHORT).show();
+        }).getRoot(), 1);
+        Toast.makeText(this, getString(R.string.set_other_clear_default_code), Toast.LENGTH_SHORT).show();
+      }).getRoot());
+    }
+    else {
+      setActivity.setOther.addView(PublicTools.createTextCardDetail(this, getString(R.string.set_other_clear_default), getString(R.string.set_other_no_default), () -> {
+        Toast.makeText(this, getString(R.string.set_other_no_default), Toast.LENGTH_SHORT).show();
+      }).getRoot());
+    }
+
+    String defaultUsbDevice = AppData.setting.getDefaultUsbDevice();
+    if (!defaultUsbDevice.isEmpty()) {
+      defaultUsbDevice = AppData.dbHelper.getByUUID(defaultUsbDevice).uuid;
+      setActivity.setOther.addView(PublicTools.createTextCardDetail(this, getString(R.string.set_other_clear_default_usb), defaultUsbDevice, () -> {
+        AppData.setting.setDefaultUsbDevice("");
+        setActivity.setOther.removeViewAt(2);
+        setActivity.setOther.addView(PublicTools.createTextCardDetail(this, getString(R.string.set_other_clear_default_usb), getString(R.string.set_other_no_default), () -> {
+          Toast.makeText(this, getString(R.string.set_other_no_default), Toast.LENGTH_SHORT).show();
+        }).getRoot(), 2);
+        Toast.makeText(this, getString(R.string.set_other_clear_default_usb_code), Toast.LENGTH_SHORT).show();
+      }).getRoot());
+    }
+    else {
+      setActivity.setOther.addView(PublicTools.createTextCardDetail(this, getString(R.string.set_other_clear_default_usb), getString(R.string.set_other_no_default), () -> {
+        Toast.makeText(this, getString(R.string.set_other_no_default), Toast.LENGTH_SHORT).show();
+      }).getRoot());
+    }
+
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_about_ip), () -> startActivity(new Intent(this, IpActivity.class))).getRoot());
-    setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_clear_default), () -> {
-      AppData.setting.setDefaultDevice("");
-      Toast.makeText(this, getString(R.string.set_other_clear_default_code), Toast.LENGTH_SHORT).show();
-    }).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_custom_key), () -> startActivity(new Intent(this, AdbKeyActivity.class))).getRoot());
     setActivity.setOther.addView(PublicTools.createTextCard(this, getString(R.string.set_other_clear_key), () -> {
       AppData.reGenerateAdbKeyPair(this);

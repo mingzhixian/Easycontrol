@@ -46,8 +46,6 @@ public class MainActivity extends Activity {
     mainActivity.devicesList.setAdapter(deviceListAdapter);
     // 设置按钮监听
     setButtonListener();
-    // 启动默认设备
-    startDefault();
     // 注册广播监听
     IntentFilter filter = new IntentFilter();
     filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
@@ -67,7 +65,7 @@ public class MainActivity extends Activity {
           d = Device.getDefaultDevice(uuid, Device.TYPE_LINK);
           AppData.dbHelper.insert(d);
         }
-        deviceListAdapter.linkDevice = new Pair<>(uuid, device);
+        deviceListAdapter.linkDevices.add(new Pair<>(uuid, device));
         deviceListAdapter.update();
       } else {
         AppData.usbManager.requestPermission(
@@ -77,8 +75,11 @@ public class MainActivity extends Activity {
                         new Intent("top.saymzx.easycontrol.app.USB_PERMISSION"),
                         PendingIntent.FLAG_MUTABLE));
       }
-      break; // 只处理第一个设备
     }
+    // 启动默认USB设备
+    startDefaultUSB();
+    // 启动默认无线设备
+    startDefault();
     super.onCreate(savedInstanceState);
   }
 
@@ -109,7 +110,7 @@ public class MainActivity extends Activity {
     }
   }
 
-  // 启动默认设备
+  // 启动默认无线设备
   private void startDefault() {
     String defaultDevice = AppData.setting.getDefaultDevice();
     if (!defaultDevice.equals("")) {
@@ -121,6 +122,27 @@ public class MainActivity extends Activity {
           Intent home = new Intent(Intent.ACTION_MAIN);
           home.addCategory(Intent.CATEGORY_HOME);
           AppData.main.startActivity(home);
+        }
+      }
+    }
+  }
+
+  // 启动默认USB设备
+  private void startDefaultUSB() {
+    if (AppData.setting.getNeedStartDefaultUsbDevice()) {
+      String defaultUsbDevice = AppData.setting.getDefaultUsbDevice();
+      if (!defaultUsbDevice.equals("")) {
+        for (Pair<String, UsbDevice> pair : deviceListAdapter.linkDevices) {
+          if (Objects.equals(pair.first, defaultUsbDevice)) {
+            new Client(AppData.dbHelper.getByUUID(defaultUsbDevice), pair.second);
+            // 返回桌面
+            if (!AppData.setting.getDefaultDevice().equals("") && AppData.setting.getAutoBackOnStartDefault()) {
+              Intent home = new Intent(Intent.ACTION_MAIN);
+              home.addCategory(Intent.CATEGORY_HOME);
+              AppData.main.startActivity(home);
+            }
+            return;
+          }
         }
       }
     }
@@ -184,7 +206,17 @@ public class MainActivity extends Activity {
         }
         // USB设备已拔出
         case UsbManager.ACTION_USB_DEVICE_DETACHED: {
-          deviceListAdapter.linkDevice = null;
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            deviceListAdapter.linkDevices.removeIf(pair -> pair.second.equals(usbDevice));
+          }
+          else {
+            for (int i = 0; i < deviceListAdapter.linkDevices.size(); i++) {
+              if (deviceListAdapter.linkDevices.get(i).second.equals(usbDevice)) {
+                deviceListAdapter.linkDevices.remove(i);
+                break;
+              }
+            }
+          }
           deviceListAdapter.update();
           break;
         }
@@ -199,7 +231,7 @@ public class MainActivity extends Activity {
               device = Device.getDefaultDevice(uuid, Device.TYPE_LINK);
               AppData.dbHelper.insert(device);
             }
-            deviceListAdapter.linkDevice = new Pair<>(uuid, usbDevice);
+            deviceListAdapter.linkDevices.add(new Pair<>(uuid, usbDevice));
             deviceListAdapter.update();
           }
           break;
