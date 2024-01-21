@@ -57,6 +57,28 @@ public class MainActivity extends Activity {
     filter.addAction(ACTION_SCREEN_OFF);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiver(broadcastReceiver, filter, RECEIVER_EXPORTED);
     else registerReceiver(broadcastReceiver, filter);
+    // 检查USB
+    for (String k : AppData.usbManager.getDeviceList().keySet()) {
+      UsbDevice device = AppData.usbManager.getDeviceList().get(k);
+      if (AppData.usbManager.hasPermission(device)) {
+        String uuid = device.getSerialNumber();
+        Device d = AppData.dbHelper.getByUUID(uuid);
+        if (d == null) {
+          d = Device.getDefaultDevice(uuid, Device.TYPE_LINK);
+          AppData.dbHelper.insert(d);
+        }
+        deviceListAdapter.linkDevice = new Pair<>(uuid, device);
+        deviceListAdapter.update();
+      } else {
+        AppData.usbManager.requestPermission(
+                device,
+                PendingIntent.getBroadcast(getApplicationContext(),
+                        0,
+                        new Intent("top.saymzx.easycontrol.app.USB_PERMISSION"),
+                        PendingIntent.FLAG_MUTABLE));
+      }
+      break; // 只处理第一个设备
+    }
     super.onCreate(savedInstanceState);
   }
 
