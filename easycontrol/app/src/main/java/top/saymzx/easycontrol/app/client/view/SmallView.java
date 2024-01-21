@@ -1,19 +1,14 @@
 package top.saymzx.easycontrol.app.client.view;
 
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.text.InputType;
-import android.util.Log;
+import android.util.DisplayMetrics;
 import android.util.Pair;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewOutlineProvider;
-import android.view.WindowManager;
+import android.view.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,6 +22,13 @@ import top.saymzx.easycontrol.app.helper.PublicTools;
 public class SmallView extends ViewOutlineProvider {
   private final ClientView clientView;
   private static int statusBarHeight = 0;
+  private boolean LocalIsPortrait() {
+    return AppData.main.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+  }
+  private boolean LastLocalIsPortrait;
+  private boolean RemoteIsPortrait = true;
+  private boolean InitSize = false;
+  private boolean InitPos = false;
 
   // 悬浮窗
   private final ModuleSmallViewBinding smallView = ModuleSmallViewBinding.inflate(LayoutInflater.from(AppData.main));
@@ -54,14 +56,103 @@ public class SmallView extends ViewOutlineProvider {
     // 设置圆角
     smallView.body.setOutlineProvider(this);
     smallView.body.setClipToOutline(true);
+    // 设置窗口大小
+    DisplayMetrics displayMetrics = AppData.main.getResources().getDisplayMetrics();
+    int screenWidth = displayMetrics.widthPixels;
+    int screenHeight = displayMetrics.heightPixels + statusBarHeight;
+    int longEdge = Math.max(screenWidth, screenHeight);
+    int shortEdge = Math.min(screenWidth, screenHeight);
+    if (clientView.device.small_p_p_width == 0 | clientView.device.small_p_p_height == 0
+            | clientView.device.small_p_l_width == 0 | clientView.device.small_p_l_height == 0
+            | clientView.device.small_l_p_width == 0 | clientView.device.small_l_p_height == 0
+            | clientView.device.small_l_l_width == 0 | clientView.device.small_l_l_height == 0) {
+      clientView.device.small_p_p_width = shortEdge * 4 / 5;
+      clientView.device.small_p_p_height = longEdge * 4 / 5;
+      clientView.device.small_p_l_width = shortEdge * 4 / 5;
+      clientView.device.small_p_l_height = longEdge * 4 / 5;
+      clientView.device.small_l_p_width = longEdge * 4 / 5;
+      clientView.device.small_l_p_height = shortEdge * 4 / 5;
+      clientView.device.small_l_l_width = longEdge * 4 / 5;
+      clientView.device.small_l_l_height = shortEdge * 4 / 5;
+    }
+    clientView.updateMaxSize(new Pair<>(shortEdge * 4 / 5, shortEdge * 4 / 5));
+    // 设置窗口监听
+    smallView.textureViewLayout.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+      if (right == 0 || bottom == 0) return;
+      if (!InitSize & (right == shortEdge * 4 / 5 | bottom == shortEdge * 4 / 5)) InitSize = true;
+      if (!InitSize) return;
+
+      if (clientView.device.small_p_p_x == 0 & clientView.device.small_p_p_y == 0 & right < bottom & LocalIsPortrait()) {
+        clientView.updateMaxSize(new Pair<>(clientView.device.small_p_p_width, clientView.device.small_p_p_height));
+        ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+        smallViewParams.x = clientView.device.small_p_p_x = (shortEdge - layoutParams.width) / 2;
+        smallViewParams.y = clientView.device.small_p_p_y = (longEdge - layoutParams.height) / 2;
+        AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+        InitPos = true;
+        return;
+      }
+      if (clientView.device.small_p_l_x == 0 & clientView.device.small_p_l_y == 0 & right > bottom & LocalIsPortrait()) {
+        clientView.updateMaxSize(new Pair<>(clientView.device.small_p_l_width, clientView.device.small_p_l_height));
+        ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+        smallViewParams.x = clientView.device.small_p_l_x = (shortEdge - layoutParams.width) / 2;
+        smallViewParams.y = clientView.device.small_p_l_y = (longEdge - layoutParams.height) / 2;
+        AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+        InitPos = true;
+        return;
+      }
+      if (clientView.device.small_l_p_x == 0 & clientView.device.small_l_p_y == 0 & right < bottom & !LocalIsPortrait()) {
+        clientView.updateMaxSize(new Pair<>(clientView.device.small_l_p_width, clientView.device.small_l_p_height));
+        ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+        smallViewParams.x = clientView.device.small_l_p_x = (longEdge - layoutParams.width) / 2;
+        smallViewParams.y = clientView.device.small_l_p_y = (shortEdge - layoutParams.height) / 2;
+        AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+        InitPos = true;
+        return;
+      }
+      if (clientView.device.small_l_l_x == 0 & clientView.device.small_l_l_y == 0 & right > bottom & !LocalIsPortrait()) {
+        clientView.updateMaxSize(new Pair<>(clientView.device.small_l_l_width, clientView.device.small_l_l_height));
+        ViewGroup.LayoutParams layoutParams = clientView.textureView.getLayoutParams();
+        smallViewParams.x = clientView.device.small_l_l_x = (longEdge - layoutParams.width) / 2;
+        smallViewParams.y = clientView.device.small_l_l_y = (shortEdge - layoutParams.height) / 2;
+        AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+        InitPos = true;
+        return;
+      }
+
+      boolean LocalIsPortrait = LocalIsPortrait();
+      if (!InitPos | right < bottom != RemoteIsPortrait | LocalIsPortrait != LastLocalIsPortrait) {
+        InitPos = true;
+        LastLocalIsPortrait = LocalIsPortrait;
+        if (right < bottom) {
+          if (LocalIsPortrait) {
+            smallViewParams.x = clientView.device.small_p_p_x;
+            smallViewParams.y = clientView.device.small_p_p_y;
+            clientView.updateMaxSize(new Pair<>(clientView.device.small_p_p_width, clientView.device.small_p_p_height));
+          } else {
+            smallViewParams.x = clientView.device.small_l_p_x;
+            smallViewParams.y = clientView.device.small_l_p_y;
+            clientView.updateMaxSize(new Pair<>(clientView.device.small_l_p_width, clientView.device.small_l_p_height));
+          }
+        } else {
+          if (LocalIsPortrait) {
+            smallViewParams.x = clientView.device.small_p_l_x;
+            smallViewParams.y = clientView.device.small_p_l_y;
+            clientView.updateMaxSize(new Pair<>(clientView.device.small_p_l_width, clientView.device.small_p_l_height));
+          } else {
+            smallViewParams.x = clientView.device.small_l_l_x;
+            smallViewParams.y = clientView.device.small_l_l_y;
+            clientView.updateMaxSize(new Pair<>(clientView.device.small_l_l_width, clientView.device.small_l_l_height));
+          }
+        }
+        AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+      }
+      RemoteIsPortrait = right < bottom;
+    });
   }
 
   public void show() {
     // 初始化
     smallView.barView.setVisibility(View.GONE);
-    smallViewParams.x = clientView.device.small_x;
-    smallViewParams.y = clientView.device.small_y;
-    clientView.updateMaxSize(new Pair<>(clientView.device.small_length, clientView.device.small_length));
     // 设置监听
     setButtonListener(clientView.controlPacket);
     setKeyEvent(clientView.controlPacket);
@@ -138,8 +229,24 @@ public class SmallView extends ViewOutlineProvider {
           // 更新
           smallViewParams.x = paramsX.get() + flipX;
           smallViewParams.y = paramsY.get() + flipY;
-          clientView.device.small_x = smallViewParams.x;
-          clientView.device.small_y = smallViewParams.y;
+          if (RemoteIsPortrait) {
+            if (LocalIsPortrait()) {
+              clientView.device.small_p_p_x = smallViewParams.x;
+              clientView.device.small_p_p_y = smallViewParams.y;
+            } else {
+              clientView.device.small_l_p_x = smallViewParams.x;
+              clientView.device.small_l_p_y = smallViewParams.y;
+            }
+          }
+          else {
+            if (LocalIsPortrait()) {
+              clientView.device.small_p_l_x = smallViewParams.x;
+              clientView.device.small_p_l_y = smallViewParams.y;
+            } else {
+              clientView.device.small_l_l_x = smallViewParams.x;
+              clientView.device.small_l_l_y = smallViewParams.y;
+            }
+          }
           AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
           break;
         }
@@ -163,7 +270,10 @@ public class SmallView extends ViewOutlineProvider {
     });
     smallView.buttonMini.setOnClickListener(v -> clientView.changeToMini());
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
-    smallView.buttonClose.setOnClickListener(v -> clientView.onClose.run());
+    smallView.buttonClose.setOnClickListener(v -> {
+      hide();
+      clientView.onClose.run();
+    });
     smallView.buttonLight.setOnClickListener(v -> {
       controlPacket.sendLightEvent(1);
       changeBarView();
@@ -195,15 +305,32 @@ public class SmallView extends ViewOutlineProvider {
   // 设置悬浮窗大小拖动按钮监听控制
   @SuppressLint("ClickableViewAccessibility")
   private void setReSizeListener() {
-    int minLength = PublicTools.dp2px(250f);
+    int minSize = PublicTools.dp2px(150f);
     smallView.reSize.setOnTouchListener((v, event) -> {
       if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
         int sizeX = (int) (event.getRawX() - smallViewParams.x);
         int sizeY = (int) (event.getRawY() - smallViewParams.y);
-        int length = Math.max(sizeX, sizeY);
-        if (length < minLength) return true;
-        clientView.updateMaxSize(new Pair<>(length, length));
-        clientView.device.small_length = length;
+        if (sizeX < minSize || sizeY < minSize) return true;
+        clientView.updateMaxSize(new Pair<>(sizeX, sizeY));
+
+        if (sizeX < sizeY) {
+          if (LocalIsPortrait()){
+            clientView.device.small_p_p_width = sizeX;
+            clientView.device.small_p_p_height = sizeY;
+          } else {
+            clientView.device.small_l_p_width = sizeX;
+            clientView.device.small_l_p_height = sizeY;
+          }
+        }
+        else {
+          if (LocalIsPortrait()){
+            clientView.device.small_p_l_width = sizeX;
+            clientView.device.small_p_l_height = sizeY;
+          } else {
+            clientView.device.small_l_l_width = sizeX;
+            clientView.device.small_l_l_height = sizeY;
+          }
+        }
       }
       return true;
     });

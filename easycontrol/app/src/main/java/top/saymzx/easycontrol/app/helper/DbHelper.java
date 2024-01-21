@@ -15,7 +15,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 10;
+  private static final int version = 11;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -24,13 +24,13 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useOpus integer ," + "\t small_x integer ," + "\t small_y integer ," + "\t small_length integer ," + "\t mini_y integer " + ");");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useOpus integer ," + "\t small_p_p_x integer ," + "\t small_p_p_y integer ," + "\t small_p_p_width integer ," + "\t small_p_p_height integer ," + "\t small_p_l_x integer ," + "\t small_p_l_y integer ," + "\t small_p_l_width integer ," + "\t small_p_l_height integer ," + "\t small_l_p_x integer ," + "\t small_l_p_y integer ," + "\t small_l_p_width integer ," + "\t small_l_p_height integer ," + "\t small_l_l_x integer ," + "\t small_l_l_y integer ," + "\t small_l_l_width integer ," + "\t small_l_l_height integer ," + "\t mini_y integer \n" + ");");
   }
 
   @SuppressLint("Range")
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    if (oldVersion < 10) {
+    if (oldVersion < 11) {
       // 获取旧数据
       ArrayList<Device> devices = getAll(db);
       // 修改表名
@@ -97,9 +97,22 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("defaultFull", device.defaultFull);
     values.put("useH265", device.useH265);
     values.put("useOpus", device.useOpus);
-    values.put("small_x", device.small_x);
-    values.put("small_y", device.small_y);
-    values.put("small_length", device.small_length);
+    values.put("small_p_p_x", device.small_p_p_x);
+    values.put("small_p_p_y", device.small_p_p_y);
+    values.put("small_p_p_width", device.small_p_p_width);
+    values.put("small_p_p_height", device.small_p_p_height);
+    values.put("small_p_l_x", device.small_p_l_x);
+    values.put("small_p_l_y", device.small_p_l_y);
+    values.put("small_p_l_width", device.small_p_l_width);
+    values.put("small_p_l_height", device.small_p_l_height);
+    values.put("small_l_p_x", device.small_l_p_x);
+    values.put("small_l_p_y", device.small_l_p_y);
+    values.put("small_l_p_width", device.small_l_p_width);
+    values.put("small_l_p_height", device.small_l_p_height);
+    values.put("small_l_l_x", device.small_l_l_x);
+    values.put("small_l_l_y", device.small_l_l_y);
+    values.put("small_l_l_width", device.small_l_l_width);
+    values.put("small_l_l_height", device.small_l_l_height);
     values.put("mini_y", device.mini_y);
     return values;
   }
@@ -119,9 +132,22 @@ public class DbHelper extends SQLiteOpenHelper {
       cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
       cursor.getColumnIndex("useH265") == -1 ? AppData.setting.getDefaultUseH265() : cursor.getInt(cursor.getColumnIndex("useH265")) == 1,
       cursor.getColumnIndex("useOpus") == -1 ? AppData.setting.getDefaultUseOpus() : cursor.getInt(cursor.getColumnIndex("useOpus")) == 1,
-      cursor.getColumnIndex("small_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_x")),
-      cursor.getColumnIndex("small_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_y")),
-      cursor.getColumnIndex("small_length") == -1 ? Device.SMALL_LENGTH : cursor.getInt(cursor.getColumnIndex("small_length")),
+      cursor.getColumnIndex("small_p_p_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_p_p_x")),
+      cursor.getColumnIndex("small_p_p_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_p_p_y")),
+      cursor.getColumnIndex("small_p_p_width") == -1 ? Device.SMALL_WIDTH : cursor.getInt(cursor.getColumnIndex("small_p_p_width")),
+      cursor.getColumnIndex("small_p_p_height") == -1 ? Device.SMALL_HEIGHT : cursor.getInt(cursor.getColumnIndex("small_p_p_height")),
+      cursor.getColumnIndex("small_p_l_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_p_l_x")),
+      cursor.getColumnIndex("small_p_l_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_p_l_y")),
+      cursor.getColumnIndex("small_p_l_width") == -1 ? Device.SMALL_WIDTH : cursor.getInt(cursor.getColumnIndex("small_p_l_width")),
+      cursor.getColumnIndex("small_p_l_height") == -1 ? Device.SMALL_HEIGHT : cursor.getInt(cursor.getColumnIndex("small_p_l_height")),
+      cursor.getColumnIndex("small_l_p_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_l_p_x")),
+      cursor.getColumnIndex("small_l_p_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_l_p_y")),
+      cursor.getColumnIndex("small_l_p_width") == -1 ? Device.SMALL_WIDTH : cursor.getInt(cursor.getColumnIndex("small_l_p_width")),
+      cursor.getColumnIndex("small_l_p_height") == -1 ? Device.SMALL_HEIGHT : cursor.getInt(cursor.getColumnIndex("small_l_p_height")),
+      cursor.getColumnIndex("small_l_l_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_l_l_x")),
+      cursor.getColumnIndex("small_l_l_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_l_l_y")),
+      cursor.getColumnIndex("small_l_l_width") == -1 ? Device.SMALL_WIDTH : cursor.getInt(cursor.getColumnIndex("small_l_l_width")),
+      cursor.getColumnIndex("small_l_l_height") == -1 ? Device.SMALL_HEIGHT : cursor.getInt(cursor.getColumnIndex("small_l_l_height")),
       cursor.getColumnIndex("mini_y") == -1 ? Device.MINI_Y : cursor.getInt(cursor.getColumnIndex("mini_y"))
     );
   }

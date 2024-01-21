@@ -26,11 +26,11 @@ public class ClientView implements TextureView.SurfaceTextureListener {
   public final ControlPacket controlPacket;
   private final PublicTools.MyFunction onReady;
   public final PublicTools.MyFunction onClose;
-  public final TextureView textureView = new TextureView(AppData.main);
+  public final TextureView textureView;
   private SurfaceTexture surfaceTexture;
 
-  private final SmallView smallView = new SmallView(this);
-  private final MiniView miniView = new MiniView(this);
+  private final SmallView smallView;
+  private final MiniView miniView;
   private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
@@ -39,6 +39,9 @@ public class ClientView implements TextureView.SurfaceTextureListener {
 
   public ClientView(Device device, ControlPacket controlPacket, PublicTools.MyFunction onReady, PublicTools.MyFunction onClose) {
     this.device = device;
+    textureView = new TextureView(AppData.main);
+    smallView = new SmallView(this);
+    miniView = new MiniView(this);
     this.controlPacket = controlPacket;
     this.onReady = onReady;
     this.onClose = onClose;
