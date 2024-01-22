@@ -19,6 +19,7 @@ public class ActiveActivity extends Activity {
     PublicTools.setLocale(this);
     activeActivity = ActivityActiveBinding.inflate(this.getLayoutInflater());
     setContentView(activeActivity.getRoot());
+    AppData.setting.setIsActive(false);
     setButtonListener();
     // 绘制UI
     drawUi();
@@ -39,6 +40,7 @@ public class ActiveActivity extends Activity {
         AppData.uiHandler.post(() -> {
           if (isOk) {
             finish();
+            AppData.setting.setIsActive(true);
             Toast.makeText(this, getString(R.string.active_button_success), Toast.LENGTH_SHORT).show();
             PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md");
           } else Toast.makeText(this, getString(R.string.active_button_error), Toast.LENGTH_SHORT).show();

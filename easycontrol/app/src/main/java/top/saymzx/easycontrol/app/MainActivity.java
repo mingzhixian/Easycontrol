@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
 
   // 检测激活
   private void checkActive() {
-    if (AppData.setting.getActiveKey().equals("")) startActivity(new Intent(this, ActiveActivity.class));
+    if (!AppData.setting.getIsActive()) startActivity(new Intent(this, ActiveActivity.class));
   }
 
   // 检查权限
