@@ -47,9 +47,9 @@
 		- 导航栏左边旋转按钮，可以控制被控端页面旋转，仅请求旋转，实际是否旋转看被控端当前应用是否允许
 		- 全屏页面方向跟随手机重力方向（可在工具栏中锁定）
 	5. 图示版：
-		- <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/small.webp" width="200px">
-		- <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/mini.webp" width="200px">
-		- <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/full.webp" width="200px">
+		<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/small.webp" width="200px">
+		<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/mini.webp" width="200px">
+		<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/full.webp" width="200px">
 
 3. 高级使用
 	- 在添加设备时或长按设备点击“修改”按钮，设置高级选项，可自定义编解码参数、投屏控制参数等
