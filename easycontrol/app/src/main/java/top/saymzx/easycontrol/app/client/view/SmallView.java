@@ -5,7 +5,6 @@ import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.text.InputType;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -88,7 +87,7 @@ public class SmallView extends ViewOutlineProvider {
   // 设置焦点监听
   @SuppressLint("ClickableViewAccessibility")
   private void setFloatVideoListener() {
-    boolean defaultMiniOnOutside = AppData.setting.getDefaultMiniOnOutside();
+    boolean defaultMiniOnOutside = AppData.setting.getAutoMiniOnOutside();
     smallView.getRoot().setOnTouchHandle(event -> {
       if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
         if (defaultMiniOnOutside) clientView.changeToMini();

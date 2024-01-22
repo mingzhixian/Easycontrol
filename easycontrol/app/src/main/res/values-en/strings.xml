@@ -51,8 +51,12 @@
   <string name="active_url">Go to donation address</string>
   <string name="active_key">Donation Order number: $5 and up</string>
   <string name="active_button">Active</string>
-  <string name="active_key_hint">* The donation will be logged into the system within 24 hours. If the donation still cannot be activated after timeout, please contact mingzhixian@outlook.com</string>
-  <string name="active_button_error">Input error or system still not entered</string>
+  <string name="active_key_hint">
+    * The donation will be recorded in the system within 24 hours, please wait patiently \n
+    * One order number supports activation of 5 devices, to protect your privacy, Easycontrol uses random numbers to identify one device, which means that even if you just reinstall it, it will be considered a new device, so if you can\'t activate because you have more than 5 devices, please contact us \n
+    * For any questions, please contact: mingzhixian@outlook.com
+  </string>
+  <string name="active_button_error">Input error or system still not entered or more than 5 devices</string>
   <string name="active_button_success">Activate successfully, please check the instructions before use</string>
 
   <!-- 设备添加模块 -->

@@ -29,6 +29,7 @@ public class ActiveActivity extends Activity {
   }
 
   private void drawUi() {
+    activeActivity.key.setText(AppData.setting.getActiveKey());
     activeActivity.layout.addView(PublicTools.createTextCard(this, getString(R.string.active_url), () -> PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md")).getRoot());
   }
 

@@ -51,8 +51,12 @@
   <string name="active_url">前往捐赠地址</string>
   <string name="active_key">捐赠订单号: 35元及以上</string>
   <string name="active_button">激活</string>
-  <string name="active_key_hint">* 捐赠后将于24小时内录入系统，如超时仍不成功，请联系mingzhixian@outlook.com</string>
-  <string name="active_button_error">输入错误或系统仍未录入</string>
+  <string name="active_key_hint">
+    * 捐赠后将于24小时内录入系统，请耐心等待 \n
+    * 一个订单号支持激活5个设备，为了保护您的隐私，易控使用了随机数标识一台设备，这意味着即使您只是重新安装也会被视为新设备，所以如果您因为超出5台设备而无法激活，请联系我们 \n
+    * 如有任何问题，请联系：mingzhixian@outlook.com
+  </string>
+  <string name="active_button_error">输入错误或系统仍未录入或超出5台设备</string>
   <string name="active_button_success">激活成功，请查看使用说明后使用</string>
 
   <!-- 设备添加模块 -->
