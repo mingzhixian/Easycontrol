@@ -8,17 +8,12 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.audiofx.LoudnessEnhancer;
 import android.os.Build;
-import android.os.Handler;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import top.saymzx.easycontrol.app.buffer.BufferNew;
 
 public class AudioDecode {
   private MediaCodec decodec;

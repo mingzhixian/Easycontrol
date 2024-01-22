@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.UUID;
@@ -15,7 +14,6 @@ import java.util.UUID;
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
-import top.saymzx.easycontrol.app.helper.ActiveHelper;
 import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
 import top.saymzx.easycontrol.app.helper.PublicTools;
@@ -70,9 +68,7 @@ public class MainActivity extends Activity {
 
   // 检测激活
   private void checkActive() {
-    new Thread(() -> {
-      if (!ActiveHelper.checkOk(AppData.setting.getActiveKey())) AppData.uiHandler.post(() -> startActivity(new Intent(this, ActiveActivity.class)));
-    }).start();
+    if (AppData.setting.getActiveKey().equals("")) startActivity(new Intent(this, ActiveActivity.class));
   }
 
   // 检查权限

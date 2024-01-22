@@ -88,7 +88,7 @@ public final class AudioEncode {
           return;
         }
       }
-      ControlPacket.sendAudioEvent(buffer.remaining() , buffer);
+      ControlPacket.sendAudioEvent(buffer.remaining(), buffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

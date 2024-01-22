@@ -32,7 +32,7 @@ public class BufferStream {
     this.underlySocketFunction = underlySocketFunction;
   }
 
-  public void pushSource(byte[] bytes) {
+  public void pushSource(byte[] bytes) throws IOException {
     if (bytes != null) source.write(ByteBuffer.wrap(bytes));
   }
 

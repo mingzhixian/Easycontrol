@@ -343,7 +343,7 @@ public class PublicTools {
   }
 
   // 浏览器打开
-  public static void startUrl(Context context,String url) {
+  public static void startUrl(Context context, String url) {
     try {
       Intent intent = new Intent(Intent.ACTION_VIEW);
       intent.addCategory(Intent.CATEGORY_BROWSABLE);

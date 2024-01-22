@@ -1,13 +1,10 @@
 package top.saymzx.easycontrol.app;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import top.saymzx.easycontrol.app.databinding.ActivityActiveBinding;
-import top.saymzx.easycontrol.app.databinding.ActivityIpBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.ActiveHelper;
 import top.saymzx.easycontrol.app.helper.PublicTools;

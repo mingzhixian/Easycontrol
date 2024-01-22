@@ -1,8 +1,5 @@
 package top.saymzx.easycontrol.app.adb;
 
-import android.util.Log;
-import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -18,8 +15,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import javax.crypto.Cipher;
-
-import top.saymzx.easycontrol.app.entity.AppData;
 
 public class AdbKeyPair {
 

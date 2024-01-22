@@ -5,20 +5,11 @@ import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbInterface;
-import android.net.LocalServerSocket;
-import android.os.Build;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 import android.util.Pair;
 
-import java.io.DataInputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.R;

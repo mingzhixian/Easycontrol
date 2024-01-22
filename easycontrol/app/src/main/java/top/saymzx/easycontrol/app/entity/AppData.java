@@ -12,11 +12,9 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import java.io.File;
 
-import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.adb.AdbBase64;
 import top.saymzx.easycontrol.app.adb.AdbKeyPair;
 import top.saymzx.easycontrol.app.helper.DbHelper;
