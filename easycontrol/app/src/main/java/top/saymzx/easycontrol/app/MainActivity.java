@@ -46,12 +46,12 @@ public class MainActivity extends Activity {
     myBroadcastReceiver.setDeviceListAdapter(deviceListAdapter);
     // 设置按钮监听
     setButtonListener();
-    // 启动默认设备
-    myBroadcastReceiver.startDefault();
     // 注册广播监听
     myBroadcastReceiver.register(this);
     // 检查已连接设备
     myBroadcastReceiver.checkConnectedUsb(this);
+    // 启动默认设备
+    AppData.uiHandler.postDelayed(myBroadcastReceiver::startDefault, 1000);
     super.onCreate(savedInstanceState);
   }
 

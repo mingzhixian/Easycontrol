@@ -104,14 +104,15 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   public void startDefault() {
     String defaultDevice = AppData.setting.getDefaultDevice();
     if (!defaultDevice.equals("")) {
-      Device device = AppData.dbHelper.getByUUID(defaultDevice);
-      if (device != null && device.isNormalDevice()) {
-        new Client(device);
-        // 返回桌面
-        if (AppData.setting.getAutoBackOnStartDefault()) {
-          Intent home = new Intent(Intent.ACTION_MAIN);
-          home.addCategory(Intent.CATEGORY_HOME);
-          AppData.main.startActivity(home);
+      for (Device device : deviceListAdapter.devicesList) {
+        if (Objects.equals(device.uuid, defaultDevice)) {
+          deviceListAdapter.startDevice(device);
+          // 返回桌面
+          if (AppData.setting.getAutoBackOnStartDefault()) {
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.addCategory(Intent.CATEGORY_HOME);
+            AppData.main.startActivity(home);
+          }
         }
       }
     }

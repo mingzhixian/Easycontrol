@@ -28,7 +28,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 
 public class DeviceListAdapter extends BaseAdapter {
 
-  private final ArrayList<Device> devicesList = new ArrayList<>();
+  public final ArrayList<Device> devicesList = new ArrayList<>();
   public final HashMap<String, UsbDevice> linkDevices = new HashMap<>();
   private final Context context;
 
@@ -143,7 +143,7 @@ public class DeviceListAdapter extends BaseAdapter {
     }
   }
 
-  private void startDevice(Device device) {
+  public void startDevice(Device device) {
     if (device.isLinkDevice()) {
       UsbDevice usbDevice = linkDevices.get(device.uuid);
       if (usbDevice == null) return;
