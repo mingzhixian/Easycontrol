@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Pair;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -100,11 +101,11 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
     fullActivity.buttonClose.setOnClickListener(v -> clientView.onClose.run());
     fullActivity.buttonLight.setOnClickListener(v -> {
-      clientView.controlPacket.sendLightEvent(1);
+      clientView.controlPacket.sendLightEvent(Display.STATE_ON);
       changeBarView();
     });
     fullActivity.buttonLightOff.setOnClickListener(v -> {
-      clientView.controlPacket.sendLightEvent(0);
+      clientView.controlPacket.sendLightEvent(Display.STATE_UNKNOWN);
       changeBarView();
     });
     fullActivity.buttonPower.setOnClickListener(v -> {

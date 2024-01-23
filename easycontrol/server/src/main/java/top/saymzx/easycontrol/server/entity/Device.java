@@ -199,7 +199,7 @@ public final class Device {
       }
     } else {
       IBinder d = SurfaceControl.getBuiltInDisplay();
-      if (d == null) SurfaceControl.setDisplayPowerMode(d, mode);
+      if (d != null) SurfaceControl.setDisplayPowerMode(d, mode);
     }
   }
 
@@ -230,7 +230,10 @@ public final class Device {
       String output = execReadOutput("settings get system screen_off_timeout");
       // 使用正则表达式匹配数字
       Matcher matcher = Pattern.compile("\\d+").matcher(output);
-      if (matcher.find() && Integer.parseInt(matcher.group()) > 20) oldScreenOffTimeout = Integer.parseInt(matcher.group());
+      if (matcher.find()) {
+        int timeout = Integer.parseInt(matcher.group());
+        if (timeout >= 20 && timeout <= 60 * 30) oldScreenOffTimeout = timeout;
+      }
       execReadOutput("settings put system screen_off_timeout 600000000");
     } catch (Exception ignored) {
     }

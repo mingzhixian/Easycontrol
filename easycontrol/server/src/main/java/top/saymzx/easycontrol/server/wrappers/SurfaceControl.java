@@ -83,7 +83,7 @@ public final class SurfaceControl {
     try {
       if (getBuiltInDisplayMethod == null) getBuiltInDisplayMethod = CLASS.getMethod("getBuiltInDisplay", int.class);
       return (IBinder) getBuiltInDisplayMethod.invoke(null, 0);
-    } catch (Exception ignroed) {
+    } catch (Exception ignored) {
       return null;
     }
   }

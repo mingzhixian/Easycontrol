@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.text.InputType;
 import android.util.Pair;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -164,11 +165,11 @@ public class SmallView extends ViewOutlineProvider {
     smallView.buttonFull.setOnClickListener(v -> clientView.changeToFull());
     smallView.buttonClose.setOnClickListener(v -> clientView.onClose.run());
     smallView.buttonLight.setOnClickListener(v -> {
-      controlPacket.sendLightEvent(1);
+      controlPacket.sendLightEvent(Display.STATE_ON);
       changeBarView();
     });
     smallView.buttonLightOff.setOnClickListener(v -> {
-      controlPacket.sendLightEvent(0);
+      controlPacket.sendLightEvent(Display.STATE_UNKNOWN);
       changeBarView();
     });
     smallView.buttonPower.setOnClickListener(v -> {
