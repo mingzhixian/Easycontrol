@@ -1,5 +1,7 @@
 package top.saymzx.easycontrol.app.entity;
 
+import top.saymzx.easycontrol.app.helper.PublicTools;
+
 public class Device {
   public static final int TYPE_NORMAL = 1;
   public static final int TYPE_LINK = 2;
@@ -21,7 +23,7 @@ public class Device {
   public int small_y;
   public static int SMALL_Y = 100;
   public int small_length;
-  public static int SMALL_LENGTH = 1000;
+  public static int SMALL_LENGTH = 0;
   public int mini_y;
   public static int MINI_Y = 200;
 
@@ -60,6 +62,7 @@ public class Device {
   }
 
   public static Device getDefaultDevice(String uuid, int type) {
+    if (SMALL_LENGTH == 0) SMALL_LENGTH = PublicTools.dp2px(500f);
     return new Device(uuid, type, uuid, "", AppData.setting.getDefaultIsAudio(), AppData.setting.getDefaultMaxSize(), AppData.setting.getDefaultMaxFps(), AppData.setting.getDefaultMaxVideoBit(), AppData.setting.getDefaultSetResolution(), AppData.setting.getDefaultFull(), AppData.setting.getDefaultUseH265(), AppData.setting.getDefaultUseOpus(), SMALL_X, SMALL_Y, SMALL_LENGTH, MINI_Y);
   }
 

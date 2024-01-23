@@ -90,7 +90,7 @@ public class PublicTools {
   // 创建弹窗
   public static Dialog createDialog(Context context, boolean canCancel, View view) {
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setCancelable(true);
+    builder.setCancelable(canCancel);
     ScrollView dialogView = ModuleDialogBinding.inflate(LayoutInflater.from(context)).getRoot();
     dialogView.addView(view);
     builder.setView(dialogView);
@@ -178,9 +178,7 @@ public class PublicTools {
   }
 
   // 创建Client加载框
-  public static Dialog createClientLoading(
-    Context context
-  ) {
+  public static Dialog createClientLoading(Context context) {
     ItemLoadingBinding loadingView = ItemLoadingBinding.inflate(LayoutInflater.from(context));
     return createDialog(context, false, loadingView.getRoot());
   }
@@ -192,7 +190,7 @@ public class PublicTools {
     MyFunction function
   ) {
     ItemTextBinding textView = ItemTextBinding.inflate(LayoutInflater.from(context));
-    textView.getRoot().setText(text);
+    textView.text.setText(text);
     if (function != null) textView.getRoot().setOnClickListener(v -> function.run());
     return textView;
   }

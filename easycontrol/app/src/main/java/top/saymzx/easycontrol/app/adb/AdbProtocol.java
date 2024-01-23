@@ -88,9 +88,7 @@ public class AdbProtocol {
 
   private static int payloadChecksum(byte[] payload) {
     int checksum = 0;
-    for (byte b : payload) {
-      checksum += (b & 0xFF);
-    }
+    for (byte b : payload) checksum += (b & 0xFF);
     return checksum;
   }
 

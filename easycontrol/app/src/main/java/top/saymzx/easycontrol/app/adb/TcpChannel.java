@@ -1,5 +1,7 @@
 package top.saymzx.easycontrol.app.adb;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,6 +47,7 @@ public class TcpChannel implements AdbChannel {
   @Override
   public void close() {
     try {
+      Log.e("aaa","channel close");
       outputStream.close();
       inputStream.close();
       socket.close();

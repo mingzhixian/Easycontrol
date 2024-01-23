@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -35,8 +36,11 @@ public class ActiveActivity extends Activity {
     activeActivity.active.setOnClickListener(v -> {
       String activeKey = String.valueOf(activeActivity.key.getText());
       AppData.setting.setActiveKey(activeKey);
+      Dialog dialog = PublicTools.createClientLoading(AppData.main);
+      dialog.show();
       new Thread(() -> {
         boolean isOk = ActiveHelper.checkOk(activeKey);
+        dialog.cancel();
         AppData.uiHandler.post(() -> {
           if (isOk) {
             finish();

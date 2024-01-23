@@ -119,11 +119,13 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 
   // 检查已连接设备
   public void checkConnectedUsb(Context context) {
+    if (AppData.usbManager==null)return;
     for (Map.Entry<String, UsbDevice> entry : AppData.usbManager.getDeviceList().entrySet()) onConnectUsb(context, entry.getValue());
   }
 
   // 请求USB设备权限
   private void onConnectUsb(Context context, UsbDevice usbDevice) {
+    if (AppData.usbManager==null)return;
     PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
     AppData.usbManager.requestPermission(usbDevice, permissionIntent);
   }

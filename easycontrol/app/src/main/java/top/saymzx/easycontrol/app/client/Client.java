@@ -39,6 +39,8 @@ public class Client {
   public final ControlPacket controlPacket = new ControlPacket(this::write);
   public final ClientView clientView;
   public final String uuid;
+  private Thread startThread;
+  private Thread timeOutThread;
 
   private static final String serverName = "/data/local/tmp/easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
   private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
@@ -50,16 +52,19 @@ public class Client {
 
   public Client(Device device, UsbDevice usbDevice) {
     allClient.add(this);
-    // 初始化
-    Thread timeOutThread = new Thread(() -> {
+    uuid = device.uuid;
+    Dialog dialog = PublicTools.createClientLoading(AppData.main);
+    // 超时
+    timeOutThread = new Thread(() -> {
       try {
         Thread.sleep(10 * 1000);
+        if (startThread != null) startThread.interrupt();
+        if (dialog.isShowing()) dialog.cancel();
         release(null);
       } catch (InterruptedException ignored) {
       }
     });
-    timeOutThread.start();
-    uuid = device.uuid;
+    // 界面
     clientView = new ClientView(device, controlPacket, () -> {
       status = 1;
       executeVideoStreamInThread.setPriority(Thread.MAX_PRIORITY);
@@ -67,10 +72,8 @@ public class Client {
       executeStreamInThread.start();
       AppData.uiHandler.post(this::executeOtherService);
     }, () -> release(null));
-    Dialog dialog = PublicTools.createClientLoading(AppData.main);
-    dialog.show();
     // 连接
-    new Thread(() -> {
+    startThread = new Thread(() -> {
       try {
         adb = connectADB(device, usbDevice);
         startServer(device);
@@ -83,9 +86,13 @@ public class Client {
         release(e.toString());
       } finally {
         dialog.cancel();
-        timeOutThread.interrupt();
+        if (timeOutThread != null) timeOutThread.interrupt();
       }
-    }).start();
+    });
+    // 启动
+    dialog.show();
+    timeOutThread.start();
+    startThread.start();
   }
 
   // 连接ADB

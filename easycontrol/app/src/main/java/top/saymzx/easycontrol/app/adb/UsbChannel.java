@@ -30,6 +30,7 @@ public class UsbChannel implements AdbChannel {
 
   public UsbChannel(UsbDevice usbDevice) throws IOException {
     // 连接USB设备
+    if (AppData.usbManager == null) throw new IOException("not have usbManager");
     usbConnection = AppData.usbManager.openDevice(usbDevice);
     if (usbConnection == null) return;
     // 查找ADB的接口
