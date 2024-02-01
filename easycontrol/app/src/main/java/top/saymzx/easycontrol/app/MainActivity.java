@@ -17,6 +17,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
 import top.saymzx.easycontrol.app.helper.PublicTools;
+import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class MainActivity extends Activity {
   // 设备列表
@@ -32,8 +33,8 @@ public class MainActivity extends Activity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     AppData.init(this);
-    PublicTools.setStatusAndNavBar(this);
-    PublicTools.setLocale(this);
+    ViewTools.setStatusAndNavBar(this);
+    ViewTools.setLocale(this);
     mainActivity = ActivityMainBinding.inflate(this.getLayoutInflater());
     setContentView(mainActivity.getRoot());
     // 检测激活
@@ -49,7 +50,7 @@ public class MainActivity extends Activity {
     // 检查已连接设备
     myBroadcastReceiver.checkConnectedUsb(this);
     // 启动默认设备
-    AppData.uiHandler.postDelayed(myBroadcastReceiver::startDefault, 1000);
+    AppData.uiHandler.postDelayed(() -> myBroadcastReceiver.startDefault(this), 1000);
     super.onCreate(savedInstanceState);
   }
 
@@ -87,7 +88,7 @@ public class MainActivity extends Activity {
 
   // 设置按钮监听
   private void setButtonListener() {
-    mainActivity.buttonAdd.setOnClickListener(v -> PublicTools.createAddDeviceView(this, Device.getDefaultDevice(UUID.randomUUID().toString(), Device.TYPE_NORMAL), deviceListAdapter).show());
+    mainActivity.buttonAdd.setOnClickListener(v -> ViewTools.createAddDeviceView(this, Device.getDefaultDevice(UUID.randomUUID().toString(), Device.TYPE_NORMAL), deviceListAdapter).show());
     mainActivity.buttonSet.setOnClickListener(v -> startActivity(new Intent(this, SetActivity.class)));
   }
 

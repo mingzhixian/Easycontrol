@@ -23,13 +23,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public final class AudioCapture {
-
   public static final int SAMPLE_RATE = 48000;
   private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_STEREO;
   public static final int CHANNELS = 2;
   private static final int CHANNEL_MASK = AudioFormat.CHANNEL_IN_LEFT | AudioFormat.CHANNEL_IN_RIGHT;
   public static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
   private static final int BYTES_PER_SAMPLE = 2;
+  public static final int AUDIO_PACKET_SIZE = SAMPLE_RATE * CHANNELS * BYTES_PER_SAMPLE * 40 / 1000;
+  private static final int MINI_BUFFER_SIZE = Math.min(AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING), AUDIO_PACKET_SIZE * 4);
 
   public static AudioRecord init() {
     AudioRecord recorder;
@@ -40,10 +41,6 @@ public final class AudioCapture {
     }
     recorder.startRecording();
     return recorder;
-  }
-
-  public static int millisToBytes(int millis) {
-    return (SAMPLE_RATE * CHANNELS * BYTES_PER_SAMPLE / 1000) * millis;
   }
 
   @SuppressLint({"WrongConstant", "MissingPermission"})
@@ -58,7 +55,7 @@ public final class AudioCapture {
       audioFormatBuilder.setSampleRate(SAMPLE_RATE);
       audioFormatBuilder.setChannelMask(CHANNEL_CONFIG);
       audioRecordBuilder.setAudioFormat(audioFormatBuilder.build());
-      audioRecordBuilder.setBufferSizeInBytes(10 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING));
+      audioRecordBuilder.setBufferSizeInBytes(MINI_BUFFER_SIZE);
       return audioRecordBuilder.build();
     }
     return null;
@@ -116,13 +113,10 @@ public final class AudioCapture {
       mChannelMaskField.setAccessible(true);
       mChannelMaskField.set(audioRecord, CHANNEL_MASK);
 
-      int minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING);
-      int bufferSizeInBytes = minBufferSize * 8;
-
       // audioRecord.audioBuffSizeCheck(bufferSizeInBytes)
       Method audioBuffSizeCheckMethod = AudioRecord.class.getDeclaredMethod("audioBuffSizeCheck", int.class);
       audioBuffSizeCheckMethod.setAccessible(true);
-      audioBuffSizeCheckMethod.invoke(audioRecord, bufferSizeInBytes);
+      audioBuffSizeCheckMethod.invoke(audioRecord, MINI_BUFFER_SIZE);
 
       final int channelIndexMask = 0;
 
@@ -140,7 +134,7 @@ public final class AudioCapture {
           int.class, int.class, int.class, int[].class, String.class, long.class);
         nativeSetupMethod.setAccessible(true);
         initResult = (int) nativeSetupMethod.invoke(audioRecord, new WeakReference<AudioRecord>(audioRecord), attributes, sampleRateArray,
-          CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), bufferSizeInBytes, session, FakeContext.get().getOpPackageName(),
+          CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), MINI_BUFFER_SIZE, session, FakeContext.get().getOpPackageName(),
           0L);
       } else {
         // Assume `context` is never `null`
@@ -165,7 +159,7 @@ public final class AudioCapture {
             int.class, int.class, int.class, int[].class, Parcel.class, long.class, int.class);
           nativeSetupMethod.setAccessible(true);
           initResult = (int) nativeSetupMethod.invoke(audioRecord, new WeakReference<AudioRecord>(audioRecord), attributes, sampleRateArray,
-            CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), bufferSizeInBytes, session, attributionSourceParcel, 0L, 0);
+            CHANNEL_MASK, channelIndexMask, audioRecord.getAudioFormat(), MINI_BUFFER_SIZE, session, attributionSourceParcel, 0L, 0);
         }
       }
 

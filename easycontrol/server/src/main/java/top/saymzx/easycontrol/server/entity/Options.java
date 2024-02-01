@@ -8,6 +8,7 @@ public final class Options {
   public static int maxSize = 1600;
   public static int maxVideoBit = 4000000;
   public static int maxFps = 60;
+  public static boolean autoWake = true;
   public static boolean keepAwake = true;
   public static boolean useH265 = true;
   public static boolean useOpus = true;
@@ -30,6 +31,9 @@ public final class Options {
           break;
         case "maxVideoBit":
           maxVideoBit = Integer.parseInt(value) * 1000000;
+          break;
+        case "autoWake":
+          autoWake = Integer.parseInt(value) == 1;
           break;
         case "keepAwake":
           keepAwake = Integer.parseInt(value) == 1;

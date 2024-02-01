@@ -42,7 +42,7 @@
         android:layout_height="match_parent"
         android:focusable="false"
         android:padding="4dp"
-        android:src="@drawable/rotate"
+        android:src="@drawable/horizontal_rotate"
         android:tint="#DEDEDE" />
 
       <ImageView
@@ -119,12 +119,12 @@
       android:tint="@color/onCardBackground" />
 
     <ImageView
-      android:id="@+id/button_full_exit"
+      android:id="@+id/button_small"
       android:layout_width="24dp"
       android:layout_height="24dp"
       android:layout_margin="4dp"
       android:focusable="false"
-      android:src="@drawable/compress"
+      android:src="@drawable/window_restore"
       android:tint="@color/onCardBackground" />
 
     <ImageView
@@ -142,15 +142,6 @@
       android:layout_height="24dp"
       android:layout_margin="4dp"
       android:focusable="false"
-      android:src="@drawable/lightbulb"
-      android:tint="@color/onCardBackground" />
-
-    <ImageView
-      android:id="@+id/button_light_off"
-      android:layout_width="24dp"
-      android:layout_height="24dp"
-      android:layout_margin="4dp"
-      android:focusable="false"
       android:src="@drawable/lightbulb_off"
       android:tint="@color/onCardBackground" />
 
@@ -160,16 +151,16 @@
       android:layout_height="24dp"
       android:layout_margin="4dp"
       android:focusable="false"
-      android:src="@drawable/power_off"
+      android:src="@drawable/power"
       android:tint="@color/onCardBackground" />
 
     <ImageView
-      android:id="@+id/button_lock"
+      android:id="@+id/button_auto_rotate"
       android:layout_width="24dp"
       android:layout_height="24dp"
       android:layout_margin="4dp"
       android:focusable="false"
-      android:src="@drawable/lock"
+      android:src="@drawable/un_rotate"
       android:tint="@color/onCardBackground" />
 
   </GridLayout>

@@ -97,7 +97,7 @@ public final class VideoEncode {
       do outIndex = encedec.dequeueOutputBuffer(bufferInfo, -1); while (outIndex < 0);
       ByteBuffer buffer = encedec.getOutputBuffer(outIndex);
       if (buffer == null) return;
-      ControlPacket.sendVideoEvent(bufferInfo.size + 8, bufferInfo.presentationTimeUs, buffer);
+      ControlPacket.sendVideoEvent(bufferInfo.presentationTimeUs, buffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }

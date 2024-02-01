@@ -7,20 +7,19 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
-import top.saymzx.easycontrol.app.buffer.BufferNew;
 import top.saymzx.easycontrol.app.buffer.BufferStream;
 
 // 此部分代码摘抄借鉴了tananaev大佬的开源代码(https://github.com/tananaev/adblib)以及开源库dadb(https://github.com/mobile-dev-inc/dadb)
 // 因为官方adb协议文档写的十分糟糕，因此此部分代码的实现参考了cstyan大佬所整理的文档，再次进行感谢：https://github.com/cstyan/adbDocumentation
 public class Adb {
+  private boolean isClose = false;
   private final AdbChannel channel;
   private int localIdPool = 1;
   private int MAX_DATA = AdbProtocol.CONNECT_MAXDATA;
-  private final ConcurrentHashMap<Integer, BufferStream> connectionStreams = new ConcurrentHashMap<>();
-  private final BufferNew sendBuffer = new BufferNew();
+  private final ConcurrentHashMap<Integer, BufferStream> connectionStreams = new ConcurrentHashMap<>(10);
+  private final ConcurrentHashMap<Integer, BufferStream> openStreams = new ConcurrentHashMap<>(5);
 
   private final Thread handleInThread = new Thread(this::handleIn);
-  private final Thread handleOutThread = new Thread(this::handleOut);
 
   public Adb(String host, int port, AdbKeyPair keyPair) throws Exception {
     channel = new TcpChannel(host, port);
@@ -52,30 +51,30 @@ public class Adb {
     // 启动后台进程
     handleInThread.setPriority(Thread.MAX_PRIORITY);
     handleInThread.start();
-    handleOutThread.start();
   }
 
   private BufferStream open(String destination, boolean canMultipleSend) throws InterruptedException {
     int localId = localIdPool++ * (canMultipleSend ? 1 : -1);
-    sendBuffer.write(AdbProtocol.generateOpen(localId, destination));
+    writeToChannel(AdbProtocol.generateOpen(localId, destination));
     BufferStream bufferStream;
     do {
       synchronized (this) {
         wait();
       }
-      bufferStream = connectionStreams.get(localId);
+      bufferStream = openStreams.get(localId);
     } while (bufferStream == null);
+    openStreams.remove(localId);
     return bufferStream;
   }
 
-  public String restartOnTcpip(int port) throws InterruptedException, IOException {
+  public String restartOnTcpip(int port) throws InterruptedException {
     BufferStream bufferStream = open("tcpip:" + port, false);
     do {
       synchronized (this) {
         wait();
       }
     } while (!bufferStream.isClosed());
-    return new String(bufferStream.readAllBytes().array());
+    return new String(bufferStream.readByteArrayBeforeClose().array());
   }
 
   public void pushFile(InputStream file, String remotePath) throws Exception {
@@ -112,7 +111,7 @@ public class Adb {
         wait();
       }
     } while (!bufferStream.isClosed());
-    return new String(bufferStream.readAllBytes().array());
+    return new String(bufferStream.readByteArrayBeforeClose().array());
   }
 
   public BufferStream getShell() throws InterruptedException {
@@ -138,17 +137,14 @@ public class Adb {
         BufferStream bufferStream = connectionStreams.get(message.arg1);
         boolean isNeedNotify = bufferStream == null;
         // 新连接
-        if (isNeedNotify) {
-          bufferStream = createNewStream(message.arg1, message.arg0, message.arg1 > 0);
-          connectionStreams.put(message.arg1, bufferStream);
-        }
+        if (isNeedNotify) bufferStream = createNewStream(message.arg1, message.arg0, message.arg1 > 0);
         switch (message.command) {
           case AdbProtocol.CMD_OKAY:
             bufferStream.setCanWrite(true);
             break;
           case AdbProtocol.CMD_WRTE:
-            sendBuffer.write(AdbProtocol.generateOkay(message.arg1, message.arg0));
             bufferStream.pushSource(message.payload);
+            writeToChannel(AdbProtocol.generateOkay(message.arg1, message.arg0));
             break;
           case AdbProtocol.CMD_CLSE:
             bufferStream.close();
@@ -166,41 +162,51 @@ public class Adb {
     }
   }
 
-  private void handleOut() {
+  private void writeToChannel(ByteBuffer byteBuffer) {
     try {
-      while (!Thread.interrupted()) {
-        channel.write(sendBuffer.readNext());
-        if (!sendBuffer.isEmpty()) channel.write(sendBuffer.read(sendBuffer.getSize()));
-        channel.flush();
+      synchronized (channel) {
+        channel.write(byteBuffer);
       }
-    } catch (IOException | InterruptedException ignored) {
+    } catch (Exception ignored) {
       close();
     }
   }
 
-  private BufferStream createNewStream(int localId, int remoteId, boolean canMultipleSend) {
+  private BufferStream createNewStream(int localId, int remoteId, boolean canMultipleSend) throws Exception {
     return new BufferStream(false, canMultipleSend, new BufferStream.UnderlySocketFunction() {
       @Override
-      public void write(ByteBuffer buffer) {
-        while (buffer.hasRemaining()) {
-          byte[] byteArray = new byte[Math.min(MAX_DATA - 128, buffer.remaining())];
-          buffer.get(byteArray);
-          sendBuffer.write(AdbProtocol.generateWrite(localId, remoteId, byteArray));
-        }
-        // sendMoreOk
-        sendBuffer.write(AdbProtocol.generateOkay(localId, remoteId));
+      public void connect(BufferStream bufferStream) {
+        connectionStreams.put(localId, bufferStream);
+        openStreams.put(localId, bufferStream);
       }
 
       @Override
-      public void close() {
-        sendBuffer.write(AdbProtocol.generateClose(localId, remoteId));
+      public void write(BufferStream bufferStream, ByteBuffer buffer) {
+        while (buffer.hasRemaining()) {
+          byte[] byteArray = new byte[Math.min(MAX_DATA - 128, buffer.remaining())];
+          buffer.get(byteArray);
+          writeToChannel(AdbProtocol.generateWrite(localId, remoteId, byteArray));
+        }
+      }
+
+      @Override
+      public void flush(BufferStream bufferStream) throws Exception {
+        writeToChannel(AdbProtocol.generateOkay(localId, remoteId));
+      }
+
+      @Override
+      public void close(BufferStream bufferStream) {
+        connectionStreams.remove(localId);
+        writeToChannel(AdbProtocol.generateClose(localId, remoteId));
       }
     });
   }
 
   public void close() {
+    if (isClose) return;
+    isClose = true;
     handleInThread.interrupt();
-    handleOutThread.interrupt();
+    for (Object bufferStream : connectionStreams.values().toArray()) ((BufferStream) bufferStream).close();
     channel.close();
   }
 

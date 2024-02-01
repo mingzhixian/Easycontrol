@@ -79,7 +79,7 @@ public class UsbChannel implements AdbChannel {
   }
 
   @Override
-  public ByteBuffer read(int size) throws InterruptedException {
+  public ByteBuffer read(int size) throws InterruptedException, IOException {
     return sourceBuffer.read(size);
   }
 
@@ -98,6 +98,7 @@ public class UsbChannel implements AdbChannel {
         }
       }
     } catch (IOException ignored) {
+      sourceBuffer.close();
     }
   }
 

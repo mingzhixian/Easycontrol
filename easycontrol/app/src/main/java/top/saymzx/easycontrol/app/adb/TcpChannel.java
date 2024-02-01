@@ -1,7 +1,5 @@
 package top.saymzx.easycontrol.app.adb;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +13,6 @@ public class TcpChannel implements AdbChannel {
   private final OutputStream outputStream;
 
   public TcpChannel(String host, int port) throws IOException {
-    socket.setTcpNoDelay(true);
     socket.connect(new InetSocketAddress(host, port), 5000);
     inputStream = socket.getInputStream();
     outputStream = socket.getOutputStream();
@@ -36,8 +33,7 @@ public class TcpChannel implements AdbChannel {
     byte[] buffer = new byte[size];
     int bytesRead = 0;
     while (bytesRead < size) {
-      int bytesRemaining = size - bytesRead;
-      int read = inputStream.read(buffer, bytesRead, bytesRemaining);
+      int read = inputStream.read(buffer, bytesRead, size - bytesRead);
       if (read == -1) break;
       bytesRead += read;
     }
@@ -47,7 +43,6 @@ public class TcpChannel implements AdbChannel {
   @Override
   public void close() {
     try {
-      Log.e("aaa","channel close");
       outputStream.close();
       inputStream.close();
       socket.close();

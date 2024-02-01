@@ -1,11 +1,6 @@
 # 易控(Easycontrol)使用说明
 
-## 视频教程（视频版本更新较慢，请以文本说明为准）
-1. [视频1](https://www.bilibili.com/video/BV1Wu4y1u7vD/)
-2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
-3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
-
-## 初次使用
+## 准备操作
 1. 被控端手机连续点击关于手机-版本号，直至提示打开开发者选项
 2. 被控端手机设置中找到开发者选项
 	- 打开“USB调试”
@@ -98,3 +93,8 @@
 	- 目标设备关闭投屏：
 		action：close
 		uuid：设备ID
+		
+## 视频教程（视频版本更新较慢，请以文本说明为准）
+1. [视频1](https://www.bilibili.com/video/BV1Wu4y1u7vD/)
+2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
+3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
