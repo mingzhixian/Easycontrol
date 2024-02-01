@@ -66,10 +66,10 @@ public final class Device {
     deviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
     layerStack = displayInfo.layerStack;
-    getVideoSize();
+    calculateVideoSize();
   }
 
-  private static void getVideoSize() {
+  private static void calculateVideoSize() {
     boolean isPortrait = deviceSize.first < deviceSize.second;
     int major = isPortrait ? deviceSize.second : deviceSize.first;
     int minor = isPortrait ? deviceSize.first : deviceSize.second;
@@ -77,9 +77,9 @@ public final class Device {
       minor = minor * Options.maxSize / major;
       major = Options.maxSize;
     }
-    // h264只接受8的倍数，所以需要缩放至最近参数
-    minor = minor + 4 & ~7;
-    major = major + 4 & ~7;
+    // 某些厂商实现的解码器只接受16的倍数，所以需要缩放至最近参数
+    minor = minor + 8 & ~15;
+    major = major + 8 & ~15;
     videoSize = isPortrait ? new Pair<>(minor, major) : new Pair<>(major, minor);
   }
 
@@ -205,6 +205,17 @@ public final class Device {
 
   public static void changePower() {
     keyEvent(26, 0);
+  }
+
+  public static void changePowerToWake() {
+    try {
+      String output = execReadOutput("dumpsys deviceidle | grep mScreenOn");
+      Boolean isScreenOn = null;
+      if (output.contains("mScreenOn=true")) isScreenOn = true;
+      else if (output.contains("mScreenOn=false")) isScreenOn = false;
+      if (isScreenOn != null && !isScreenOn) Device.keyEvent(26, 0);
+    } catch (Exception ignored) {
+    }
   }
 
   public static void rotateDevice() {

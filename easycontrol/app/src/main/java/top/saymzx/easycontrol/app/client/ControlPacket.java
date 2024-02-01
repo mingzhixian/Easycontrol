@@ -1,43 +1,14 @@
 package top.saymzx.easycontrol.app.client;
 
-import android.content.ClipData;
 import android.view.MotionEvent;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
-import top.saymzx.easycontrol.app.buffer.BufferStream;
-import top.saymzx.easycontrol.app.entity.AppData;
+public final class ControlPacket {
 
-public class ControlPacket {
-  private final MyFunctionByteBuffer write;
-
-  public ControlPacket(MyFunctionByteBuffer write) {
-    this.write = write;
-  }
-
-  public ByteBuffer readFrame(BufferStream bufferStream) throws IOException, InterruptedException {
-    return bufferStream.readByteArray(bufferStream.readInt());
-  }
-
-  // 剪切板
-  public String nowClipboardText = "";
-
-  public void checkClipBoard() {
-    ClipData clipBoard = AppData.clipBoard.getPrimaryClip();
-    if (clipBoard != null && clipBoard.getItemCount() > 0) {
-      String newClipBoardText = String.valueOf(clipBoard.getItemAt(0).getText());
-      if (!Objects.equals(nowClipboardText, newClipBoardText)) {
-        nowClipboardText = newClipBoardText;
-        sendClipboardEvent();
-      }
-    }
-  }
-
-  // 发送触摸事件
-  public void sendTouchEvent(int action, int p, float x, float y, int offsetTime) {
+  // 触摸事件
+  public static ByteBuffer createTouchEvent(int action, int p, float x, float y, int offsetTime) {
     if (x < 0 || x > 1 || y < 0 || y > 1) {
       // 超出范围则改为抬起事件
       if (x < 0) x = 0;
@@ -59,11 +30,11 @@ public class ControlPacket {
     // 时间偏移
     byteBuffer.putInt(offsetTime);
     byteBuffer.flip();
-    write.run(byteBuffer);
+    return byteBuffer;
   }
 
-  // 发送按键事件
-  public void sendKeyEvent(int key, int meta) {
+  // 按键事件
+  public static ByteBuffer createKeyEvent(int key, int meta) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(9);
     // 输入事件
     byteBuffer.put((byte) 2);
@@ -71,52 +42,48 @@ public class ControlPacket {
     byteBuffer.putInt(key);
     byteBuffer.putInt(meta);
     byteBuffer.flip();
-    write.run(byteBuffer);
+    return byteBuffer;
   }
 
-  // 发送剪切板事件
-  private void sendClipboardEvent() {
-    byte[] tmpTextByte = nowClipboardText.getBytes(StandardCharsets.UTF_8);
-    if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return;
+  // 剪切板事件
+  public static ByteBuffer createClipboardEvent(String text) {
+    byte[] tmpTextByte = text.getBytes(StandardCharsets.UTF_8);
+    if (tmpTextByte.length == 0 || tmpTextByte.length > 5000) return null;
     ByteBuffer byteBuffer = ByteBuffer.allocate(5 + tmpTextByte.length);
     byteBuffer.put((byte) 3);
     byteBuffer.putInt(tmpTextByte.length);
     byteBuffer.put(tmpTextByte);
     byteBuffer.flip();
-    write.run(byteBuffer);
+    return byteBuffer;
   }
 
-  // 发送心跳包
-  public void sendKeepAlive() {
-    write.run(ByteBuffer.wrap(new byte[]{4}));
+  // 心跳包
+  public static ByteBuffer createKeepAlive() {
+    return ByteBuffer.wrap(new byte[]{4});
   }
 
-  // 发送修改分辨率事件
-  public void sendChangeSizeEvent(float newSize) {
+  // 修改分辨率事件
+  public static ByteBuffer createChangeSizeEvent(float newSize) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(5);
     byteBuffer.put((byte) 5);
     byteBuffer.putFloat(newSize);
     byteBuffer.flip();
-    write.run(byteBuffer);
+    return byteBuffer;
   }
 
-  // 发送旋转请求事件
-  public void sendRotateEvent() {
-    write.run(ByteBuffer.wrap(new byte[]{6}));
+  // 旋转请求事件
+  public static ByteBuffer createRotateEvent() {
+    return ByteBuffer.wrap(new byte[]{6});
   }
 
-  // 发送背光控制事件
-  public void sendLightEvent(int mode) {
-    write.run(ByteBuffer.wrap(new byte[]{7, (byte) mode}));
+  // 背光控制事件
+  public static ByteBuffer createLightEvent(int mode) {
+    return ByteBuffer.wrap(new byte[]{7, (byte) mode});
   }
 
-  // 发送电源键事件
-  public void sendPowerEvent() {
-    write.run(ByteBuffer.wrap(new byte[]{8}));
-  }
-
-  public interface MyFunctionByteBuffer {
-    void run(ByteBuffer byteBuffer);
+  // 电源键事件
+  public static ByteBuffer createPowerEvent() {
+    return ByteBuffer.wrap(new byte[]{8});
   }
 
 }

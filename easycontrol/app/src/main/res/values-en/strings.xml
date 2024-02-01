@@ -4,13 +4,15 @@
   <string name="app_name_dev">EasyControlDev</string>
 
   <!-- 主页 -->
-  <string name="main_poem">One Day I\'ll Fly Away,leave all this to yesterday</string>
+  <string name="main_poem">Celebrate The New Year !</string>
   <string name="main_float_permission">Please grant hover window privileges</string>
 
   <!-- 设置页面 -->
   <string name="set_center">Login</string>
   <string name="set_default">Default</string>
   <string name="set_display">Display</string>
+  <string name="set_display_auto_wake">Auto wake controlled</string>
+  <string name="set_display_auto_wake_detail">Automatically wake up the device after successful connection</string>
   <string name="set_display_keep_screen_awake">Keep controlled awake</string>
   <string name="set_display_keep_screen_awake_detail">The controlled end is not locked during the connection</string>
   <string name="set_display_auto_back_on_start_default">Open default and return</string>
@@ -89,7 +91,6 @@
   <string name="error_refused_back">The full screen status will intercept the return</string>
   <string name="error_connect_server">Failed to connect</string>
   <string name="error_stream_closed">Disconnect</string>
-  <string name="error_cloud_error">Failed to connect to the cloud service. Check the cloud service address</string>
 
   <!-- 设备参数设置及注释说明 -->
   <string name="option_is_audio">Enable audio</string>

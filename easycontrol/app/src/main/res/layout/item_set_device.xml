@@ -10,9 +10,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="25dp"
-    android:layout_marginTop="25dp"
+    android:layout_marginTop="20dp"
     android:layout_marginEnd="25dp"
-    android:layout_marginBottom="15dp"
+    android:layout_marginBottom="20dp"
     android:text="@string/set_device_title"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/middleFont" />
@@ -20,13 +20,16 @@
   <GridLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:columnCount="3"
-    android:padding="12dp">
+    android:layout_marginStart="10dp"
+    android:layout_marginEnd="10dp"
+    android:layout_marginBottom="20dp"
+    android:columnCount="3">
 
     <Button
       android:id="@+id/button_change"
       android:layout_columnWeight="9"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="5dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/alert"
       android:gravity="center"
@@ -39,6 +42,8 @@
     <Button
       android:id="@+id/button_delete"
       android:layout_columnWeight="9"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="5dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/alert"
       android:gravity="center"
@@ -46,25 +51,11 @@
       android:textColor="@color/onAlert"
       android:textSize="@dimen/smallFont" />
 
-    <Space
-      android:layout_height="10dp"
-      android:layout_columnSpan="3" />
-
-    <Button
-      android:id="@+id/button_recover"
-      android:layout_columnWeight="9"
-      android:background="@drawable/background_cron"
-      android:backgroundTint="@color/button"
-      android:gravity="center"
-      android:text="@string/set_device_button_recover"
-      android:textColor="@color/onButton"
-      android:textSize="@dimen/smallFont" />
-
-    <Space android:layout_columnWeight="1" />
-
     <Button
       android:id="@+id/button_get_uuid"
       android:layout_columnWeight="9"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="5dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"
       android:gravity="center"
@@ -72,13 +63,25 @@
       android:textColor="@color/onButton"
       android:textSize="@dimen/smallFont" />
 
-    <Space
-      android:layout_height="10dp"
-      android:layout_columnSpan="3" />
+    <Space android:layout_columnWeight="1" />
+
+    <Button
+      android:id="@+id/button_recover"
+      android:layout_columnWeight="9"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="5dp"
+      android:background="@drawable/background_cron"
+      android:backgroundTint="@color/button"
+      android:gravity="center"
+      android:text="@string/set_device_button_recover"
+      android:textColor="@color/onButton"
+      android:textSize="@dimen/smallFont" />
 
     <Button
       android:id="@+id/button_set_default"
       android:layout_columnWeight="9"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="5dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"
       android:gravity="center"
@@ -91,6 +94,8 @@
     <Button
       android:id="@+id/button_start_wireless"
       android:layout_columnWeight="9"
+      android:layout_marginTop="5dp"
+      android:layout_marginBottom="5dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/button"
       android:gravity="center"

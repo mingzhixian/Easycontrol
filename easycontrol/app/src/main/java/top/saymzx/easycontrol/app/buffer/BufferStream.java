@@ -14,26 +14,23 @@ public class BufferStream {
 
   // canWrite的设立，是为了兼容某些底层连接不能随时发送，例如adb协议规定需等待对方回复确认后才可以开始下一次发送，因此使用canWrite限制发送
   // canMultipleSend的设立，是为了兼容某些上层应用需逐次发送的场景，即上层的一次写入对应底层的一次写入，不会将上层多次写入合并在一起写入底层连接
-  public BufferStream(boolean canWrite, boolean canMultipleSend, UnderlySocketFunction underlySocketFunction) {
+  public BufferStream(boolean canWrite, boolean canMultipleSend, UnderlySocketFunction underlySocketFunction) throws Exception {
     this.canWrite = canWrite;
     this.canMultipleSend = canMultipleSend;
     this.underlySocketFunction = underlySocketFunction;
+    underlySocketFunction.connect(this);
   }
 
-  public BufferStream(boolean canWrite, UnderlySocketFunction underlySocketFunction) {
-    this.canWrite = canWrite;
-    this.canMultipleSend = true;
-    this.underlySocketFunction = underlySocketFunction;
+  public BufferStream(boolean canWrite, UnderlySocketFunction underlySocketFunction) throws Exception {
+    this(canWrite, true, underlySocketFunction);
   }
 
-  public BufferStream(UnderlySocketFunction underlySocketFunction) {
-    this.canWrite = true;
-    this.canMultipleSend = true;
-    this.underlySocketFunction = underlySocketFunction;
+  public BufferStream(UnderlySocketFunction underlySocketFunction) throws Exception {
+    this(true, true, underlySocketFunction);
   }
 
-  public void pushSource(byte[] bytes) throws IOException {
-    if (bytes != null) source.write(ByteBuffer.wrap(bytes));
+  public void pushSource(ByteBuffer byteBuffer) {
+    if (byteBuffer != null) source.write(byteBuffer);
   }
 
   public byte readByte() throws InterruptedException, IOException {
@@ -53,12 +50,16 @@ public class BufferStream {
   }
 
   public ByteBuffer readAllBytes() throws InterruptedException, IOException {
-    return readByteArray(source.getSize());
+    return readByteArray(getSize());
   }
 
   public ByteBuffer readByteArray(int size) throws InterruptedException, IOException {
-    if (isClosed && size > getSize()) throw new IOException("connection is closed");
+    if (isClosed) throw new IOException("connection is closed");
     return source.read(size);
+  }
+
+  public ByteBuffer readByteArrayBeforeClose() {
+    return source.readByteArrayBeforeClose();
   }
 
   public void write(ByteBuffer byteBuffer) throws Exception {
@@ -68,12 +69,13 @@ public class BufferStream {
   }
 
   public void setCanWrite(boolean canWrite) throws Exception {
+    if (isClosed) return;
     this.canWrite = canWrite;
     if (canWrite) pollSink();
   }
 
   private synchronized void pollSink() throws Exception {
-    if (canWrite && !sink.isEmpty()) underlySocketFunction.write(canMultipleSend ? sink.read(sink.getSize()) : sink.readNext());
+    if (canWrite && !sink.isEmpty()) underlySocketFunction.write(this, canMultipleSend ? sink.read(sink.getSize()) : sink.readNext());
   }
 
   public boolean isEmpty() {
@@ -88,14 +90,28 @@ public class BufferStream {
     return isClosed;
   }
 
+  public void flush() throws Exception {
+    underlySocketFunction.flush(this);
+  }
+
   public void close() {
+    if (isClosed) return;
     isClosed = true;
-    underlySocketFunction.close();
+    source.close();
+    sink.close();
+    try {
+      underlySocketFunction.close(this);
+    } catch (Exception ignored) {
+    }
   }
 
   public interface UnderlySocketFunction {
-    void write(ByteBuffer buffer) throws Exception;
+    void connect(BufferStream bufferStream) throws Exception;
 
-    void close();
+    void write(BufferStream bufferStream, ByteBuffer buffer) throws Exception;
+
+    void flush(BufferStream bufferStream) throws Exception;
+
+    void close(BufferStream bufferStream) throws Exception;
   }
 }

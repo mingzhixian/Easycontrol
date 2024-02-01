@@ -2,15 +2,16 @@
 <resources>
   <string name="app_name">易控</string>
   <string name="app_name_dev">易控测试版</string>
-
   <!-- 主页 -->
-  <string name="main_poem">风乍起，吹皱一池春水</string>
+  <string name="main_poem">愿得长如此，年年物候新</string>
   <string name="main_float_permission">请授予悬浮窗权限</string>
 
   <!-- 设置页面 -->
   <string name="set_center">登录账号</string>
   <string name="set_default">默认参数</string>
   <string name="set_display">显示</string>
+  <string name="set_display_auto_wake">连接时自动唤醒</string>
+  <string name="set_display_auto_wake_detail">连接成功后自动唤醒设备</string>
   <string name="set_display_keep_screen_awake">被控端保持唤醒</string>
   <string name="set_display_keep_screen_awake_detail">连接过程中被控端不锁定（即修改自动锁定时间）</string>
   <string name="set_display_auto_back_on_start_default">打开默认后返回</string>
@@ -49,7 +50,7 @@
 
   <!-- 激活页面 -->
   <string name="active_url">前往捐赠地址</string>
-  <string name="active_key">捐赠订单号: 35元及以上</string>
+  <string name="active_key">捐赠订单号: 35元及以上 \n * 2024.2.1-2024.2.15 期间10元</string>
   <string name="active_button">激活</string>
   <string name="active_key_hint">
     * 捐赠后将于24小时内录入系统，请耐心等待 \n
@@ -89,7 +90,6 @@
   <string name="error_refused_back">全屏状态会拦截返回</string>
   <string name="error_connect_server">连接被控端失败</string>
   <string name="error_stream_closed">连接断开</string>
-  <string name="error_cloud_error">连接云服务失败，请检查云服务地址</string>
 
   <!-- 设备参数设置及注释说明 -->
   <string name="option_is_audio">使能音频</string>

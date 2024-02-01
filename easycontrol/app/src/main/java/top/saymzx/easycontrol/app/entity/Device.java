@@ -19,11 +19,11 @@ public class Device {
   public boolean useH265;
   public boolean useOpus;
   public int small_x;
-  public static int SMALL_X = 100;
+  public static int SMALL_X = 200;
   public int small_y;
-  public static int SMALL_Y = 100;
+  public static int SMALL_Y = 200;
   public int small_length;
-  public static int SMALL_LENGTH = 0;
+  public static int SMALL_LENGTH = 800;
   public int mini_y;
   public static int MINI_Y = 200;
 

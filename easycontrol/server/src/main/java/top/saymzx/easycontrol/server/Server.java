@@ -4,18 +4,17 @@
 package top.saymzx.easycontrol.server;
 
 import android.annotation.SuppressLint;
-import android.net.LocalServerSocket;
-import android.net.LocalSocket;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.system.ErrnoException;
-import android.system.Os;
 
 import java.io.DataInputStream;
-import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -32,10 +31,10 @@ import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 // 此部分代码摘抄借鉴了著名投屏软件Scrcpy的开源代码(https://github.com/Genymobile/scrcpy/tree/master/server)
 public final class Server {
-  private static LocalSocket mainSocket;
-  private static LocalSocket videoSocket;
-  private static FileDescriptor mainFileDescriptor;
-  private static FileDescriptor videoFileDescriptor;
+  private static Socket mainSocket;
+  private static Socket videoSocket;
+  private static OutputStream mainOutputStream;
+  private static OutputStream videoOutputStream;
   public static DataInputStream mainInputStream;
 
   private static final Object object = new Object();
@@ -74,6 +73,7 @@ public final class Server {
       for (Thread thread : threads) thread.start();
       // 程序运行
       timeOutThread.interrupt();
+      if (Options.autoWake) Device.changePowerToWake();
       synchronized (object) {
         object.wait();
       }
@@ -121,11 +121,13 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    try (LocalServerSocket serverSocket = new LocalServerSocket("easycontrol")) {
+    try (ServerSocket serverSocket = new ServerSocket(25166)) {
       mainSocket = serverSocket.accept();
       videoSocket = serverSocket.accept();
-      mainFileDescriptor = mainSocket.getFileDescriptor();
-      videoFileDescriptor = videoSocket.getFileDescriptor();
+      mainSocket.setTcpNoDelay(true);
+      videoSocket.setTcpNoDelay(true);
+      mainOutputStream = mainSocket.getOutputStream();
+      videoOutputStream = videoSocket.getOutputStream();
       mainInputStream = new DataInputStream(mainSocket.getInputStream());
     }
   }
@@ -201,13 +203,13 @@ public final class Server {
   }
 
   public static void writeMain(ByteBuffer byteBuffer) throws IOException, ErrnoException {
-    synchronized (mainFileDescriptor) {
-      while (byteBuffer.remaining() > 0) Os.write(mainFileDescriptor, byteBuffer);
+    synchronized (mainOutputStream) {
+      mainOutputStream.write(byteBuffer.array());
     }
   }
 
   public static void writeVideo(ByteBuffer byteBuffer) throws IOException, ErrnoException {
-    while (byteBuffer.remaining() > 0) Os.write(videoFileDescriptor, byteBuffer);
+    videoOutputStream.write(byteBuffer.array());
   }
 
   public static void errorClose(Exception e) {

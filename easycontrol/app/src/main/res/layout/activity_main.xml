@@ -1,69 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@color/background"
-  android:orientation="vertical">
+  android:background="@color/background">
+
+  <ImageView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:alpha="0.5"
+    android:padding="15dp"
+    android:src="@drawable/chinese_long" />
 
   <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingTop="5dp"
-    android:paddingBottom="15dp">
-
-    <ImageView
-      android:id="@+id/button_set"
-      android:layout_width="54dp"
-      android:layout_height="54dp"
-      android:padding="15dp"
-      android:src="@drawable/bars"
-      android:tint="@color/onBackground" />
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
-      android:layout_width="0dp"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:orientation="vertical">
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:paddingTop="5dp"
+      android:paddingBottom="15dp">
 
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/largeFont" />
+      <ImageView
+        android:id="@+id/button_set"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:padding="15dp"
+        android:src="@drawable/bars"
+        android:tint="@color/onBackground" />
 
-      <TextView
-        android:layout_width="match_parent"
+      <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/main_poem"
-        android:textColor="@color/onBackgroundSecond"
-        android:textSize="@dimen/smallSmallFont" />
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/app_name"
+          android:textColor="@color/onBackground"
+          android:textSize="@dimen/largeFont" />
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/main_poem"
+          android:textColor="@color/onBackgroundSecond"
+          android:textSize="@dimen/smallSmallFont" />
+      </LinearLayout>
+
+      <ImageView
+        android:id="@+id/button_add"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:padding="15dp"
+        android:src="@drawable/plus"
+        android:tint="@color/onBackground" />
+
     </LinearLayout>
 
-    <ImageView
-      android:id="@+id/button_add"
-      android:layout_width="54dp"
-      android:layout_height="54dp"
-      android:padding="15dp"
-      android:src="@drawable/plus"
-      android:tint="@color/onBackground" />
+    <ListView
+      android:id="@+id/devices_list"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:clipToPadding="false"
+      android:divider="#00000000"
+      android:dividerHeight="10dp"
+      android:paddingStart="15dp"
+      android:paddingEnd="15dp"
+      android:paddingBottom="60dp"
+      tools:listitem="@layout/item_devices_item" />
 
   </LinearLayout>
+</FrameLayout>
 
-  <ListView
-    android:id="@+id/devices_list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipToPadding="false"
-    android:divider="#00000000"
-    android:dividerHeight="10dp"
-    android:paddingStart="15dp"
-    android:paddingEnd="15dp"
-    android:paddingBottom="60dp"
-    tools:listitem="@layout/item_devices_item" />
-
-</LinearLayout>

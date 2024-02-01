@@ -47,12 +47,10 @@ public final class AudioEncode {
     encedec = MediaCodec.createEncoderByType(codecMime);
     MediaFormat encodecFormat = MediaFormat.createAudioFormat(codecMime, AudioCapture.SAMPLE_RATE, AudioCapture.CHANNELS);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
-    encodecFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, frameSize);
+    encodecFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, AudioCapture.AUDIO_PACKET_SIZE);
     if (!useOpus) encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
   }
-
-  private static final int frameSize = AudioCapture.millisToBytes(20);
 
   public static void encodeIn() {
     try {
@@ -60,7 +58,7 @@ public final class AudioEncode {
       do inIndex = encedec.dequeueInputBuffer(-1); while (inIndex < 0);
       ByteBuffer buffer = encedec.getInputBuffer(inIndex);
       if (buffer == null) return;
-      int size = Math.min(buffer.remaining(), frameSize);
+      int size = Math.min(buffer.remaining(), AudioCapture.AUDIO_PACKET_SIZE);
       audioCapture.read(buffer, size);
       encedec.queueInputBuffer(inIndex, 0, size, 0, 0);
     } catch (IllegalStateException ignored) {
@@ -88,7 +86,7 @@ public final class AudioEncode {
           return;
         }
       }
-      ControlPacket.sendAudioEvent(buffer.remaining(), buffer);
+      ControlPacket.sendAudioEvent(buffer);
       encedec.releaseOutputBuffer(outIndex, false);
     } catch (IllegalStateException ignored) {
     }
@@ -96,10 +94,10 @@ public final class AudioEncode {
 
   public static void release() {
     try {
-      audioCapture.stop();
-      audioCapture.release();
       encedec.stop();
       encedec.release();
+      audioCapture.stop();
+      audioCapture.release();
     } catch (Exception ignored) {
     }
   }

@@ -9,38 +9,47 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Pair;
-import android.view.Display;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import java.nio.ByteBuffer;
+
 import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.ClientController;
+import top.saymzx.easycontrol.app.client.ControlPacket;
 import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
+import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
+import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class FullActivity extends Activity implements SensorEventListener {
-  private ClientView clientView;
+  private boolean isClose = false;
+  private Device device;
   private ActivityFullBinding fullActivity;
+  private boolean autoRotate;
+  private boolean light = true;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    PublicTools.setLocale(this);
+    ViewTools.setLocale(this);
     fullActivity = ActivityFullBinding.inflate(this.getLayoutInflater());
     setContentView(fullActivity.getRoot());
-    clientView = Client.allClient.get(getIntent().getIntExtra("index", 0)).clientView;
-    clientView.setFullView(this);
+    device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
+    ClientController.setFullView(device.uuid, this);
     // 初始化
     fullActivity.barView.setVisibility(View.GONE);
     setNavBarHide(AppData.setting.getDefaultShowNavBar());
+    autoRotate = AppData.setting.getAutoRotate();
+    fullActivity.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
     // 按键监听
     setButtonListener();
     setKeyEvent();
     // 更新textureView
-    fullActivity.textureViewLayout.addView(clientView.textureView, 0);
-    fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
+    fullActivity.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
+    fullActivity.textureViewLayout.post(() -> updateMaxSize(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight()));
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     super.onCreate(savedInstanceState);
@@ -49,33 +58,41 @@ public class FullActivity extends Activity implements SensorEventListener {
   @Override
   protected void onPause() {
     AppData.sensorManager.unregisterListener(this);
-    if (isChangingConfigurations()) fullActivity.textureViewLayout.removeView(clientView.textureView);
-    else if (clientView != null) clientView.changeToMini();
+    if (isChangingConfigurations()) fullActivity.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+    else if (!isClose) ClientController.handleControll(device.uuid, "changeToMini", null);
     super.onPause();
   }
 
   @Override
   protected void onResume() {
-    PublicTools.setFullScreen(this);
+    ViewTools.setFullScreen(this);
     super.onResume();
   }
 
   @Override
   public void onMultiWindowModeChanged(boolean isInMultiWindowMode, Configuration newConfig) {
-    fullActivity.textureViewLayout.post(() -> clientView.updateMaxSize(new Pair<>(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight())));
+    fullActivity.textureViewLayout.post(() -> updateMaxSize(fullActivity.textureViewLayout.getMeasuredWidth(), fullActivity.textureViewLayout.getMeasuredHeight()));
     super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
   }
 
   @Override
   public void onBackPressed() {
-    Toast.makeText(AppData.main, getString(R.string.error_refused_back), Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, getString(R.string.error_refused_back), Toast.LENGTH_SHORT).show();
+  }
+
+  private void updateMaxSize(int w, int h) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+    byteBuffer.putInt(w);
+    byteBuffer.putInt(h);
+    byteBuffer.flip();
+    ClientController.handleControll(device.uuid, "updateMaxSize", byteBuffer);
   }
 
   public void hide() {
     try {
-      fullActivity.textureViewLayout.removeView(clientView.textureView);
-      clientView.setFullView(null);
-      clientView = null;
+      fullActivity.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+      ClientController.setFullView(device.uuid, null);
+      isClose = true;
       finish();
     } catch (Exception ignored) {
     }
@@ -83,38 +100,40 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   // 获取去除底部操作栏后的屏幕大小，用于修改分辨率使用
   public static float getResolution() {
-    return (float) AppData.realScreenSize.widthPixels / (float) (AppData.realScreenSize.heightPixels - PublicTools.dp2px(35f));
+    DisplayMetrics screenSize = PublicTools.getScreenSize();
+    int min = Math.min(screenSize.widthPixels, screenSize.heightPixels);
+    int max = Math.max(screenSize.widthPixels, screenSize.heightPixels);
+    return (float) min / (float) (max - PublicTools.dp2px(35f));
   }
 
   // 设置按钮监听
   private void setButtonListener() {
-    fullActivity.buttonRotate.setOnClickListener(v -> clientView.controlPacket.sendRotateEvent());
-    fullActivity.buttonBack.setOnClickListener(v -> clientView.controlPacket.sendKeyEvent(4, 0));
-    fullActivity.buttonHome.setOnClickListener(v -> clientView.controlPacket.sendKeyEvent(3, 0));
-    fullActivity.buttonSwitch.setOnClickListener(v -> clientView.controlPacket.sendKeyEvent(187, 0));
-    fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
+    fullActivity.buttonRotate.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
+    fullActivity.buttonBack.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
+    fullActivity.buttonHome.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
+    fullActivity.buttonSwitch.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
     fullActivity.buttonNavBar.setOnClickListener(v -> {
       setNavBarHide(fullActivity.navBar.getVisibility() == View.GONE);
       changeBarView();
     });
-    fullActivity.buttonMini.setOnClickListener(v -> clientView.changeToMini());
-    fullActivity.buttonFullExit.setOnClickListener(v -> clientView.changeToSmall());
-    fullActivity.buttonClose.setOnClickListener(v -> clientView.onClose.run());
+    fullActivity.buttonMini.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
+    fullActivity.buttonSmall.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
+    fullActivity.buttonClose.setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
     fullActivity.buttonLight.setOnClickListener(v -> {
-      clientView.controlPacket.sendLightEvent(Display.STATE_ON);
-      changeBarView();
-    });
-    fullActivity.buttonLightOff.setOnClickListener(v -> {
-      clientView.controlPacket.sendLightEvent(Display.STATE_UNKNOWN);
+      light = !light;
+      fullActivity.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
+      ClientController.handleControll(device.uuid, light ? "buttonLight" : "buttonLightOff", null);
       changeBarView();
     });
     fullActivity.buttonPower.setOnClickListener(v -> {
-      clientView.controlPacket.sendPowerEvent();
+      ClientController.handleControll(device.uuid, "buttonPower", null);
       changeBarView();
     });
-    fullActivity.buttonLock.setOnClickListener(v -> {
-      lockOrientation = !lockOrientation;
-      fullActivity.buttonLock.setImageResource(lockOrientation ? R.drawable.unlock : R.drawable.lock);
+    fullActivity.buttonMore.setOnClickListener(v -> changeBarView());
+    fullActivity.buttonAutoRotate.setOnClickListener(v -> {
+      autoRotate = !autoRotate;
+      AppData.setting.setAutoRotate(autoRotate);
+      fullActivity.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
       changeBarView();
     });
   }
@@ -128,18 +147,17 @@ public class FullActivity extends Activity implements SensorEventListener {
   private void changeBarView() {
     boolean toShowView = fullActivity.barView.getVisibility() == View.GONE;
     boolean isLandscape = lastOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || lastOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-    clientView.viewAnim(fullActivity.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
+    ViewTools.viewAnim(fullActivity.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
       if (isStart && toShowView) fullActivity.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) fullActivity.barView.setVisibility(View.GONE);
     }));
   }
 
-  private boolean lockOrientation = false;
   private int lastOrientation = -1;
 
   @Override
   public void onSensorChanged(SensorEvent sensorEvent) {
-    if (lockOrientation || Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()) return;
+    if (!autoRotate || Sensor.TYPE_ACCELEROMETER != sensorEvent.sensor.getType()) return;
     float[] values = sensorEvent.values;
     float x = values[0];
     float y = values[1];
@@ -167,7 +185,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     fullActivity.editText.setInputType(InputType.TYPE_NULL);
     fullActivity.editText.setOnKeyListener((v, keyCode, event) -> {
       if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
-        clientView.controlPacket.sendKeyEvent(event.getKeyCode(), event.getMetaState());
+        ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
         return true;
       }
       return false;

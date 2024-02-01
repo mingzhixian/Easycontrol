@@ -15,7 +15,7 @@ import android.os.Build;
 import java.util.Map;
 import java.util.Objects;
 
-import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.ClientController;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 
@@ -48,7 +48,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
     if (ACTION_SCREEN_OFF.equals(action)) handleScreenOff();
-    else if (ACTION_CONTROL.equals(action)) handleControl(intent);
+    else if (ACTION_CONTROL.equals(action)) handleControl(context, intent);
     else handleUSB(context, intent);
   }
 
@@ -57,37 +57,20 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   }
 
   private void handleScreenOff() {
-    for (Client client : Client.allClient) client.release(null);
+    for (Device device : deviceListAdapter.devicesList) ClientController.handleControll(device.uuid, "close", null);
   }
 
-  private void handleControl(Intent intent) {
+  private void handleControl(Context context, Intent intent) {
     String action = intent.getStringExtra("action");
     if (action == null) return;
     if (action.equals("startDefault")) {
-      startDefault();
+      startDefault(context);
       return;
     }
     String uuid = intent.getStringExtra("uuid");
     if (uuid == null) return;
     if (action.equals("start")) deviceListAdapter.startByUUID(uuid);
-    else {
-      for (Client client : Client.allClient) {
-        if (Objects.equals(client.uuid, uuid)) {
-          if (action.equals("changeToSmall")) client.clientView.changeToSmall();
-          else if (action.equals("changeToFull")) client.clientView.changeToFull();
-          else if (action.equals("changeToMini")) client.clientView.changeToMini();
-          else if (action.equals("buttonPower")) client.controlPacket.sendPowerEvent();
-          else if (action.equals("buttonLight")) client.controlPacket.sendLightEvent(1);
-          else if (action.equals("buttonLightOff")) client.controlPacket.sendLightEvent(0);
-          else if (action.equals("buttonBack")) client.controlPacket.sendKeyEvent(4, 0);
-          else if (action.equals("buttonHome")) client.controlPacket.sendKeyEvent(3, 0);
-          else if (action.equals("buttonSwitch")) client.controlPacket.sendKeyEvent(187, 0);
-          else if (action.equals("buttonRotate")) client.controlPacket.sendRotateEvent();
-          else if (action.equals("close")) client.release(null);
-          return;
-        }
-      }
-    }
+    else ClientController.handleControll(uuid, action, null);
   }
 
   private void handleUSB(Context context, Intent intent) {
@@ -100,7 +83,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   }
 
   // 启动默认设备
-  public void startDefault() {
+  public void startDefault(Context context) {
     String defaultDevice = AppData.setting.getDefaultDevice();
     if (!defaultDevice.equals("")) {
       for (Device device : deviceListAdapter.devicesList) {
@@ -110,7 +93,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
           if (AppData.setting.getAutoBackOnStartDefault()) {
             Intent home = new Intent(Intent.ACTION_MAIN);
             home.addCategory(Intent.CATEGORY_HOME);
-            AppData.main.startActivity(home);
+            context.startActivity(home);
           }
         }
       }
@@ -119,13 +102,13 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 
   // 检查已连接设备
   public void checkConnectedUsb(Context context) {
-    if (AppData.usbManager==null)return;
+    if (AppData.usbManager == null) return;
     for (Map.Entry<String, UsbDevice> entry : AppData.usbManager.getDeviceList().entrySet()) onConnectUsb(context, entry.getValue());
   }
 
   // 请求USB设备权限
   private void onConnectUsb(Context context, UsbDevice usbDevice) {
-    if (AppData.usbManager==null)return;
+    if (AppData.usbManager == null) return;
     PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
     AppData.usbManager.requestPermission(usbDevice, permissionIntent);
   }

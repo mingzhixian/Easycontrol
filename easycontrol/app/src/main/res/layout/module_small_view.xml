@@ -18,7 +18,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="25dp"
+    android:layout_marginTop="24dp"
     android:background="@drawable/background_cron"
     android:orientation="vertical">
 
@@ -44,7 +44,7 @@
         android:layout_weight="1"
         android:focusable="false"
         android:padding="2dp"
-        android:src="@drawable/rotate"
+        android:src="@drawable/horizontal_rotate"
         android:tint="@color/onCardBackground" />
 
       <ImageView
@@ -105,7 +105,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="35dp"
+    android:layout_marginTop="30dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"
     android:elevation="6dp"
@@ -153,15 +153,6 @@
       android:layout_height="24dp"
       android:layout_margin="2dp"
       android:focusable="false"
-      android:src="@drawable/lightbulb"
-      android:tint="@color/onCardBackground" />
-
-    <ImageView
-      android:id="@+id/button_light_off"
-      android:layout_width="24dp"
-      android:layout_height="24dp"
-      android:layout_margin="2dp"
-      android:focusable="false"
       android:src="@drawable/lightbulb_off"
       android:tint="@color/onCardBackground" />
 
@@ -171,10 +162,8 @@
       android:layout_height="24dp"
       android:layout_margin="2dp"
       android:focusable="false"
-      android:src="@drawable/power_off"
+      android:src="@drawable/power"
       android:tint="@color/onCardBackground" />
-
-
   </GridLayout>
 
   <View

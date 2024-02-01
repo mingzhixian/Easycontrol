@@ -108,6 +108,24 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getAutoWake() {
+    return sharedPreferences.getBoolean("autoWake", true);
+  }
+
+  public void setAutoWake(boolean value) {
+    editor.putBoolean("autoWake", value);
+    editor.apply();
+  }
+
+  public boolean getAutoRotate() {
+    return sharedPreferences.getBoolean("autoRotate", true);
+  }
+
+  public void setAutoRotate(boolean value) {
+    editor.putBoolean("autoRotate", value);
+    editor.apply();
+  }
+
   public boolean getAutoBackOnStartDefault() {
     return sharedPreferences.getBoolean("autoBackOnStartDefault", false);
   }

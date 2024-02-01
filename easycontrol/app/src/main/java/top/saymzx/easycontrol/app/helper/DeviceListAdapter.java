@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.ClientStream;
 import top.saymzx.easycontrol.app.databinding.ItemDevicesItemBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSetDeviceBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -80,7 +81,7 @@ public class DeviceListAdapter extends BaseAdapter {
   // 卡片长按事件
   private void onLongClickCard(Device device) {
     ItemSetDeviceBinding itemSetDeviceBinding = ItemSetDeviceBinding.inflate(LayoutInflater.from(context));
-    Dialog dialog = PublicTools.createDialog(context, true, itemSetDeviceBinding.getRoot());
+    Dialog dialog = ViewTools.createDialog(context, true, itemSetDeviceBinding.getRoot());
     // 有线设备
     if (device.isLinkDevice()) {
       itemSetDeviceBinding.buttonStartWireless.setVisibility(View.VISIBLE);
@@ -88,7 +89,7 @@ public class DeviceListAdapter extends BaseAdapter {
         dialog.cancel();
         UsbDevice usbDevice = linkDevices.get(device.uuid);
         if (usbDevice == null) return;
-        Client.restartOnTcpip(device, usbDevice, result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_start_wireless_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+        ClientStream.restartOnTcpip(device, usbDevice, result -> AppData.uiHandler.post(() -> Toast.makeText(context, context.getString(result ? R.string.set_device_button_start_wireless_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
       });
     } else itemSetDeviceBinding.buttonStartWireless.setVisibility(View.GONE);
     itemSetDeviceBinding.buttonRecover.setOnClickListener(v -> {
@@ -96,8 +97,8 @@ public class DeviceListAdapter extends BaseAdapter {
       if (device.isLinkDevice()) {
         UsbDevice usbDevice = linkDevices.get(device.uuid);
         if (usbDevice == null) return;
-        Client.runOnceCmd(device, usbDevice, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
-      } else Client.runOnceCmd(device, null, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(AppData.main, AppData.main.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+        ClientStream.runOnceCmd(device, usbDevice, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(context, context.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
+      } else ClientStream.runOnceCmd(device, null, "wm size reset", result -> AppData.uiHandler.post(() -> Toast.makeText(context, context.getString(result ? R.string.set_device_button_recover_success : R.string.set_device_button_recover_error), Toast.LENGTH_SHORT).show()));
     });
     itemSetDeviceBinding.buttonSetDefault.setOnClickListener(v -> {
       dialog.cancel();
@@ -107,11 +108,11 @@ public class DeviceListAdapter extends BaseAdapter {
     itemSetDeviceBinding.buttonGetUuid.setOnClickListener(v -> {
       dialog.cancel();
       AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, device.uuid));
-      Toast.makeText(AppData.main, AppData.main.getString(R.string.set_device_button_get_uuid_success), Toast.LENGTH_SHORT).show();
+      Toast.makeText(context, context.getString(R.string.set_device_button_get_uuid_success), Toast.LENGTH_SHORT).show();
     });
     itemSetDeviceBinding.buttonChange.setOnClickListener(v -> {
       dialog.cancel();
-      PublicTools.createAddDeviceView(context, device, this).show();
+      ViewTools.createAddDeviceView(context, device, this).show();
     });
     itemSetDeviceBinding.buttonDelete.setOnClickListener(v -> {
       AppData.dbHelper.delete(device);

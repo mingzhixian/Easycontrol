@@ -26,19 +26,19 @@ public class AdbKeyPair {
     this.publicKeyBytes = publicKeyBytes;
   }
 
-  public byte[] signPayload(byte[] payload) throws Exception {
+  public byte[] signPayload(ByteBuffer payload) throws Exception {
     if (payload == null) return new byte[]{0};
     Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
     cipher.init(Cipher.ENCRYPT_MODE, privateKey);
     cipher.update(SIGNATURE_PADDING);
-    return cipher.doFinal(payload);
+    return cipher.doFinal(payload.array());
   }
 
   public static void setAdbBase64(AdbBase64 adbBase64) {
     AdbKeyPair.adbBase64 = adbBase64;
   }
 
-  public static AdbKeyPair read(File privateKey, File publicKey) throws Exception {
+  public static AdbKeyPair read(File publicKey,File privateKey) throws Exception {
     if (adbBase64 == null) throw new IOException("no adbBase64");
     byte[] publicKeyBytes = new byte[(int) publicKey.length() + 1];
     byte[] privateKeyBytes = new byte[(int) privateKey.length()];
@@ -59,7 +59,7 @@ public class AdbKeyPair {
     return new AdbKeyPair(tmpPrivateKey, publicKeyBytes);
   }
 
-  public static void generate(File privateKey, File publicKey) throws Exception {
+  public static void generate( File publicKey,File privateKey) throws Exception {
     if (adbBase64 == null) throw new IOException("no adbBase64");
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
     keyPairGenerator.initialize(KEY_LENGTH_BITS);

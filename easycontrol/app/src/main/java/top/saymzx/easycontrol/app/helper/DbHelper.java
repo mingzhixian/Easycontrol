@@ -15,7 +15,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 10;
+  private static final int version = 12;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -30,7 +30,7 @@ public class DbHelper extends SQLiteOpenHelper {
   @SuppressLint("Range")
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    if (oldVersion < 10) {
+    if (oldVersion < version) {
       // 获取旧数据
       ArrayList<Device> devices = getAll(db);
       // 修改表名
