@@ -22,6 +22,8 @@ public class Client {
 
   public Client(Device device, UsbDevice usbDevice) {
     this.device = device;
+    // 关闭旧的设备
+    ClientController.handleControll(device.uuid, "close", null);
     Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(AppData.applicationContext);
     AppData.windowManager.addView(loading.first, loading.second);
     // 连接

@@ -50,7 +50,7 @@
 
   <!-- 激活页面 -->
   <string name="active_url">前往捐赠地址</string>
-  <string name="active_key">捐赠订单号: 35元及以上 \n * 2024.2.1-2024.2.15 期间10元</string>
+  <string name="active_key">捐赠订单号: 35元及以上 \n * 2024.2.1-2024.2.15 期间30元</string>
   <string name="active_button">激活</string>
   <string name="active_key_hint">
     * 捐赠后将于24小时内录入系统，请耐心等待 \n

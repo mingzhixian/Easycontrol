@@ -12,7 +12,7 @@
     android:layout_gravity="center"
     android:alpha="0.5"
     android:padding="15dp"
-    android:src="@drawable/chinese_long" />
+    android:src="@drawable/chinese_jili" />
 
   <LinearLayout
     android:layout_width="match_parent"

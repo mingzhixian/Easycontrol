@@ -5,6 +5,7 @@
 
 ## 激活
 请捐赠35元（5美元）及以上后，保存捐赠订单号，我们将在24小时内录入系统中，届时您可以通过输入订单号激活软件。
+* 2024.2.1-2024.2.15 期间30元
 订单号位置：
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/order_wechat.webp" width="200px">
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/tips/order_alipay.webp" width="200px">
