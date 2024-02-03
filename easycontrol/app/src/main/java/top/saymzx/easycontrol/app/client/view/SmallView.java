@@ -252,7 +252,7 @@ public class SmallView extends ViewOutlineProvider {
     if (width > screenMaxWidth || height > screenMaxHeight) {
       int maxLength = Math.min(screenMaxWidth, screenMaxHeight);
       updateMaxSize(maxLength, maxLength);
-      updateSite(50, statusBarHeight / 2);
+      updateSite(50, statusBarHeight + 10);
       return;
     }
     // 检测到位置超出过多

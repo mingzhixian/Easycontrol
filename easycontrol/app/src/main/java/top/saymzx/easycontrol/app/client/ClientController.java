@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -166,7 +167,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   }
 
   private void updateVideoSize(ByteBuffer byteBuffer) {
-    this.videoSize = new Pair<>(byteBuffer.getInt(), byteBuffer.getInt());
+    int width = byteBuffer.getInt();
+    int height = byteBuffer.getInt();
+    if (width <= 100 || height <= 100) return;
+    this.videoSize = new Pair<>(width, height);
     AppData.uiHandler.post(this::reCalculateTextureViewSize);
   }
 
@@ -188,7 +192,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   // 检查画面是否超出
   private void checkSizeAndSite() {
-    smallView.checkSizeAndSite();
+    // 碎碎念，感谢 波瑠卡 的关爱，今天一家四口一起去医院进年货去了，每人提了一袋子(´；ω；`)
+    AppData.uiHandler.post(smallView::checkSizeAndSite);
   }
 
   // 设置视频区域触摸监听

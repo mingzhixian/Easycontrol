@@ -4,6 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 
