@@ -24,8 +24,8 @@
 
     <FrameLayout
       android:id="@+id/texture_view_layout"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+      android:layout_width="200dp"
+      android:layout_height="200dp"
       android:elevation="8dp" />
 
     <LinearLayout
@@ -90,7 +90,6 @@
     android:layout_width="120dp"
     android:layout_height="20dp"
     android:layout_gravity="top|center_horizontal">
-
     <View
       android:layout_width="60dp"
       android:layout_height="5dp"
