@@ -14,6 +14,7 @@ import top.saymzx.easycontrol.app.BuildConfig;
 import top.saymzx.easycontrol.app.R;
 import top.saymzx.easycontrol.app.adb.Adb;
 import top.saymzx.easycontrol.app.buffer.BufferStream;
+import top.saymzx.easycontrol.app.client.decode.DecodecTools;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.entity.MyInterface;
@@ -33,8 +34,8 @@ public class ClientStream {
   private BufferStream shell;
   private Thread connectThread = null;
   private static final String serverName = "/data/local/tmp/easycontrol_server_" + BuildConfig.VERSION_CODE + ".jar";
-  private static final boolean supportH265 = PublicTools.isDecoderSupport("hevc");
-  private static final boolean supportOpus = PublicTools.isDecoderSupport("opus");
+  private static final boolean supportH265 = DecodecTools.isSupportH265();
+  private static final boolean supportOpus = DecodecTools.isSupportOpus();
 
   public ClientStream(Device device, UsbDevice usbDevice, MyInterface.MyFunctionBoolean handle) {
     // 超时
@@ -82,10 +83,9 @@ public class ClientStream {
       + " isAudio=" + (device.isAudio ? 1 : 0) + " maxSize=" + device.maxSize
       + " maxFps=" + device.maxFps
       + " maxVideoBit=" + device.maxVideoBit
-      + " autoWake=" + (AppData.setting.getAutoWake() ? 1 : 0)
       + " keepAwake=" + (AppData.setting.getKeepAwake() ? 1 : 0)
-      + " useH265=" + ((device.useH265 && supportH265) ? 1 : 0)
-      + " useOpus=" + ((device.useOpus && supportOpus) ? 1 : 0) + " \n").getBytes()));
+      + " supportH265=" + ((device.useH265 && supportH265) ? 1 : 0)
+      + " supportOpus=" + (supportOpus ? 1 : 0) + " \n").getBytes()));
   }
 
   // 连接Server

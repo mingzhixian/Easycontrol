@@ -73,6 +73,12 @@
 	- 目标设备按下电源键：
 		action：buttonPower
 		uuid：设备ID
+	- 目标设备唤醒：
+		action：buttonWake
+		uuid：设备ID
+	- 目标设备锁定：
+		action：buttonLock
+		uuid：设备ID
 	- 目标设备打开背光：
 		action：buttonLight
 		uuid：设备ID
@@ -96,6 +102,4 @@
 		uuid：设备ID
 		
 ## 视频教程（视频版本更新较慢，请以文本说明为准）
-1. [视频1](https://www.bilibili.com/video/BV1Wu4y1u7vD/)
-2. [视频2](https://www.bilibili.com/video/BV11a4y1d7EU/)
-3. [视频3](https://www.bilibili.com/video/BV1Wa4y197tF/)
+1. [视频](https://www.bilibili.com/video/BV1V2421A7zf/)

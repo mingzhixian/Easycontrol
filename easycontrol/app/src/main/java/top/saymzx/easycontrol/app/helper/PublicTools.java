@@ -150,13 +150,6 @@ public class PublicTools {
     }
   }
 
-  // 获取解码器是否支持
-  public static boolean isDecoderSupport(String mimeName) {
-    MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (!mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains(mimeName)) return true;
-    return false;
-  }
-
   // 日志
   public static void logToast(String str) {
     Log.e("Easycontrol", str);

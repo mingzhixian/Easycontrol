@@ -82,8 +82,12 @@ public final class ControlPacket {
   }
 
   // 电源键事件
-  public static ByteBuffer createPowerEvent() {
-    return ByteBuffer.wrap(new byte[]{8});
+  public static ByteBuffer createPowerEvent(int mode) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(5);
+    byteBuffer.put((byte) 8);
+    byteBuffer.putInt(mode);
+    byteBuffer.flip();
+    return byteBuffer;
   }
 
 }

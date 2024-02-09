@@ -15,7 +15,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 12;
+  private static final int version = 14;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -24,7 +24,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t defaultFull integer," + "\t useH265 integer ," + "\t useOpus integer ," + "\t small_x integer ," + "\t small_y integer ," + "\t small_length integer ," + "\t mini_y integer " + ");");
+    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t useH265 integer ," + "\t small_x integer ," + "\t small_y integer ," + "\t small_length integer ," + "\t mini_y integer " + ");");
   }
 
   @SuppressLint("Range")
@@ -94,9 +94,7 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("maxFps", device.maxFps);
     values.put("maxVideoBit", device.maxVideoBit);
     values.put("setResolution", device.setResolution);
-    values.put("defaultFull", device.defaultFull);
     values.put("useH265", device.useH265);
-    values.put("useOpus", device.useOpus);
     values.put("small_x", device.small_x);
     values.put("small_y", device.small_y);
     values.put("small_length", device.small_length);
@@ -116,9 +114,7 @@ public class DbHelper extends SQLiteOpenHelper {
       cursor.getInt(cursor.getColumnIndex("maxFps")),
       cursor.getInt(cursor.getColumnIndex("maxVideoBit")),
       cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
-      cursor.getInt(cursor.getColumnIndex("defaultFull")) == 1,
       cursor.getColumnIndex("useH265") == -1 ? AppData.setting.getDefaultUseH265() : cursor.getInt(cursor.getColumnIndex("useH265")) == 1,
-      cursor.getColumnIndex("useOpus") == -1 ? AppData.setting.getDefaultUseOpus() : cursor.getInt(cursor.getColumnIndex("useOpus")) == 1,
       cursor.getColumnIndex("small_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_x")),
       cursor.getColumnIndex("small_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_y")),
       cursor.getColumnIndex("small_length") == -1 ? Device.SMALL_LENGTH : cursor.getInt(cursor.getColumnIndex("small_length")),

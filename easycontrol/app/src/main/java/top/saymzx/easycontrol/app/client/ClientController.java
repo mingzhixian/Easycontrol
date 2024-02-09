@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -64,35 +63,48 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     handlerThread.start();
     handler = new Handler(handlerThread.getLooper());
     // 启动界面
-    handleControll(device.uuid, device.defaultFull ? "changeToFull" : "changeToSmall", null);
+    handleControll(device.uuid, device.changeToFullOnConnect ? "changeToFull" : "changeToSmall", null);
+    // 运行启动时操作
+    if (AppData.setting.getWakeOnConnect()) handleControll(device.uuid, "buttonWake", null);
+    if (AppData.setting.getLightOffOnConnect()) handler.postDelayed(() -> handleControll(device.uuid, "buttonLightOff", null), 2000);
   }
 
   public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
     ClientController clientController = allController.get(uuid);
     if (clientController == null) return;
-    clientController.handler.post(() -> {
-      try {
-        if (action.equals("changeToSmall")) clientController.changeToSmall();
-        else if (action.equals("changeToFull")) clientController.changeToFull();
-        else if (action.equals("changeToMini")) clientController.changeToMini();
-        else if (action.equals("close")) clientController.close(null);
-        else if (action.equals("buttonPower")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent());
-        else if (action.equals("buttonLight")) clientController.clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_ON));
-        else if (action.equals("buttonLightOff")) clientController.clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_UNKNOWN));
-        else if (action.equals("buttonBack")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(4, 0));
-        else if (action.equals("buttonHome")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(3, 0));
-        else if (action.equals("buttonSwitch")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(187, 0));
-        else if (action.equals("buttonRotate")) clientController.clientStream.writeToMain(ControlPacket.createRotateEvent());
-        else if (action.equals("keepAlive")) clientController.clientStream.writeToMain(ControlPacket.createKeepAlive());
-        else if (action.equals("checkSizeAndSite")) clientController.checkSizeAndSite();
-        else if (byteBuffer == null) return;
-        else if (action.equals("writeByteBuffer")) clientController.clientStream.writeToMain(byteBuffer);
-        else if (action.equals("updateMaxSize")) clientController.updateMaxSize(byteBuffer);
-        else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
-      } catch (Exception ignored) {
-        clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
-      }
-    });
+    clientController.handler.post(() -> handleAction(clientController, action, byteBuffer));
+  }
+
+  public static void handleControllNow(String uuid, String action, ByteBuffer byteBuffer) {
+    ClientController clientController = allController.get(uuid);
+    if (clientController == null) return;
+    handleAction(clientController, action, byteBuffer);
+  }
+
+  private static void handleAction(ClientController clientController, String action, ByteBuffer byteBuffer) {
+    try {
+      if (action.equals("changeToSmall")) clientController.changeToSmall();
+      else if (action.equals("changeToFull")) clientController.changeToFull();
+      else if (action.equals("changeToMini")) clientController.changeToMini(byteBuffer);
+      else if (action.equals("close")) clientController.close(null);
+      else if (action.equals("buttonPower")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(-1));
+      else if (action.equals("buttonWake")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(1));
+      else if (action.equals("buttonLock")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(0));
+      else if (action.equals("buttonLight")) clientController.clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_ON));
+      else if (action.equals("buttonLightOff")) clientController.clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_UNKNOWN));
+      else if (action.equals("buttonBack")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(4, 0));
+      else if (action.equals("buttonHome")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(3, 0));
+      else if (action.equals("buttonSwitch")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(187, 0));
+      else if (action.equals("buttonRotate")) clientController.clientStream.writeToMain(ControlPacket.createRotateEvent());
+      else if (action.equals("keepAlive")) clientController.clientStream.writeToMain(ControlPacket.createKeepAlive());
+      else if (action.equals("checkSizeAndSite")) clientController.checkSizeAndSite();
+      else if (byteBuffer == null) return;
+      else if (action.equals("writeByteBuffer")) clientController.clientStream.writeToMain(byteBuffer);
+      else if (action.equals("updateMaxSize")) clientController.updateMaxSize(byteBuffer);
+      else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
+    } catch (Exception ignored) {
+      clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
+    }
   }
 
   public static void setFullView(String uuid, FullActivity fullView) {
@@ -121,27 +133,28 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     return clientController.textureView;
   }
 
-  private void changeToFull() throws Exception {
+  private synchronized void changeToFull() throws Exception {
     hide();
-    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(FullActivity.getResolution()));
     Intent intent = new Intent(AppData.mainActivity, FullActivity.class);
     intent.putExtra("uuid", device.uuid);
     AppData.mainActivity.startActivity(intent);
+    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(FullActivity.getResolution()));
   }
 
-  private void changeToSmall() throws Exception {
+  private synchronized void changeToSmall() throws Exception {
     hide();
-    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(SmallView.getResolution()));
     AppData.uiHandler.post(smallView::show);
+    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(SmallView.getResolution()));
   }
 
-  private void changeToMini() {
+  private synchronized void changeToMini(ByteBuffer byteBuffer) {
     hide();
-    AppData.uiHandler.post(miniView::show);
+    AppData.uiHandler.post(() -> miniView.show(byteBuffer));
   }
 
-  private void hide() {
+  private synchronized void hide() {
     if (fullView != null) AppData.uiHandler.post(fullView::hide);
+    fullView = null;
     AppData.uiHandler.post(smallView::hide);
     AppData.uiHandler.post(miniView::hide);
   }
@@ -149,9 +162,15 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   private void close(String error) {
     if (isClose) return;
     isClose = true;
-    handlerThread.interrupt();
-    if (error != null) PublicTools.logToast(error);
     hide();
+    handlerThread.interrupt();
+    // 运行断开时操作
+    if (AppData.setting.getLockOnClose()) handleControllNow(device.uuid, "buttonLock", null);
+      // 开启了自动锁定，就没必要发送打开背光了
+    else if (AppData.setting.getLightOnClose()) handleControllNow(device.uuid, "buttonLight", null);
+    if (error != null && device.isNormalDevice() && AppData.setting.getReconnectOnClose()) new Client(device);
+    // 打印日志
+    if (error != null) PublicTools.logToast(error);
     allController.remove(device.uuid);
     if (surfaceTexture != null) surfaceTexture.release();
     handle.run(false);

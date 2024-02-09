@@ -70,7 +70,9 @@ public class DeviceListAdapter extends BaseAdapter {
     devicesItemBinding.deviceIcon.setImageResource(device.isLinkDevice() ? R.drawable.link : R.drawable.wifi);
     devicesItemBinding.deviceName.setText(device.name);
     // 单击事件
-    devicesItemBinding.getRoot().setOnClickListener(v -> startDevice(device));
+    devicesItemBinding.getRoot().setOnClickListener(v -> startDevice(device, AppData.setting.getChangeToFullOnConnect()));
+    devicesItemBinding.buttonSmall.setOnClickListener(v -> startDevice(device, false));
+    devicesItemBinding.buttonFull.setOnClickListener(v -> startDevice(device, true));
     // 长按事件
     devicesItemBinding.getRoot().setOnLongClickListener(v -> {
       onLongClickCard(device);
@@ -136,12 +138,11 @@ public class DeviceListAdapter extends BaseAdapter {
   }
 
   public void startByUUID(String uuid) {
-    for (Device device : devicesList) {
-      if (Objects.equals(device.uuid, uuid)) startDevice(device);
-    }
+    for (Device device : devicesList) if (Objects.equals(device.uuid, uuid)) startDevice(device, AppData.setting.getChangeToFullOnConnect());
   }
 
-  public void startDevice(Device device) {
+  public void startDevice(Device device, boolean changeToFullOnConnect) {
+    device.changeToFullOnConnect = changeToFullOnConnect;
     if (device.isLinkDevice()) {
       UsbDevice usbDevice = linkDevices.get(device.uuid);
       if (usbDevice == null) return;

@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.server.Server;
-import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
 
 public final class AudioEncode {
@@ -23,7 +22,7 @@ public final class AudioEncode {
   private static boolean useOpus;
 
   public static boolean init() throws IOException, ErrnoException {
-    useOpus = Options.useOpus && Device.isEncoderSupport("opus");
+    useOpus = Options.supportOpus && EncodecTools.isSupportOpus();
     byte[] bytes = new byte[]{0};
     try {
       // 从安卓12开始支持音频

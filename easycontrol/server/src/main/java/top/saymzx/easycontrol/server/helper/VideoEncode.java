@@ -15,6 +15,7 @@ import android.view.Surface;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
@@ -30,7 +31,7 @@ public final class VideoEncode {
   private static IBinder display;
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
-    useH265 = Options.useH265 && Device.isEncoderSupport("hevc");
+    useH265 = Options.supportH265 && EncodecTools.isSupportH265();
     Server.writeVideo(ByteBuffer.wrap(new byte[]{(byte) (useH265 ? 1 : 0)}));
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
@@ -41,17 +42,17 @@ public final class VideoEncode {
 
   private static void createEncodecFormat() throws IOException {
     String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
-    encedec = MediaCodec.createEncoderByType(codecMime);
+    String codecName = EncodecTools.getVideoEncoder(useH265);
+    if (!Objects.equals(codecName, "")) encedec = MediaCodec.createByCodecName(codecName);
+    else encedec = MediaCodec.createDecoderByType(codecMime);
+
     encodecFormat = new MediaFormat();
-
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
-
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.maxVideoBit);
     encodecFormat.setInteger(MediaFormat.KEY_FRAME_RATE, Options.maxFps);
     encodecFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) encodecFormat.setInteger(MediaFormat.KEY_INTRA_REFRESH_PERIOD, Options.maxFps * 3);
     encodecFormat.setFloat("max-fps-to-encoder", Options.maxFps);
-
     encodecFormat.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000);
     encodecFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
   }

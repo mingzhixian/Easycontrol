@@ -58,7 +58,8 @@ public final class Device {
     DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
     realDeviceSize = displayInfo.size;
     deviceRotation = displayInfo.rotation;
-    if (deviceRotation == 1 || deviceRotation == 3) realDeviceSize = new Pair<>(realDeviceSize.second, realDeviceSize.first);
+    if (deviceRotation == 1 || deviceRotation == 3)
+      realDeviceSize = new Pair<>(realDeviceSize.second, realDeviceSize.first);
   }
 
   private static void getDeivceSize() {
@@ -164,9 +165,11 @@ public final class Device {
 
     if (action == MotionEvent.ACTION_UP) {
       pointersState.remove(pointerId);
-      if (pointerCount > 1) action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+      if (pointerCount > 1)
+        action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     } else if (action == MotionEvent.ACTION_DOWN) {
-      if (pointerCount > 1) action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+      if (pointerCount > 1)
+        action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     }
     MotionEvent event = MotionEvent.obtain(pointer.downTime, pointer.downTime + offsetTime, action, pointerCount, pointersState.pointerProperties, pointersState.pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
     injectEvent(event);
@@ -203,18 +206,17 @@ public final class Device {
     }
   }
 
-  public static void changePower() {
-    keyEvent(26, 0);
-  }
-
-  public static void changePowerToWake() {
-    try {
-      String output = execReadOutput("dumpsys deviceidle | grep mScreenOn");
-      Boolean isScreenOn = null;
-      if (output.contains("mScreenOn=true")) isScreenOn = true;
-      else if (output.contains("mScreenOn=false")) isScreenOn = false;
-      if (isScreenOn != null && !isScreenOn) Device.keyEvent(26, 0);
-    } catch (Exception ignored) {
+  public static void changePower(int mode) {
+    if (mode == -1) keyEvent(26, 0);
+    else {
+      try {
+        String output = execReadOutput("dumpsys deviceidle | grep mScreenOn");
+        Boolean isScreenOn = null;
+        if (output.contains("mScreenOn=true")) isScreenOn = true;
+        else if (output.contains("mScreenOn=false")) isScreenOn = false;
+        if (isScreenOn != null && isScreenOn ^ (mode == 1)) Device.keyEvent(26, 0);
+      } catch (Exception ignored) {
+      }
     }
   }
 
@@ -250,9 +252,4 @@ public final class Device {
     }
   }
 
-  public static boolean isEncoderSupport(String mimeName) {
-    MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (mediaCodecInfo.isEncoder() && mediaCodecInfo.getName().contains(mimeName)) return true;
-    return false;
-  }
 }

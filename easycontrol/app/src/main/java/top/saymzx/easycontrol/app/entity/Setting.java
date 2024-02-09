@@ -90,30 +90,48 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getDefaultUseOpus() {
-    return sharedPreferences.getBoolean("defaultUseOpus", true);
+  public boolean getWakeOnConnect() {
+    return sharedPreferences.getBoolean("wakeOnConnect", true);
   }
 
-  public void setDefaultUseOpus(boolean value) {
-    editor.putBoolean("defaultUseOpus", value);
+  public void setWakeOnConnect(boolean value) {
+    editor.putBoolean("wakeOnConnect", value);
     editor.apply();
   }
 
-  public boolean getDefaultFull() {
-    return sharedPreferences.getBoolean("defaultFull", false);
+  public boolean getLightOffOnConnect() {
+    return sharedPreferences.getBoolean("lightOffOnConnect", false);
   }
 
-  public void setDefaultFull(boolean value) {
-    editor.putBoolean("defaultFull", value);
+  public void setLightOffOnConnect(boolean value) {
+    editor.putBoolean("lightOffOnConnect", value);
     editor.apply();
   }
 
-  public boolean getAutoWake() {
-    return sharedPreferences.getBoolean("autoWake", true);
+  public boolean getLockOnClose() {
+    return sharedPreferences.getBoolean("lockOnClose", true);
   }
 
-  public void setAutoWake(boolean value) {
-    editor.putBoolean("autoWake", value);
+  public void setLockOnClose(boolean value) {
+    editor.putBoolean("lockOnClose", value);
+    editor.apply();
+  }
+
+  public boolean getLightOnClose() {
+    return sharedPreferences.getBoolean("lightOnClose", false);
+  }
+
+  public void setLightOnClose(boolean value) {
+    editor.putBoolean("lightOnClose", value);
+    editor.apply();
+  }
+
+  public boolean getReconnectOnClose() {
+    return sharedPreferences.getBoolean("reconnectOnClose", false);
+  }
+
+  public void setReconnectOnClose(boolean value) {
+    editor.putBoolean("reconnectOnClose", value);
     editor.apply();
   }
 
@@ -126,12 +144,12 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getAutoBackOnStartDefault() {
-    return sharedPreferences.getBoolean("autoBackOnStartDefault", false);
+  public boolean getAutoBackOnStart() {
+    return sharedPreferences.getBoolean("autoBackOnStart", false);
   }
 
-  public void setAutoBackOnStartDefault(boolean value) {
-    editor.putBoolean("autoBackOnStartDefault", value);
+  public void setAutoBackOnStart(boolean value) {
+    editor.putBoolean("autoBackOnStart", value);
     editor.apply();
   }
 
@@ -144,21 +162,48 @@ public final class Setting {
     editor.apply();
   }
 
-  public boolean getDefaultShowNavBar() {
-    return sharedPreferences.getBoolean("defaultShowNavBar", true);
+  public boolean getShowNavBarOnConnect() {
+    return sharedPreferences.getBoolean("showNavBarOnConnect", true);
   }
 
-  public void setDefaultShowNavBar(boolean value) {
-    editor.putBoolean("defaultShowNavBar", value);
+  public void setShowNavBarOnConnect(boolean value) {
+    editor.putBoolean("showNavBarOnConnect", value);
     editor.apply();
   }
 
-  public boolean getAutoMiniOnOutside() {
-    return sharedPreferences.getBoolean("autoMiniOnOutside", false);
+  public boolean getChangeToFullOnConnect() {
+    return sharedPreferences.getBoolean("changeToFullOnConnect", false);
   }
 
-  public void setAutoMiniOnOutside(boolean value) {
-    editor.putBoolean("autoMiniOnOutside", value);
+  public void setChangeToFullOnConnect(boolean value) {
+    editor.putBoolean("changeToFullOnConnect", value);
+    editor.apply();
+  }
+
+  public boolean getSmallToMiniOnOutside() {
+    return sharedPreferences.getBoolean("smallToMiniOnOutside", false);
+  }
+
+  public void setSmallToMiniOnOutside(boolean value) {
+    editor.putBoolean("smallToMiniOnOutside", value);
+    editor.apply();
+  }
+
+  public boolean getMiniRecoverOnTimeout() {
+    return sharedPreferences.getBoolean("miniRecoverOnTimeout", false);
+  }
+
+  public void setMiniRecoverOnTimeout(boolean value) {
+    editor.putBoolean("miniRecoverOnTimeout", value);
+    editor.apply();
+  }
+
+  public boolean getFullToMiniOnExit() {
+    return sharedPreferences.getBoolean("fullToMiniOnExit", true);
+  }
+
+  public void setFullToMiniOnExit(boolean value) {
+    editor.putBoolean("fullToMiniOnExit", value);
     editor.apply();
   }
 

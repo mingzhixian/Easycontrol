@@ -8,28 +8,45 @@
   <string name="main_float_permission">Please grant hover window privileges</string>
 
   <!-- 设置页面 -->
-  <string name="set_center">Login</string>
   <string name="set_default">Default</string>
-  <string name="set_display">Display</string>
-  <string name="set_display_auto_wake">Auto wake controlled</string>
-  <string name="set_display_auto_wake_detail">Automatically wake up the device after successful connection</string>
-  <string name="set_display_keep_screen_awake">Keep controlled awake</string>
-  <string name="set_display_keep_screen_awake_detail">The controlled end is not locked during the connection</string>
-  <string name="set_display_auto_back_on_start_default">Open default and return</string>
-  <string name="set_display_auto_back_on_start_default_detail">Whether to automatically return to the desktop after the default is turned on at startup</string>
-  <string name="set_display_default_show_nav_bar">Default show navigation bar</string>
-  <string name="set_display_default_show_nav_bar_detail">Sets whether the navigation bar is displayed by default in small window and full screen modes</string>
-  <string name="set_display_default_mini_on_outside">Minimize when touching the outside world</string>
-  <string name="set_display_default_mini_on_outside_detail">(Small window mode) Minimized when touching a location other than a small window</string>
+  <string name="set_on_start">Set action on start</string>
+  <string name="set_on_connect">Set action on connect</string>
+  <string name="set_on_close">Set action on close</string>
+  <string name="set_connecting">Set action on connecting</string>
   <string name="set_other">Other</string>
-  <string name="set_other_clear_default">Clear default open devices</string>
-  <string name="set_other_clear_default_code">Cleared</string>
+  <string name="set_adb_key">Adb Key</string>
+  <string name="set_about">About</string>
+  <string name="set_auto_wake_on_connect">Auto wake controlled when connecting</string>
+  <string name="set_auto_wake_on_connect_detail">Automatically wake up the device after successful connection</string>
+  <string name="set_auto_lightoff_on_connect">Turn off backlight when connecting</string>
+  <string name="set_auto_lightoff_on_connect_detail">Automatically close the screen of the controlled terminal after a successful connection</string>
+  <string name="set_auto_lock_on_close">Lock automatically when disconnected</string>
+  <string name="set_auto_lock_on_close_detail">Automatically lock the controlled terminal when disconnecting</string>
+  <string name="set_auto_light_on_close">Automatically restore backlight when disconnected</string>
+  <string name="set_auto_light_on_close_detail">Automatically restore the backlight of the controlled terminal when it is disconnected (this function can be turned on or off if automatic locking is enabled)</string>
+  <string name="set_auto_keep_screen_awake">Keep controlled awake</string>
+  <string name="set_auto_keep_screen_awake_detail">The controlled end is not locked during the connection</string>
+  <string name="set_auto_back_on_start_default">Return after connect default device</string>
+  <string name="set_auto_back_on_start_default_detail">Whether to automatically return to the desktop after the default is turned on at startup</string>
+  <string name="set_auto_show_nav_bar_on_connect">Show navigation bar</string>
+  <string name="set_auto_show_nav_bar_on_connect_detail">Set whether the navigation bar is displayed by default in small window and full screen modes</string>
+  <string name="set_auto_change_to_full_on_connect">Default full</string>
+  <string name="set_auto_change_to_full_on_connect_detail">After this function is enabled, the system enters the full-screen state directly after the connection is successful</string>
+  <string name="set_auto_small_to_mini_on_outside">Auto hangs the small window</string>
+  <string name="set_auto_small_to_mini_on_outside_detail">Automatically minimized when touching a position outside the small window. The default is unchanged.</string>
+  <string name="set_auto_full_to_mini_on_exit">Hang automatically on full screen</string>
+  <string name="set_auto_full_to_mini_on_exit_detail">When you exit the full screen by non-manual operation, it is automatically minimized, and if you turn off the secondary option, you will automatically switch to a small window.</string>
+  <string name="set_auto_mini_recover_on_timeout">Automatic recovery after hang</string>
+  <string name="set_auto_mini_recover_on_timeout_detail">No operation automatically returns to the original mode within 5 seconds after the automatic suspension is triggered</string>
+  <string name="set_auto_reconnect_on_close">Automatic reconnection</string>
+  <string name="set_auto_reconnect_on_close_detail">Automatically reconnect when unexpectedly disconnected (cannot automatically reconnect because the wired device needs to be reauthorized)</string>
+  <string name="set_auto_clear_default">Clear default open devices</string>
+  <string name="set_auto_clear_default_code">Cleared</string>
   <string name="set_other_custom_key">Custom key (reauthorization required)</string>
   <string name="set_other_clear_key">Regenerate the key (reauthorization required)</string>
   <string name="set_other_clear_key_code">Already refreshed</string>
   <string name="set_other_locale">Change language(中文/English)</string>
   <string name="set_other_locale_code">已切换，可能需要重启APP</string>
-  <string name="set_about">About</string>
   <string name="set_about_ip">View local address</string>
   <string name="set_about_active">Reactivate</string>
   <string name="set_about_website">Website</string>
@@ -54,9 +71,11 @@
   <string name="active_key">Donation Order number: $5 and up</string>
   <string name="active_button">Active</string>
   <string name="active_key_hint">
-    * The donation will be recorded in the system within 24 hours, please wait patiently \n
-    * One order number supports activation of 5 devices, to protect your privacy, Easycontrol uses random numbers to identify one device, which means that even if you just reinstall it, it will be considered a new device, so if you can\'t activate because you have more than 5 devices, please contact us \n
-    * For any questions, please contact: mingzhixian@outlook.com
+    * the donation will be entered into the system within 24 hours. Please wait patiently. \n
+    * easy to control is a buyout system, and there is no limit on the number of devices to be used, but in order to prevent theft, a single account is limited to 5 devices by default \n
+    * in order to protect your privacy, easy control uses random numbers to identify a device, which means that reinstalled software will also be considered a new device \n
+    * if you cannot activate or have any other problems due to an excess number of devices, please contact us \n
+    * contact address: mingzhixian@outlook.com
   </string>
   <string name="active_button_error">Input error or system still not entered or more than 5 devices</string>
   <string name="active_button_success">Activate successfully, please check the instructions before use</string>
@@ -103,10 +122,6 @@
   <string name="option_max_video_bit_detail">The larger the bit rate, the smaller the video loss, and the larger the video volume. You are advised to set the value to 4. If the bit rate is too high, the delay increases</string>
   <string name="option_use_h265">Use H265</string>
   <string name="option_use_h265_detail">H265 is preferred, the video size is small and the delay is low. The actual situation is mainly supported. If the video is abnormal, try to close it</string>
-  <string name="option_use_opus">Use Opus</string>
-  <string name="option_use_opus_detail">OPUS is preferred, the audio volume is small and the delay is low, and the actual support is mainly</string>
-  <string name="option_default_full">Default full</string>
-  <string name="option_default_full_detail">After this function is enabled, the system enters the full-screen state directly after the connection is successful</string>
   <string name="option_set_resolution">Auto set resolution</string>
   <string name="option_set_resolution_detail">After this function is enabled, the resolution of the controlled end will be automatically changed. Therefore, the resolution may not be automatically restored (you can manually restore it)</string>
 

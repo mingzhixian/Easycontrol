@@ -86,16 +86,12 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   public void startDefault(Context context) {
     String defaultDevice = AppData.setting.getDefaultDevice();
     if (!defaultDevice.equals("")) {
-      for (Device device : deviceListAdapter.devicesList) {
-        if (Objects.equals(device.uuid, defaultDevice)) {
-          deviceListAdapter.startDevice(device);
-          // 返回桌面
-          if (AppData.setting.getAutoBackOnStartDefault()) {
-            Intent home = new Intent(Intent.ACTION_MAIN);
-            home.addCategory(Intent.CATEGORY_HOME);
-            context.startActivity(home);
-          }
-        }
+      deviceListAdapter.startByUUID(defaultDevice);
+      // 返回桌面
+      if (AppData.setting.getAutoBackOnStart()) {
+        Intent home = new Intent(Intent.ACTION_MAIN);
+        home.addCategory(Intent.CATEGORY_HOME);
+        context.startActivity(home);
       }
     }
   }
@@ -109,7 +105,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   // 请求USB设备权限
   private void onConnectUsb(Context context, UsbDevice usbDevice) {
     if (AppData.usbManager == null) return;
-    PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
+    PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
     AppData.usbManager.requestPermission(usbDevice, permissionIntent);
   }
 

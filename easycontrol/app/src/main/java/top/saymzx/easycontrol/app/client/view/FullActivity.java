@@ -34,14 +34,15 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    ViewTools.setLocale(this);
+    ViewTools.setFullScreen(this);
     fullActivity = ActivityFullBinding.inflate(this.getLayoutInflater());
     setContentView(fullActivity.getRoot());
     device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
+    if (device == null) return;
     ClientController.setFullView(device.uuid, this);
     // 初始化
     fullActivity.barView.setVisibility(View.GONE);
-    setNavBarHide(AppData.setting.getDefaultShowNavBar());
+    setNavBarHide(AppData.setting.getShowNavBarOnConnect());
     autoRotate = AppData.setting.getAutoRotate();
     fullActivity.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
     // 按键监听
@@ -59,14 +60,8 @@ public class FullActivity extends Activity implements SensorEventListener {
   protected void onPause() {
     AppData.sensorManager.unregisterListener(this);
     if (isChangingConfigurations()) fullActivity.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
-    else if (!isClose) ClientController.handleControll(device.uuid, "changeToMini", null);
+    else if (!isClose) ClientController.handleControll(device.uuid, AppData.setting.getFullToMiniOnExit() ? "changeToMini" : "changeToSmall", ByteBuffer.wrap("changeToFull".getBytes()));
     super.onPause();
-  }
-
-  @Override
-  protected void onResume() {
-    ViewTools.setFullScreen(this);
-    super.onResume();
   }
 
   @Override
@@ -90,9 +85,8 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   public void hide() {
     try {
-      fullActivity.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
-      ClientController.setFullView(device.uuid, null);
       isClose = true;
+      fullActivity.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
       finish();
     } catch (Exception ignored) {
     }

@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.system.ErrnoException;
-import android.view.Display;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -74,12 +73,6 @@ public final class Server {
       for (Thread thread : threads) thread.start();
       // 程序运行
       timeOutThread.interrupt();
-      if (Options.autoWake) Device.changePowerToWake();
-      // 专为 摸鱼仔 而设，自动唤醒后自动关闭被控端背光
-      if (Options.autoWake) {
-        Thread.sleep(3000);
-        Device.changeScreenPowerMode(Display.STATE_UNKNOWN);
-      }
       synchronized (object) {
         object.wait();
       }
@@ -199,7 +192,7 @@ public final class Server {
             Device.changeScreenPowerMode(mainInputStream.readByte());
             break;
           case 8:
-            Device.changePower();
+            Device.changePower(mainInputStream.readInt());
             break;
         }
       }

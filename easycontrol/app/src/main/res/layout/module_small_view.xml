@@ -18,14 +18,13 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="14dp"
     android:background="@drawable/background_cron"
     android:orientation="vertical">
 
     <FrameLayout
       android:id="@+id/texture_view_layout"
-      android:layout_width="200dp"
-      android:layout_height="200dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
       android:elevation="8dp" />
 
     <LinearLayout
@@ -87,14 +86,13 @@
 
   <FrameLayout
     android:id="@+id/bar"
-    android:layout_width="120dp"
+    android:layout_width="100dp"
     android:layout_height="20dp"
     android:layout_gravity="top|center_horizontal">
     <View
-      android:layout_width="60dp"
+      android:layout_width="40dp"
       android:layout_height="5dp"
-      android:layout_margin="1dp"
-      android:layout_gravity="center_horizontal"
+      android:layout_gravity="center"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/clientBar"
       android:focusable="false" />
@@ -105,7 +103,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="20dp"
+    android:layout_marginTop="22dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"
     android:elevation="6dp"

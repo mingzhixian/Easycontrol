@@ -19,7 +19,6 @@
     android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
     android:usesCleartextTraffic="true"
     tools:targetApi="31">
-
     <activity
       android:name=".MainActivity"
       android:exported="true">
@@ -36,9 +35,12 @@
       android:name=".SetActivity"
       android:exported="false" />
     <activity
+      android:name=".SetDetailActivity"
+      android:exported="false" />
+    <activity
       android:name=".client.view.FullActivity"
       android:exported="false"
-      android:hardwareAccelerated="true" />
+      android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
     <activity
       android:name=".AdbKeyActivity"
       android:exported="false" />

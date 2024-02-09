@@ -26,77 +26,53 @@
       android:paddingStart="15dp"
       android:paddingEnd="15dp">
 
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/set_default"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont" />
-
       <LinearLayout
         android:id="@+id/set_default"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp" />
-
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/set_display"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont" />
+        android:paddingStart="15dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="8dp" />
 
       <LinearLayout
-        android:id="@+id/set_display"
+        android:id="@+id/set_auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp" />
-
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/set_other"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont" />
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="10dp" />
 
       <LinearLayout
         android:id="@+id/set_other"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp" />
-
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/set_about"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont" />
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="10dp" />
 
       <LinearLayout
         android:id="@+id/set_about"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:layout_marginBottom="60dp"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp" />
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="10dp" />
 
     </LinearLayout>
   </ScrollView>
