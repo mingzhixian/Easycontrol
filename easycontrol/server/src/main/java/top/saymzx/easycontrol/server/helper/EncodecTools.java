@@ -4,70 +4,55 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class EncodecTools {
-  private static ArrayList<MediaCodecInfo> encodecList = null;
+  private static ArrayList<String> hevcEncodecList = null;
+  private static ArrayList<String> avcEncodecList = null;
+  private static ArrayList<String> opusEncodecList = null;
   private static Boolean isSupportOpus = null;
   private static Boolean isSupportH265 = null;
   private static String videoEncoder = null;
 
   // 获取解码器列表
-  private static void getDecodecList() {
-    encodecList = new ArrayList<>();
+  private static void getEncodecList() {
     MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) if (mediaCodecInfo.isEncoder()) encodecList.add(mediaCodecInfo);
+    hevcEncodecList = new ArrayList<>();
+    avcEncodecList = new ArrayList<>();
+    opusEncodecList = new ArrayList<>();
+    Pattern codecPattern = Pattern.compile("(?i)(mtk|qti|qcom|exynos|hisi)");
+    for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
+      String codecName = mediaCodecInfo.getName();
+      if (mediaCodecInfo.isEncoder() && codecPattern.matcher(codecName).find()) {
+        if (codecName.toLowerCase().contains("opus")) opusEncodecList.add(codecName);
+        else if (codecName.toLowerCase().contains("hevc") || codecName.toLowerCase().contains("h265")) hevcEncodecList.add(codecName);
+        else if (codecName.toLowerCase().contains("avc") || codecName.toLowerCase().contains("h264")) avcEncodecList.add(codecName);
+      }
+    }
   }
 
   // 获取解码器是否支持
   public static boolean isSupportOpus() {
     if (isSupportOpus != null) return isSupportOpus;
-    if (encodecList == null) getDecodecList();
-    for (MediaCodecInfo mediaCodecInfo : encodecList) {
-      if (mediaCodecInfo.getName().contains("opus")) {
-        isSupportOpus = true;
-        return isSupportOpus;
-      }
-    }
-    isSupportOpus = false;
+    if (opusEncodecList == null) getEncodecList();
+    isSupportOpus = opusEncodecList.size() > 0;
     return isSupportOpus;
   }
 
   public static boolean isSupportH265() {
     if (isSupportH265 != null) return isSupportH265;
-    if (encodecList == null) getDecodecList();
-    for (MediaCodecInfo mediaCodecInfo : encodecList) {
-      String codecName = mediaCodecInfo.getName();
-      // 是h265解码器
-      if (codecName.contains("hevc") || codecName.contains("h265")) {
-        // 优选硬件解码器
-        if (isHardEncodec(codecName)) {
-          isSupportH265 = true;
-          return isSupportH265;
-        }
-      }
-    }
-    isSupportH265 = false;
+    if (hevcEncodecList == null) getEncodecList();
+    isSupportH265 = hevcEncodecList.size() > 0;
     return isSupportH265;
   }
 
   // 获取视频最优解码器
   public static String getVideoEncoder(boolean h265) {
     if (videoEncoder != null) return videoEncoder;
-    if (encodecList == null) getDecodecList();
-    ArrayList<String> allHardNormalEncodec = new ArrayList<>();
+    if (hevcEncodecList == null || avcEncodecList == null) getEncodecList();
+    ArrayList<String> allHardNormalEncodec = h265 ? hevcEncodecList : avcEncodecList;
     ArrayList<String> allHardLowLatencyEncodec = new ArrayList<>();
-    for (MediaCodecInfo mediaCodecInfo : encodecList) {
-      String codecName = mediaCodecInfo.getName();
-      // 查找对应解码器
-      if (codecName.contains(h265 ? "hevc" : "avc") || codecName.contains(h265 ? "h265" : "h264")) {
-        // 优选硬件解码器
-        if (isHardEncodec(codecName)) {
-          // 优选低延迟
-          if (codecName.contains("low_latency")) allHardLowLatencyEncodec.add(codecName);
-          else allHardNormalEncodec.add(codecName);
-        }
-      }
-    }
+    for (String codecName : allHardNormalEncodec) if (codecName.contains("low_latency")) allHardLowLatencyEncodec.add(codecName);
     // 存在低延迟解码器
     if (allHardLowLatencyEncodec.size() > 0) {
       videoEncoder = getC2Encodec(allHardLowLatencyEncodec);
@@ -79,11 +64,6 @@ public class EncodecTools {
       return videoEncoder;
     }
     return "";
-  }
-
-  // 检查是否为硬件解码器
-  private static boolean isHardEncodec(String codecName) {
-    return (codecName.contains("mtk") || codecName.contains("qti") || codecName.contains("qcom") || codecName.contains("exynos") || codecName.contains("hisi"));
   }
 
   // 优选C2解码器

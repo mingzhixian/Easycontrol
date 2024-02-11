@@ -16,7 +16,6 @@ import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
-import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class MainActivity extends Activity {

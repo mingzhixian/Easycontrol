@@ -18,7 +18,7 @@ import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class AdbKeyActivity extends Activity {
   private ActivityAdbKeyBinding activityAdbKeyBinding;
-  private Pair<File,File> adbKeyFile;
+  private Pair<File, File> adbKeyFile;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,7 @@ public class AdbKeyActivity extends Activity {
     ViewTools.setLocale(this);
     activityAdbKeyBinding = ActivityAdbKeyBinding.inflate(this.getLayoutInflater());
     setContentView(activityAdbKeyBinding.getRoot());
-    adbKeyFile=PublicTools.getAdbKeyFile(this);
+    adbKeyFile = PublicTools.getAdbKeyFile(this);
     readKey();
     activityAdbKeyBinding.backButton.setOnClickListener(v -> finish());
     activityAdbKeyBinding.ok.setOnClickListener(v -> writeKey());

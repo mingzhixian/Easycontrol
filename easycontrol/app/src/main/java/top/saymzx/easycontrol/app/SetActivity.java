@@ -3,15 +3,10 @@ package top.saymzx.easycontrol.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Layout;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import top.saymzx.easycontrol.app.databinding.ActivitySetBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class SetActivity extends Activity {

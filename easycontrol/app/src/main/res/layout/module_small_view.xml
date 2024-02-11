@@ -89,6 +89,7 @@
     android:layout_width="100dp"
     android:layout_height="20dp"
     android:layout_gravity="top|center_horizontal">
+
     <View
       android:layout_width="40dp"
       android:layout_height="5dp"

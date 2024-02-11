@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class VideoDecode {
@@ -66,9 +65,11 @@ public class VideoDecode {
     csd0.position(8);
     // 创建解码器
     String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
-    String codecName = DecodecTools.getVideoDecoder(useH265);
-    if (!Objects.equals(codecName, "")) decodec = MediaCodec.createByCodecName(codecName);
-    else decodec = MediaCodec.createDecoderByType(codecMime);
+    try {
+      decodec = MediaCodec.createByCodecName(DecodecTools.getVideoDecoder(useH265));
+    } catch (Exception ignord) {
+      decodec = MediaCodec.createDecoderByType(codecMime);
+    }
     MediaFormat decodecFormat = MediaFormat.createVideoFormat(codecMime, videoSize.first, videoSize.second);
     // 获取视频标识头
     decodecFormat.setByteBuffer("csd-0", csd0);

@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.entity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.hardware.SensorManager;
@@ -38,7 +37,7 @@ public class AppData {
   public static Setting setting;
 
   public static void init(MainActivity m) {
-    mainActivity= m;
+    mainActivity = m;
     applicationContext = m.getApplicationContext();
     uiHandler = new android.os.Handler(m.getMainLooper());
     dbHelper = new DbHelper(applicationContext);

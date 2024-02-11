@@ -38,7 +38,7 @@ public class AdbKeyPair {
     AdbKeyPair.adbBase64 = adbBase64;
   }
 
-  public static AdbKeyPair read(File publicKey,File privateKey) throws Exception {
+  public static AdbKeyPair read(File publicKey, File privateKey) throws Exception {
     if (adbBase64 == null) throw new IOException("no adbBase64");
     byte[] publicKeyBytes = new byte[(int) publicKey.length() + 1];
     byte[] privateKeyBytes = new byte[(int) privateKey.length()];
@@ -59,7 +59,7 @@ public class AdbKeyPair {
     return new AdbKeyPair(tmpPrivateKey, publicKeyBytes);
   }
 
-  public static void generate( File publicKey,File privateKey) throws Exception {
+  public static void generate(File publicKey, File privateKey) throws Exception {
     if (adbBase64 == null) throw new IOException("no adbBase64");
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
     keyPairGenerator.initialize(KEY_LENGTH_BITS);

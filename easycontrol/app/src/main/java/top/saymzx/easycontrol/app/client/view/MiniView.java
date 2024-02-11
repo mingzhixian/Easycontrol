@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app.client.view;
 import android.annotation.SuppressLint;
 import android.graphics.PixelFormat;
 import android.os.Build;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;

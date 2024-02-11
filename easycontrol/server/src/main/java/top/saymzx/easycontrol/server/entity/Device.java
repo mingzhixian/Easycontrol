@@ -4,8 +4,6 @@
 package top.saymzx.easycontrol.server.entity;
 
 import android.content.IOnPrimaryClipChangedListener;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;

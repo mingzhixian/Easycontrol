@@ -21,6 +21,7 @@ public class SetDetailActivity extends Activity {
     ViewTools.setLocale(this);
     setDetailActivity = ActivitySetDetailBinding.inflate(this.getLayoutInflater());
     setContentView(setDetailActivity.getRoot());
+    setButtonListener();
     // 检查类型
     String type = getIntent().getStringExtra("type");
     if (Objects.equals(type, "default")) drawDefault();
@@ -31,6 +32,11 @@ public class SetDetailActivity extends Activity {
     else if (Objects.equals(type, "adbKey")) drawAdbKey();
     else if (Objects.equals(type, "about")) drawAbout();
     super.onCreate(savedInstanceState);
+  }
+
+  // 设置按钮监听
+  private void setButtonListener() {
+    setDetailActivity.backButton.setOnClickListener(v -> finish());
   }
 
   // 绘制默认参数
@@ -65,8 +71,8 @@ public class SetDetailActivity extends Activity {
   // 绘制界面显示
   private void drawConnecting() {
     setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_small_to_mini_on_outside), getString(R.string.set_auto_small_to_mini_on_outside_detail), AppData.setting.getSmallToMiniOnOutside(), isChecked -> AppData.setting.setSmallToMiniOnOutside(isChecked)).getRoot());
-    setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_mini_recover_on_timeout), getString(R.string.set_auto_mini_recover_on_timeout_detail), AppData.setting.getMiniRecoverOnTimeout(), isChecked -> AppData.setting.setMiniRecoverOnTimeout(isChecked)).getRoot());
     setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_full_to_mini_on_exit), getString(R.string.set_auto_full_to_mini_on_exit_detail), AppData.setting.getFullToMiniOnExit(), isChecked -> AppData.setting.setFullToMiniOnExit(isChecked)).getRoot());
+    setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_mini_recover_on_timeout), getString(R.string.set_auto_mini_recover_on_timeout_detail), AppData.setting.getMiniRecoverOnTimeout(), isChecked -> AppData.setting.setMiniRecoverOnTimeout(isChecked)).getRoot());
   }
 
   // 绘制密钥相关操作

@@ -2,8 +2,6 @@ package top.saymzx.easycontrol.app.helper;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.net.DhcpInfo;
 import android.net.Uri;
 import android.util.Base64;

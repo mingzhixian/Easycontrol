@@ -15,7 +15,6 @@ import android.view.Surface;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
@@ -42,9 +41,11 @@ public final class VideoEncode {
 
   private static void createEncodecFormat() throws IOException {
     String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
-    String codecName = EncodecTools.getVideoEncoder(useH265);
-    if (!Objects.equals(codecName, "")) encedec = MediaCodec.createByCodecName(codecName);
-    else encedec = MediaCodec.createDecoderByType(codecMime);
+    try {
+      encedec = MediaCodec.createByCodecName(EncodecTools.getVideoEncoder(useH265));
+    } catch (Exception ignord) {
+      encedec = MediaCodec.createEncoderByType(codecMime);
+    }
 
     encodecFormat = new MediaFormat();
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
