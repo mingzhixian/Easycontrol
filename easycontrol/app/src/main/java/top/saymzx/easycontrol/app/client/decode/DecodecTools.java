@@ -2,9 +2,10 @@ package top.saymzx.easycontrol.app.client.decode;
 
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.MediaFormat;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
 public class DecodecTools {
   private static ArrayList<String> hevcDecodecList = null;
@@ -12,7 +13,6 @@ public class DecodecTools {
   private static ArrayList<String> opusDecodecList = null;
   private static Boolean isSupportOpus = null;
   private static Boolean isSupportH265 = null;
-  private static String videoDecoder = null;
 
   // 获取解码器列表
   private static void getDecodecList() {
@@ -20,13 +20,17 @@ public class DecodecTools {
     hevcDecodecList = new ArrayList<>();
     avcDecodecList = new ArrayList<>();
     opusDecodecList = new ArrayList<>();
-    Pattern codecPattern = Pattern.compile("(?i)(mtk|qti|qcom|exynos|hisi)");
     for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
-      String codecName = mediaCodecInfo.getName();
-      if (!mediaCodecInfo.isEncoder() && codecPattern.matcher(codecName).find()) {
+      if (!mediaCodecInfo.isEncoder()) {
+        String codecName = mediaCodecInfo.getName();
         if (codecName.toLowerCase().contains("opus")) opusDecodecList.add(codecName);
-        else if (codecName.toLowerCase().contains("hevc") || codecName.toLowerCase().contains("h265")) hevcDecodecList.add(codecName);
-        else if (codecName.toLowerCase().contains("avc") || codecName.toLowerCase().contains("h264")) avcDecodecList.add(codecName);
+        // 要求硬件实现
+        if (!codecName.startsWith("OMX.google") && !codecName.startsWith("c2.android")) {
+          for (String supportType : mediaCodecInfo.getSupportedTypes()) {
+            if (Objects.equals(supportType, MediaFormat.MIMETYPE_VIDEO_HEVC)) hevcDecodecList.add(codecName);
+            else if (Objects.equals(supportType, MediaFormat.MIMETYPE_VIDEO_AVC)) avcDecodecList.add(codecName);
+          }
+        }
       }
     }
   }
@@ -48,21 +52,14 @@ public class DecodecTools {
 
   // 获取视频最优解码器
   public static String getVideoDecoder(boolean h265) {
-    if (videoDecoder != null) return videoDecoder;
     if (hevcDecodecList == null || avcDecodecList == null) getDecodecList();
     ArrayList<String> allHardNormalDecodec = h265 ? hevcDecodecList : avcDecodecList;
     ArrayList<String> allHardLowLatencyDecodec = new ArrayList<>();
     for (String codecName : allHardNormalDecodec) if (codecName.contains("low_latency")) allHardLowLatencyDecodec.add(codecName);
     // 存在低延迟解码器
-    if (allHardLowLatencyDecodec.size() > 0) {
-      videoDecoder = getC2Decodec(allHardLowLatencyDecodec);
-      return videoDecoder;
-    }
+    if (allHardLowLatencyDecodec.size() > 0) return getC2Decodec(allHardLowLatencyDecodec);
     // 选择正常解码器
-    if (allHardNormalDecodec.size() > 0) {
-      videoDecoder = getC2Decodec(allHardNormalDecodec);
-      return videoDecoder;
-    }
+    if (allHardNormalDecodec.size() > 0) return getC2Decodec(allHardNormalDecodec);
     return "";
   }
 

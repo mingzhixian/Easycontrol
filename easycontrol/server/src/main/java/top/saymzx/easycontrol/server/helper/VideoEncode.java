@@ -41,11 +41,7 @@ public final class VideoEncode {
 
   private static void createEncodecFormat() throws IOException {
     String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
-    try {
-      encedec = MediaCodec.createByCodecName(EncodecTools.getVideoEncoder(useH265));
-    } catch (Exception ignord) {
-      encedec = MediaCodec.createEncoderByType(codecMime);
-    }
+    encedec = MediaCodec.createEncoderByType(codecMime);
 
     encodecFormat = new MediaFormat();
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);

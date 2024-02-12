@@ -73,9 +73,12 @@ public class AudioDecode {
   private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
   public void decodeIn(ByteBuffer data) throws InterruptedException {
-    int inIndex = intputBufferQueue.take();
-    decodec.getInputBuffer(inIndex).put(data);
-    decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
+    try {
+      int inIndex = intputBufferQueue.take();
+      decodec.getInputBuffer(inIndex).put(data);
+      decodec.queueInputBuffer(inIndex, 0, data.capacity(), 0, 0);
+    } catch (IllegalStateException ignored) {
+    }
   }
 
   // 创建Codec

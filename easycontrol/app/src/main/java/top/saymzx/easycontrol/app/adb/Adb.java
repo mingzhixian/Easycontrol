@@ -190,7 +190,7 @@ public class Adb {
       }
 
       @Override
-      public void flush(BufferStream bufferStream) throws Exception {
+      public void flush(BufferStream bufferStream) {
         writeToChannel(AdbProtocol.generateOkay(localId, remoteId));
       }
 

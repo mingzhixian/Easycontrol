@@ -52,13 +52,13 @@
       android:layout_height="45dp"
       android:paddingStart="10dp"
       android:paddingTop="10dp"
-      android:paddingEnd="10dp"
+      android:paddingEnd="8dp"
       android:paddingBottom="10dp"
       android:src="@drawable/window_restore"
       android:tint="@color/onCardBackground" />
 
     <FrameLayout
-      android:layout_width="10dp"
+      android:layout_width="8dp"
       android:layout_height="20dp"
       android:layout_gravity="center">
 
@@ -75,7 +75,7 @@
       android:id="@+id/button_full"
       android:layout_width="45dp"
       android:layout_height="45dp"
-      android:paddingStart="10dp"
+      android:paddingStart="8dp"
       android:paddingTop="10dp"
       android:paddingEnd="10dp"
       android:paddingBottom="10dp"

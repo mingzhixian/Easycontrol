@@ -3,6 +3,7 @@ package top.saymzx.easycontrol.app.client;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 

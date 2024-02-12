@@ -4,6 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class VideoDecode {
@@ -53,25 +55,30 @@ public class VideoDecode {
   private final LinkedBlockingQueue<Integer> intputBufferQueue = new LinkedBlockingQueue<>();
 
   public void decodeIn(ByteBuffer data) throws InterruptedException {
-    long pts = data.getLong();
-    int inIndex = intputBufferQueue.take();
-    decodec.getInputBuffer(inIndex).put(data);
-    decodec.queueInputBuffer(inIndex, 0, data.capacity() - 8, pts, 0);
+    try {
+      long pts = data.getLong();
+      int inIndex = intputBufferQueue.take();
+      decodec.getInputBuffer(inIndex).put(data);
+      decodec.queueInputBuffer(inIndex, 0, data.capacity() - 8, pts, 0);
+    } catch (IllegalStateException ignored) {
+    }
   }
 
   // 创建Codec
   private void setVideoDecodec(Pair<Integer, Integer> videoSize, Surface surface, ByteBuffer csd0, ByteBuffer csd1, Handler playHandler) throws IOException, InterruptedException {
     boolean useH265 = csd1 == null;
-    csd0.position(8);
     // 创建解码器
     String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
     try {
-      decodec = MediaCodec.createByCodecName(DecodecTools.getVideoDecoder(useH265));
+      String codecName = DecodecTools.getVideoDecoder(useH265);
+      if (Objects.equals(codecName, "")) decodec = MediaCodec.createDecoderByType(codecMime);
+      else decodec = MediaCodec.createByCodecName(codecName);
     } catch (Exception ignord) {
       decodec = MediaCodec.createDecoderByType(codecMime);
     }
     MediaFormat decodecFormat = MediaFormat.createVideoFormat(codecMime, videoSize.first, videoSize.second);
     // 获取视频标识头
+    csd0.position(8);
     decodecFormat.setByteBuffer("csd-0", csd0);
     if (!useH265) {
       csd1.position(8);
