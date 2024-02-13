@@ -42,6 +42,8 @@ public class ClientStream {
     Thread timeOutThread = new Thread(() -> {
       try {
         Thread.sleep(10 * 1000);
+        PublicTools.logToast(AppData.applicationContext.getString(R.string.error_timeout));
+        handle.run(false);
         if (connectThread != null) connectThread.interrupt();
       } catch (InterruptedException ignored) {
       }
@@ -120,6 +122,10 @@ public class ClientStream {
       }
     }
     throw new Exception(AppData.applicationContext.getString(R.string.error_connect_server));
+  }
+
+  public void runShell(String cmd) throws Exception {
+    adb.runAdbCmd(cmd);
   }
 
   public byte readByteFromMain() throws IOException, InterruptedException {

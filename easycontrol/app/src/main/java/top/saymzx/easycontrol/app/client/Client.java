@@ -37,7 +37,10 @@ public class Client {
           } else release();
         });
       }
-      AppData.windowManager.removeView(loading.first);
+      try {
+        AppData.windowManager.removeView(loading.first);
+      } catch (Exception ignored) {
+      }
     });
   }
 

@@ -28,7 +28,7 @@
 - [点击此处查看](https://gitee.com/mingzhixianweb/easycontrol/releases)
 
 ## 激活
-代码是开源的，但本人打包的安装包需要激活才可使用，激活的步骤请参考[此页面](https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md)
+代码是开源的，但官方打包的安装包需要激活才可使用，激活的步骤请参考[此页面](https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md)
 
 ## 截图
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/main.webp" width="200px">

@@ -249,7 +249,7 @@ public class SmallView extends ViewOutlineProvider {
     int startX = smallViewParams.x;
     int startY = smallViewParams.y;
     // 检测到大小超出
-    if (width > screenMaxWidth || height > screenMaxHeight) {
+    if (width > screenMaxWidth + 200 || height > screenMaxHeight + 200) {
       int maxLength = Math.min(screenMaxWidth, screenMaxHeight);
       updateMaxSize(maxLength, maxLength);
       updateSite(50, statusBarHeight);
@@ -257,10 +257,10 @@ public class SmallView extends ViewOutlineProvider {
     }
     // 检测到位置超出过多
     int halfWidth = (int) (width * 0.5);
-    if (startX < -1 * halfWidth) updateSite(50, startY);
-    if (startX > screenSize.widthPixels - halfWidth) updateSite(screenSize.widthPixels - width - 50, startY);
+    if (startX < -1 * halfWidth) updateSite(-1 * halfWidth + 50, startY);
+    if (startX > screenSize.widthPixels - halfWidth) updateSite(screenSize.widthPixels - halfWidth - 50, startY);
     if (startY < statusBarHeight / 2) updateSite(startX, statusBarHeight);
-    if (startY > screenSize.heightPixels - 100) updateSite(startX, screenSize.heightPixels - height - 100);
+    if (startY > screenSize.heightPixels - 100) updateSite(startX, screenSize.heightPixels - 200);
   }
 
   @Override

@@ -1,5 +1,8 @@
 # 易控(Easycontrol)使用说明
 
+## 视频教程（视频版本更新较慢，请以文本说明为准）
+1. [视频](https://www.bilibili.com/video/BV1V2421A7zf/)
+
 ## 准备操作
 1. 被控端手机连续点击关于手机-版本号，直至提示打开开发者选项
 2. 被控端手机设置中找到开发者选项
@@ -57,49 +60,51 @@
 4. 扩展使用
 	易控支持在外部使用广播控制，广播地址为："top.saymzx.easycontrol.app.CONTROL"，需要向意向也就是Intent填入想要做的动作：
 	- 启动默认设备：
-		action：startDefault
+		- action：startDefault
 	- 启动目标设备：
-		action：start
-		uuid：设备ID
+		- action：start
+		- uuid：设备ID
 	- 目标设备变成小窗：
-		action：changeToSmall
-		uuid：设备ID
+		- action：changeToSmall
+		- uuid：设备ID
 	- 目标设备最小化：
-		action：changeToMini
-		uuid：设备ID
+		- action：changeToMini
+		- uuid：设备ID
 	- 目标设备全屏：
-		action：changeToFull
-		uuid：设备ID
+		- action：changeToFull
+		- uuid：设备ID
 	- 目标设备按下电源键：
-		action：buttonPower
-		uuid：设备ID
+		- action：buttonPower
+		- uuid：设备ID
 	- 目标设备唤醒：
-		action：buttonWake
-		uuid：设备ID
+		- action：buttonWake
+		- uuid：设备ID
 	- 目标设备锁定：
-		action：buttonLock
-		uuid：设备ID
+		- action：buttonLock
+		- uuid：设备ID
 	- 目标设备打开背光：
-		action：buttonLight
-		uuid：设备ID
+		- action：buttonLight
+		- uuid：设备ID
 	- 目标设备关闭背光：
-		action：buttonLightOff
-		uuid：设备ID
+		- action：buttonLightOff
+		- uuid：设备ID
 	- 目标设备按下返回键：
-		action：buttonBack
-		uuid：设备ID
+		- action：buttonBack
+		- uuid：设备ID
 	- 目标设备按下桌面键：
-		action：buttonHome
-		uuid：设备ID
+		- action：buttonHome
+		- uuid：设备ID
 	- 目标设备按下最近任务键：
-		action：buttonSwitch
-		uuid：设备ID
+		- action：buttonSwitch
+		- uuid：设备ID
 	- 目标设备旋转屏幕：
-		action：buttonRotate
-		uuid：设备ID
+		- action：buttonRotate
+		- uuid：设备ID
 	- 目标设备关闭投屏：
-		action：close
-		uuid：设备ID
+		- action：close
+		- uuid：设备ID
+	- 目标设备执行命令：
+		- action：runShell
+		- uuid：设备ID
+		- cmd: 命令
 		
-## 视频教程（视频版本更新较慢，请以文本说明为准）
-1. [视频](https://www.bilibili.com/video/BV1V2421A7zf/)

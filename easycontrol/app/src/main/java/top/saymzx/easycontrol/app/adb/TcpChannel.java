@@ -3,17 +3,16 @@ package top.saymzx.easycontrol.app.adb;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
 public class TcpChannel implements AdbChannel {
-  private final Socket socket = new Socket();
+  private final Socket socket;
   private final InputStream inputStream;
   private final OutputStream outputStream;
 
   public TcpChannel(String host, int port) throws IOException {
-    socket.connect(new InetSocketAddress(host, port), 5000);
+    socket = new Socket(host, port);
     inputStream = socket.getInputStream();
     outputStream = socket.getOutputStream();
   }

@@ -38,7 +38,7 @@ public class SetActivity extends Activity {
     setActivity.setOther.addView(ViewTools.createTextCard(this, getString(R.string.set_adb_key), () -> enterDetailSet("adbKey")).getRoot());
     // 关于
     setActivity.setAbout.addView(ViewTools.createTextCard(this, getString(R.string.set_other_locale), () -> {
-      AppData.setting.setDefaultLocale(!AppData.setting.getDefaultLocale().equals("zh") ? "zh" : "en");
+      AppData.setting.setDefaultLocale(AppData.setting.getDefaultLocale().equals("en") ? "zh" : "en");
       Toast.makeText(this, getString(R.string.set_other_locale_code), Toast.LENGTH_SHORT).show();
     }).getRoot());
     setActivity.setAbout.addView(ViewTools.createTextCard(this, getString(R.string.set_about), () -> enterDetailSet("about")).getRoot());

@@ -53,7 +53,7 @@
 
         <LinearLayout
           android:id="@+id/ipv4"
-          android:layout_width="wrap_content"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:orientation="vertical"
           android:paddingStart="15dp" />
@@ -69,7 +69,7 @@
 
         <LinearLayout
           android:id="@+id/ipv6"
-          android:layout_width="wrap_content"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:orientation="vertical"
           android:paddingStart="15dp" />

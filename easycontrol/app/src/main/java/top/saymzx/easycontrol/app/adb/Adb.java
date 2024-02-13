@@ -62,7 +62,7 @@ public class Adb {
         wait();
       }
       bufferStream = openStreams.get(localId);
-    } while (bufferStream == null);
+    } while (!isClose && bufferStream == null);
     openStreams.remove(localId);
     return bufferStream;
   }
@@ -208,6 +208,9 @@ public class Adb {
     handleInThread.interrupt();
     for (Object bufferStream : connectionStreams.values().toArray()) ((BufferStream) bufferStream).close();
     channel.close();
+    synchronized (this) {
+      notifyAll();
+    }
   }
 
 }

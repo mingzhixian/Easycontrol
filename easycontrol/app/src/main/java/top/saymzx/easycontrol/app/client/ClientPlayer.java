@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app.client;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 
@@ -11,6 +10,7 @@ import top.saymzx.easycontrol.app.client.decode.AudioDecode;
 import top.saymzx.easycontrol.app.client.decode.VideoDecode;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientPlayer {
   private boolean isClose = false;
@@ -60,7 +60,9 @@ public class ClientPlayer {
             break;
         }
       }
-    } catch (Exception ignored) {
+    } catch (InterruptedException ignored) {
+    } catch (Exception e) {
+      PublicTools.logToast(e.toString());
     } finally {
       if (audioDecode != null) audioDecode.release();
     }

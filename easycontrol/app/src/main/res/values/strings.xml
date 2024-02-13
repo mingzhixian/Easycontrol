@@ -107,6 +107,7 @@
   <string name="error_no_browser">没有默认浏览器</string>
   <string name="error_address_error">地址格式错误</string>
   <string name="error_refused_back">全屏状态会拦截返回</string>
+  <string name="error_timeout">超时</string>
   <string name="error_connect_server">连接被控端失败</string>
   <string name="error_stream_closed">连接断开</string>
 

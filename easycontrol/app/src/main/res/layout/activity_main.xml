@@ -12,6 +12,7 @@
     android:layout_gravity="center"
     android:alpha="0.5"
     android:padding="15dp"
+    android:scaleType="fitEnd"
     android:src="@drawable/chinese_yanhua" />
 
   <LinearLayout

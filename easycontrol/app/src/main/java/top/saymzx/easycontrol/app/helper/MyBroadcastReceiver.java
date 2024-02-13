@@ -12,6 +12,7 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Objects;
 
@@ -70,7 +71,11 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     String uuid = intent.getStringExtra("uuid");
     if (uuid == null) return;
     if (action.equals("start")) deviceListAdapter.startByUUID(uuid);
-    else ClientController.handleControll(uuid, action, null);
+    else if (action.equals("runShell")) {
+      String cmd = intent.getStringExtra("cmd");
+      if (cmd == null) return;
+      ClientController.handleControll(uuid, action, ByteBuffer.wrap(cmd.getBytes()));
+    } else ClientController.handleControll(uuid, action, null);
   }
 
   private void handleUSB(Context context, Intent intent) {
@@ -105,7 +110,9 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   // 请求USB设备权限
   private void onConnectUsb(Context context, UsbDevice usbDevice) {
     if (AppData.usbManager == null) return;
-    @SuppressLint("MutableImplicitPendingIntent") PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
+    Intent intent = new Intent(ACTION_USB_PERMISSION);
+    intent.setPackage(AppData.applicationContext.getPackageName());
+    PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, intent, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0);
     AppData.usbManager.requestPermission(usbDevice, permissionIntent);
   }
 
