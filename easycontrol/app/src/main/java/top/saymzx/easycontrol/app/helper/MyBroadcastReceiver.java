@@ -11,6 +11,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
+import android.view.KeyEvent;
 
 import java.nio.ByteBuffer;
 import java.util.Map;

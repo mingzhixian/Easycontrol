@@ -98,11 +98,13 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("buttonRotate")) clientController.clientStream.writeToMain(ControlPacket.createRotateEvent());
       else if (action.equals("keepAlive")) clientController.clientStream.writeToMain(ControlPacket.createKeepAlive());
       else if (action.equals("checkSizeAndSite")) clientController.checkSizeAndSite();
+      else if (action.equals("checkClipBoard")) clientController.checkClipBoard();
       else if (byteBuffer == null) return;
       else if (action.equals("writeByteBuffer")) clientController.clientStream.writeToMain(byteBuffer);
       else if (action.equals("updateMaxSize")) clientController.updateMaxSize(byteBuffer);
       else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
       else if (action.equals("runShell")) clientController.runShell(byteBuffer);
+      else if (action.equals("setClipBoard")) clientController.setClipBoard(byteBuffer);
     } catch (Exception ignored) {
       clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
     }
@@ -171,7 +173,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     else if (AppData.setting.getLightOnClose()) handleControllNow(device.uuid, "buttonLight", null);
     if (error != null && device.isNormalDevice() && AppData.setting.getReconnectOnClose()) new Client(device);
     // 打印日志
-    if (error != null) PublicTools.logToast(error);
+    if (error != null) PublicTools.logToast("controller", error, true);
     allController.remove(device.uuid);
     if (surfaceTexture != null) surfaceTexture.release();
     handle.run(false);
@@ -256,7 +258,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   // 剪切板
   private String nowClipboardText = "";
 
-  public void checkClipBoard() {
+  private void checkClipBoard() {
     ClipData clipBoard = AppData.clipBoard.getPrimaryClip();
     if (clipBoard != null && clipBoard.getItemCount() > 0) {
       String newClipBoardText = String.valueOf(clipBoard.getItemAt(0).getText());
@@ -267,9 +269,9 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     }
   }
 
-  public void setClipBoard(String text) {
-    nowClipboardText = text;
-    AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, text));
+  private void setClipBoard(ByteBuffer byteBuffer) {
+    nowClipboardText = new String(byteBuffer.array());
+    AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(MIMETYPE_TEXT_PLAIN, nowClipboardText));
   }
 
   private void runShell(ByteBuffer byteBuffer) throws Exception {

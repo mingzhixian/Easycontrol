@@ -20,8 +20,9 @@ public class AdbProtocol {
   public static final int CMD_WRTE = 0x45545257;
 
   public static final int CONNECT_VERSION = 0x01000000;
-  // 旧版本的adb服务端硬编码maxdata=4096，因此这里设置为4096，若你的设备较新，可将此值设置为1024*1024以提高效率
-  public static final int CONNECT_MAXDATA = 1024 * 1024;
+  // 最大数据大小一般为1024*1024，此处设置为15*1024，是因为有些设备USB仅支持最大16*1024，所以如果ADB使用了过大的数据，会导致USB无法传输，丢失数据，所以限制ADB协议最大为15k
+  // 旧版本的adb服务端硬编码maxdata=4096，若设备实在太老，可尝试将此处修改为4096
+  public static final int CONNECT_MAXDATA = 15 * 1024;
 
   public static final byte[] CONNECT_PAYLOAD = "host::\0".getBytes();
 

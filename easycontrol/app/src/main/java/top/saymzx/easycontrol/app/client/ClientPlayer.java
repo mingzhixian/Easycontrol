@@ -52,17 +52,16 @@ public class ClientPlayer {
             else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
             break;
           case CLIPBOARD_EVENT:
-            clientController.setClipBoard(new String(clientStream.readByteArrayFromMain(clientStream.readIntFromMain()).array()));
+            ClientController.handleControll(device.uuid, "setClipBoard", clientStream.readByteArrayFromMain(clientStream.readIntFromMain()));
             break;
           case CHANGE_SIZE_EVENT:
-            ByteBuffer byteBuffer = clientStream.readByteArrayFromMain(8);
-            ClientController.handleControll(device.uuid, "updateVideoSize", byteBuffer);
+            ClientController.handleControll(device.uuid, "updateVideoSize", clientStream.readByteArrayFromMain(8));
             break;
         }
       }
     } catch (InterruptedException ignored) {
     } catch (Exception e) {
-      PublicTools.logToast(e.toString());
+      PublicTools.logToast("player", e.toString(), false);
     } finally {
       if (audioDecode != null) audioDecode.release();
     }
@@ -84,7 +83,7 @@ public class ClientPlayer {
 
   private void otherService() {
     if (!isClose) {
-      clientController.checkClipBoard();
+      ClientController.handleControll(device.uuid, "checkClipBoard", null);
       ClientController.handleControll(device.uuid, "keepAlive", null);
       ClientController.handleControll(device.uuid, "checkSizeAndSite", null);
       AppData.uiHandler.postDelayed(this::otherService, 2000);

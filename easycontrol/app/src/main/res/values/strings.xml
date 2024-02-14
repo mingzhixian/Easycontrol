@@ -67,7 +67,7 @@
 
   <!-- 激活页面 -->
   <string name="active_url">前往捐赠地址</string>
-  <string name="active_key">捐赠订单号: 35元及以上 \n * 2024.2.1-2024.2.15 期间30元</string>
+  <string name="active_key">捐赠订单号: 35元及以上</string>
   <string name="active_button">激活</string>
   <string name="active_key_hint">
     * 捐赠后将于24小时内录入系统，请耐心等待 \n
@@ -112,16 +112,16 @@
   <string name="error_stream_closed">连接断开</string>
 
   <!-- 设备参数设置及注释说明 -->
-  <string name="option_is_audio">使能音频</string>
-  <string name="option_is_audio_detail">开启后将尝试传输音频，被控端需要安卓12之上</string>
+  <string name="option_is_audio">音频</string>
+  <string name="option_is_audio_detail">被控端需要安卓12之上</string>
   <string name="option_max_size">最大大小</string>
-  <string name="option_max_size_detail">设置画面长和宽的最大大小</string>
+  <string name="option_max_size_detail">设置画面的最大大小</string>
   <string name="option_max_fps">最大帧率</string>
-  <string name="option_max_fps_detail">最大帧率限制，值越低画面越卡顿，但流量也越小，延迟也会降低</string>
+  <string name="option_max_fps_detail">最大帧率限制，值越低画面越卡顿</string>
   <string name="option_max_video_bit">最大码率</string>
   <string name="option_max_video_bit_detail">码率越大视频损失越小体积越大，建议设置为4，过高会导致延迟增加</string>
   <string name="option_use_h265">优先H265</string>
-  <string name="option_use_h265_detail">优先使用H265，视频体积小延迟低，实际以支持情况为主，若视频异常可尝试关闭</string>
+  <string name="option_use_h265_detail">优先使用H265，视频体积小延迟低，若画面异常可尝试关闭</string>
   <string name="option_set_resolution">修改分辨率</string>
   <string name="option_set_resolution_detail">开启后会自动修改被控端分辨率，可能会无法自动恢复(可手动恢复)，慎重考虑</string>
 

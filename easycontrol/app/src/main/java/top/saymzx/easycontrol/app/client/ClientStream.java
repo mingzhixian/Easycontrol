@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.client;
 
 import android.hardware.usb.UsbDevice;
-import android.util.Log;
 import android.util.Pair;
 
 import java.io.DataInputStream;
@@ -23,6 +22,7 @@ import top.saymzx.easycontrol.app.helper.PublicTools;
 public class ClientStream {
   private boolean isClose = false;
   private boolean connectDirect = false;
+  private final boolean connectByUsb;
   private Adb adb;
   private Socket mainSocket;
   private Socket videoSocket;
@@ -38,11 +38,12 @@ public class ClientStream {
   private static final boolean supportOpus = DecodecTools.isSupportOpus();
 
   public ClientStream(Device device, UsbDevice usbDevice, MyInterface.MyFunctionBoolean handle) {
+    connectByUsb = usbDevice != null;
     // 超时
     Thread timeOutThread = new Thread(() -> {
       try {
         Thread.sleep(10 * 1000);
-        PublicTools.logToast(AppData.applicationContext.getString(R.string.error_timeout));
+        PublicTools.logToast("stream", AppData.applicationContext.getString(R.string.error_timeout), true);
         handle.run(false);
         if (connectThread != null) connectThread.interrupt();
       } catch (InterruptedException ignored) {
@@ -52,13 +53,13 @@ public class ClientStream {
     connectThread = new Thread(() -> {
       try {
         Pair<String, Integer> address = null;
-        if (usbDevice == null) address = PublicTools.getIpAndPort(device.address);
+        if (!connectByUsb) address = PublicTools.getIpAndPort(device.address);
         adb = connectADB(address, usbDevice);
         startServer(device);
         connectServer(address);
         handle.run(true);
       } catch (Exception e) {
-        PublicTools.logToast(e.toString());
+        PublicTools.logToast("stream", e.toString(), true);
         handle.run(false);
       } finally {
         timeOutThread.interrupt();
@@ -166,13 +167,14 @@ public class ClientStream {
   }
 
   public ByteBuffer readFrameFromMain() throws Exception {
-    if (!connectDirect) mainBufferStream.flush();
+    if (!connectByUsb && !connectDirect) mainBufferStream.flush();
     return readByteArrayFromMain(readIntFromMain());
   }
 
   public ByteBuffer readFrameFromVideo() throws Exception {
-    if (!connectDirect) videoBufferStream.flush();
-    return readByteArrayFromVideo(readIntFromVideo());
+    if (!connectByUsb && !connectDirect) videoBufferStream.flush();
+    int size = readIntFromVideo();
+    return readByteArrayFromVideo(size);
   }
 
   public void writeToMain(ByteBuffer byteBuffer) throws Exception {
@@ -183,7 +185,7 @@ public class ClientStream {
   public void close() {
     if (isClose) return;
     isClose = true;
-    if (shell != null) Log.e("Easycontrol_server", new String(shell.readByteArrayBeforeClose().array()));
+    if (shell != null) PublicTools.logToast("server", new String(shell.readByteArrayBeforeClose().array()), false);
     if (connectDirect) {
       try {
         mainOutputStream.close();
