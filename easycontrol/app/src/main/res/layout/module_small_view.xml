@@ -18,14 +18,14 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
+    android:layout_margin="2dp"
     android:background="@drawable/background_cron"
     android:orientation="vertical">
 
     <FrameLayout
       android:id="@+id/texture_view_layout"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:elevation="8dp" />
+      android:layout_height="wrap_content" />
 
     <LinearLayout
       android:id="@+id/nav_bar"
@@ -107,7 +107,7 @@
     android:layout_marginTop="22dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"
-    android:elevation="6dp"
+    android:elevation="8dp"
     android:padding="6dp">
 
     <ImageView

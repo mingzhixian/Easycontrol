@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import top.saymzx.easycontrol.app.databinding.ActivityActiveBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
@@ -23,7 +22,8 @@ public class ActiveActivity extends Activity {
     ViewTools.setLocale(this);
     activeActivity = ActivityActiveBinding.inflate(this.getLayoutInflater());
     setContentView(activeActivity.getRoot());
-    AppData.setting.setIsActive(false);
+    // 取消激活
+    if (AppData.setting.getIsActive()) deactivate();
     setButtonListener();
     // 绘制UI
     drawUi();
@@ -42,18 +42,34 @@ public class ActiveActivity extends Activity {
       Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(this);
       AppData.windowManager.addView(loading.first, loading.second);
       new Thread(() -> {
-        boolean isOk = ActiveHelper.checkOk(activeKey);
+        boolean isOk = ActiveHelper.active(activeKey);
         AppData.windowManager.removeView(loading.first);
         AppData.uiHandler.post(() -> {
           if (isOk) {
             finish();
             AppData.setting.setIsActive(true);
-            Toast.makeText(this, getString(R.string.active_button_success), Toast.LENGTH_SHORT).show();
             PublicTools.startUrl(this, "https://gitee.com/mingzhixianweb/easycontrol/blob/master/HOW_TO_USE.md");
-          } else Toast.makeText(this, getString(R.string.active_button_error), Toast.LENGTH_SHORT).show();
+            PublicTools.logToast("active", getString(R.string.active_button_success), true);
+          } else PublicTools.logToast("active", getString(R.string.active_button_error), true);
         });
       }).start();
     });
+  }
+
+  // 取消激活
+  private void deactivate() {
+    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(this);
+    AppData.windowManager.addView(loading.first, loading.second);
+    new Thread(() -> {
+      boolean isOk = ActiveHelper.deactivate(AppData.setting.getActiveKey());
+      AppData.windowManager.removeView(loading.first);
+      AppData.uiHandler.post(() -> {
+        if (isOk) {
+          AppData.setting.setIsActive(false);
+          PublicTools.logToast("deactivate", getString(R.string.active_deactivate_success), true);
+        } else PublicTools.logToast("deactivate", getString(R.string.active_deactivate_error), true);
+      });
+    }).start();
   }
 
   @Override

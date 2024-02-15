@@ -34,18 +34,17 @@ public class IpActivity extends Activity {
   private void drawUi() {
     // 添加IP
     Pair<ArrayList<String>, ArrayList<String>> listPair = PublicTools.getIp();
-    Context context = this;
     for (String i : listPair.first) {
-      ItemTextBinding text = ViewTools.createTextCard(context, i, () -> {
+      ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-        Toast.makeText(context, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
       });
       ipActivity.ipv4.addView(text.getRoot());
     }
     for (String i : listPair.second) {
-      ItemTextBinding text = ViewTools.createTextCard(context, i, () -> {
+      ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-        Toast.makeText(context, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
       });
       ipActivity.ipv6.addView(text.getRoot());
     }

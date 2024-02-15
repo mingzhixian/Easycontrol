@@ -24,7 +24,7 @@ import android.widget.ScrollView;
 import java.util.Locale;
 
 import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.databinding.ItemAddDeviceBinding;
+import top.saymzx.easycontrol.app.databinding.ItemDeviceDetailBinding;
 import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
@@ -91,12 +91,12 @@ public class ViewTools {
   }
 
   // 创建新建设备弹窗
-  public static Dialog createAddDeviceView(
+  public static Dialog createDeviceDetailView(
     Context context,
     Device device,
     DeviceListAdapter deviceListAdapter
   ) {
-    ItemAddDeviceBinding itemAddDeviceBinding = ItemAddDeviceBinding.inflate(LayoutInflater.from(context));
+    ItemDeviceDetailBinding itemAddDeviceBinding = ItemDeviceDetailBinding.inflate(LayoutInflater.from(context));
     Dialog dialog = createDialog(context, true, itemAddDeviceBinding.getRoot());
     // 设置值
     itemAddDeviceBinding.name.setText(device.name);

@@ -46,11 +46,12 @@ public class SetDetailActivity extends Activity {
 
   // 绘制启动时操作
   private void drawOnStart() {
-    setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_back_on_start_default), getString(R.string.set_auto_back_on_start_default_detail), AppData.setting.getAutoBackOnStart(), isChecked -> AppData.setting.setAutoBackOnStart(isChecked)).getRoot());
+    setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_back_after_start_default_on_start), getString(R.string.set_auto_back_after_start_default_on_start_detail), AppData.setting.getAutoBackOnStart(), isChecked -> AppData.setting.setAutoBackOnStart(isChecked)).getRoot());
     setDetailActivity.setDetail.addView(ViewTools.createTextCard(this, getString(R.string.set_auto_clear_default), () -> {
       AppData.setting.setDefaultDevice("");
       Toast.makeText(this, getString(R.string.set_auto_clear_default_code), Toast.LENGTH_SHORT).show();
     }).getRoot());
+    setDetailActivity.setDetail.addView(ViewTools.createSwitchCard(this, getString(R.string.set_auto_scan_address_on_start), getString(R.string.set_auto_scan_address_on_start_detail), AppData.setting.getAutoScanAddressOnStart(), isChecked -> AppData.setting.setAutoScanAddressOnStart(isChecked)).getRoot());
   }
 
   // 绘制连接时操作

@@ -3,63 +3,54 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content"
-  android:paddingTop="10dp"
-  android:paddingEnd="10dp"
-  android:paddingBottom="10dp">
+  android:layout_margin="10dp"
+  android:background="@drawable/background_cron"
+  android:elevation="8dp">
 
-  <FrameLayout
+  <LinearLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="-10dp"
+    android:layout_margin="5dp"
     android:background="@drawable/background_cron"
-    android:paddingStart="10dp">
+    android:backgroundTint="@color/background"
+    android:orientation="vertical"
+    tools:ignore="UselessParent">
 
-    <LinearLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="5dp"
-      android:background="@drawable/background_cron"
-      android:backgroundTint="@color/background"
-      android:orientation="vertical"
-      tools:ignore="UselessParent">
+    <ImageView
+      android:id="@+id/button_small"
+      android:layout_width="45dp"
+      android:layout_height="40dp"
+      android:paddingStart="10dp"
+      android:paddingTop="10dp"
+      android:paddingEnd="10dp"
+      android:paddingBottom="5dp"
+      android:src="@drawable/window_restore"
+      android:tint="@color/onCardBackground" />
 
-      <ImageView
-        android:id="@+id/button_small"
-        android:layout_width="45dp"
-        android:layout_height="40dp"
-        android:paddingStart="10dp"
-        android:paddingTop="10dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="5dp"
-        android:src="@drawable/window_restore"
-        android:tint="@color/onCardBackground" />
+    <FrameLayout
+      android:layout_width="20dp"
+      android:layout_height="10dp"
+      android:layout_gravity="center">
 
-      <FrameLayout
+      <View
         android:layout_width="20dp"
-        android:layout_height="10dp"
-        android:layout_gravity="center">
+        android:layout_height="3dp"
+        android:layout_gravity="center"
+        android:background="@drawable/background_cron"
+        android:backgroundTint="@color/clientBar"
+        android:focusable="false" />
+    </FrameLayout>
 
-        <View
-          android:layout_width="20dp"
-          android:layout_height="3dp"
-          android:layout_gravity="center"
-          android:background="@drawable/background_cron"
-          android:backgroundTint="@color/clientBar"
-          android:focusable="false" />
-      </FrameLayout>
-
-      <ImageView
-        android:id="@+id/button_full"
-        android:layout_width="45dp"
-        android:layout_height="40dp"
-        android:paddingStart="10dp"
-        android:paddingTop="5dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="10dp"
-        android:src="@drawable/expand"
-        android:tint="@color/onCardBackground" />
-    </LinearLayout>
-
-  </FrameLayout>
+    <ImageView
+      android:id="@+id/button_full"
+      android:layout_width="45dp"
+      android:layout_height="40dp"
+      android:paddingStart="10dp"
+      android:paddingTop="5dp"
+      android:paddingEnd="10dp"
+      android:paddingBottom="10dp"
+      android:src="@drawable/expand"
+      android:tint="@color/onCardBackground" />
+  </LinearLayout>
 
 </FrameLayout>

@@ -8,7 +8,9 @@
 
   <!-- 主页 -->
   <string name="main_poem">Happy New Year!</string>
-  <string name="main_float_permission">Please grant floating window permission</string>
+  <string name="main_float_permission">Please grant floating window permission, otherwise the software cannot be used.</string>
+  <string name="main_float_permission_button">Go to setting</string>
+  <string name="main_scan_device_list">Find the following address (click copy)</string>
 
   <!-- 设置页面 -->
   <string name="set_default">Default settings</string>
@@ -29,8 +31,10 @@
   <string name="set_auto_light_on_close_detail">Restore remote device\'s backlight when disconnected (ignored when auto lock is enabled)</string>
   <string name="set_auto_keep_screen_awake">Keep remote device unlocked</string>
   <string name="set_auto_keep_screen_awake_detail">Remote device won\'t lock when connected</string>
-  <string name="set_auto_back_on_start_default">Return to launcher</string>
-  <string name="set_auto_back_on_start_default_detail">Return to launcher automatically when default device connected.</string>
+  <string name="set_auto_back_after_start_default_on_start">Return to launcher</string>
+  <string name="set_auto_back_after_start_default_on_start_detail">Return to launcher automatically when default device connected.</string>
+  <string name="set_auto_scan_address_on_start">Start scanning automatically</string>
+  <string name="set_auto_scan_address_on_start_detail">Automatically start scanning the addresses of all available devices on the local area network at startup</string>
   <string name="set_auto_show_nav_bar_on_connect">Show navigation bar</string>
   <string name="set_auto_show_nav_bar_on_connect_detail">Bottom navbar display control</string>
   <string name="set_auto_change_to_full_on_connect">Fullscreen mode</string>
@@ -51,7 +55,7 @@
   <string name="set_other_locale">Change language(中文/English)</string>
   <string name="set_other_locale_code">已切换，可能需要重启APP</string>
   <string name="set_about_ip">IP addresses</string>
-  <string name="set_about_active">Activation</string>
+  <string name="set_about_active">Deactivate</string>
   <string name="set_about_website">Homepage</string>
   <string name="set_about_how_to_use">Tutorial</string>
   <string name="set_about_privacy">Privacy Policy</string>
@@ -82,14 +86,16 @@
   </string>
   <string name="active_button_error">Invalid order number/Order number not registered/Device quota(5) exceeded</string>
   <string name="active_button_success">SUCCESS! Read tutorial</string>
+  <string name="active_deactivate_error">Deactivation error, unknown reason</string>
+  <string name="active_deactivate_success">Deactivated</string>
 
   <!-- 设备添加模块 -->
-  <string name="add_device_name">Name</string>
-  <string name="add_device_name_hint">Can NOT be empty</string>
-  <string name="add_device_address">Address:Port</string>
-  <string name="add_device_address_hint">IPv4/v6 addresses or domain</string>
-  <string name="add_device_option">Advanced options</string>
-  <string name="add_device_button">Ok</string>
+  <string name="device_detail_name">Name</string>
+  <string name="device_detail_name_hint">Can NOT be empty</string>
+  <string name="device_detail_address">Address:Port</string>
+  <string name="device_detail_address_hint">IPv4/v6 addresses or domain</string>
+  <string name="device_detail_option">Advanced options</string>
+  <string name="device_detail_button">Ok</string>
 
   <!-- 设备设置模块 -->
   <string name="set_device_title">Details</string>

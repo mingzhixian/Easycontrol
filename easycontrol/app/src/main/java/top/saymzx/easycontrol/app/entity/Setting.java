@@ -153,6 +153,15 @@ public final class Setting {
     editor.apply();
   }
 
+  public boolean getAutoScanAddressOnStart() {
+    return sharedPreferences.getBoolean("autoScanAddressStart", false);
+  }
+
+  public void setAutoScanAddressOnStart(boolean value) {
+    editor.putBoolean("autoScanAddressStart", value);
+    editor.apply();
+  }
+
   public boolean getKeepAwake() {
     return sharedPreferences.getBoolean("keepAwake", true);
   }

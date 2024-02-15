@@ -114,7 +114,7 @@ public class DeviceListAdapter extends BaseAdapter {
     });
     itemSetDeviceBinding.buttonChange.setOnClickListener(v -> {
       dialog.cancel();
-      ViewTools.createAddDeviceView(context, device, this).show();
+      ViewTools.createDeviceDetailView(context, device, this).show();
     });
     itemSetDeviceBinding.buttonDelete.setOnClickListener(v -> {
       AppData.dbHelper.delete(device);

@@ -2,7 +2,6 @@ package top.saymzx.easycontrol.app.helper;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.DhcpInfo;
 import android.net.Uri;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -16,9 +15,14 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,20 +103,16 @@ public class PublicTools {
 
   // 获取网关地址
   public static String getGateway() {
-    return decodeIntToIp(AppData.wifiManager.getDhcpInfo().gateway, 4);
+    int ip = AppData.wifiManager.getDhcpInfo().gateway;
+    // 没有wifi时，设置为1.1.1.1
+    if (ip == 0) ip = 16843009;
+    return decodeIntToIp(ip, 4);
   }
 
   // 获取子网地址
   public static String getNetAddress() {
-    DhcpInfo dhcpInfo = AppData.wifiManager.getDhcpInfo();
-    int gateway = dhcpInfo.gateway;
-    int ipAddress = dhcpInfo.ipAddress;
-    // 因为dhcpInfo.netmask兼容性不好，部分设备获取值为0，所以此处使用对比方法
-    int len;
-    if (((gateway >> 8) & 0xff) == ((ipAddress >> 8) & 0xff)) len = 3;
-    else if (((gateway >> 16) & 0xff) == ((ipAddress >> 16) & 0xff)) len = 2;
-    else len = 1;
-    return decodeIntToIp(gateway, len);
+    // 因为此标识符使用场景有限，为了节省资源，默认地址为24位掩码地址
+    return decodeIntToIp(AppData.wifiManager.getDhcpInfo().gateway, 3);
   }
 
   // 解析地址
@@ -198,6 +198,32 @@ public class PublicTools {
     Display display = AppData.windowManager.getDefaultDisplay();
     display.getRealMetrics(screenSize);
     return screenSize;
+  }
+
+  // 扫描局域网设备
+  public static ArrayList<String> scanAddress() {
+    ArrayList<String> scannedAddresses = new ArrayList<>();
+    String subnet = getNetAddress();
+    ExecutorService executor = Executors.newFixedThreadPool(128);
+    for (int i = 1; i <= 255; i++) {
+      String host = subnet + "." + i;
+      executor.execute(() -> {
+        try {
+          Socket socket = new Socket();
+          socket.connect(new InetSocketAddress(host, 5555), 1000);
+          socket.close();
+          scannedAddresses.add(host + ":5555");
+        } catch (Exception ignored) {
+        }
+      });
+    }
+    executor.shutdown();
+    try {
+      while (!executor.awaitTermination(1, TimeUnit.SECONDS)) {
+      }
+    } catch (InterruptedException ignored) {
+    }
+    return scannedAddresses;
   }
 
 }

@@ -30,8 +30,8 @@
 
       <ImageView
         android:id="@+id/button_set"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:padding="15dp"
         android:src="@drawable/bars"
         android:tint="@color/onBackground" />
@@ -58,10 +58,19 @@
       </LinearLayout>
 
       <ImageView
+        android:id="@+id/button_scan"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:padding="8dp"
+        android:src="@drawable/scansion"
+        android:tint="@color/onBackground" />
+
+      <ImageView
         android:id="@+id/button_add"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
-        android:padding="15dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="5dp"
+        android:padding="10dp"
         android:src="@drawable/plus"
         android:tint="@color/onBackground" />
 
@@ -71,12 +80,11 @@
       android:id="@+id/devices_list"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:clipToPadding="false"
       android:divider="#00000000"
       android:dividerHeight="15dp"
       android:paddingStart="15dp"
       android:paddingEnd="15dp"
-      android:paddingBottom="60dp"
+      android:paddingBottom="50dp"
       tools:listitem="@layout/item_devices_item" />
 
   </LinearLayout>

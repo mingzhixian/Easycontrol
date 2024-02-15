@@ -4,7 +4,9 @@
   <string name="app_name_dev">易控测试版</string>
   <!-- 主页 -->
   <string name="main_poem">新年快乐！！！</string>
-  <string name="main_float_permission">请授予悬浮窗权限</string>
+  <string name="main_float_permission">请授予悬浮窗权限，否则软件无法使用</string>
+  <string name="main_float_permission_button">前往设置</string>
+  <string name="main_scan_device_list">找到以下地址(点击复制)</string>
 
   <!-- 设置页面 -->
   <string name="set_default">默认参数</string>
@@ -25,8 +27,10 @@
   <string name="set_auto_light_on_close_detail">断开时自动恢复被控端背光（若启用了自动锁定，则此功能可开可关）</string>
   <string name="set_auto_keep_screen_awake">被控端保持唤醒</string>
   <string name="set_auto_keep_screen_awake_detail">连接过程中被控端不锁定（即修改自动锁定时间）</string>
-  <string name="set_auto_back_on_start_default">打开默认后返回</string>
-  <string name="set_auto_back_on_start_default_detail">启动时打开默认后是否自动返回桌面</string>
+  <string name="set_auto_back_after_start_default_on_start">打开默认后返回</string>
+  <string name="set_auto_back_after_start_default_on_start_detail">启动时打开默认后是否自动返回桌面</string>
+  <string name="set_auto_scan_address_on_start">自动开始扫描</string>
+  <string name="set_auto_scan_address_on_start_detail">启动时自动开始扫描局域网所有可用设备地址</string>
   <string name="set_auto_show_nav_bar_on_connect">打开导航栏显示</string>
   <string name="set_auto_show_nav_bar_on_connect_detail">设置小窗和全屏模式默认是否显示导航栏</string>
   <string name="set_auto_change_to_full_on_connect">默认全屏启动</string>
@@ -47,7 +51,7 @@
   <string name="set_other_locale">语言切换(中文/English)</string>
   <string name="set_other_locale_code">Ok, you may need to restart the APP</string>
   <string name="set_about_ip">查看本机IP</string>
-  <string name="set_about_active">重新激活</string>
+  <string name="set_about_active">取消激活</string>
   <string name="set_about_website">项目主页</string>
   <string name="set_about_how_to_use">使用说明</string>
   <string name="set_about_privacy">隐私政策</string>
@@ -78,14 +82,17 @@
   </string>
   <string name="active_button_error">输入错误或系统仍未录入或超出5台设备</string>
   <string name="active_button_success">激活成功，请查看使用说明后使用</string>
+  <string name="active_deactivate_error">取消激活错误，原因未知</string>
+  <string name="active_deactivate_success">已取消激活</string>
 
   <!-- 设备添加模块 -->
-  <string name="add_device_name">设备名称</string>
-  <string name="add_device_name_hint">不可为空</string>
-  <string name="add_device_address">地址:端口号</string>
-  <string name="add_device_address_hint">支持IPv4/v6地址、域名</string>
-  <string name="add_device_option">高级选项</string>
-  <string name="add_device_button">确认</string>
+  <string name="device_detail_name">设备名称</string>
+  <string name="device_detail_name_hint">不可为空</string>
+  <string name="device_detail_address">地址:端口号</string>
+  <string name="device_detail_address_hint">支持IPv4/v6地址、域名</string>
+  <string name="device_detail_option">参数设置</string>
+  <string name="device_detail_auto">自动化设置</string>
+  <string name="device_detail_button">确认</string>
 
   <!-- 设备设置模块 -->
   <string name="set_device_title">干什么◔ ‸◔?</string>
