@@ -1,29 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/text"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:background="@color/cardBackground"
   android:gravity="center_vertical"
-  android:orientation="horizontal"
   android:paddingTop="6dp"
-  android:paddingBottom="6dp">
-
-  <TextView
-    android:id="@+id/text"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:gravity="center_vertical"
-    android:text="前往官网"
-    android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/smallFont"
-    tools:ignore="HardcodedText" />
-
-  <ImageView
-    android:layout_width="18dp"
-    android:layout_height="18dp"
-    android:rotation="180"
-    android:src="@drawable/chevron_left"
-    android:tint="@color/onCardBackground" />
-</LinearLayout>
+  android:paddingBottom="6dp"
+  android:text="前往官网"
+  android:textColor="@color/onCardBackground"
+  android:textSize="@dimen/smallFont"
+  tools:ignore="HardcodedText" />

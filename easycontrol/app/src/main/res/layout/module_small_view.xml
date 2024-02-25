@@ -18,8 +18,9 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_margin="2dp"
+    android:layout_margin="10dp"
     android:background="@drawable/background_cron"
+    android:elevation="4dp"
     android:orientation="vertical">
 
     <FrameLayout
@@ -31,6 +32,7 @@
       android:id="@+id/nav_bar"
       android:layout_width="match_parent"
       android:layout_height="25dp"
+      android:alpha="0.8"
       android:orientation="horizontal"
       android:paddingStart="10dp"
       android:paddingEnd="5dp"
@@ -40,7 +42,7 @@
         android:id="@+id/button_rotate"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:focusable="false"
         android:padding="2dp"
         android:src="@drawable/horizontal_rotate"
@@ -50,7 +52,7 @@
         android:id="@+id/button_switch"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:focusable="false"
         android:padding="2dp"
         android:src="@drawable/square"
@@ -60,7 +62,7 @@
         android:id="@+id/button_home"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:focusable="false"
         android:padding="2dp"
         android:src="@drawable/o"
@@ -70,7 +72,7 @@
         android:id="@+id/button_back"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:focusable="false"
         android:padding="2dp"
         android:src="@drawable/caret_left"
@@ -87,13 +89,15 @@
   <FrameLayout
     android:id="@+id/bar"
     android:layout_width="100dp"
-    android:layout_height="20dp"
-    android:layout_gravity="top|center_horizontal">
+    android:layout_height="25dp"
+    android:layout_gravity="top|center_horizontal"
+    android:elevation="6dp">
 
     <View
       android:layout_width="40dp"
       android:layout_height="5dp"
-      android:layout_gravity="center"
+      android:layout_gravity="center_horizontal|bottom"
+      android:layout_marginBottom="3dp"
       android:background="@drawable/background_cron"
       android:backgroundTint="@color/clientBar"
       android:focusable="false" />
@@ -104,7 +108,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="22dp"
+    android:layout_marginTop="30dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"
     android:elevation="8dp"

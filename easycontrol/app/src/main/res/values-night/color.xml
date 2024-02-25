@@ -17,10 +17,14 @@
   <!-- 客户端界面色彩 -->
   <color name="clientBar">#828282</color>
 
-  <!-- 迷你客户端界面色彩 -->
-  <color name="bar1">#e8b621</color>
-  <color name="bar2">#3a7f9e</color>
-  <color name="bar3">#6eaa84</color>
-  <color name="bar4">#0A95FF</color>
+  <!-- 彩色 -->
+  <color name="color1">#FF9966</color>
+  <color name="color2">#FFCCCC</color>
+  <color name="color3">#CCCC99</color>
+  <color name="color4">#336699</color>
+  <color name="color5">#666666</color>
+  <color name="color6">#669999</color>
+  <color name="color7">#666699</color>
+  <color name="color8">#669933</color>
 
 </resources>

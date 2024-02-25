@@ -31,10 +31,11 @@
 代码是开源的，但官方打包的安装包需要激活才可使用，激活的步骤请参考[此页面](https://gitee.com/mingzhixianweb/easycontrol/blob/master/DONATE.md)
 
 ## 截图
-<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/main.webp" width="200px">
-<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/small.webp" width="200px">
-<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/mini.webp" width="200px">
-<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/full.webp" width="200px">
+<center class="half">
+ <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/1.jpg" width="150"/><img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/2.jpg" width="150"/><img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/3.jpg" width="150"/>
+ <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/4.jpg" width="150"/><img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/5.jpg" width="150"/><img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/6.jpg" width="150"/>
+ <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/7.jpg" width="150"/><img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/screenshot/8.jpg" width="150"/>
+</center>
 
 ## 构建
 如果您想要自己构建，请注意以下几项
@@ -42,7 +43,12 @@
 - 我去除了官方打包加入的激活模块相关的代码文件，所以会有报错，请自行注释掉报错代码即可
 
 ## 反馈
-
 请在Github或Gitee提出Issue，或进入易控反馈群反馈BUG或建议。
 
 <img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/qq_issue.webp" width="200px">
+<img src="https://gitee.com/mingzhixianweb/easycontrol/raw/master/pic/other/wechat_issue.png" width="200px">
+
+## 附加
+- ADB协议说明(官方的文档写的真烂，感谢cstyan大佬) [点击前往](https://github.com/cstyan/adbDocumentation)
+- Scrcpy官方地址 [点击前往](https://github.com/Genymobile/scrcpy)
+- 第三方修改本(专为车机进行了优化) [点击前往](https://github.com/eiyooooo/Easycontrol_For_Car)

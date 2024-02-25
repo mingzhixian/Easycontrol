@@ -6,6 +6,7 @@ import android.util.Pair;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
@@ -43,7 +44,7 @@ public class ClientStream {
     Thread timeOutThread = new Thread(() -> {
       try {
         Thread.sleep(10 * 1000);
-        PublicTools.logToast("stream", AppData.applicationContext.getString(R.string.error_timeout), true);
+        PublicTools.logToast("stream", AppData.applicationContext.getString(R.string.toast_timeout), true);
         handle.run(false);
         if (connectThread != null) connectThread.interrupt();
       } catch (InterruptedException ignored) {
@@ -86,7 +87,7 @@ public class ClientStream {
       + " isAudio=" + (device.isAudio ? 1 : 0) + " maxSize=" + device.maxSize
       + " maxFps=" + device.maxFps
       + " maxVideoBit=" + device.maxVideoBit
-      + " keepAwake=" + (AppData.setting.getKeepAwake() ? 1 : 0)
+      + " keepAwake=" + (device.keepWakeOnRunning ? 1 : 0)
       + " supportH265=" + ((device.useH265 && supportH265) ? 1 : 0)
       + " supportOpus=" + (supportOpus ? 1 : 0) + " \n").getBytes()));
   }
@@ -95,18 +96,28 @@ public class ClientStream {
   private void connectServer(Pair<String, Integer> address) throws Exception {
     Thread.sleep(50);
     int reTry = 60;
+    long startTime = System.currentTimeMillis();
     if (address != null) {
       reTry /= 2;
       for (int i = 0; i < reTry; i++) {
         try {
-          if (mainSocket == null) mainSocket = new Socket(address.first, 25166);
-          if (videoSocket == null) videoSocket = new Socket(address.first, 25166);
+          if (mainSocket == null) {
+            mainSocket = new Socket();
+            mainSocket.connect(new InetSocketAddress(address.first, 25166), 1000);
+          }
+          if (videoSocket == null) {
+            videoSocket = new Socket();
+            videoSocket.connect(new InetSocketAddress(address.first, 25166), 1000);
+          }
           mainOutputStream = mainSocket.getOutputStream();
           mainDataInputStream = new DataInputStream(mainSocket.getInputStream());
           videoDataInputStream = new DataInputStream(videoSocket.getInputStream());
           connectDirect = true;
           return;
         } catch (Exception ignored) {
+          // 此处检查是因为代码是靠连接错误约束时间的，但有些设备为了安全，在端口没有开启的情况下不会回复reset错误，而是不回复，导致无法检测错误，无法约束时间
+          // 如果超时，直接跳出循环
+          if (System.currentTimeMillis() - startTime >= 5000) reTry = 60;
           Thread.sleep(50);
         }
       }
@@ -122,7 +133,7 @@ public class ClientStream {
         Thread.sleep(50);
       }
     }
-    throw new Exception(AppData.applicationContext.getString(R.string.error_connect_server));
+    throw new Exception(AppData.applicationContext.getString(R.string.toast_connect_server));
   }
 
   public void runShell(String cmd) throws Exception {

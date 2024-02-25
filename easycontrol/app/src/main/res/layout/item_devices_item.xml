@@ -7,80 +7,57 @@
   android:background="@drawable/background_cron"
   android:gravity="center"
   android:orientation="horizontal"
-  android:padding="8dp">
+  android:paddingStart="12dp"
+  android:paddingTop="10dp"
+  android:paddingEnd="12dp"
+  android:paddingBottom="10dp">
+
+  <FrameLayout
+    android:id="@+id/device_icon_background"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_round"
+    android:backgroundTint="@color/color1"
+    android:padding="10dp">
+
+    <ImageView
+      android:id="@+id/device_icon"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:src="@drawable/wifi"
+      android:tint="@color/onCardBackground" />
+  </FrameLayout>
 
   <LinearLayout
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_weight="1"
     android:gravity="center"
-    android:orientation="horizontal">
+    android:orientation="vertical"
+    android:paddingStart="12dp">
 
-    <ImageView
-      android:id="@+id/device_icon"
-      android:layout_width="26dp"
-      android:layout_height="26dp"
-      android:src="@drawable/wifi"
-      android:tint="@color/onCardBackground" />
+    <TextView
+      android:id="@+id/device_type"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="1dp"
+      android:includeFontPadding="false"
+      android:maxLines="1"
+      android:text="无线连接"
+      android:textColor="@color/onCardBackgroundSecond"
+      android:textSize="@dimen/smallSmallFont"
+      tools:ignore="HardcodedText" />
 
     <TextView
       android:id="@+id/device_name"
-      android:layout_width="0dp"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
-      android:layout_weight="1"
       android:includeFontPadding="false"
       android:maxLines="1"
       android:text="设备1"
       android:textColor="@color/onCardBackground"
-      android:textSize="@dimen/largeFont"
+      android:textSize="@dimen/middleFont"
       tools:ignore="HardcodedText" />
-  </LinearLayout>
-
-  <LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/background_cron"
-    android:backgroundTint="@color/background"
-    android:orientation="horizontal"
-    tools:ignore="UselessParent">
-
-    <ImageView
-      android:id="@+id/button_small"
-      android:layout_width="45dp"
-      android:layout_height="45dp"
-      android:paddingStart="10dp"
-      android:paddingTop="10dp"
-      android:paddingEnd="8dp"
-      android:paddingBottom="10dp"
-      android:src="@drawable/window_restore"
-      android:tint="@color/onCardBackground" />
-
-    <FrameLayout
-      android:layout_width="8dp"
-      android:layout_height="20dp"
-      android:layout_gravity="center">
-
-      <View
-        android:layout_width="3dp"
-        android:layout_height="20dp"
-        android:layout_gravity="center"
-        android:background="@drawable/background_cron"
-        android:backgroundTint="@color/clientBar"
-        android:focusable="false" />
-    </FrameLayout>
-
-    <ImageView
-      android:id="@+id/button_full"
-      android:layout_width="45dp"
-      android:layout_height="45dp"
-      android:paddingStart="8dp"
-      android:paddingTop="10dp"
-      android:paddingEnd="10dp"
-      android:paddingBottom="10dp"
-      android:src="@drawable/expand"
-      android:tint="@color/onCardBackground" />
   </LinearLayout>
 
 </LinearLayout>

@@ -11,6 +11,7 @@ public final class Options {
   public static boolean keepAwake = true;
   public static boolean supportH265 = true;
   public static boolean supportOpus = true;
+  public static String startApp = "";
 
   public static void parse(String... args) {
     for (String arg : args) {
@@ -39,6 +40,9 @@ public final class Options {
           break;
         case "supportOpus":
           supportOpus = Integer.parseInt(value) == 1;
+          break;
+        case "startApp":
+          startApp = value;
           break;
       }
     }

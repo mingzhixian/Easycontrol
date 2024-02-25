@@ -30,18 +30,17 @@ import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 public final class Device {
-  private static Pair<Integer, Integer> realDeviceSize;
+  public static Pair<Integer, Integer> realSize;
   public static Pair<Integer, Integer> deviceSize;
   public static int deviceRotation;
+  public static int layerStack;
   public static Pair<Integer, Integer> videoSize;
   public static boolean needReset = false;
   public static int oldScreenOffTimeout = 60000;
-
   private static final int displayId = Display.DEFAULT_DISPLAY;
-  public static int layerStack;
 
   public static void init() throws IOException, InterruptedException {
-    getRealDeviceSize();
+    getRealSize();
     getDeivceSize();
     // 旋转监听
     setRotationListener();
@@ -51,13 +50,18 @@ public final class Device {
     if (Options.keepAwake) setKeepScreenLight();
   }
 
-  // 获取真实的设备大小
-  private static void getRealDeviceSize() {
-    DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
-    realDeviceSize = displayInfo.size;
-    deviceRotation = displayInfo.rotation;
-    if (deviceRotation == 1 || deviceRotation == 3)
-      realDeviceSize = new Pair<>(realDeviceSize.second, realDeviceSize.first);
+  private static void getRealSize() throws IOException, InterruptedException {
+    String output = Device.execReadOutput("wm size");
+    String patStr;
+    // 查看当前分辨率
+    patStr = (output.contains("Override") ? "Override" : "Physical") + " size: (\\d+)x(\\d+)";
+    Matcher matcher = Pattern.compile(patStr).matcher(output);
+    if (matcher.find()) {
+      String width = matcher.group(1);
+      String height = matcher.group(2);
+      if (width == null || height == null) return;
+      realSize = new Pair<>(Integer.parseInt(width), Integer.parseInt(height));
+    }
   }
 
   private static void getDeivceSize() {
@@ -83,31 +87,54 @@ public final class Device {
   }
 
   // 修改分辨率
-  public static void changeDeviceSize(float reSize) {
+  public static void changeDeviceResolution(float targetRatio) {
     try {
+      // 安全阈值(长宽比最多三倍)
+      if (targetRatio > 3 || targetRatio < 0.34) return;
+      // 没有获取到真实分辨率
+      if (realSize == null) return;
       needReset = true;
-      // 竖向比例最大为1
-      if (reSize > 1) reSize = 1;
-      boolean isPortrait = realDeviceSize.first < realDeviceSize.second;
-      int major = isPortrait ? realDeviceSize.second : realDeviceSize.first;
-      int minor = isPortrait ? realDeviceSize.first : realDeviceSize.second;
 
-      int newWidth;
-      int newHeight;
-      if ((float) minor / (float) major > reSize) {
-        newWidth = (int) (reSize * major);
-        newHeight = major;
+      float originalRatio = (float) realSize.first / realSize.second;
+      // 计算变化比率
+      float ratioChange = targetRatio / originalRatio;
+      // 根据比率变化确定新的长和宽
+      int newWidth, newHeight;
+      if (ratioChange > 1) {
+        newWidth = realSize.first;
+        newHeight = (int) (realSize.second / ratioChange);
       } else {
-        newWidth = minor;
-        newHeight = (int) (minor / reSize);
+        newWidth = (int) (realSize.first * ratioChange);
+        newHeight = realSize.second;
       }
+      changeDeviceResolution(newWidth, newHeight);
+    } catch (Exception ignored) {
+    }
+  }
+
+  // 修改分辨率
+  public static void changeDeviceResolution(int width, int height) {
+    try {
+      float originalRatio = (float) realSize.first / realSize.second;
+      // 安全阈值(长宽比最多三倍)
+      if (originalRatio > 3 || originalRatio < 0.34) return;
+
+      needReset = true;
+
+      // 缩放至16倍数
+      width = width + 8 & ~15;
+      height = height + 8 & ~15;
+
+      // 避免分辨率相同，会触发安全机制导致系统崩溃
+      if (width == height) width -= 16;
+
       // 修改分辨率
-      Pair<Integer, Integer> newDeivceSize = new Pair<>((isPortrait ? newWidth : newHeight), (isPortrait ? newHeight : newWidth));
-      newDeivceSize = new Pair<>(newDeivceSize.first + 4 & ~7, newDeivceSize.second + 4 & ~7);
-      Device.execReadOutput("wm size " + newDeivceSize.first + "x" + newDeivceSize.second);
-      // 更新，需延迟一段时间，否则会导致画面卡顿，尚未查清原因
-      Thread.sleep(500);
+      Device.execReadOutput("wm size " + width + "x" + height);
+
+      // 更新，需延迟一段时间
+      Thread.sleep(200);
       getDeivceSize();
+      calculateVideoSize();
       VideoEncode.isHasChangeConfig = true;
     } catch (Exception ignored) {
     }
@@ -137,11 +164,8 @@ public final class Device {
   private static void setRotationListener() {
     WindowManager.registerRotationWatcher(new IRotationWatcher.Stub() {
       public void onRotationChanged(int rotation) {
-        if ((deviceRotation + rotation) % 2 != 0) {
-          deviceSize = new Pair<>(deviceSize.second, deviceSize.first);
-          videoSize = new Pair<>(videoSize.second, videoSize.first);
-        }
-        deviceRotation = rotation;
+        getDeivceSize();
+        calculateVideoSize();
         VideoEncode.isHasChangeConfig = true;
       }
     }, displayId);
@@ -163,11 +187,9 @@ public final class Device {
 
     if (action == MotionEvent.ACTION_UP) {
       pointersState.remove(pointerId);
-      if (pointerCount > 1)
-        action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+      if (pointerCount > 1) action = MotionEvent.ACTION_POINTER_UP | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     } else if (action == MotionEvent.ACTION_DOWN) {
-      if (pointerCount > 1)
-        action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+      if (pointerCount > 1) action = MotionEvent.ACTION_POINTER_DOWN | (pointer.id << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
     }
     MotionEvent event = MotionEvent.obtain(pointer.downTime, pointer.downTime + offsetTime, action, pointerCount, pointersState.pointerProperties, pointersState.pointerCoords, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
     injectEvent(event);

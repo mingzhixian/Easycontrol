@@ -1,138 +1,122 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!-- 感谢群友 @λ 提供的翻译，原谅我之前只能用机器翻译 -->
-
+<?xml version="1.0" encoding="utf-8"?><!-- 感谢群友 @λ 提供的翻译，原谅我之前只能用机器翻译 -->
 <resources>
   <string name="app_name">EasyControl</string>
   <string name="app_name_dev">EasyControlBeta</string>
 
   <!-- 主页 -->
-  <string name="main_poem">Happy New Year!</string>
+  <string name="main_poem">Spring — an experience in immortality</string>
   <string name="main_float_permission">Please grant floating window permission, otherwise the software cannot be used.</string>
   <string name="main_float_permission_button">Go to setting</string>
   <string name="main_scan_device_list">Find the following address (click copy)</string>
+  <string name="main_scan_device_local">Local</string>
+  <string name="main_device_type_network">Wireless</string>
+  <string name="main_device_type_link">Wired</string>
 
   <!-- 设置页面 -->
-  <string name="set_default">Default settings</string>
-  <string name="set_on_start">Set action on start</string>
-  <string name="set_on_connect">Set action on connect</string>
-  <string name="set_on_close">Set action on close</string>
-  <string name="set_connecting">Set action on connecting</string>
-  <string name="set_other">Other</string>
-  <string name="set_adb_key">Adb Key</string>
-  <string name="set_about">About</string>
-  <string name="set_auto_wake_on_connect">Auto wakeup</string>
-  <string name="set_auto_wake_on_connect_detail">Wake up remote device when connected</string>
-  <string name="set_auto_lightoff_on_connect">Backlight off</string>
-  <string name="set_auto_lightoff_on_connect_detail">Turn off remote device\'s backlight when connected</string>
-  <string name="set_auto_lock_on_close">Lock</string>
-  <string name="set_auto_lock_on_close_detail">Lock remote device when disconnected</string>
-  <string name="set_auto_light_on_close">Reset backlight</string>
-  <string name="set_auto_light_on_close_detail">Restore remote device\'s backlight when disconnected (ignored when auto lock is enabled)</string>
-  <string name="set_auto_keep_screen_awake">Keep remote device unlocked</string>
-  <string name="set_auto_keep_screen_awake_detail">Remote device won\'t lock when connected</string>
-  <string name="set_auto_back_after_start_default_on_start">Return to launcher</string>
-  <string name="set_auto_back_after_start_default_on_start_detail">Return to launcher automatically when default device connected.</string>
-  <string name="set_auto_scan_address_on_start">Start scanning automatically</string>
-  <string name="set_auto_scan_address_on_start_detail">Automatically start scanning the addresses of all available devices on the local area network at startup</string>
-  <string name="set_auto_show_nav_bar_on_connect">Show navigation bar</string>
-  <string name="set_auto_show_nav_bar_on_connect_detail">Bottom navbar display control</string>
-  <string name="set_auto_change_to_full_on_connect">Fullscreen mode</string>
-  <string name="set_auto_change_to_full_on_connect_detail">When connected,enter fullscreen mode</string>
-  <string name="set_auto_small_to_mini_on_outside">Floating window auto minimize </string>
-  <string name="set_auto_small_to_mini_on_outside_detail">Touch outside of floating window to minimize it</string>
-  <string name="set_auto_full_to_mini_on_exit">Fullscreen auto minimize</string>
-  <string name="set_auto_full_to_mini_on_exit_detail">When fullscreen not manually exits,auto minimize it. Default behavour is switching to floating window mode.</string>
-  <string name="set_auto_mini_recover_on_timeout">Auto reset mode when hanged</string>
-  <string name="set_auto_mini_recover_on_timeout_detail">When auto hang is triggered, if users are not responding with in 5 secs, reset control mode.</string>
-  <string name="set_auto_reconnect_on_close">Auto reconnect</string>
-  <string name="set_auto_reconnect_on_close_detail">Auto reconnect to remote device (wired device can\'t auto reconnect)</string>
-  <string name="set_auto_clear_default">Clear default device</string>
-  <string name="set_auto_clear_default_code">Cleared</string>
-  <string name="set_other_custom_key">Custom ADB key (ADB reauthorization required)</string>
-  <string name="set_other_clear_key">Regenerate ADB key (ADB reauthorization required)</string>
-  <string name="set_other_clear_key_code">Regenerated</string>
+  <string name="set_other_custom_key">Custom ADB key</string>
+  <string name="set_other_reset_key">Reset ADB key</string>
+  <string name="set_other_ip">IP addresses</string>
   <string name="set_other_locale">Change language(中文/English)</string>
-  <string name="set_other_locale_code">已切换，可能需要重启APP</string>
-  <string name="set_about_ip">IP addresses</string>
   <string name="set_about_active">Deactivate</string>
   <string name="set_about_website">Homepage</string>
-  <string name="set_about_how_to_use">Tutorial</string>
   <string name="set_about_privacy">Privacy Policy</string>
   <string name="set_about_version">Version: </string>
 
   <!-- 查看IP地址页面 -->
-  <string name="ip_title">IP addresses</string>
   <string name="ip_ipv4">IPv4(Touch to copy)</string>
   <string name="ip_ipv6">IPv6(Touch to copy)</string>
-  <string name="ip_copy">Copied</string>
 
   <!-- 查看密钥页面 -->
   <string name="adb_key_pub">Public key (Base64)</string>
   <string name="adb_key_pri">Private key (Base64)</string>
   <string name="adb_key_button">Save</string>
-  <string name="adb_key_button_code">Saved</string>
 
   <!-- 激活页面 -->
   <string name="active_url">Donation Link</string>
   <string name="active_key">Donation Order number: $5 and up</string>
   <string name="active_button">Activate</string>
-  <string name="active_key_hint">
+  <string name="active_hint">
     * Your donation will be updated into our server within 24 hours. \n
     * One account can activate EasyControl on 5 different devices, no extra payments. \n
     * EasyControl use random generated sequences as device identifier, reinstalling app will require activation.\n
     * If you encountered devices quota limit or other problems, please contact us \n
     * E-mail: mingzhixian@outlook.com
   </string>
-  <string name="active_button_error">Invalid order number/Order number not registered/Device quota(5) exceeded</string>
-  <string name="active_button_success">SUCCESS! Read tutorial</string>
-  <string name="active_deactivate_error">Deactivation error, unknown reason</string>
-  <string name="active_deactivate_success">Deactivated</string>
 
-  <!-- 设备添加模块 -->
-  <string name="device_detail_name">Name</string>
-  <string name="device_detail_name_hint">Can NOT be empty</string>
-  <string name="device_detail_address">Address:Port</string>
-  <string name="device_detail_address_hint">IPv4/v6 addresses or domain</string>
-  <string name="device_detail_option">Advanced options</string>
-  <string name="device_detail_button">Ok</string>
+  <!-- 设备添加页面 -->
+  <string name="device_uuid">Touch to copy ID</string>
+  <string name="device_name">Name</string>
+  <string name="device_name_hint">Can NOT be empty</string>
+  <string name="device_address">Address:Port</string>
+  <string name="device_address_hint">IPv4/v6 addresses or domain</string>
+
+  <string name="device_on_connect">Set action on connect</string>
+  <string name="device_custom_resolution_on_connect">Change the resolution on connect</string>
+  <string name="device_custom_resolution_on_connect_detail">Set the resolution manually. After setting this item, the "Adaptive resolution on running" function is invalid.</string>
+  <string name="device_wake_on_connect">Auto wakeup</string>
+  <string name="device_wake_on_connect_detail">Wake up remote device when connected</string>
+  <string name="device_light_off_on_connect">Backlight off</string>
+  <string name="device_light_off_on_connect_detail">Turn off remote device\'s backlight when connected</string>
+  <string name="device_show_nav_bar_on_connect">Show navigation bar</string>
+  <string name="device_show_nav_bar_on_connect_detail">Bottom navbar display control</string>
+  <string name="device_change_to_full_on_connect">Fullscreen mode</string>
+  <string name="device_change_to_full_on_connect_detail">When connected,enter fullscreen mode</string>
+
+  <string name="device_on_running">Set action on running</string>
+  <string name="device_keep_wake_on_running">Keep remote device unlocked</string>
+  <string name="device_keep_wake_on_running_detail">Remote device won\'t lock when connected</string>
+  <string name="device_change_resolution_on_running">Adaptive resolution</string>
+  <string name="device_change_resolution_on_running_detail">Override remote device\'s resolution. WARNING: resolution may not reset automatically when disconnected(you can manually reset it in details page)</string>
+  <string name="device_small_to_mini_on_running">Floating window auto minimize</string>
+  <string name="device_small_to_mini_on_running_detail">Touch outside of floating window to minimize it</string>
+  <string name="device_full_to_mini_on_running">Fullscreen auto minimize</string>
+  <string name="device_full_to_mini_on_running_detail">When fullscreen not manually exits,auto minimize it. Default behavour is switching to floating window mode.</string>
+  <string name="device_mini_timeout_on_running">Auto reset mode when hanged</string>
+  <string name="device_mini_timeout_on_running_detail">When auto hang is triggered, if users are not responding with in 5 secs, reset control mode.</string>
+
+  <string name="device_on_close">Set action on close</string>
+  <string name="device_lock_on_close">Lock</string>
+  <string name="device_lock_on_close_detail">Lock remote device when disconnected</string>
+  <string name="device_light_on_close">Reset backlight</string>
+  <string name="device_light_on_close_detail">Restore remote device\'s backlight when disconnected (ignored when auto lock is enabled)</string>
+  <string name="device_reconnect_on_close">Auto reconnect</string>
+  <string name="device_reconnect_on_close_detail">Auto reconnect to remote device when accidentally disconnected (wired device can\'t auto reconnect)</string>
+
+  <string name="device_option">Options</string>
+  <string name="device_is_audio">Audio</string>
+  <string name="device_is_audio_detail">Works with Android 12+ </string>
+  <string name="device_max_size">Resolution</string>
+  <string name="device_max_size_detail">Set max resolution</string>
+  <string name="device_max_fps">FPS</string>
+  <string name="device_max_fps_detail">Frame per seconds</string>
+  <string name="device_max_video_bit">Bitrate</string>
+  <string name="device_max_video_bit_detail">Set stream bitrate. Suggested = 4, high value may increases latency.</string>
+  <string name="device_use_h265">H265</string>
+  <string name="device_use_h265_detail">Enable H265 when available. Disable it when encountered display issues.</string>
+  <string name="device_connect_on_start">Connect on start</string>
+  <string name="device_connect_on_start_detail">Auto connect when the software starts, and multiple devices can be set.</string>
+
+  <string name="device_button">Ok</string>
 
   <!-- 设备设置模块 -->
   <string name="set_device_title">Details</string>
-  <string name="set_device_button_recover">Reset resolution</string>
-  <string name="set_device_button_recover_success">Success</string>
-  <string name="set_device_button_recover_error">Failed, check ADB connection</string>
-  <string name="set_device_button_set_default">Set as default</string>
-  <string name="set_device_button_get_uuid">Copy ID</string>
-  <string name="set_device_button_get_uuid_success">Copied</string>
-  <string name="set_device_button_start_wireless">Enable wireless debugging</string>
-  <string name="set_device_button_start_wireless_success">Success</string>
   <string name="set_device_button_change">Settings</string>
+  <string name="set_device_button_start_wireless">Enable wireless</string>
+  <string name="set_device_button_recover">Reset resolution</string>
   <string name="set_device_button_delete">Delete</string>
 
   <!-- 加载中模块 -->
   <string name="loading_text">Loading</string>
 
-  <!-- 错误提示 -->
-  <string name="error_no_browser">No default browser</string>
-  <string name="error_address_error">Address format error</string>
-  <string name="error_refused_back">Fullscreen mode intercepts return key event</string>
-  <string name="error_timeout">Timeout</string>
-  <string name="error_connect_server">Failed to connect</string>
-  <string name="error_stream_closed">Disconnected</string>
-
-  <!-- 设备参数设置及注释说明 -->
-  <string name="option_is_audio">Audio</string>
-  <string name="option_is_audio_detail">Works with Android 12+ </string>
-  <string name="option_max_size">Resolution</string>
-  <string name="option_max_size_detail">Set max resolution</string>
-  <string name="option_max_fps">FPS</string>
-  <string name="option_max_fps_detail">Frame per seconds</string>
-  <string name="option_max_video_bit">Bitrate</string>
-  <string name="option_max_video_bit_detail">Set stream bitrate. Suggested = 4, high value may increases latency.</string>
-  <string name="option_use_h265">H265</string>
-  <string name="option_use_h265_detail">Enable H265 when available. Disable it when encountered display issues.</string>
-  <string name="option_set_resolution">Override Resolution</string>
-  <string name="option_set_resolution_detail">Override remote device\'s resolution. WARNING: resolution may not reset automatically when disconnected(you can manually reset it in details page)</string>
+  <!-- 提示文本 -->
+  <string name="toast_change_locale">已切换，可能需要重启APP</string>
+  <string name="toast_copy">Copied</string>
+  <string name="toast_success">Success</string>
+  <string name="toast_fail">Fail</string>
+  <string name="toast_no_browser">No default browser</string>
+  <string name="toast_address_error">Address format error</string>
+  <string name="toast_timeout">Timeout</string>
+  <string name="toast_connect_server">Failed to connect</string>
+  <string name="toast_stream_closed">Disconnected</string>
 
 </resources>

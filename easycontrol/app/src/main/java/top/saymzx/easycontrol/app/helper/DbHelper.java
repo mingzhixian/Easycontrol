@@ -9,13 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 
-import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
 
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 14;
+  private static final int version = 16;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -24,7 +23,38 @@ public class DbHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + tableName + " (\n" + "\t uuid text PRIMARY KEY,\n" + "\t type integer,\n" + "\t name text,\n" + "\t address text,\n" + "\t isAudio integer,\n" + "\t maxSize integer,\n" + "\t maxFps integer,\n" + "\t maxVideoBit integer," + "\t setResolution integer," + "\t useH265 integer ," + "\t small_x integer ," + "\t small_y integer ," + "\t small_length integer ," + "\t mini_y integer " + ");");
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("CREATE TABLE " + tableName + " (");
+    stringBuilder.append("uuid text PRIMARY KEY,");
+    stringBuilder.append("type integer,");
+    stringBuilder.append("name text,");
+    stringBuilder.append("address text,");
+    stringBuilder.append("isAudio integer,");
+    stringBuilder.append("maxSize integer,");
+    stringBuilder.append("maxFps integer,");
+    stringBuilder.append("maxVideoBit integer,");
+    stringBuilder.append("useH265 integer,");
+    stringBuilder.append("connectOnStart integer,");
+    stringBuilder.append("customResolutionOnConnect integer,");
+    stringBuilder.append("wakeOnConnect integer,");
+    stringBuilder.append("lightOffOnConnect integer,");
+    stringBuilder.append("showNavBarOnConnect integer,");
+    stringBuilder.append("changeToFullOnConnect integer,");
+    stringBuilder.append("keepWakeOnRunning integer,");
+    stringBuilder.append("changeResolutionOnRunning integer,");
+    stringBuilder.append("smallToMiniOnRunning integer,");
+    stringBuilder.append("fullToMiniOnRunning integer,");
+    stringBuilder.append("miniTimeoutOnRunning integer,");
+    stringBuilder.append("lockOnClose integer,");
+    stringBuilder.append("lightOnClose integer,");
+    stringBuilder.append("reconnectOnClose integer,");
+    stringBuilder.append("customResolutionWidth integer,");
+    stringBuilder.append("customResolutionHeight integer,");
+    stringBuilder.append("smallX integer,");
+    stringBuilder.append("smallY integer,");
+    stringBuilder.append("smallLength integer,");
+    stringBuilder.append("miniY integer);");
+    db.execSQL(stringBuilder.toString());
   }
 
   @SuppressLint("Range")
@@ -75,12 +105,12 @@ public class DbHelper extends SQLiteOpenHelper {
 
   // 更新
   public void update(Device device) {
-    getWritableDatabase().update(tableName, getValues(device), "uuid=?", new String[]{String.valueOf(device.uuid)});
+    getWritableDatabase().update(tableName, getValues(device), "uuid=?", new String[]{device.uuid});
   }
 
   // 删除
   public void delete(Device device) {
-    getWritableDatabase().delete(tableName, "uuid=?", new String[]{String.valueOf(device.uuid)});
+    getWritableDatabase().delete(tableName, "uuid=?", new String[]{device.uuid});
   }
 
   private ContentValues getValues(Device device) {
@@ -88,37 +118,150 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("uuid", device.uuid);
     values.put("type", device.type);
     values.put("name", device.name);
-    values.put("isAudio", device.isAudio);
     values.put("address", device.address);
+    values.put("isAudio", device.isAudio);
     values.put("maxSize", device.maxSize);
     values.put("maxFps", device.maxFps);
     values.put("maxVideoBit", device.maxVideoBit);
-    values.put("setResolution", device.setResolution);
-    values.put("useH265", device.useH265);
-    values.put("small_x", device.small_x);
-    values.put("small_y", device.small_y);
-    values.put("small_length", device.small_length);
-    values.put("mini_y", device.mini_y);
+    values.put("useH265", device.useH265 ? 1 : 0);
+    values.put("connectOnStart", device.connectOnStart ? 1 : 0);
+    values.put("customResolutionOnConnect", device.customResolutionOnConnect ? 1 : 0);
+    values.put("wakeOnConnect", device.wakeOnConnect ? 1 : 0);
+    values.put("lightOffOnConnect", device.lightOffOnConnect ? 1 : 0);
+    values.put("showNavBarOnConnect", device.showNavBarOnConnect ? 1 : 0);
+    values.put("changeToFullOnConnect", device.changeToFullOnConnect ? 1 : 0);
+    values.put("keepWakeOnRunning", device.keepWakeOnRunning ? 1 : 0);
+    values.put("changeResolutionOnRunning", device.changeResolutionOnRunning ? 1 : 0);
+    values.put("smallToMiniOnRunning", device.smallToMiniOnRunning ? 1 : 0);
+    values.put("fullToMiniOnRunning", device.fullToMiniOnRunning ? 1 : 0);
+    values.put("miniTimeoutOnRunning", device.miniTimeoutOnRunning ? 1 : 0);
+    values.put("lockOnClose", device.lockOnClose ? 1 : 0);
+    values.put("lightOnClose", device.lightOnClose ? 1 : 0);
+    values.put("reconnectOnClose", device.reconnectOnClose ? 1 : 0);
+    values.put("customResolutionWidth", device.customResolutionWidth);
+    values.put("customResolutionHeight", device.customResolutionHeight);
+    values.put("smallX", device.smallX);
+    values.put("smallY", device.smallY);
+    values.put("smallLength", device.smallLength);
+    values.put("miniY", device.miniY);
     return values;
   }
 
   @SuppressLint("Range")
   private Device getDeviceFormCursor(Cursor cursor) {
-    return new Device(
-      cursor.getString(cursor.getColumnIndex("uuid")),
-      cursor.getInt(cursor.getColumnIndex("type")),
-      cursor.getString(cursor.getColumnIndex("name")),
-      cursor.getString(cursor.getColumnIndex("address")),
-      cursor.getInt(cursor.getColumnIndex("isAudio")) == 1,
-      cursor.getInt(cursor.getColumnIndex("maxSize")),
-      cursor.getInt(cursor.getColumnIndex("maxFps")),
-      cursor.getInt(cursor.getColumnIndex("maxVideoBit")),
-      cursor.getInt(cursor.getColumnIndex("setResolution")) == 1,
-      cursor.getColumnIndex("useH265") == -1 ? AppData.setting.getDefaultUseH265() : cursor.getInt(cursor.getColumnIndex("useH265")) == 1,
-      cursor.getColumnIndex("small_x") == -1 ? Device.SMALL_X : cursor.getInt(cursor.getColumnIndex("small_x")),
-      cursor.getColumnIndex("small_y") == -1 ? Device.SMALL_Y : cursor.getInt(cursor.getColumnIndex("small_y")),
-      cursor.getColumnIndex("small_length") == -1 ? Device.SMALL_LENGTH : cursor.getInt(cursor.getColumnIndex("small_length")),
-      cursor.getColumnIndex("mini_y") == -1 ? Device.MINI_Y : cursor.getInt(cursor.getColumnIndex("mini_y"))
-    );
+    Device device = new Device(cursor.getString(cursor.getColumnIndex("uuid")), cursor.getInt(cursor.getColumnIndex("type")));
+    for (int i = 0; i < cursor.getColumnCount(); i++) {
+      switch (cursor.getColumnName(i)) {
+        case "name": {
+          device.name = cursor.getString(i);
+          break;
+        }
+        case "address": {
+          device.address = cursor.getString(i);
+          break;
+        }
+        case "isAudio": {
+          device.isAudio = cursor.getInt(i) == 1;
+          break;
+        }
+        case "maxSize": {
+          device.maxSize = cursor.getInt(i);
+          break;
+        }
+        case "maxFps": {
+          device.maxFps = cursor.getInt(i);
+          break;
+        }
+        case "maxVideoBit": {
+          device.maxVideoBit = cursor.getInt(i);
+          break;
+        }
+        case "useH265": {
+          device.useH265 = cursor.getInt(i) == 1;
+          break;
+        }
+        case "connectOnStart": {
+          device.connectOnStart = cursor.getInt(i) == 1;
+          break;
+        }
+        case "customResolutionOnConnect": {
+          device.customResolutionOnConnect = cursor.getInt(i) == 1;
+          break;
+        }
+        case "wakeOnConnect": {
+          device.wakeOnConnect = cursor.getInt(i) == 1;
+          break;
+        }
+        case "lightOffOnConnect": {
+          device.lightOffOnConnect = cursor.getInt(i) == 1;
+          break;
+        }
+        case "showNavBarOnConnect": {
+          device.showNavBarOnConnect = cursor.getInt(i) == 1;
+          break;
+        }
+        case "changeToFullOnConnect": {
+          device.changeToFullOnConnect = cursor.getInt(i) == 1;
+          break;
+        }
+        case "keepWakeOnRunning": {
+          device.keepWakeOnRunning = cursor.getInt(i) == 1;
+          break;
+        }
+        case "changeResolutionOnRunning": {
+          device.changeResolutionOnRunning = cursor.getInt(i) == 1;
+          break;
+        }
+        case "smallToMiniOnRunning": {
+          device.smallToMiniOnRunning = cursor.getInt(i) == 1;
+          break;
+        }
+        case "fullToMiniOnRunning": {
+          device.fullToMiniOnRunning = cursor.getInt(i) == 1;
+          break;
+        }
+        case "miniTimeoutOnRunning": {
+          device.miniTimeoutOnRunning = cursor.getInt(i) == 1;
+          break;
+        }
+        case "lockOnClose": {
+          device.lockOnClose = cursor.getInt(i) == 1;
+          break;
+        }
+        case "lightOnClose": {
+          device.lightOnClose = cursor.getInt(i) == 1;
+          break;
+        }
+        case "reconnectOnClose": {
+          device.reconnectOnClose = cursor.getInt(i) == 1;
+          break;
+        }
+        case "customResolutionWidth": {
+          device.customResolutionWidth = cursor.getInt(i);
+          break;
+        }
+        case "customResolutionHeight": {
+          device.customResolutionHeight = cursor.getInt(i);
+          break;
+        }
+        case "smallX": {
+          device.smallX = cursor.getInt(i);
+          break;
+        }
+        case "smallY": {
+          device.smallY = cursor.getInt(i);
+          break;
+        }
+        case "smallLength": {
+          device.smallLength = cursor.getInt(i);
+          break;
+        }
+        case "miniY": {
+          device.miniY = cursor.getInt(i);
+          break;
+        }
+      }
+    }
+    return device;
   }
 }

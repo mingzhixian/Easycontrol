@@ -12,7 +12,6 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
@@ -24,14 +23,12 @@ import android.widget.ScrollView;
 import java.util.Locale;
 
 import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.databinding.ItemDeviceDetailBinding;
 import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSpinnerBinding;
 import top.saymzx.easycontrol.app.databinding.ItemSwitchBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
 import top.saymzx.easycontrol.app.databinding.ModuleDialogBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.entity.MyInterface;
 
 public class ViewTools {
@@ -58,7 +55,7 @@ public class ViewTools {
   public static void setLocale(Activity context) {
     Resources resources = context.getResources();
     Configuration config = resources.getConfiguration();
-    String locale = AppData.setting.getDefaultLocale();
+    String locale = AppData.setting.getLocale();
     if (locale.equals("")) config.locale = Locale.getDefault();
     else if (locale.equals("en")) config.locale = Locale.ENGLISH;
     else if (locale.equals("zh")) config.locale = Locale.CHINESE;
@@ -88,75 +85,6 @@ public class ViewTools {
     dialog.setCanceledOnTouchOutside(canCancel);
     dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
     return dialog;
-  }
-
-  // 创建新建设备弹窗
-  public static Dialog createDeviceDetailView(
-    Context context,
-    Device device,
-    DeviceListAdapter deviceListAdapter
-  ) {
-    ItemDeviceDetailBinding itemAddDeviceBinding = ItemDeviceDetailBinding.inflate(LayoutInflater.from(context));
-    Dialog dialog = createDialog(context, true, itemAddDeviceBinding.getRoot());
-    // 设置值
-    itemAddDeviceBinding.name.setText(device.name);
-    itemAddDeviceBinding.address.setText(device.address);
-    // 创建View
-    createDeviceOptionSet(context, itemAddDeviceBinding.options, device);
-    // 特殊设备不允许修改
-    if (!device.isNormalDevice()) itemAddDeviceBinding.address.setEnabled(false);
-    // 是否显示高级选项
-    itemAddDeviceBinding.isOptions.setOnClickListener(v -> itemAddDeviceBinding.options.setVisibility(itemAddDeviceBinding.isOptions.isChecked() ? View.VISIBLE : View.GONE));
-    // 设置确认按钮监听
-    itemAddDeviceBinding.ok.setOnClickListener(v -> {
-      if (device.type == Device.TYPE_NORMAL && String.valueOf(itemAddDeviceBinding.address.getText()).equals("")) return;
-      device.name = String.valueOf(itemAddDeviceBinding.name.getText());
-      device.address = String.valueOf(itemAddDeviceBinding.address.getText());
-      if (AppData.dbHelper.getByUUID(device.uuid) != null) AppData.dbHelper.update(device);
-      else AppData.dbHelper.insert(device);
-      deviceListAdapter.update();
-      dialog.cancel();
-    });
-    return dialog;
-  }
-
-  // 创建设备参数设置页面
-  private static final String[] maxSizeList = new String[]{"2560", "1920", "1600", "1280", "1024", "800"};
-  private static final String[] maxFpsList = new String[]{"90", "60", "40", "30", "20", "10"};
-  private static final String[] maxVideoBitList = new String[]{"12", "8", "4", "2", "1"};
-
-  public static void createDeviceOptionSet(Context context, ViewGroup fatherLayout, Device device) {
-    // Device为null，则视为设置默认参数
-    boolean setDefault = device == null;
-    // 数组适配器
-    ArrayAdapter<String> maxSizeAdapter = new ArrayAdapter<>(AppData.applicationContext, R.layout.item_spinner_item, maxSizeList);
-    ArrayAdapter<String> maxFpsAdapter = new ArrayAdapter<>(AppData.applicationContext, R.layout.item_spinner_item, maxFpsList);
-    ArrayAdapter<String> maxVideoBitAdapter = new ArrayAdapter<>(AppData.applicationContext, R.layout.item_spinner_item, maxVideoBitList);
-    // 添加参数视图
-    fatherLayout.addView(createSwitchCard(context, context.getString(R.string.option_is_audio), context.getString(R.string.option_is_audio_detail), setDefault ? AppData.setting.getDefaultIsAudio() : device.isAudio, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultIsAudio(isChecked);
-      else device.isAudio = isChecked;
-    }).getRoot());
-    fatherLayout.addView(createSpinnerCard(context, context.getString(R.string.option_max_size), context.getString(R.string.option_max_size_detail), String.valueOf(setDefault ? AppData.setting.getDefaultMaxSize() : device.maxSize), maxSizeAdapter, str -> {
-      if (setDefault) AppData.setting.setDefaultMaxSize(Integer.parseInt(str));
-      else device.maxSize = Integer.parseInt(str);
-    }).getRoot());
-    fatherLayout.addView(createSpinnerCard(context, context.getString(R.string.option_max_fps), context.getString(R.string.option_max_fps_detail), String.valueOf(setDefault ? AppData.setting.getDefaultMaxFps() : device.maxFps), maxFpsAdapter, str -> {
-      if (setDefault) AppData.setting.setDefaultMaxFps(Integer.parseInt(str));
-      else device.maxFps = Integer.parseInt(str);
-    }).getRoot());
-    fatherLayout.addView(createSpinnerCard(context, context.getString(R.string.option_max_video_bit), context.getString(R.string.option_max_video_bit_detail), String.valueOf(setDefault ? AppData.setting.getDefaultMaxVideoBit() : device.maxVideoBit), maxVideoBitAdapter, str -> {
-      if (setDefault) AppData.setting.setDefaultMaxVideoBit(Integer.parseInt(str));
-      else device.maxVideoBit = Integer.parseInt(str);
-    }).getRoot());
-    fatherLayout.addView(createSwitchCard(context, context.getString(R.string.option_use_h265), context.getString(R.string.option_use_h265_detail), setDefault ? AppData.setting.getDefaultUseH265() : device.useH265, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultUseH265(isChecked);
-      else device.useH265 = isChecked;
-    }).getRoot());
-    fatherLayout.addView(createSwitchCard(context, context.getString(R.string.option_set_resolution), context.getString(R.string.option_set_resolution_detail), setDefault ? AppData.setting.getDefaultSetResolution() : device.setResolution, isChecked -> {
-      if (setDefault) AppData.setting.setDefaultSetResolution(isChecked);
-      else device.setResolution = isChecked;
-    }).getRoot());
   }
 
   // 创建Client加载框

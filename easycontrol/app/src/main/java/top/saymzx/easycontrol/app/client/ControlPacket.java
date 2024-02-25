@@ -63,10 +63,20 @@ public final class ControlPacket {
   }
 
   // 修改分辨率事件
-  public static ByteBuffer createChangeSizeEvent(float newSize) {
+  public static ByteBuffer createChangeResolutionEvent(float newSize) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(5);
     byteBuffer.put((byte) 5);
     byteBuffer.putFloat(newSize);
+    byteBuffer.flip();
+    return byteBuffer;
+  }
+
+  // 修改分辨率事件
+  public static ByteBuffer createChangeResolutionEvent(int width, int height) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
+    byteBuffer.put((byte) 9);
+    byteBuffer.putInt(width);
+    byteBuffer.putInt(height);
     byteBuffer.flip();
     return byteBuffer;
   }

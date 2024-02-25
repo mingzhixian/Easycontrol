@@ -59,8 +59,6 @@
 	
 4. 扩展使用
 	易控支持在外部使用广播控制，广播地址为："top.saymzx.easycontrol.app.CONTROL"，需要向意向也就是Intent填入想要做的动作：
-	- 启动默认设备：
-		- action：startDefault
 	- 启动目标设备：
 		- action：start
 		- uuid：设备ID

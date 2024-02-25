@@ -21,7 +21,6 @@ import top.saymzx.easycontrol.app.helper.ViewTools;
 public class MiniView {
 
   private final Device device;
-  private final boolean miniRecoverOnTimeout;
   private Thread timeoutListenerThread;
   private long lastTouchTIme = 0;
 
@@ -37,7 +36,6 @@ public class MiniView {
 
   public MiniView(Device device) {
     this.device = device;
-    miniRecoverOnTimeout = AppData.setting.getMiniRecoverOnTimeout();
     miniViewParams.gravity = Gravity.START | Gravity.TOP;
     miniViewParams.x = 0;
     // 设置监听控制
@@ -46,13 +44,13 @@ public class MiniView {
   }
 
   public void show(ByteBuffer byteBuffer) {
-    miniViewParams.y = device.mini_y;
+    miniViewParams.y = device.miniY;
     // 显示
     ViewTools.viewAnim(miniView.getRoot(), true, PublicTools.dp2px(-40f), 0, (isStart -> {
       if (isStart) AppData.windowManager.addView(miniView.getRoot(), miniViewParams);
     }));
     // 超时检测
-    if (miniRecoverOnTimeout && byteBuffer != null) {
+    if (device.miniTimeoutOnRunning && byteBuffer != null) {
       lastTouchTIme = System.currentTimeMillis();
       timeoutListenerThread = new Thread(() -> timeoutListener(new String(byteBuffer.array())));
       timeoutListenerThread.start();
@@ -100,7 +98,7 @@ public class MiniView {
         }
         case MotionEvent.ACTION_MOVE: {
           miniViewParams.y = oldYy.get() + (int) event.getRawY() - yy.get();
-          device.mini_y = miniViewParams.y;
+          device.miniY = miniViewParams.y;
           AppData.windowManager.updateViewLayout(miniView.getRoot(), miniViewParams);
           break;
         }

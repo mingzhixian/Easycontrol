@@ -52,7 +52,7 @@ public class SmallView extends ViewOutlineProvider {
     this.device = device;
     smallViewParams.gravity = Gravity.START | Gravity.TOP;
     // 设置默认导航栏状态
-    setNavBarHide(AppData.setting.getShowNavBarOnConnect());
+    setNavBarHide(device.showNavBarOnConnect);
     // 设置监听控制
     setFloatVideoListener();
     setReSizeListener();
@@ -67,9 +67,11 @@ public class SmallView extends ViewOutlineProvider {
   public void show() {
     // 初始化
     smallView.barView.setVisibility(View.GONE);
-    smallViewParams.x = device.small_x;
-    smallViewParams.y = device.small_y;
-    updateMaxSize(device.small_length, device.small_length);
+    smallViewParams.x = device.smallX;
+    smallViewParams.y = device.smallY;
+    updateMaxSize(device.smallLength, device.smallLength);
+    // 自定义分辨率(2:1)
+    if (!device.customResolutionOnConnect && device.changeResolutionOnRunning) ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent(0.5f));
     // 显示
     AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
     smallView.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
@@ -86,18 +88,12 @@ public class SmallView extends ViewOutlineProvider {
     }
   }
 
-  // 获取默认宽高比，用于修改分辨率使用
-  public static float getResolution() {
-    return 0.55f;
-  }
-
   // 设置焦点监听
   @SuppressLint("ClickableViewAccessibility")
   private void setFloatVideoListener() {
-    boolean smallToMiniOnOutside = AppData.setting.getSmallToMiniOnOutside();
     smallView.getRoot().setOnTouchHandle(event -> {
       if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-        if (smallToMiniOnOutside) ClientController.handleControll(device.uuid, "changeToMini", ByteBuffer.wrap("changeToSmall".getBytes()));
+        if (device.smallToMiniOnRunning) ClientController.handleControll(device.uuid, "changeToMini", ByteBuffer.wrap("changeToSmall".getBytes()));
         else if (smallViewParams.flags != LayoutParamsFlagNoFocus) {
           smallView.editText.clearFocus();
           smallViewParams.flags = LayoutParamsFlagNoFocus;
@@ -196,26 +192,24 @@ public class SmallView extends ViewOutlineProvider {
   @SuppressLint("ClickableViewAccessibility")
   private void setReSizeListener() {
     smallView.reSize.setOnTouchListener((v, event) -> {
-      if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-        int sizeX = (int) (event.getRawX() - smallViewParams.x);
-        int sizeY = (int) (event.getRawY() - smallViewParams.y);
-        int length = Math.max(sizeX, sizeY);
-        updateMaxSize(length, length);
-      }
+      int sizeX = (int) (event.getRawX() - smallViewParams.x);
+      int sizeY = (int) (event.getRawY() - smallViewParams.y);
+      int length = Math.max(sizeX, sizeY);
+      updateMaxSize(length, length);
       return true;
     });
   }
 
   private void updateSite(int x, int y) {
-    device.small_x = x;
-    device.small_y = y;
+    device.smallX = x;
+    device.smallY = y;
     smallViewParams.x = x;
     smallViewParams.y = y;
     AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
   }
 
   private void updateMaxSize(int w, int h) {
-    device.small_length = w;
+    device.smallLength = w;
     ByteBuffer byteBuffer = ByteBuffer.allocate(8);
     byteBuffer.putInt(w);
     byteBuffer.putInt(h);
@@ -252,7 +246,7 @@ public class SmallView extends ViewOutlineProvider {
     if (width > screenMaxWidth + 200 || height > screenMaxHeight + 200) {
       int maxLength = Math.min(screenMaxWidth, screenMaxHeight);
       updateMaxSize(maxLength, maxLength);
-      updateSite(50, statusBarHeight);
+      updateSite(0, statusBarHeight);
       return;
     }
     // 检测到位置超出过多
@@ -265,7 +259,7 @@ public class SmallView extends ViewOutlineProvider {
 
   @Override
   public void getOutline(View view, Outline outline) {
-    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), AppData.applicationContext.getResources().getDimension(R.dimen.round));
+    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), AppData.applicationContext.getResources().getDimension(R.dimen.cron));
   }
 
   private static int statusBarHeight = 0;

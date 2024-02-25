@@ -3,7 +3,6 @@ package top.saymzx.easycontrol.app;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipDescription;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Pair;
 import android.widget.Toast;
@@ -17,14 +16,14 @@ import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class IpActivity extends Activity {
-  private ActivityIpBinding ipActivity;
+  private ActivityIpBinding activityIpBinding;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     ViewTools.setStatusAndNavBar(this);
     ViewTools.setLocale(this);
-    ipActivity = ActivityIpBinding.inflate(this.getLayoutInflater());
-    setContentView(ipActivity.getRoot());
+    activityIpBinding = ActivityIpBinding.inflate(this.getLayoutInflater());
+    setContentView(activityIpBinding.getRoot());
     setButtonListener();
     // 绘制UI
     drawUi();
@@ -37,22 +36,22 @@ public class IpActivity extends Activity {
     for (String i : listPair.first) {
       ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-        Toast.makeText(this, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
       });
-      ipActivity.ipv4.addView(text.getRoot());
+      activityIpBinding.ipv4.addView(text.getRoot());
     }
     for (String i : listPair.second) {
       ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-        Toast.makeText(this, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
       });
-      ipActivity.ipv6.addView(text.getRoot());
+      activityIpBinding.ipv6.addView(text.getRoot());
     }
   }
 
   // 设置返回按钮监听
   private void setButtonListener() {
-    ipActivity.backButton.setOnClickListener(v -> finish());
+    activityIpBinding.backButton.setOnClickListener(v -> finish());
   }
 
 }

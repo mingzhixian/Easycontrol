@@ -65,20 +65,15 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     // 启动界面
     handleControll(device.uuid, device.changeToFullOnConnect ? "changeToFull" : "changeToSmall", null);
     // 运行启动时操作
-    if (AppData.setting.getWakeOnConnect()) handleControll(device.uuid, "buttonWake", null);
-    if (AppData.setting.getLightOffOnConnect()) handler.postDelayed(() -> handleControll(device.uuid, "buttonLightOff", null), 2000);
+    if (device.customResolutionOnConnect) handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent(device.customResolutionWidth, device.customResolutionHeight));
+    if (device.wakeOnConnect) handleControll(device.uuid, "buttonWake", null);
+    if (device.lightOffOnConnect) handler.postDelayed(() -> handleControll(device.uuid, "buttonLightOff", null), 2000);
   }
 
   public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
     ClientController clientController = allController.get(uuid);
     if (clientController == null) return;
     clientController.handler.post(() -> handleAction(clientController, action, byteBuffer));
-  }
-
-  public static void handleControllNow(String uuid, String action, ByteBuffer byteBuffer) {
-    ClientController clientController = allController.get(uuid);
-    if (clientController == null) return;
-    handleAction(clientController, action, byteBuffer);
   }
 
   private static void handleAction(ClientController clientController, String action, ByteBuffer byteBuffer) {
@@ -106,7 +101,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       else if (action.equals("runShell")) clientController.runShell(byteBuffer);
       else if (action.equals("setClipBoard")) clientController.setClipBoard(byteBuffer);
     } catch (Exception ignored) {
-      clientController.close(AppData.applicationContext.getString(R.string.error_stream_closed));
+      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
     }
   }
 
@@ -136,18 +131,16 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     return clientController.textureView;
   }
 
-  private synchronized void changeToFull() throws Exception {
+  private synchronized void changeToFull() {
     hide();
     Intent intent = new Intent(AppData.mainActivity, FullActivity.class);
     intent.putExtra("uuid", device.uuid);
     AppData.mainActivity.startActivity(intent);
-    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(FullActivity.getResolution()));
   }
 
-  private synchronized void changeToSmall() throws Exception {
+  private synchronized void changeToSmall() {
     hide();
     AppData.uiHandler.post(smallView::show);
-    if (device.setResolution) clientStream.writeToMain(ControlPacket.createChangeSizeEvent(SmallView.getResolution()));
   }
 
   private synchronized void changeToMini(ByteBuffer byteBuffer) {
@@ -166,14 +159,14 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     if (isClose) return;
     isClose = true;
     hide();
-    handlerThread.interrupt();
     // 运行断开时操作
-    if (AppData.setting.getLockOnClose()) handleControllNow(device.uuid, "buttonLock", null);
+    if (device.lockOnClose) handleControll(device.uuid, "buttonLock", null);
       // 开启了自动锁定，就没必要发送打开背光了
-    else if (AppData.setting.getLightOnClose()) handleControllNow(device.uuid, "buttonLight", null);
-    if (error != null && device.isNormalDevice() && AppData.setting.getReconnectOnClose()) new Client(device);
+    else if (device.lightOnClose) handleControll(device.uuid, "buttonLight", null);
+    if (error != null && device.isNetworkDevice() && device.reconnectOnClose) new Client(device);
     // 打印日志
     if (error != null) PublicTools.logToast("controller", error, true);
+    handlerThread.interrupt();
     allController.remove(device.uuid);
     if (surfaceTexture != null) surfaceTexture.release();
     handle.run(false);

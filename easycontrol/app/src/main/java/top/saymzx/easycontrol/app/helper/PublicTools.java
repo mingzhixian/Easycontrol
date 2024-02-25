@@ -63,10 +63,10 @@ public class PublicTools {
       pattern = "(.*?):(\\d+)";
     }
     Matcher matcher = Pattern.compile(pattern).matcher(address);
-    if (!matcher.find()) throw new IOException(AppData.applicationContext.getString(R.string.error_address_error));
+    if (!matcher.find()) throw new IOException(AppData.applicationContext.getString(R.string.toast_address_error));
     String ip = matcher.group(1);
     String port = matcher.group(2);
-    if (ip == null || port == null) throw new IOException(AppData.applicationContext.getString(R.string.error_address_error));
+    if (ip == null || port == null) throw new IOException(AppData.applicationContext.getString(R.string.toast_address_error));
     // 特殊格式
     if (type == 2) {
       if (ip.equals("*gateway*")) ip = getGateway();
@@ -111,8 +111,11 @@ public class PublicTools {
 
   // 获取子网地址
   public static String getNetAddress() {
+    int ip = AppData.wifiManager.getDhcpInfo().gateway;
+    // 没有wifi时，设置为1.1.1.1
+    if (ip == 0) ip = 16843009;
     // 因为此标识符使用场景有限，为了节省资源，默认地址为24位掩码地址
-    return decodeIntToIp(AppData.wifiManager.getDhcpInfo().gateway, 3);
+    return decodeIntToIp(ip, 3);
   }
 
   // 解析地址
@@ -144,7 +147,7 @@ public class PublicTools {
       intent.setData(Uri.parse(url));
       context.startActivity(intent);
     } catch (Exception ignored) {
-      Toast.makeText(context, context.getString(R.string.error_no_browser), Toast.LENGTH_SHORT).show();
+      Toast.makeText(context, context.getString(R.string.toast_no_browser), Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -203,19 +206,26 @@ public class PublicTools {
   // 扫描局域网设备
   public static ArrayList<String> scanAddress() {
     ArrayList<String> scannedAddresses = new ArrayList<>();
-    String subnet = getNetAddress();
-    ExecutorService executor = Executors.newFixedThreadPool(128);
-    for (int i = 1; i <= 255; i++) {
-      String host = subnet + "." + i;
-      executor.execute(() -> {
-        try {
-          Socket socket = new Socket();
-          socket.connect(new InetSocketAddress(host, 5555), 1000);
-          socket.close();
-          scannedAddresses.add(host + ":5555");
-        } catch (Exception ignored) {
+    ExecutorService executor = Executors.newFixedThreadPool(256);
+    ArrayList<String> ipv4List = getIp().first;
+    for (String ipv4 : ipv4List) {
+      Matcher matcher = Pattern.compile("(\\d+\\.\\d+\\.\\d+)").matcher(ipv4);
+      if (matcher.find()) {
+        String subnet = matcher.group(1);
+        for (int i = 1; i <= 255; i++) {
+          String host = subnet + "." + i;
+          executor.execute(() -> {
+            try {
+              Socket socket = new Socket();
+              socket.connect(new InetSocketAddress(host, 5555), 800);
+              socket.close();
+              // 标注本机
+              scannedAddresses.add(host + ":5555" + (host.equals(ipv4) ? " (" + AppData.applicationContext.getString(R.string.main_scan_device_local) + ")" : ""));
+            } catch (Exception ignored) {
+            }
+          });
         }
-      });
+      }
     }
     executor.shutdown();
     try {

@@ -63,7 +63,7 @@ public class AdbKeyActivity extends Activity {
         privateKeyWriter.flush();
       }
       AppData.keyPair = AdbKeyPair.read(adbKeyFile.first, adbKeyFile.second);
-      Toast.makeText(this, getString(R.string.adb_key_button_code), Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, getString(R.string.toast_success), Toast.LENGTH_SHORT).show();
     } catch (Exception ignored) {
     }
   }

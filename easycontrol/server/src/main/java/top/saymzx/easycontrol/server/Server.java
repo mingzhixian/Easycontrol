@@ -183,7 +183,7 @@ public final class Server {
             lastKeepAliveTime = System.currentTimeMillis();
             break;
           case 5:
-            Device.changeDeviceSize(mainInputStream.readFloat());
+            Device.changeDeviceResolution(mainInputStream.readFloat());
             break;
           case 6:
             Device.rotateDevice();
@@ -193,6 +193,9 @@ public final class Server {
             break;
           case 8:
             Device.changePower(mainInputStream.readInt());
+            break;
+          case 9:
+            Device.changeDeviceResolution(mainInputStream.readInt(), mainInputStream.readInt());
             break;
         }
       }
@@ -233,7 +236,10 @@ public final class Server {
             AudioEncode.release();
             break;
           case 2:
-            if (Device.needReset) Device.execReadOutput("wm size reset");
+            if (Device.needReset) {
+              if (Device.realSize != null) Device.execReadOutput("wm size " + Device.realSize.first + "x" + Device.realSize.second);
+              else Device.execReadOutput("wm size reset");
+            }
             if (Options.keepAwake) Device.execReadOutput("settings put system screen_off_timeout " + Device.oldScreenOffTimeout);
           case 3:
             Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");

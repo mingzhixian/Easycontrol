@@ -21,27 +21,60 @@
       android:paddingBottom="60dp">
 
       <LinearLayout
-        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp" />
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+          android:id="@+id/url"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="@color/cardBackground"
+          android:gravity="center_vertical"
+          android:orientation="horizontal"
+          android:paddingTop="6dp"
+          android:paddingBottom="6dp">
+
+          <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/active_url"
+            android:textColor="@color/onCardBackground"
+            android:textSize="@dimen/middleFont" />
+
+          <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/chevron_right"
+            android:tint="@color/onCardBackground" />
+        </LinearLayout>
+
+      </LinearLayout>
 
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp">
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="10dp">
 
         <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:text="@string/active_key"
           android:textColor="@color/onCardBackground"
-          android:textSize="@dimen/smallFont" />
+          android:textSize="@dimen/middleFont" />
 
         <EditText
           android:id="@+id/key"
@@ -57,9 +90,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
-        android:text="@string/active_key_hint"
+        android:text="@string/active_hint"
         android:textColor="@color/alert"
-        android:textSize="@dimen/smallFont" />
+        android:textSize="@dimen/smallSmallFont" />
 
       <Button
         android:id="@+id/active"

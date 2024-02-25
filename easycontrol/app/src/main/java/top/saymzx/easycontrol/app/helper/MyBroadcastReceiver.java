@@ -11,7 +11,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
-import android.view.KeyEvent;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -24,6 +23,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class MyBroadcastReceiver extends BroadcastReceiver {
 
   private static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
+  public static final String ACTION_UPDATE_DEVICE_LIST = "top.saymzx.easycontrol.app.UPDATE_DEVICE_LIST";
   private static final String ACTION_CONTROL = "top.saymzx.easycontrol.app.CONTROL";
   private static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
 
@@ -36,6 +36,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
     filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
     filter.addAction(ACTION_USB_PERMISSION);
+    filter.addAction(ACTION_UPDATE_DEVICE_LIST);
     filter.addAction(ACTION_CONTROL);
     filter.addAction(ACTION_SCREEN_OFF);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) context.registerReceiver(this, filter, Context.RECEIVER_EXPORTED);
@@ -50,6 +51,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
     if (ACTION_SCREEN_OFF.equals(action)) handleScreenOff();
+    else if (ACTION_UPDATE_DEVICE_LIST.equals(action)) deviceListAdapter.update();
     else if (ACTION_CONTROL.equals(action)) handleControl(context, intent);
     else handleUSB(context, intent);
   }
@@ -64,13 +66,8 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 
   private void handleControl(Context context, Intent intent) {
     String action = intent.getStringExtra("action");
-    if (action == null) return;
-    if (action.equals("startDefault")) {
-      startDefault(context);
-      return;
-    }
     String uuid = intent.getStringExtra("uuid");
-    if (uuid == null) return;
+    if (action == null || uuid == null) return;
     if (action.equals("start")) deviceListAdapter.startByUUID(uuid);
     else if (action.equals("runShell")) {
       String cmd = intent.getStringExtra("cmd");
@@ -86,20 +83,6 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     if (Objects.equals(action, UsbManager.ACTION_USB_DEVICE_ATTACHED)) onConnectUsb(context, usbDevice);
     else if (Objects.equals(action, UsbManager.ACTION_USB_DEVICE_DETACHED)) onCutUsb(usbDevice);
     else if (Objects.equals(action, ACTION_USB_PERMISSION)) if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) onGetUsbPer(usbDevice);
-  }
-
-  // 启动默认设备
-  public void startDefault(Context context) {
-    String defaultDevice = AppData.setting.getDefaultDevice();
-    if (!defaultDevice.equals("")) {
-      deviceListAdapter.startByUUID(defaultDevice);
-      // 返回桌面
-      if (AppData.setting.getAutoBackOnStart()) {
-        Intent home = new Intent(Intent.ACTION_MAIN);
-        home.addCategory(Intent.CATEGORY_HOME);
-        context.startActivity(home);
-      }
-    }
   }
 
   // 检查已连接设备
@@ -137,7 +120,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
         // 若没有该设备，则新建设备
         Device device = AppData.dbHelper.getByUUID(uuid);
         if (device == null) {
-          device = Device.getDefaultDevice(uuid, Device.TYPE_LINK);
+          device = new Device(uuid, Device.TYPE_LINK);
           AppData.dbHelper.insert(device);
         }
         deviceListAdapter.linkDevices.put(uuid, usbDevice);

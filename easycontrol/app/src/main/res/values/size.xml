@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <dimen name="round">12dp</dimen>
+  <dimen name="cron">14dp</dimen>
+  <dimen name="round">50dp</dimen>
   <!--字体-->
-  <dimen name="largeFont">24sp</dimen>
+  <dimen name="largeFont">26sp</dimen>
   <dimen name="middleFont">22sp</dimen>
   <dimen name="smallFont">18sp</dimen>
-  <dimen name="smallSmallFont">12sp</dimen>
+  <dimen name="smallSmallFont">14sp</dimen>
 </resources>

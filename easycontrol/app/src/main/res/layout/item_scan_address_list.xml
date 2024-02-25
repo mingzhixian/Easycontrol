@@ -4,7 +4,10 @@
   android:layout_height="wrap_content"
   android:background="@drawable/background_cron"
   android:orientation="vertical"
-  android:padding="15dp">
+  android:paddingStart="15dp"
+  android:paddingEnd="15dp"
+  android:paddingTop="10dp"
+  android:paddingBottom="10dp">
 
   <TextView
     android:layout_width="match_parent"
@@ -13,7 +16,7 @@
     android:gravity="center"
     android:text="@string/main_scan_device_list"
     android:textColor="@color/onCardBackground"
-    android:textSize="@dimen/smallFont" />
+    android:textSize="@dimen/middleFont" />
 
   <LinearLayout
     android:id="@+id/list"

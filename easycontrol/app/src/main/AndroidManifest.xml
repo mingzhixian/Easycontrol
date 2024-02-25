@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
   <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络 -->
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -28,13 +27,13 @@
       </intent-filter>
     </activity>
     <activity
-      android:name=".IpActivity"
+      android:name=".DeviceDetailActivity"
       android:exported="false" />
     <activity
       android:name=".SetActivity"
       android:exported="false" />
     <activity
-      android:name=".SetDetailActivity"
+      android:name=".IpActivity"
       android:exported="false" />
     <activity
       android:name=".client.view.FullActivity"

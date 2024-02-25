@@ -26,21 +26,23 @@
       android:paddingStart="15dp"
       android:paddingEnd="15dp">
 
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/adb_key_pub"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont" />
-
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp">
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="5dp"
+          android:text="@string/adb_key_pub"
+          android:textColor="@color/onBackground"
+          android:textSize="@dimen/middleFont" />
 
         <EditText
           android:id="@+id/adb_key_pub"
@@ -51,22 +53,24 @@
           android:textSize="@dimen/smallSmallFont" />
       </LinearLayout>
 
-      <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/adb_key_pri"
-        android:textColor="@color/onBackground"
-        android:textSize="@dimen/middleFont" />
-
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:background="@drawable/background_cron"
         android:orientation="vertical"
-        android:padding="15dp">
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="5dp"
+          android:text="@string/adb_key_pri"
+          android:textColor="@color/onBackground"
+          android:textSize="@dimen/middleFont" />
 
         <EditText
           android:id="@+id/adb_key_pri"

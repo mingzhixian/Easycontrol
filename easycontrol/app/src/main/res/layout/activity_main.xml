@@ -13,7 +13,7 @@
     android:alpha="0.5"
     android:padding="15dp"
     android:scaleType="fitEnd"
-    android:src="@drawable/chinese_yanhua" />
+    android:src="@drawable/main_chengxuyuan" />
 
   <LinearLayout
     android:layout_width="match_parent"
@@ -25,14 +25,13 @@
       android:layout_height="wrap_content"
       android:gravity="center_vertical"
       android:orientation="horizontal"
-      android:paddingTop="5dp"
-      android:paddingBottom="15dp">
+      android:padding="5dp">
 
       <ImageView
         android:id="@+id/button_set"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:padding="15dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:padding="10dp"
         android:src="@drawable/bars"
         android:tint="@color/onBackground" />
 
@@ -47,11 +46,13 @@
           android:layout_height="wrap_content"
           android:text="@string/app_name"
           android:textColor="@color/onBackground"
-          android:textSize="@dimen/largeFont" />
+          android:textSize="@dimen/largeFont"
+          android:textStyle="bold" />
 
         <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:maxLines="1"
           android:text="@string/main_poem"
           android:textColor="@color/onBackgroundSecond"
           android:textSize="@dimen/smallSmallFont" />
@@ -59,18 +60,17 @@
 
       <ImageView
         android:id="@+id/button_scan"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:padding="8dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="6dp"
         android:src="@drawable/scansion"
         android:tint="@color/onBackground" />
 
       <ImageView
         android:id="@+id/button_add"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_marginEnd="5dp"
-        android:padding="10dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="6dp"
         android:src="@drawable/plus"
         android:tint="@color/onBackground" />
 
@@ -81,10 +81,8 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:divider="#00000000"
-      android:dividerHeight="15dp"
-      android:paddingStart="15dp"
-      android:paddingEnd="15dp"
-      android:paddingBottom="50dp"
+      android:dividerHeight="10dp"
+      android:padding="10dp"
       tools:listitem="@layout/item_devices_item" />
 
   </LinearLayout>

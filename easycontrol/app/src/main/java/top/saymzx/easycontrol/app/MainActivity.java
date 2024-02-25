@@ -17,25 +17,20 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import top.saymzx.easycontrol.app.databinding.ActivityMainBinding;
 import top.saymzx.easycontrol.app.databinding.ItemRequestPermissionBinding;
 import top.saymzx.easycontrol.app.databinding.ItemScanAddressListBinding;
 import top.saymzx.easycontrol.app.databinding.ItemTextBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.DeviceListAdapter;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class MainActivity extends Activity {
-  // 设备列表
-  private DeviceListAdapter deviceListAdapter;
 
-  // 创建界面
-  private ActivityMainBinding mainActivity;
+  private ActivityMainBinding activityMainBinding;
 
   // 广播
   private final MyBroadcastReceiver myBroadcastReceiver = new MyBroadcastReceiver();
@@ -46,8 +41,8 @@ public class MainActivity extends Activity {
     AppData.init(this);
     ViewTools.setStatusAndNavBar(this);
     ViewTools.setLocale(this);
-    mainActivity = ActivityMainBinding.inflate(this.getLayoutInflater());
-    setContentView(mainActivity.getRoot());
+    activityMainBinding = ActivityMainBinding.inflate(this.getLayoutInflater());
+    setContentView(activityMainBinding.getRoot());
     // 检测权限
     if (!checkPermission()) createAlert();
     else startApp();
@@ -65,8 +60,8 @@ public class MainActivity extends Activity {
     // 检测激活
     checkActive();
     // 设置设备列表适配器
-    deviceListAdapter = new DeviceListAdapter(this);
-    mainActivity.devicesList.setAdapter(deviceListAdapter);
+    DeviceListAdapter deviceListAdapter = new DeviceListAdapter(this);
+    activityMainBinding.devicesList.setAdapter(deviceListAdapter);
     myBroadcastReceiver.setDeviceListAdapter(deviceListAdapter);
     // 设置按钮监听
     setButtonListener();
@@ -74,10 +69,8 @@ public class MainActivity extends Activity {
     myBroadcastReceiver.register(this);
     // 检查已连接设备
     myBroadcastReceiver.checkConnectedUsb(this);
-    // 启动默认设备
-    AppData.uiHandler.postDelayed(() -> myBroadcastReceiver.startDefault(this), 1000);
-    // 开始扫描
-    if (AppData.setting.getAutoScanAddressOnStart()) scanAddress();
+    // 自启动设备
+    AppData.uiHandler.postDelayed(deviceListAdapter::startDefaultDevice, 1000);
   }
 
   // 检测激活
@@ -112,6 +105,7 @@ public class MainActivity extends Activity {
 
   // 定时检查
   private void checkPermissionDelay(Dialog dialog) {
+    // 因为某些设备可能会无法进入设置或其他问题，导致不会有返回结果，为了减少不确定性，使用定时检测的方法
     AppData.uiHandler.postDelayed(() -> {
       if (checkPermission()) {
         dialog.cancel();
@@ -122,9 +116,9 @@ public class MainActivity extends Activity {
 
   // 设置按钮监听
   private void setButtonListener() {
-    mainActivity.buttonScan.setOnClickListener(v -> scanAddress());
-    mainActivity.buttonAdd.setOnClickListener(v -> ViewTools.createDeviceDetailView(this, Device.getDefaultDevice(UUID.randomUUID().toString(), Device.TYPE_NORMAL), deviceListAdapter).show());
-    mainActivity.buttonSet.setOnClickListener(v -> startActivity(new Intent(this, SetActivity.class)));
+    activityMainBinding.buttonScan.setOnClickListener(v -> scanAddress());
+    activityMainBinding.buttonAdd.setOnClickListener(v -> startActivity(new Intent(this, DeviceDetailActivity.class)));
+    activityMainBinding.buttonSet.setOnClickListener(v -> startActivity(new Intent(this, SetActivity.class)));
   }
 
   // 扫描局域网地址
@@ -140,7 +134,7 @@ public class MainActivity extends Activity {
         for (String i : scannedAddresses) {
           ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
             AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));
-            Toast.makeText(this, getString(R.string.ip_copy), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_copy), Toast.LENGTH_SHORT).show();
           });
           scanAddressListView.list.addView(text.getRoot());
         }
