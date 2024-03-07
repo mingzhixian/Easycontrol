@@ -6,10 +6,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.Pair;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -88,17 +86,9 @@ public class ViewTools {
   }
 
   // 创建Client加载框
-  public static Pair<View, WindowManager.LayoutParams> createLoading(Context context) {
+  public static Pair<ItemLoadingBinding, Dialog> createLoading(Context context) {
     ItemLoadingBinding loadingView = ItemLoadingBinding.inflate(LayoutInflater.from(context));
-    WindowManager.LayoutParams loadingViewParams = new WindowManager.LayoutParams(
-      WindowManager.LayoutParams.WRAP_CONTENT,
-      WindowManager.LayoutParams.WRAP_CONTENT,
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE,
-      WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-      PixelFormat.TRANSLUCENT
-    );
-    loadingViewParams.gravity = Gravity.CENTER;
-    return new Pair<>(loadingView.getRoot(), loadingViewParams);
+    return new Pair<>(loadingView, createDialog(context, false, loadingView.getRoot()));
   }
 
   // 创建纯文本卡片

@@ -1,22 +1,22 @@
-package top.saymzx.easycontrol.app.client;
+package top.saymzx.easycontrol.app.client.tools;
 
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Pair;
+import android.view.Surface;
 
 import java.nio.ByteBuffer;
 
+import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.client.decode.AudioDecode;
 import top.saymzx.easycontrol.app.client.decode.VideoDecode;
-import top.saymzx.easycontrol.app.entity.AppData;
-import top.saymzx.easycontrol.app.entity.Device;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientPlayer {
   private boolean isClose = false;
-  private final Device device;
-  private final ClientStream clientStream;
   private final ClientController clientController;
+  private final ClientStream clientStream;
   private final Thread mainStreamInThread = new Thread(this::mainStreamIn);
   private final Thread videoStreamInThread = new Thread(this::videoStreamIn);
   private Handler playHandler = null;
@@ -25,17 +25,16 @@ public class ClientPlayer {
   private static final int CLIPBOARD_EVENT = 2;
   private static final int CHANGE_SIZE_EVENT = 3;
 
-  public ClientPlayer(Device device, ClientStream clientStream, ClientController clientController) {
-    this.device = device;
+  public ClientPlayer(String uuid, ClientStream clientStream) {
+    clientController = Client.getClientController(uuid);
     this.clientStream = clientStream;
-    this.clientController = clientController;
+    if (clientController == null) return;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       playHandlerThread.start();
       playHandler = new Handler(playHandlerThread.getLooper());
     }
     mainStreamInThread.start();
     videoStreamInThread.start();
-    AppData.uiHandler.post(this::otherService);
   }
 
   private void mainStreamIn() {
@@ -52,10 +51,10 @@ public class ClientPlayer {
             else audioDecode = new AudioDecode(useOpus, audioFrame, playHandler);
             break;
           case CLIPBOARD_EVENT:
-            ClientController.handleControll(device.uuid, "setClipBoard", clientStream.readByteArrayFromMain(clientStream.readIntFromMain()));
+            clientController.handleAction("setClipBoard", clientStream.readByteArrayFromMain(clientStream.readIntFromMain()), 0);
             break;
           case CHANGE_SIZE_EVENT:
-            ClientController.handleControll(device.uuid, "updateVideoSize", clientStream.readByteArrayFromMain(8));
+            clientController.handleAction("updateVideoSize", clientStream.readByteArrayFromMain(8), 0);
             break;
         }
       }
@@ -71,22 +70,15 @@ public class ClientPlayer {
     VideoDecode videoDecode = null;
     try {
       boolean useH265 = clientStream.readByteFromVideo() == 1;
+      Pair<Integer, Integer> videoSize = new Pair<>(clientStream.readIntFromVideo(), clientStream.readIntFromVideo());
+      Surface surface = new Surface(clientController.getTextureView().getSurfaceTexture());
       ByteBuffer csd0 = clientStream.readFrameFromVideo();
-      if (useH265) videoDecode = new VideoDecode(clientController.getVideoSize(), clientController.getSurface(), csd0, null, playHandler);
-      else videoDecode = new VideoDecode(clientController.getVideoSize(), clientController.getSurface(), csd0, clientStream.readFrameFromVideo(), playHandler);
+      ByteBuffer csd1 = useH265 ? null : clientStream.readFrameFromVideo();
+      videoDecode = new VideoDecode(videoSize, surface, csd0, csd1, playHandler);
       while (!Thread.interrupted()) videoDecode.decodeIn(clientStream.readFrameFromVideo());
     } catch (Exception ignored) {
     } finally {
       if (videoDecode != null) videoDecode.release();
-    }
-  }
-
-  private void otherService() {
-    if (!isClose) {
-      ClientController.handleControll(device.uuid, "checkClipBoard", null);
-      ClientController.handleControll(device.uuid, "keepAlive", null);
-      ClientController.handleControll(device.uuid, "checkSizeAndSite", null);
-      AppData.uiHandler.postDelayed(this::otherService, 2000);
     }
   }
 

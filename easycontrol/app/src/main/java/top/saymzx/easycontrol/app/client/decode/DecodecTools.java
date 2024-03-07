@@ -23,12 +23,14 @@ public class DecodecTools {
     for (MediaCodecInfo mediaCodecInfo : mediaCodecList.getCodecInfos()) {
       if (!mediaCodecInfo.isEncoder()) {
         String codecName = mediaCodecInfo.getName();
-        if (codecName.toLowerCase().contains("opus")) opusDecodecList.add(codecName);
-        // 要求硬件实现
-        if (!codecName.startsWith("OMX.google") && !codecName.startsWith("c2.android")) {
-          for (String supportType : mediaCodecInfo.getSupportedTypes()) {
-            if (Objects.equals(supportType, MediaFormat.MIMETYPE_VIDEO_HEVC)) hevcDecodecList.add(codecName);
-            else if (Objects.equals(supportType, MediaFormat.MIMETYPE_VIDEO_AVC)) avcDecodecList.add(codecName);
+        for (String supportType : mediaCodecInfo.getSupportedTypes()) {
+          if (Objects.equals(supportType, MediaFormat.MIMETYPE_AUDIO_OPUS)) opusDecodecList.add(codecName);
+          else {
+            // 视频解码器要求硬件实现
+            if (!codecName.startsWith("OMX.google") && !codecName.startsWith("c2.android")) {
+              if (Objects.equals(supportType, MediaFormat.MIMETYPE_VIDEO_HEVC)) hevcDecodecList.add(codecName);
+              else if (Objects.equals(supportType, MediaFormat.MIMETYPE_VIDEO_AVC)) avcDecodecList.add(codecName);
+            }
           }
         }
       }

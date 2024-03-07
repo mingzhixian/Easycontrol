@@ -4,6 +4,7 @@
 package top.saymzx.easycontrol.server.entity;
 
 import android.content.IOnPrimaryClipChangedListener;
+import android.hardware.display.VirtualDisplay;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -18,6 +19,7 @@ import android.view.MotionEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,24 +32,48 @@ import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
 import top.saymzx.easycontrol.server.wrappers.WindowManager;
 
 public final class Device {
+  private static int displayId = Display.DEFAULT_DISPLAY;
+  private static VirtualDisplay virtualDisplay;
   public static Pair<Integer, Integer> realSize;
-  public static Pair<Integer, Integer> deviceSize;
-  public static int deviceRotation;
-  public static int layerStack;
+  public static DisplayInfo displayInfo;
   public static Pair<Integer, Integer> videoSize;
-  public static boolean needReset = false;
-  public static int oldScreenOffTimeout = 60000;
-  private static final int displayId = Display.DEFAULT_DISPLAY;
+  private static boolean needReset = false;
+  private static int oldScreenOffTimeout = 60000;
 
-  public static void init() throws IOException, InterruptedException {
+  public static void init() throws Exception {
+    // 若启动单个应用则需创建虚拟Dispaly
+    if (!Objects.equals(Options.startApp, "")) {
+      virtualDisplay = DisplayManager.createVirtualDisplay();
+      displayId = virtualDisplay.getDisplay().getDisplayId();
+      startAndMoveAppToVirtualDisplay();
+      needReset = true;
+    }
     getRealSize();
-    getDeivceSize();
+    updateSize();
     // 旋转监听
     setRotationListener();
     // 剪切板监听
     setClipBoardListener();
     // 设置不息屏
     if (Options.keepAwake) setKeepScreenLight();
+  }
+
+  // 打开并移动应用
+  private static void startAndMoveAppToVirtualDisplay() throws IOException, InterruptedException {
+    int appStackId = getAppStackId();
+    if (appStackId == -1) {
+      Device.execReadOutput("monkey -p " + Options.startApp + " -c android.intent.category.LAUNCHER 1");
+      appStackId = getAppStackId();
+    }
+    if (appStackId == -1) throw new IOException("error app");
+    Device.execReadOutput("am display move-stack " + appStackId + " " + displayId);
+  }
+
+  private static int getAppStackId() throws IOException, InterruptedException {
+    String amStackList = Device.execReadOutput("am stack list");
+    Matcher m = Pattern.compile("taskId=([0-9]+): " + Options.startApp).matcher(amStackList);
+    if (!m.find()) return -1;
+    return Integer.parseInt(Objects.requireNonNull(m.group(1)));
   }
 
   private static void getRealSize() throws IOException, InterruptedException {
@@ -64,18 +90,11 @@ public final class Device {
     }
   }
 
-  private static void getDeivceSize() {
-    DisplayInfo displayInfo = DisplayManager.getDisplayInfo(displayId);
-    deviceSize = displayInfo.size;
-    deviceRotation = displayInfo.rotation;
-    layerStack = displayInfo.layerStack;
-    calculateVideoSize();
-  }
-
-  private static void calculateVideoSize() {
-    boolean isPortrait = deviceSize.first < deviceSize.second;
-    int major = isPortrait ? deviceSize.second : deviceSize.first;
-    int minor = isPortrait ? deviceSize.first : deviceSize.second;
+  private static void updateSize() {
+    displayInfo = DisplayManager.getDisplayInfo(displayId);
+    boolean isPortrait = displayInfo.width < displayInfo.height;
+    int major = isPortrait ? displayInfo.height : displayInfo.width;
+    int minor = isPortrait ? displayInfo.width : displayInfo.height;
     if (major > Options.maxSize) {
       minor = minor * Options.maxSize / major;
       major = Options.maxSize;
@@ -87,13 +106,12 @@ public final class Device {
   }
 
   // 修改分辨率
-  public static void changeDeviceResolution(float targetRatio) {
+  public static void changeResolution(float targetRatio) {
     try {
       // 安全阈值(长宽比最多三倍)
       if (targetRatio > 3 || targetRatio < 0.34) return;
       // 没有获取到真实分辨率
       if (realSize == null) return;
-      needReset = true;
 
       float originalRatio = (float) realSize.first / realSize.second;
       // 计算变化比率
@@ -107,13 +125,13 @@ public final class Device {
         newWidth = (int) (realSize.first * ratioChange);
         newHeight = realSize.second;
       }
-      changeDeviceResolution(newWidth, newHeight);
+      changeResolution(newWidth, newHeight);
     } catch (Exception ignored) {
     }
   }
 
   // 修改分辨率
-  public static void changeDeviceResolution(int width, int height) {
+  public static void changeResolution(int width, int height) {
     try {
       float originalRatio = (float) realSize.first / realSize.second;
       // 安全阈值(长宽比最多三倍)
@@ -124,19 +142,32 @@ public final class Device {
       // 缩放至16倍数
       width = width + 8 & ~15;
       height = height + 8 & ~15;
-
       // 避免分辨率相同，会触发安全机制导致系统崩溃
       if (width == height) width -= 16;
 
       // 修改分辨率
-      Device.execReadOutput("wm size " + width + "x" + height);
+      if (virtualDisplay != null) virtualDisplay.resize(width, height, displayInfo.density);
+      else Device.execReadOutput("wm size " + width + "x" + height);
 
       // 更新，需延迟一段时间
       Thread.sleep(200);
-      getDeivceSize();
-      calculateVideoSize();
+      updateSize();
       VideoEncode.isHasChangeConfig = true;
     } catch (Exception ignored) {
+    }
+  }
+
+  // 恢复分辨率
+  public static void fallbackResolution() throws IOException, InterruptedException {
+    if (Device.needReset) {
+      if (virtualDisplay != null) {
+        int appStackId = getAppStackId();
+        if (appStackId == -1) Device.execReadOutput("am display move-stack " + appStackId + " " + Display.DEFAULT_DISPLAY);
+        virtualDisplay.release();
+      } else {
+        if (Device.realSize != null) Device.execReadOutput("wm size " + Device.realSize.first + "x" + Device.realSize.second);
+        else Device.execReadOutput("wm size reset");
+      }
     }
   }
 
@@ -164,8 +195,7 @@ public final class Device {
   private static void setRotationListener() {
     WindowManager.registerRotationWatcher(new IRotationWatcher.Stub() {
       public void onRotationChanged(int rotation) {
-        getDeivceSize();
-        calculateVideoSize();
+        updateSize();
         VideoEncode.isHasChangeConfig = true;
       }
     }, displayId);
@@ -181,8 +211,8 @@ public final class Device {
       pointer = pointersState.newPointer(pointerId, SystemClock.uptimeMillis() - 50);
     }
 
-    pointer.x = x * deviceSize.first;
-    pointer.y = y * deviceSize.second;
+    pointer.x = x * displayInfo.width;
+    pointer.y = y * displayInfo.height;
     int pointerCount = pointersState.update();
 
     if (action == MotionEvent.ACTION_UP) {
@@ -205,12 +235,12 @@ public final class Device {
 
   private static void injectEvent(InputEvent inputEvent) {
     try {
+      if (displayId != Display.DEFAULT_DISPLAY) InputManager.setDisplayId(inputEvent, displayId);
       InputManager.injectInputEvent(inputEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     } catch (Exception e) {
       System.out.println(e.toString());
     }
   }
-
 
   public static void changeScreenPowerMode(int mode) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -241,9 +271,9 @@ public final class Device {
   }
 
   public static void rotateDevice() {
-    boolean accelerometerRotation = !WindowManager.isRotationFrozen();
-    WindowManager.freezeRotation(deviceRotation == 0 || deviceRotation == 3 ? 1 : 0);
-    if (accelerometerRotation) WindowManager.thawRotation();
+    boolean accelerometerRotation = !WindowManager.isRotationFrozen(displayId);
+    WindowManager.freezeRotation((displayInfo.rotation == 0 || displayInfo.rotation == 3 )? 1 : 0, displayId);
+    if (accelerometerRotation) WindowManager.thawRotation(displayId);
   }
 
   public static String execReadOutput(String cmd) throws IOException, InterruptedException {
@@ -270,6 +300,11 @@ public final class Device {
       execReadOutput("settings put system screen_off_timeout 600000000");
     } catch (Exception ignored) {
     }
+  }
+
+  // 恢复自动锁定时间
+  public static void fallbackScreenLightTimeout() throws IOException, InterruptedException {
+    if (Options.keepAwake) Device.execReadOutput("settings put system screen_off_timeout " + Device.oldScreenOffTimeout);
   }
 
 }

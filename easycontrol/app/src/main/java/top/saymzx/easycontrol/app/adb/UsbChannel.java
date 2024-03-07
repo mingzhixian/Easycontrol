@@ -134,11 +134,13 @@ public class UsbChannel implements AdbChannel {
 
   @Override
   public void close() {
+    readBackgroundThread.interrupt();
     try {
-      readBackgroundThread.interrupt();
       // 强制让adb执行错误，从而断开重连USB
-      usbConnection.bulkTransfer(endpointOut, new byte[40], 40, 2000);
-      usbConnection.claimInterface(usbInterface, false);
+      usbConnection.bulkTransfer(endpointOut, new byte[100], 100, 100);
+    } catch (Exception ignored) {
+    }
+    try {
       usbConnection.releaseInterface(usbInterface);
       usbConnection.close();
     } catch (Exception ignored) {

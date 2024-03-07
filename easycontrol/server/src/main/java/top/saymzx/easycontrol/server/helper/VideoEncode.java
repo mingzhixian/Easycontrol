@@ -31,7 +31,12 @@ public final class VideoEncode {
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
     useH265 = Options.supportH265 && EncodecTools.isSupportH265();
-    Server.writeVideo(ByteBuffer.wrap(new byte[]{(byte) (useH265 ? 1 : 0)}));
+    ByteBuffer byteBuffer = ByteBuffer.allocate(9);
+    byteBuffer.put((byte) (useH265 ? 1 : 0));
+    byteBuffer.putInt(Device.videoSize.first);
+    byteBuffer.putInt(Device.videoSize.second);
+    byteBuffer.flip();
+    Server.writeVideo(byteBuffer);
     // 创建显示器
     display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
     // 创建Codec
@@ -58,6 +63,7 @@ public final class VideoEncode {
   private static Surface surface;
 
   public static void startEncode() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
+    ControlPacket.sendVideoSizeEvent();
     encodecFormat.setInteger(MediaFormat.KEY_WIDTH, Device.videoSize.first);
     encodecFormat.setInteger(MediaFormat.KEY_HEIGHT, Device.videoSize.second);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
@@ -66,7 +72,6 @@ public final class VideoEncode {
     setDisplaySurface(display, surface);
     // 启动编码
     encedec.start();
-    ControlPacket.sendVideoSizeEvent();
   }
 
   public static void stopEncode() {
@@ -79,8 +84,8 @@ public final class VideoEncode {
     SurfaceControl.openTransaction();
     try {
       SurfaceControl.setDisplaySurface(display, surface);
-      SurfaceControl.setDisplayProjection(display, 0, new Rect(0, 0, Device.deviceSize.first, Device.deviceSize.second), new Rect(0, 0, Device.videoSize.first, Device.videoSize.second));
-      SurfaceControl.setDisplayLayerStack(display, Device.layerStack);
+      SurfaceControl.setDisplayProjection(display, 0, new Rect(0, 0, Device.displayInfo.width, Device.displayInfo.height), new Rect(0, 0, Device.videoSize.first, Device.videoSize.second));
+      SurfaceControl.setDisplayLayerStack(display, Device.displayInfo.layerStack);
     } finally {
       SurfaceControl.closeTransaction();
     }
@@ -88,7 +93,7 @@ public final class VideoEncode {
 
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public static void encodeOut() throws IOException, ErrnoException {
+  public static void encodeOut() throws IOException {
     try {
       // 找到已完成的输出缓冲区
       int outIndex;

@@ -6,7 +6,6 @@ package top.saymzx.easycontrol.server;
 import android.annotation.SuppressLint;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.system.ErrnoException;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -39,7 +38,7 @@ public final class Server {
 
   private static final Object object = new Object();
 
-  private static final int timeoutDelay = 1000 * 10;
+  private static final int timeoutDelay = 1000 * 5;
 
   public static void main(String... args) {
     try {
@@ -123,8 +122,6 @@ public final class Server {
     try (ServerSocket serverSocket = new ServerSocket(25166)) {
       mainSocket = serverSocket.accept();
       videoSocket = serverSocket.accept();
-      mainSocket.setTcpNoDelay(true);
-      videoSocket.setTcpNoDelay(true);
       mainOutputStream = mainSocket.getOutputStream();
       videoOutputStream = videoSocket.getOutputStream();
       mainInputStream = new DataInputStream(mainSocket.getInputStream());
@@ -159,7 +156,7 @@ public final class Server {
   private static void executeAudioOut() {
     try {
       while (!Thread.interrupted()) AudioEncode.encodeOut();
-    } catch (IOException | ErrnoException e) {
+    } catch (Exception e) {
       errorClose(e);
     }
   }
@@ -183,7 +180,7 @@ public final class Server {
             lastKeepAliveTime = System.currentTimeMillis();
             break;
           case 5:
-            Device.changeDeviceResolution(mainInputStream.readFloat());
+            Device.changeResolution(mainInputStream.readFloat());
             break;
           case 6:
             Device.rotateDevice();
@@ -195,7 +192,7 @@ public final class Server {
             Device.changePower(mainInputStream.readInt());
             break;
           case 9:
-            Device.changeDeviceResolution(mainInputStream.readInt(), mainInputStream.readInt());
+            Device.changeResolution(mainInputStream.readInt(), mainInputStream.readInt());
             break;
         }
       }
@@ -204,13 +201,11 @@ public final class Server {
     }
   }
 
-  public static void writeMain(ByteBuffer byteBuffer) throws IOException, ErrnoException {
-    synchronized (mainOutputStream) {
-      mainOutputStream.write(byteBuffer.array());
-    }
+  public synchronized static void writeMain(ByteBuffer byteBuffer) throws IOException {
+    mainOutputStream.write(byteBuffer.array());
   }
 
-  public static void writeVideo(ByteBuffer byteBuffer) throws IOException, ErrnoException {
+  public static void writeVideo(ByteBuffer byteBuffer) throws IOException {
     videoOutputStream.write(byteBuffer.array());
   }
 
@@ -236,13 +231,10 @@ public final class Server {
             AudioEncode.release();
             break;
           case 2:
-            if (Device.needReset) {
-              if (Device.realSize != null) Device.execReadOutput("wm size " + Device.realSize.first + "x" + Device.realSize.second);
-              else Device.execReadOutput("wm size reset");
-            }
-            if (Options.keepAwake) Device.execReadOutput("settings put system screen_off_timeout " + Device.oldScreenOffTimeout);
+            Device.fallbackResolution();
+            Device.fallbackScreenLightTimeout();
           case 3:
-            Device.execReadOutput("ps -ef | grep easycontrol.server | grep -v grep | grep -E \"^[a-z]+ +[0-9]+\" -o | grep -E \"[0-9]+\" -o | xargs kill -9");
+            Runtime.getRuntime().exit(0);
             break;
         }
       } catch (Exception ignored) {

@@ -14,7 +14,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
     android:gravity="center"
-    android:text="@string/main_scan_device_list"
+    android:text="@string/device_scan_device_list"
     android:textColor="@color/onCardBackground"
     android:textSize="@dimen/middleFont" />
 

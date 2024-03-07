@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.app.client;
+package top.saymzx.easycontrol.app.client.tools;
 
 import android.view.MotionEvent;
 

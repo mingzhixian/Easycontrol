@@ -18,14 +18,14 @@
     android:layout_height="wrap_content"
     android:background="@drawable/background_round"
     android:backgroundTint="@color/color1"
-    android:padding="10dp">
+    android:padding="6dp">
 
     <ImageView
       android:id="@+id/device_icon"
-      android:layout_width="24dp"
-      android:layout_height="24dp"
+      android:layout_width="30dp"
+      android:layout_height="30dp"
       android:src="@drawable/wifi"
-      android:tint="@color/onCardBackground" />
+      android:tint="@color/onColor1" />
   </FrameLayout>
 
   <LinearLayout

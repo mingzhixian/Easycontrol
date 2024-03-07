@@ -15,8 +15,9 @@ import android.view.View;
 import java.nio.ByteBuffer;
 
 import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.client.ClientController;
-import top.saymzx.easycontrol.app.client.ControlPacket;
+import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.tools.ClientController;
+import top.saymzx.easycontrol.app.client.tools.ControlPacket;
 import top.saymzx.easycontrol.app.databinding.ActivityFullBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -26,6 +27,7 @@ import top.saymzx.easycontrol.app.helper.ViewTools;
 public class FullActivity extends Activity implements SensorEventListener {
   private boolean isClose = false;
   private Device device;
+  private ClientController clientController;
   private ActivityFullBinding activityFullBinding;
   private boolean autoRotate;
   private boolean light = true;
@@ -35,19 +37,27 @@ public class FullActivity extends Activity implements SensorEventListener {
     ViewTools.setFullScreen(this);
     activityFullBinding = ActivityFullBinding.inflate(this.getLayoutInflater());
     setContentView(activityFullBinding.getRoot());
-    device = ClientController.getDevice(getIntent().getStringExtra("uuid"));
-    if (device == null) return;
-    ClientController.setFullView(device.uuid, this);
+    String uuid = getIntent().getStringExtra("uuid");
+    device = Client.getDevice(uuid);
+    clientController = Client.getClientController(uuid);
+    if (device == null || clientController == null) return;
+    clientController.setFullView(this);
     // 初始化
     activityFullBinding.barView.setVisibility(View.GONE);
     setNavBarHide(device.showNavBarOnConnect);
     autoRotate = AppData.setting.getAutoRotate();
-    activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+    activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_auto : R.drawable.auto);
+    if (device.address.contains("#")) {
+      activityFullBinding.buttonHome.setVisibility(View.GONE);
+      activityFullBinding.buttonSwitch.setVisibility(View.GONE);
+      activityFullBinding.buttonApp.setVisibility(View.GONE);
+      activityFullBinding.textureViewLayout.setPadding(0, PublicTools.dp2px(20f), 0, 0);
+    }
     // 按键监听
     setButtonListener();
     setKeyEvent();
     // 更新textureView
-    activityFullBinding.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
+    activityFullBinding.textureViewLayout.addView(clientController.getTextureView(), 0);
     activityFullBinding.textureViewLayout.post(this::updateMaxSize);
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
@@ -57,8 +67,8 @@ public class FullActivity extends Activity implements SensorEventListener {
   @Override
   protected void onPause() {
     AppData.sensorManager.unregisterListener(this);
-    if (isChangingConfigurations()) activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
-    else if (!isClose) ClientController.handleControll(device.uuid, device.fullToMiniOnRunning ? "changeToMini" : "changeToSmall", ByteBuffer.wrap("changeToFull".getBytes()));
+    if (isChangingConfigurations()) activityFullBinding.textureViewLayout.removeView(clientController.getTextureView());
+    else if (!isClose) clientController.handleAction(device.fullToMiniOnRunning ? "changeToMini" : "changeToSmall", ByteBuffer.wrap("changeToFull".getBytes()), 0);
     super.onPause();
   }
 
@@ -79,14 +89,15 @@ public class FullActivity extends Activity implements SensorEventListener {
     byteBuffer.putInt(width);
     byteBuffer.putInt(height);
     byteBuffer.flip();
-    ClientController.handleControll(device.uuid, "updateMaxSize", byteBuffer);
-    if (!device.customResolutionOnConnect && device.changeResolutionOnRunning) ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent((float) width / height));
+    clientController.handleAction("updateMaxSize", byteBuffer, 0);
+    if (!device.customResolutionOnConnect && device.changeResolutionOnRunning) clientController.handleAction("writeByteBuffer", ControlPacket.createChangeResolutionEvent((float) width / height), 0);
   }
 
   public void hide() {
+    if (device == null || clientController == null) return;
     try {
       isClose = true;
-      activityFullBinding.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+      activityFullBinding.textureViewLayout.removeView(clientController.getTextureView());
       finish();
     } catch (Exception ignored) {
     }
@@ -94,32 +105,35 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   // 设置按钮监听
   private void setButtonListener() {
-    activityFullBinding.buttonRotate.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
-    activityFullBinding.buttonBack.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
-    activityFullBinding.buttonHome.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
-    activityFullBinding.buttonSwitch.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
+    activityFullBinding.buttonRotate.setOnClickListener(v -> clientController.handleAction("buttonRotate", null, 0));
+    activityFullBinding.buttonBack.setOnClickListener(v -> clientController.handleAction("buttonBack", null, 0));
+    activityFullBinding.buttonHome.setOnClickListener(v -> clientController.handleAction("buttonHome", null, 0));
+    activityFullBinding.buttonSwitch.setOnClickListener(v -> clientController.handleAction("buttonSwitch", null, 0));
     activityFullBinding.buttonNavBar.setOnClickListener(v -> {
       setNavBarHide(activityFullBinding.navBar.getVisibility() == View.GONE);
       changeBarView();
     });
-    activityFullBinding.buttonMini.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
-    activityFullBinding.buttonSmall.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
-    activityFullBinding.buttonClose.setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
+    activityFullBinding.buttonMini.setOnClickListener(v -> clientController.handleAction("changeToMini", null, 0));
+    activityFullBinding.buttonSmall.setOnClickListener(v -> clientController.handleAction("changeToSmall", null, 0));
+    activityFullBinding.buttonClose.setOnClickListener(v -> Client.sendAction(device.uuid, "close", null, 0));
     activityFullBinding.buttonLight.setOnClickListener(v -> {
       light = !light;
       activityFullBinding.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
-      ClientController.handleControll(device.uuid, light ? "buttonLight" : "buttonLightOff", null);
-      changeBarView();
+      clientController.handleAction(light ? "buttonLight" : "buttonLightOff", null, 0);
     });
     activityFullBinding.buttonPower.setOnClickListener(v -> {
-      ClientController.handleControll(device.uuid, "buttonPower", null);
+      clientController.handleAction("buttonPower", null, 0);
       changeBarView();
     });
-    activityFullBinding.buttonMore.setOnClickListener(v -> changeBarView());
+    activityFullBinding.bar.setOnClickListener(v -> changeBarView());
     activityFullBinding.buttonAutoRotate.setOnClickListener(v -> {
       autoRotate = !autoRotate;
       AppData.setting.setAutoRotate(autoRotate);
-      activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_rotate : R.drawable.rotate);
+      activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_auto : R.drawable.auto);
+      changeBarView();
+    });
+    activityFullBinding.buttonApp.setOnClickListener(v -> {
+      clientController.handleAction("changeToApp", null, 0);
       changeBarView();
     });
   }
@@ -133,8 +147,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   private void changeBarView() {
     boolean toShowView = activityFullBinding.barView.getVisibility() == View.GONE;
-    boolean isLandscape = lastOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || lastOrientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-    ViewTools.viewAnim(activityFullBinding.barView, toShowView, 0, PublicTools.dp2px(40f) * (isLandscape ? -1 : 1), (isStart -> {
+    ViewTools.viewAnim(activityFullBinding.barView, toShowView, 0, PublicTools.dp2px(-40f), (isStart -> {
       if (isStart && toShowView) activityFullBinding.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) activityFullBinding.barView.setVisibility(View.GONE);
     }));
@@ -172,7 +185,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     activityFullBinding.editText.setInputType(InputType.TYPE_NULL);
     activityFullBinding.editText.setOnKeyListener((v, keyCode, event) -> {
       if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
-        ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
+        clientController.handleAction("writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()), 0);
         return true;
       }
       return false;

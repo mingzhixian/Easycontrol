@@ -13,6 +13,10 @@ public final class MyInterface {
     void run(String str);
   }
 
+  public interface MyFunctionInt {
+    void run(int value);
+  }
+
   public interface MyFunctionBytes {
     void run(byte[] buffer);
   }

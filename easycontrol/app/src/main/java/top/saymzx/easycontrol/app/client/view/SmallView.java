@@ -10,7 +10,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -21,8 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import top.saymzx.easycontrol.app.R;
-import top.saymzx.easycontrol.app.client.ClientController;
-import top.saymzx.easycontrol.app.client.ControlPacket;
+import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.tools.ClientController;
+import top.saymzx.easycontrol.app.client.tools.ControlPacket;
 import top.saymzx.easycontrol.app.databinding.ModuleSmallViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -31,6 +31,7 @@ import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class SmallView extends ViewOutlineProvider {
   private final Device device;
+  private ClientController clientController;
   private boolean isShow = false;
   private boolean light = true;
 
@@ -48,8 +49,10 @@ public class SmallView extends ViewOutlineProvider {
   private static final int LayoutParamsFlagFocus = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
   private static final int LayoutParamsFlagNoFocus = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
-  public SmallView(Device device) {
-    this.device = device;
+  public SmallView(String uuid) {
+    device = Client.getDevice(uuid);
+    clientController = Client.getClientController(uuid);
+    if (device == null || clientController == null) return;
     smallViewParams.gravity = Gravity.START | Gravity.TOP;
     // 设置默认导航栏状态
     setNavBarHide(device.showNavBarOnConnect);
@@ -65,23 +68,31 @@ public class SmallView extends ViewOutlineProvider {
   }
 
   public void show() {
+    if (device == null || clientController == null) return;
     // 初始化
     smallView.barView.setVisibility(View.GONE);
     smallViewParams.x = device.smallX;
     smallViewParams.y = device.smallY;
     updateMaxSize(device.smallLength, device.smallLength);
+    if (device.address.contains("#")) {
+      smallView.buttonHome.setVisibility(View.GONE);
+      smallView.buttonSwitch.setVisibility(View.GONE);
+      smallView.buttonApp.setVisibility(View.GONE);
+      smallView.textureViewLayout.setPadding(0, PublicTools.dp2px(15f), 0, 0);
+    }
     // 自定义分辨率(2:1)
-    if (!device.customResolutionOnConnect && device.changeResolutionOnRunning) ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent(0.5f));
+    if (!device.customResolutionOnConnect && device.changeResolutionOnRunning) clientController.handleAction("writeByteBuffer", ControlPacket.createChangeResolutionEvent(0.5f), 0);
     // 显示
     AppData.windowManager.addView(smallView.getRoot(), smallViewParams);
-    smallView.textureViewLayout.addView(ClientController.getTextureView(device.uuid), 0);
+    smallView.textureViewLayout.addView(clientController.getTextureView(), 0);
     ViewTools.viewAnim(smallView.getRoot(), true, 0, PublicTools.dp2px(40f), null);
     isShow = true;
   }
 
   public void hide() {
+    if (device == null || clientController == null) return;
     try {
-      smallView.textureViewLayout.removeView(ClientController.getTextureView(device.uuid));
+      smallView.textureViewLayout.removeView(clientController.getTextureView());
       AppData.windowManager.removeView(smallView.getRoot());
       isShow = false;
     } catch (Exception ignored) {
@@ -93,16 +104,16 @@ public class SmallView extends ViewOutlineProvider {
   private void setFloatVideoListener() {
     smallView.getRoot().setOnTouchHandle(event -> {
       if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-        if (device.smallToMiniOnRunning) ClientController.handleControll(device.uuid, "changeToMini", ByteBuffer.wrap("changeToSmall".getBytes()));
+        if (device.smallToMiniOnRunning) clientController.handleAction("changeToMini", ByteBuffer.wrap("changeToSmall".getBytes()), 0);
         else if (smallViewParams.flags != LayoutParamsFlagNoFocus) {
           smallView.editText.clearFocus();
           smallViewParams.flags = LayoutParamsFlagNoFocus;
           AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
         }
       } else if (smallViewParams.flags != LayoutParamsFlagFocus) {
-        smallView.editText.requestFocus();
         smallViewParams.flags = LayoutParamsFlagFocus;
         AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
+        smallView.editText.requestFocus();
       }
     });
   }
@@ -151,25 +162,28 @@ public class SmallView extends ViewOutlineProvider {
 
   // 设置按钮监听
   private void setButtonListener() {
-    smallView.buttonRotate.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonRotate", null));
-    smallView.buttonBack.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonBack", null));
-    smallView.buttonHome.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonHome", null));
-    smallView.buttonSwitch.setOnClickListener(v -> ClientController.handleControll(device.uuid, "buttonSwitch", null));
+    smallView.buttonRotate.setOnClickListener(v -> clientController.handleAction("buttonRotate", null, 0));
+    smallView.buttonBack.setOnClickListener(v -> clientController.handleAction("buttonBack", null, 0));
+    smallView.buttonHome.setOnClickListener(v -> clientController.handleAction("buttonHome", null, 0));
+    smallView.buttonSwitch.setOnClickListener(v -> clientController.handleAction("buttonSwitch", null, 0));
     smallView.buttonNavBar.setOnClickListener(v -> {
       setNavBarHide(smallView.navBar.getVisibility() == View.GONE);
       changeBarView();
     });
-    smallView.buttonMini.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToMini", null));
-    smallView.buttonFull.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToFull", null));
-    smallView.buttonClose.setOnClickListener(v -> ClientController.handleControll(device.uuid, "close", null));
+    smallView.buttonMini.setOnClickListener(v -> clientController.handleAction("changeToMini", null, 0));
+    smallView.buttonFull.setOnClickListener(v -> clientController.handleAction("changeToFull", null, 0));
+    smallView.buttonClose.setOnClickListener(v -> Client.sendAction(device.uuid, "close", null, 0));
     smallView.buttonLight.setOnClickListener(v -> {
       light = !light;
       smallView.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
-      ClientController.handleControll(device.uuid, light ? "buttonLight" : "buttonLightOff", null);
-      changeBarView();
+      clientController.handleAction(light ? "buttonLight" : "buttonLightOff", null, 0);
     });
     smallView.buttonPower.setOnClickListener(v -> {
-      ClientController.handleControll(device.uuid, "buttonPower", null);
+      clientController.handleAction("buttonPower", null, 0);
+      changeBarView();
+    });
+    smallView.buttonApp.setOnClickListener(v -> {
+      clientController.handleAction("changeToApp", null, 0);
       changeBarView();
     });
   }
@@ -214,7 +228,7 @@ public class SmallView extends ViewOutlineProvider {
     byteBuffer.putInt(w);
     byteBuffer.putInt(h);
     byteBuffer.flip();
-    ClientController.handleControll(device.uuid, "updateMaxSize", byteBuffer);
+    clientController.handleAction("updateMaxSize", byteBuffer, 0);
   }
 
   // 设置键盘监听
@@ -222,7 +236,7 @@ public class SmallView extends ViewOutlineProvider {
     smallView.editText.setInputType(InputType.TYPE_NULL);
     smallView.editText.setOnKeyListener((v, keyCode, event) -> {
       if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
-        ClientController.handleControll(device.uuid, "writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()));
+        clientController.handleAction("writeByteBuffer", ControlPacket.createKeyEvent(event.getKeyCode(), event.getMetaState()), 0);
         return true;
       }
       return false;
@@ -235,9 +249,7 @@ public class SmallView extends ViewOutlineProvider {
     DisplayMetrics screenSize = PublicTools.getScreenSize();
     int screenMaxWidth = screenSize.widthPixels - 50;
     int screenMaxHeight = screenSize.heightPixels - statusBarHeight - 50;
-    TextureView textureView = ClientController.getTextureView(device.uuid);
-    if (textureView == null) return;
-    ViewGroup.LayoutParams textureViewLayoutParams = textureView.getLayoutParams();
+    ViewGroup.LayoutParams textureViewLayoutParams = clientController.getTextureView().getLayoutParams();
     int width = textureViewLayoutParams.width;
     int height = textureViewLayoutParams.height;
     int startX = smallViewParams.x;

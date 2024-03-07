@@ -18,13 +18,23 @@
   <color name="clientBar">#828282</color>
 
   <!-- 彩色 -->
-  <color name="color1">#FF9966</color>
-  <color name="color2">#FFCCCC</color>
-  <color name="color3">#CCCC99</color>
-  <color name="color4">#336699</color>
-  <color name="color5">#666666</color>
-  <color name="color6">#669999</color>
-  <color name="color7">#666699</color>
-  <color name="color8">#669933</color>
+  <color name="color1">#EBF7FF</color>
+  <color name="onColor1">#0D94FD</color>
+  <color name="color2">#FDF0EF</color>
+  <color name="onColor2">#EE4F4B</color>
+  <color name="color3">#FFEFEF</color>
+  <color name="onColor3">#DC0115</color>
+  <color name="color4">#FFF2E9</color>
+  <color name="onColor4">#FE871E</color>
+  <color name="color5">#E7FFF2</color>
+  <color name="onColor5">#03CE5E</color>
+  <color name="color6">#EEEBFE</color>
+  <color name="onColor6">#8561FD</color>
+  <color name="color7">#EAF4FE</color>
+  <color name="onColor7">#39A2FD</color>
+  <color name="color8">#EAF0FE</color>
+  <color name="onColor8">#3A70FC</color>
+  <color name="color9">#ECF9FF</color>
+  <color name="onColor9">#10BEF1</color>
 
 </resources>

@@ -51,4 +51,4 @@
 ## 附加
 - ADB协议说明(官方的文档写的真烂，感谢cstyan大佬) [点击前往](https://github.com/cstyan/adbDocumentation)
 - Scrcpy官方地址 [点击前往](https://github.com/Genymobile/scrcpy)
-- 第三方修改本(专为车机进行了优化) [点击前往](https://github.com/eiyooooo/Easycontrol_For_Car)
+- 易控车机版(第三方用户专为车机进行了调整优化) [点击前往](https://github.com/eiyooooo/Easycontrol_For_Car)

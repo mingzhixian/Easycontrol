@@ -14,7 +14,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 16;
+  private static final int version = 17;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {

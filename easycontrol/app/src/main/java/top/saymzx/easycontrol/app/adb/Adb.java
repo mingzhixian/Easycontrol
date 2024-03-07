@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.adb;
 
 import android.hardware.usb.UsbDevice;
+import android.util.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,11 +9,12 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
 import top.saymzx.easycontrol.app.buffer.BufferStream;
+import top.saymzx.easycontrol.app.entity.MyInterface;
 
 // 此部分代码摘抄借鉴了tananaev大佬的开源代码(https://github.com/tananaev/adblib)以及开源库dadb(https://github.com/mobile-dev-inc/dadb)
 // 因为官方adb协议文档写的十分糟糕，因此此部分代码的实现参考了cstyan大佬所整理的文档，再次进行感谢：https://github.com/cstyan/adbDocumentation
 public class Adb {
-  private boolean isClose = false;
+  private boolean isClosed = false;
   private final AdbChannel channel;
   private int localIdPool = 1;
   private int MAX_DATA = AdbProtocol.CONNECT_MAXDATA;
@@ -21,12 +23,13 @@ public class Adb {
 
   private final Thread handleInThread = new Thread(this::handleIn);
 
-  public Adb(String host, int port, AdbKeyPair keyPair) throws Exception {
-    channel = new TcpChannel(host, port);
+  public Adb(Pair<String, Integer> address, AdbKeyPair keyPair) throws Exception {
+    channel = new TcpChannel(address.first, address.second);
     connect(keyPair);
   }
 
   public Adb(UsbDevice usbDevice, AdbKeyPair keyPair) throws Exception {
+    if (usbDevice == null) throw new IOException("no usb connect");
     channel = new UsbChannel(usbDevice);
     connect(keyPair);
   }
@@ -62,7 +65,7 @@ public class Adb {
         wait();
       }
       bufferStream = openStreams.get(localId);
-    } while (!isClose && bufferStream == null);
+    } while (!isClosed && bufferStream == null);
     openStreams.remove(localId);
     return bufferStream;
   }
@@ -77,7 +80,7 @@ public class Adb {
     return new String(bufferStream.readByteArrayBeforeClose().array());
   }
 
-  public void pushFile(InputStream file, String remotePath) throws Exception {
+  public void pushFile(InputStream file, String remotePath, MyInterface.MyFunctionInt handleProcess) throws Exception {
     // 打开链接
     BufferStream bufferStream = open("sync:", false);
     // 发送信令，建立push通道
@@ -88,9 +91,18 @@ public class Adb {
     // 发送文件
     byte[] byteArray = new byte[10240 - 8];
     int len = file.read(byteArray, 0, byteArray.length);
+    int hasSendLen = 0;
+    int allNeedSendLen = file.available();
+    int lastProcess = 0;
     do {
       bufferStream.write(AdbProtocol.generateSyncHeader("DATA", len));
       bufferStream.write(ByteBuffer.wrap(byteArray, 0, len));
+      hasSendLen += len;
+      int newProcess = (int) (((float) hasSendLen / allNeedSendLen) * 100);
+      if (newProcess != lastProcess) {
+        lastProcess = newProcess;
+        if (handleProcess != null) handleProcess.run(lastProcess);
+      }
       len = file.read(byteArray, 0, byteArray.length);
     } while (len > 0);
     file.close();
@@ -163,12 +175,12 @@ public class Adb {
   }
 
   private void writeToChannel(ByteBuffer byteBuffer) {
-    try {
-      synchronized (channel) {
+    synchronized (channel) {
+      try {
         channel.write(byteBuffer);
+      } catch (Exception ignored) {
+        close();
       }
-    } catch (Exception ignored) {
-      close();
     }
   }
 
@@ -202,9 +214,13 @@ public class Adb {
     });
   }
 
+  public boolean isClosed() {
+    return isClosed;
+  }
+
   public void close() {
-    if (isClose) return;
-    isClose = true;
+    if (isClosed) return;
+    isClosed = true;
     handleInThread.interrupt();
     for (Object bufferStream : connectionStreams.values().toArray()) ((BufferStream) bufferStream).close();
     channel.close();

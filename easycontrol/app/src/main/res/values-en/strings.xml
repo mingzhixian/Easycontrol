@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?><!-- 感谢群友 @λ 提供的翻译，原谅我之前只能用机器翻译 -->
 <resources>
   <string name="app_name">EasyControl</string>
+  <string name="app_name_simple">EasyControl</string>
   <string name="app_name_dev">EasyControlBeta</string>
 
   <!-- 主页 -->
-  <string name="main_poem">Spring — an experience in immortality</string>
+  <string name="main_poem">Light up with pleasure</string>
   <string name="main_float_permission">Please grant floating window permission, otherwise the software cannot be used.</string>
   <string name="main_float_permission_button">Go to setting</string>
-  <string name="main_scan_device_list">Find the following address (click copy)</string>
   <string name="main_scan_device_local">Local</string>
   <string name="main_device_type_network">Wireless</string>
   <string name="main_device_type_link">Wired</string>
@@ -48,6 +48,7 @@
   <string name="device_name">Name</string>
   <string name="device_name_hint">Can NOT be empty</string>
   <string name="device_address">Address:Port</string>
+  <string name="device_scan_device_list">Find the following address (click to populate)</string>
   <string name="device_address_hint">IPv4/v6 addresses or domain</string>
 
   <string name="device_on_connect">Set action on connect</string>
@@ -76,11 +77,11 @@
 
   <string name="device_on_close">Set action on close</string>
   <string name="device_lock_on_close">Lock</string>
-  <string name="device_lock_on_close_detail">Lock remote device when disconnected</string>
+  <string name="device_lock_on_close_detail">Lock remote device when disconnected, the "Reset backlight" function becomes invalid when this item is set.</string>
   <string name="device_light_on_close">Reset backlight</string>
   <string name="device_light_on_close_detail">Restore remote device\'s backlight when disconnected (ignored when auto lock is enabled)</string>
   <string name="device_reconnect_on_close">Auto reconnect</string>
-  <string name="device_reconnect_on_close_detail">Auto reconnect to remote device when accidentally disconnected (wired device can\'t auto reconnect)</string>
+  <string name="device_reconnect_on_close_detail">Auto reconnect to remote device when accidentally disconnected</string>
 
   <string name="device_option">Options</string>
   <string name="device_is_audio">Audio</string>
@@ -102,7 +103,8 @@
   <string name="set_device_title">Details</string>
   <string name="set_device_button_change">Settings</string>
   <string name="set_device_button_start_wireless">Enable wireless</string>
-  <string name="set_device_button_recover">Reset resolution</string>
+  <string name="set_device_buttons_send">Send</string>
+  <string name="set_device_button_recover">Recover</string>
   <string name="set_device_button_delete">Delete</string>
 
   <!-- 加载中模块 -->

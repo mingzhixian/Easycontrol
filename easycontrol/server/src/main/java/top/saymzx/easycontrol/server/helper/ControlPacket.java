@@ -14,7 +14,7 @@ import top.saymzx.easycontrol.server.entity.Device;
 
 public final class ControlPacket {
 
-  public static void sendVideoEvent(long pts, ByteBuffer data) throws IOException, ErrnoException {
+  public static void sendVideoEvent(long pts, ByteBuffer data) throws IOException {
     int size = data.remaining() + 8;
     ByteBuffer byteBuffer = ByteBuffer.allocate(4 + size);
     byteBuffer.putInt(size);
@@ -24,7 +24,7 @@ public final class ControlPacket {
     Server.writeVideo(byteBuffer);
   }
 
-  public static void sendAudioEvent(ByteBuffer data) throws IOException, ErrnoException {
+  public static void sendAudioEvent(ByteBuffer data) throws IOException {
     int size = data.remaining();
     ByteBuffer byteBuffer = ByteBuffer.allocate(5 + size);
     byteBuffer.put((byte) 1);
@@ -44,12 +44,12 @@ public final class ControlPacket {
     byteBuffer.flip();
     try {
       Server.writeMain(byteBuffer);
-    } catch (IOException | ErrnoException e) {
+    } catch (IOException e) {
       Server.errorClose(e);
     }
   }
 
-  public static void sendVideoSizeEvent() throws IOException, ErrnoException {
+  public static void sendVideoSizeEvent() throws IOException {
     ByteBuffer byteBuffer = ByteBuffer.allocate(9);
     byteBuffer.put((byte) 3);
     byteBuffer.putInt(Device.videoSize.first);

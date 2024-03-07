@@ -5,9 +5,13 @@
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 悬浮窗 -->
   <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
-  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- WIFI状态 -->
   <uses-permission android:name="android.permission.USB_PERMISSION" /> <!-- USB -->
   <uses-feature android:name="android.hardware.usb.host" />
+
+  <uses-permission
+    android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="28" />
 
   <application
     android:icon="${app_icon}"
@@ -17,14 +21,20 @@
     android:supportsRtl="true"
     android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar"
     android:usesCleartextTraffic="true">
+
     <activity
       android:name=".MainActivity"
-      android:exported="true">
+      android:exported="true"
+      android:launchMode="singleTask">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+
+      <meta-data
+        android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+        android:resource="@xml/device_filter" />
     </activity>
     <activity
       android:name=".DeviceDetailActivity"
@@ -37,14 +47,24 @@
       android:exported="false" />
     <activity
       android:name=".client.view.FullActivity"
-      android:exported="false"
-      android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+      android:exported="false" />
     <activity
       android:name=".AdbKeyActivity"
       android:exported="false" />
     <activity
       android:name=".ActiveActivity"
       android:exported="false" />
+    <activity
+      android:name=".UsbActivity"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+        android:resource="@xml/device_filter" />
+    </activity>
   </application>
 
 </manifest>

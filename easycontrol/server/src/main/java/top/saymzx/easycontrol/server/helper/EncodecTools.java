@@ -6,7 +6,6 @@ import android.media.MediaFormat;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class EncodecTools {
   private static ArrayList<String> hevcEncodecList = null;

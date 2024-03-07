@@ -6,49 +6,61 @@ package top.saymzx.easycontrol.server.wrappers;
 import android.os.IInterface;
 import android.view.IRotationWatcher;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public final class WindowManager {
   private static IInterface manager;
   private static Class<?> CLASS;
   private static Method freezeRotationMethod = null;
+  private static Method freezeDisplayRotationMethod = null;
   private static Method isRotationFrozenMethod = null;
+  private static Method isDisplayRotationFrozenMethod = null;
   private static Method thawRotationMethod = null;
+  private static Method thawDisplayRotationMethod = null;
 
   public static void init(IInterface m) {
     manager = m;
     CLASS = manager.getClass();
     try {
       freezeRotationMethod = manager.getClass().getMethod("freezeRotation", int.class);
+      freezeDisplayRotationMethod = manager.getClass().getMethod("freezeDisplayRotation", int.class, int.class);
+    } catch (Exception ignored) {
+    }
+    try {
       isRotationFrozenMethod = manager.getClass().getMethod("isRotationFrozen");
+      isDisplayRotationFrozenMethod = manager.getClass().getMethod("isDisplayRotationFrozen", int.class);
+    } catch (Exception ignored) {
+    }
+    try {
       thawRotationMethod = manager.getClass().getMethod("thawRotation");
+      thawDisplayRotationMethod = manager.getClass().getMethod("thawDisplayRotation", int.class);
     } catch (Exception ignored) {
     }
   }
 
-  public static void freezeRotation(int rotation) {
-    if (freezeRotationMethod == null) return;
+  public static void freezeRotation(int displayId, int rotation) {
     try {
-      freezeRotationMethod.invoke(manager, rotation);
-    } catch (InvocationTargetException | IllegalAccessException ignored) {
+      if (freezeDisplayRotationMethod != null) freezeDisplayRotationMethod.invoke(manager, displayId, rotation);
+      else if (freezeRotationMethod != null) freezeRotationMethod.invoke(manager, rotation);
+    } catch (Exception ignored) {
     }
   }
 
-  public static boolean isRotationFrozen() {
-    if (isRotationFrozenMethod == null) return false;
+  public static boolean isRotationFrozen(int displayId) {
     try {
-      return (boolean) isRotationFrozenMethod.invoke(manager);
-    } catch (InvocationTargetException | IllegalAccessException ignored) {
+      if (isDisplayRotationFrozenMethod != null) return (boolean) isDisplayRotationFrozenMethod.invoke(manager, displayId);
+      else if (isRotationFrozenMethod != null) return (boolean) isRotationFrozenMethod.invoke(manager);
+      return false;
+    } catch (Exception ignored) {
       return false;
     }
   }
 
-  public static void thawRotation() {
-    if (thawRotationMethod == null) return;
+  public static void thawRotation(int displayId) {
     try {
-      thawRotationMethod.invoke(manager);
-    } catch (InvocationTargetException | IllegalAccessException ignored) {
+      if (thawDisplayRotationMethod != null) thawDisplayRotationMethod.invoke(manager, displayId);
+      else if (thawRotationMethod != null) thawRotationMethod.invoke(manager);
+    } catch (Exception ignored) {
     }
   }
 

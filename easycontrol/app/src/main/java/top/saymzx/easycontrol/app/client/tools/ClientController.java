@@ -1,4 +1,4 @@
-package top.saymzx.easycontrol.app.client;
+package top.saymzx.easycontrol.app.client.tools;
 
 import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
@@ -11,17 +11,19 @@ import android.os.HandlerThread;
 import android.util.Pair;
 import android.view.Display;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import top.saymzx.easycontrol.app.R;
+import top.saymzx.easycontrol.app.client.Client;
 import top.saymzx.easycontrol.app.client.view.FullActivity;
 import top.saymzx.easycontrol.app.client.view.MiniView;
 import top.saymzx.easycontrol.app.client.view.SmallView;
@@ -31,104 +33,130 @@ import top.saymzx.easycontrol.app.entity.MyInterface;
 import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class ClientController implements TextureView.SurfaceTextureListener {
-  private static final HashMap<String, ClientController> allController = new HashMap<>();
-
-  private boolean isClose = false;
   private final Device device;
   private final ClientStream clientStream;
-  private final MyInterface.MyFunctionBoolean handle;
-  public final TextureView textureView = new TextureView(AppData.applicationContext);
+  private final MyInterface.MyFunction handle;
+  private final TextureView textureView = new TextureView(AppData.applicationContext);
   private SurfaceTexture surfaceTexture;
 
-  private final SmallView smallView;
-  private final MiniView miniView;
+  private SmallView smallView;
+  private MiniView miniView;
   private FullActivity fullView;
 
   private Pair<Integer, Integer> videoSize;
   private Pair<Integer, Integer> maxSize;
   private Pair<Integer, Integer> surfaceSize;
 
-  private final HandlerThread handlerThread = new HandlerThread("easycontrol_controler");
-  private final Handler handler;
+  // 执行线程
+  private final HandlerThread mainThread = new HandlerThread("easycontrol_client_main");
+  private Handler mainHandler;
 
-  public ClientController(Device device, ClientStream clientStream, MyInterface.MyFunctionBoolean handle) {
-    allController.put(device.uuid, this);
+  public ClientController(Device device, ClientStream clientStream, MyInterface.MyFunction handle) {
     this.device = device;
     this.clientStream = clientStream;
     this.handle = handle;
-    smallView = new SmallView(device);
-    miniView = new MiniView(device);
-    setTouchListener();
+    mainThread.start();
+    mainHandler = new Handler(mainThread.getLooper());
     textureView.setSurfaceTextureListener(this);
-    handlerThread.start();
-    handler = new Handler(handlerThread.getLooper());
-    // 启动界面
-    handleControll(device.uuid, device.changeToFullOnConnect ? "changeToFull" : "changeToSmall", null);
-    // 运行启动时操作
-    if (device.customResolutionOnConnect) handleControll(device.uuid, "writeByteBuffer", ControlPacket.createChangeResolutionEvent(device.customResolutionWidth, device.customResolutionHeight));
-    if (device.wakeOnConnect) handleControll(device.uuid, "buttonWake", null);
-    if (device.lightOffOnConnect) handler.postDelayed(() -> handleControll(device.uuid, "buttonLightOff", null), 2000);
+    setTouchListener();
+    // 启动子服务
+    mainHandler.post(this::otherService);
   }
 
-  public static void handleControll(String uuid, String action, ByteBuffer byteBuffer) {
-    ClientController clientController = allController.get(uuid);
-    if (clientController == null) return;
-    clientController.handler.post(() -> handleAction(clientController, action, byteBuffer));
+  public void handleAction(String action, ByteBuffer byteBuffer, int delay) {
+    if (delay == 0) mainHandler.post(() -> handleAction(action, byteBuffer));
+    else mainHandler.postDelayed(() -> handleAction(action, byteBuffer), delay);
   }
 
-  private static void handleAction(ClientController clientController, String action, ByteBuffer byteBuffer) {
+  private void handleAction(String action, ByteBuffer byteBuffer) {
     try {
-      if (action.equals("changeToSmall")) clientController.changeToSmall();
-      else if (action.equals("changeToFull")) clientController.changeToFull();
-      else if (action.equals("changeToMini")) clientController.changeToMini(byteBuffer);
-      else if (action.equals("close")) clientController.close(null);
-      else if (action.equals("buttonPower")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(-1));
-      else if (action.equals("buttonWake")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(1));
-      else if (action.equals("buttonLock")) clientController.clientStream.writeToMain(ControlPacket.createPowerEvent(0));
-      else if (action.equals("buttonLight")) clientController.clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_ON));
-      else if (action.equals("buttonLightOff")) clientController.clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_UNKNOWN));
-      else if (action.equals("buttonBack")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(4, 0));
-      else if (action.equals("buttonHome")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(3, 0));
-      else if (action.equals("buttonSwitch")) clientController.clientStream.writeToMain(ControlPacket.createKeyEvent(187, 0));
-      else if (action.equals("buttonRotate")) clientController.clientStream.writeToMain(ControlPacket.createRotateEvent());
-      else if (action.equals("keepAlive")) clientController.clientStream.writeToMain(ControlPacket.createKeepAlive());
-      else if (action.equals("checkSizeAndSite")) clientController.checkSizeAndSite();
-      else if (action.equals("checkClipBoard")) clientController.checkClipBoard();
-      else if (byteBuffer == null) return;
-      else if (action.equals("writeByteBuffer")) clientController.clientStream.writeToMain(byteBuffer);
-      else if (action.equals("updateMaxSize")) clientController.updateMaxSize(byteBuffer);
-      else if (action.equals("updateVideoSize")) clientController.updateVideoSize(byteBuffer);
-      else if (action.equals("runShell")) clientController.runShell(byteBuffer);
-      else if (action.equals("setClipBoard")) clientController.setClipBoard(byteBuffer);
+      switch (action) {
+        case "changeToSmall":
+          changeToSmall();
+          break;
+        case "changeToFull":
+          changeToFull();
+          break;
+        case "changeToMini":
+          changeToMini(byteBuffer);
+          break;
+        case "changeToApp":
+          changeToApp();
+          break;
+        case "buttonPower":
+          clientStream.writeToMain(ControlPacket.createPowerEvent(-1));
+          break;
+        case "buttonWake":
+          clientStream.writeToMain(ControlPacket.createPowerEvent(1));
+          break;
+        case "buttonLock":
+          clientStream.writeToMain(ControlPacket.createPowerEvent(0));
+          break;
+        case "buttonLight":
+          clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_ON));
+          clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_OFF));
+          break;
+        case "buttonLightOff":
+          clientStream.writeToMain(ControlPacket.createLightEvent(Display.STATE_UNKNOWN));
+          break;
+        case "buttonBack":
+          clientStream.writeToMain(ControlPacket.createKeyEvent(4, 0));
+          break;
+        case "buttonHome":
+          clientStream.writeToMain(ControlPacket.createKeyEvent(3, 0));
+          break;
+        case "buttonSwitch":
+          clientStream.writeToMain(ControlPacket.createKeyEvent(187, 0));
+          break;
+        case "buttonRotate":
+          clientStream.writeToMain(ControlPacket.createRotateEvent());
+          break;
+        case "keepAlive":
+          clientStream.writeToMain(ControlPacket.createKeepAlive());
+          break;
+        case "checkSizeAndSite":
+          checkSizeAndSite();
+          break;
+        case "checkClipBoard":
+          checkClipBoard();
+          break;
+        default:
+          if (byteBuffer == null) break;
+        case "writeByteBuffer":
+          clientStream.writeToMain(byteBuffer);
+          break;
+        case "updateMaxSize":
+          updateMaxSize(byteBuffer);
+          break;
+        case "updateVideoSize":
+          updateVideoSize(byteBuffer);
+          break;
+        case "runShell":
+          runShell(byteBuffer);
+          break;
+        case "setClipBoard":
+          setClipBoard(byteBuffer);
+          break;
+      }
     } catch (Exception ignored) {
-      clientController.close(AppData.applicationContext.getString(R.string.toast_stream_closed));
+      PublicTools.logToast("controller", AppData.applicationContext.getString(R.string.toast_stream_closed) + action, true);
+      Client.sendAction(device.uuid, "close", ByteBuffer.allocate(1), 0);
     }
   }
 
-  public static void setFullView(String uuid, FullActivity fullView) {
-    ClientController clientController = allController.get(uuid);
-    if (clientController == null) return;
-    clientController.fullView = fullView;
+  private void otherService() {
+    handleAction("checkClipBoard", null, 0);
+    handleAction("keepAlive", null, 0);
+    handleAction("checkSizeAndSite", null, 0);
+    mainHandler.postDelayed(this::otherService, 2000);
   }
 
-  public static Device getDevice(String uuid) {
-    ClientController clientController = allController.get(uuid);
-    if (clientController == null) return null;
-    return clientController.device;
+  public void setFullView(FullActivity fullView) {
+    this.fullView = fullView;
   }
 
-  public Pair<Integer, Integer> getVideoSize() {
-    return videoSize;
-  }
-
-  public Surface getSurface() {
-    return new Surface(surfaceTexture);
-  }
-
-  public static TextureView getTextureView(String uuid) {
-    ClientController clientController = allController.get(uuid);
-    if (clientController == null) return null;
-    return clientController.textureView;
+  public TextureView getTextureView() {
+    return textureView;
   }
 
   private synchronized void changeToFull() {
@@ -140,36 +168,46 @@ public class ClientController implements TextureView.SurfaceTextureListener {
 
   private synchronized void changeToSmall() {
     hide();
+    if (smallView == null) smallView = new SmallView(device.uuid);
     AppData.uiHandler.post(smallView::show);
   }
 
   private synchronized void changeToMini(ByteBuffer byteBuffer) {
     hide();
+    if (miniView == null) miniView = new MiniView(device.uuid);
     AppData.uiHandler.post(() -> miniView.show(byteBuffer));
+  }
+
+  private synchronized void changeToApp() throws Exception {
+    // 获取当前APP
+    String output = clientStream.runShell("dumpsys window | grep mCurrentFocus=Window");
+    // 创建匹配器
+    Matcher matcher = Pattern.compile(" ([a-zA-Z0-9.]+)/").matcher(output);
+    // 进行匹配
+    if (matcher.find()) {
+      Device tempDevice = device.clone(String.valueOf(UUID.randomUUID()));
+      tempDevice.name = "----";
+      tempDevice.address = tempDevice.address + "#" + matcher.group(1);
+      // 为了错开界面
+      tempDevice.smallX += 200;
+      tempDevice.smallY += 200;
+      tempDevice.smallLength -= 200;
+      tempDevice.miniY += 200;
+      Client.startDevice(tempDevice);
+    }
   }
 
   private synchronized void hide() {
     if (fullView != null) AppData.uiHandler.post(fullView::hide);
     fullView = null;
-    AppData.uiHandler.post(smallView::hide);
-    AppData.uiHandler.post(miniView::hide);
+    if (smallView != null) AppData.uiHandler.post(smallView::hide);
+    if (miniView != null) AppData.uiHandler.post(miniView::hide);
   }
 
-  private void close(String error) {
-    if (isClose) return;
-    isClose = true;
+  public void close() {
     hide();
-    // 运行断开时操作
-    if (device.lockOnClose) handleControll(device.uuid, "buttonLock", null);
-      // 开启了自动锁定，就没必要发送打开背光了
-    else if (device.lightOnClose) handleControll(device.uuid, "buttonLight", null);
-    if (error != null && device.isNetworkDevice() && device.reconnectOnClose) new Client(device);
-    // 打印日志
-    if (error != null) PublicTools.logToast("controller", error, true);
-    handlerThread.interrupt();
-    allController.remove(device.uuid);
+    mainThread.quitSafely();
     if (surfaceTexture != null) surfaceTexture.release();
-    handle.run(false);
   }
 
   private static final int minLength = PublicTools.dp2px(200f);
@@ -245,7 +283,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     }
     pointerList[p] = x;
     pointerList[10 + p] = y;
-    handleControll(device.uuid, "writeByteBuffer", ControlPacket.createTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime));
+    handleAction("writeByteBuffer", ControlPacket.createTouchEvent(action, p, (float) x / surfaceSize.first, (float) y / surfaceSize.second, offsetTime), 0);
   }
 
   // 剪切板
@@ -257,7 +295,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
       String newClipBoardText = String.valueOf(clipBoard.getItemAt(0).getText());
       if (!Objects.equals(nowClipboardText, newClipBoardText)) {
         nowClipboardText = newClipBoardText;
-        handleControll(device.uuid, "writeByteBuffer", ControlPacket.createClipboardEvent(nowClipboardText));
+        handleAction("writeByteBuffer", ControlPacket.createClipboardEvent(nowClipboardText), 0);
       }
     }
   }
@@ -277,7 +315,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     // 初始化
     if (this.surfaceTexture == null) {
       this.surfaceTexture = surfaceTexture;
-      handle.run(true);
+      handle.run();
     } else textureView.setSurfaceTexture(this.surfaceTexture);
   }
 

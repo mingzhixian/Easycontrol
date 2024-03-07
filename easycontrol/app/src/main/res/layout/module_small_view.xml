@@ -18,7 +18,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_margin="10dp"
+    android:layout_margin="6dp"
     android:background="@drawable/background_cron"
     android:elevation="4dp"
     android:orientation="vertical">
@@ -32,21 +32,10 @@
       android:id="@+id/nav_bar"
       android:layout_width="match_parent"
       android:layout_height="25dp"
-      android:alpha="0.8"
       android:orientation="horizontal"
-      android:paddingStart="10dp"
-      android:paddingEnd="5dp"
+      android:paddingStart="20dp"
+      android:paddingEnd="20dp"
       tools:ignore="RtlSymmetry">
-
-      <ImageView
-        android:id="@+id/button_rotate"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:focusable="false"
-        android:padding="2dp"
-        android:src="@drawable/horizontal_rotate"
-        android:tint="@color/onCardBackground" />
 
       <ImageView
         android:id="@+id/button_switch"
@@ -78,18 +67,13 @@
         android:src="@drawable/caret_left"
         android:tint="@color/onCardBackground" />
 
-      <Space
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1" />
-
     </LinearLayout>
   </LinearLayout>
 
   <FrameLayout
     android:id="@+id/bar"
     android:layout_width="100dp"
-    android:layout_height="25dp"
+    android:layout_height="20dp"
     android:layout_gravity="top|center_horizontal"
     android:elevation="6dp">
 
@@ -108,19 +92,19 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:layout_marginTop="30dp"
+    android:layout_marginTop="25dp"
     android:background="@drawable/background_cron"
     android:columnCount="4"
-    android:elevation="8dp"
+    android:elevation="6dp"
     android:padding="6dp">
 
     <ImageView
-      android:id="@+id/button_nav_bar"
+      android:id="@+id/button_app"
       android:layout_width="24dp"
       android:layout_height="24dp"
       android:layout_margin="2dp"
       android:focusable="false"
-      android:src="@drawable/not_equal"
+      android:src="@drawable/share"
       android:tint="@color/onCardBackground" />
 
     <ImageView
@@ -150,13 +134,23 @@
       android:src="@drawable/x"
       android:tint="@color/alert" />
 
+
     <ImageView
-      android:id="@+id/button_light"
+      android:id="@+id/button_rotate"
       android:layout_width="24dp"
       android:layout_height="24dp"
       android:layout_margin="2dp"
       android:focusable="false"
-      android:src="@drawable/lightbulb_off"
+      android:src="@drawable/horizontal_rotate"
+      android:tint="@color/onCardBackground" />
+
+    <ImageView
+      android:id="@+id/button_nav_bar"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/not_equal"
       android:tint="@color/onCardBackground" />
 
     <ImageView
@@ -167,12 +161,22 @@
       android:focusable="false"
       android:src="@drawable/power"
       android:tint="@color/onCardBackground" />
+
+    <ImageView
+      android:id="@+id/button_light"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_margin="2dp"
+      android:focusable="false"
+      android:src="@drawable/lightbulb_off"
+      android:tint="@color/onCardBackground" />
+
   </GridLayout>
 
   <View
     android:id="@+id/re_size"
-    android:layout_width="25dp"
-    android:layout_height="25dp"
+    android:layout_width="30dp"
+    android:layout_height="30dp"
     android:layout_gravity="end|bottom"
     android:focusable="false" />
 

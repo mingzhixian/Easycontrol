@@ -8,7 +8,6 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Build;
-import android.system.ErrnoException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -21,7 +20,7 @@ public final class AudioEncode {
   private static AudioRecord audioCapture;
   private static boolean useOpus;
 
-  public static boolean init() throws IOException, ErrnoException {
+  public static boolean init() throws IOException {
     useOpus = Options.supportOpus && EncodecTools.isSupportOpus();
     byte[] bytes = new byte[]{0};
     try {
@@ -66,7 +65,7 @@ public final class AudioEncode {
 
   private static final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-  public static void encodeOut() throws IOException, ErrnoException {
+  public static void encodeOut() throws IOException {
     try {
       // 找到已完成的输出缓冲区
       int outIndex;

@@ -40,6 +40,8 @@ public class PublicTools {
 
   // 分离地址和端口号
   public static Pair<String, Integer> getIpAndPort(String address) throws IOException {
+    // 如果包含应用名，则需要要分割出地址
+    if (address.contains("#")) address = address.split("#")[0];
     String pattern;
     int type;
     // 特殊格式

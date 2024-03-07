@@ -1,12 +1,14 @@
 package top.saymzx.easycontrol.app;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 
 import top.saymzx.easycontrol.app.databinding.ActivityActiveBinding;
+import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.ActiveHelper;
 import top.saymzx.easycontrol.app.helper.PublicTools;
@@ -39,11 +41,11 @@ public class ActiveActivity extends Activity {
     activityActiveBinding.active.setOnClickListener(v -> {
       String activeKey = String.valueOf(activityActiveBinding.key.getText());
       AppData.setting.setActiveKey(activeKey);
-      Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(this);
-      AppData.windowManager.addView(loading.first, loading.second);
+      Pair<ItemLoadingBinding, Dialog> loading = ViewTools.createLoading(this);
+      loading.second.show();
       new Thread(() -> {
         boolean isOk = ActiveHelper.active(activeKey);
-        AppData.windowManager.removeView(loading.first);
+        loading.second.cancel();
         AppData.uiHandler.post(() -> {
           if (isOk) {
             finish();
@@ -58,11 +60,11 @@ public class ActiveActivity extends Activity {
 
   // 取消激活
   private void deactivate() {
-    Pair<View, WindowManager.LayoutParams> loading = ViewTools.createLoading(this);
-    AppData.windowManager.addView(loading.first, loading.second);
+    Pair<ItemLoadingBinding, Dialog> loading = ViewTools.createLoading(this);
+    loading.second.show();
     new Thread(() -> {
       boolean isOk = ActiveHelper.deactivate(AppData.setting.getActiveKey());
-      AppData.windowManager.removeView(loading.first);
+      loading.second.cancel();
       AppData.uiHandler.post(() -> {
         if (isOk) {
           AppData.setting.setIsActive(false);

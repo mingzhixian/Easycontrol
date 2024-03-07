@@ -11,7 +11,8 @@ import android.view.WindowManager;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import top.saymzx.easycontrol.app.client.ClientController;
+import top.saymzx.easycontrol.app.client.Client;
+import top.saymzx.easycontrol.app.client.tools.ClientController;
 import top.saymzx.easycontrol.app.databinding.ModuleMiniViewBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
@@ -21,6 +22,7 @@ import top.saymzx.easycontrol.app.helper.ViewTools;
 public class MiniView {
 
   private final Device device;
+  private ClientController clientController;
   private Thread timeoutListenerThread;
   private long lastTouchTIme = 0;
 
@@ -34,8 +36,10 @@ public class MiniView {
     PixelFormat.TRANSLUCENT
   );
 
-  public MiniView(Device device) {
-    this.device = device;
+  public MiniView(String uuid) {
+    device = Client.getDevice(uuid);
+    clientController = Client.getClientController(uuid);
+    if (device == null || clientController == null) return;
     miniViewParams.gravity = Gravity.START | Gravity.TOP;
     miniViewParams.x = 0;
     // 设置监听控制
@@ -44,6 +48,7 @@ public class MiniView {
   }
 
   public void show(ByteBuffer byteBuffer) {
+    if (device == null || clientController == null) return;
     miniViewParams.y = device.miniY;
     // 显示
     ViewTools.viewAnim(miniView.getRoot(), true, PublicTools.dp2px(-40f), 0, (isStart -> {
@@ -58,6 +63,7 @@ public class MiniView {
   }
 
   public void hide() {
+    if (device == null || clientController == null) return;
     try {
       AppData.windowManager.removeView(miniView.getRoot());
       if (timeoutListenerThread != null) timeoutListenerThread.interrupt();
@@ -70,10 +76,10 @@ public class MiniView {
     try {
       long now;
       while (!Thread.interrupted()) {
-        Thread.sleep(1);
+        Thread.sleep(2);
         now = System.currentTimeMillis();
         if (now - lastTouchTIme > 5000) {
-          ClientController.handleControll(device.uuid, timeoutAction, null);
+          clientController.handleAction( timeoutAction, null, 0);
           return;
         }
       }
@@ -109,8 +115,8 @@ public class MiniView {
 
   // 设置按钮监听
   private void setButtonListener() {
-    miniView.buttonSmall.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToSmall", null));
-    miniView.buttonFull.setOnClickListener(v -> ClientController.handleControll(device.uuid, "changeToFull", null));
+    miniView.buttonSmall.setOnClickListener(v -> clientController.handleAction( "changeToSmall", null, 0));
+    miniView.buttonFull.setOnClickListener(v -> clientController.handleAction( "changeToFull", null, 0));
   }
 
 }

@@ -7,16 +7,18 @@ import android.util.Pair;
 
 public final class DisplayInfo {
   public final int displayId;
-  public final Pair<Integer, Integer> size;
+  public final int width;
+  public final int height;
   public final int rotation;
   public final int layerStack;
-  public final int flags;
+  public final int density;
 
-  public DisplayInfo(int displayId, Pair<Integer, Integer> size, int rotation, int layerStack, int flags) {
+  public DisplayInfo(int displayId, int width,int height, int rotation,int density, int layerStack) {
     this.displayId = displayId;
-    this.size = size;
+    this.width=width;
+    this.height=height;
     this.rotation = rotation;
     this.layerStack = layerStack;
-    this.flags = flags;
+    this.density = density;
   }
 }

@@ -1,5 +1,7 @@
 package top.saymzx.easycontrol.app.entity;
 
+import java.util.Objects;
+
 public class Device {
   public static final int TYPE_NETWORK = 1;
   public static final int TYPE_LINK = 2;
@@ -49,4 +51,40 @@ public class Device {
     return type == TYPE_LINK;
   }
 
+  public boolean isTempDevice() {
+    return Objects.equals(name, "----");
+  }
+
+  public Device clone(String uuid) {
+    Device newDevice = new Device(uuid, type);
+    newDevice.name = name;
+    newDevice.address = address;
+    newDevice.isAudio = isAudio;
+    newDevice.maxSize = maxSize;
+    newDevice.maxFps = maxFps;
+    newDevice.maxVideoBit = maxVideoBit;
+    newDevice.useH265 = useH265;
+    newDevice.connectOnStart = connectOnStart;
+    newDevice.customResolutionOnConnect = customResolutionOnConnect;
+    newDevice.wakeOnConnect = wakeOnConnect;
+    newDevice.lightOffOnConnect = lightOffOnConnect;
+    newDevice.showNavBarOnConnect = showNavBarOnConnect;
+    newDevice.changeToFullOnConnect = changeToFullOnConnect;
+    newDevice.keepWakeOnRunning = keepWakeOnRunning;
+    newDevice.changeResolutionOnRunning = changeResolutionOnRunning;
+    newDevice.smallToMiniOnRunning = smallToMiniOnRunning;
+    newDevice.fullToMiniOnRunning = fullToMiniOnRunning;
+    newDevice.miniTimeoutOnRunning = miniTimeoutOnRunning;
+    newDevice.lockOnClose = lockOnClose;
+    newDevice.lightOnClose = lightOnClose;
+    newDevice.reconnectOnClose = reconnectOnClose;
+
+    newDevice.customResolutionWidth = customResolutionWidth;
+    newDevice.customResolutionHeight = customResolutionHeight;
+    newDevice.smallX = smallX;
+    newDevice.smallY = smallY;
+    newDevice.smallLength = smallLength;
+    newDevice.miniY = miniY;
+    return newDevice;
+  }
 }
