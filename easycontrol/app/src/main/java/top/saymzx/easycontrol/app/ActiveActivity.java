@@ -20,6 +20,7 @@ public class ActiveActivity extends Activity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     ViewTools.setStatusAndNavBar(this);
     ViewTools.setLocale(this);
     activityActiveBinding = ActivityActiveBinding.inflate(this.getLayoutInflater());
@@ -29,7 +30,6 @@ public class ActiveActivity extends Activity {
     setButtonListener();
     // 绘制UI
     drawUi();
-    super.onCreate(savedInstanceState);
   }
 
   private void drawUi() {

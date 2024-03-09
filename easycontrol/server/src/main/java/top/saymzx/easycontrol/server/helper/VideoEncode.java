@@ -47,7 +47,6 @@ public final class VideoEncode {
   private static void createEncodecFormat() throws IOException {
     String codecMime = useH265 ? MediaFormat.MIMETYPE_VIDEO_HEVC : MediaFormat.MIMETYPE_VIDEO_AVC;
     encedec = MediaCodec.createEncoderByType(codecMime);
-
     encodecFormat = new MediaFormat();
     encodecFormat.setString(MediaFormat.KEY_MIME, codecMime);
     encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, Options.maxVideoBit);

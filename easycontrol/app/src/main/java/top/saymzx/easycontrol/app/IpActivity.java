@@ -20,6 +20,7 @@ public class IpActivity extends Activity {
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     ViewTools.setStatusAndNavBar(this);
     ViewTools.setLocale(this);
     activityIpBinding = ActivityIpBinding.inflate(this.getLayoutInflater());
@@ -27,7 +28,6 @@ public class IpActivity extends Activity {
     setButtonListener();
     // 绘制UI
     drawUi();
-    super.onCreate(savedInstanceState);
   }
 
   private void drawUi() {

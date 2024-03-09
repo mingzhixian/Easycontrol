@@ -32,6 +32,7 @@ public class DeviceDetailActivity extends Activity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     ViewTools.setStatusAndNavBar(this);
     ViewTools.setLocale(this);
     activityDeviceDetailBinding = ActivityDeviceDetailBinding.inflate(this.getLayoutInflater());
@@ -45,7 +46,6 @@ public class DeviceDetailActivity extends Activity {
     drawUI();
     // 设置监听
     setListener();
-    super.onCreate(savedInstanceState);
   }
 
   // 绘制UI
@@ -103,10 +103,14 @@ public class DeviceDetailActivity extends Activity {
     activityDeviceDetailBinding.buttonScan.setOnClickListener(v -> scanAddress());
     // 设置确认按钮监听
     activityDeviceDetailBinding.ok.setOnClickListener(v -> {
-      String name = String.valueOf(activityDeviceDetailBinding.address.getText());
-      if (name.equals("----") || name.equals("")) return;
-      device.name = String.valueOf(activityDeviceDetailBinding.name.getText());
-      device.address = String.valueOf(activityDeviceDetailBinding.address.getText());
+      String name = String.valueOf(activityDeviceDetailBinding.name.getText());
+      String address = String.valueOf(activityDeviceDetailBinding.address.getText());
+      if (name.equals("----") || name.equals("") || address.equals("")) {
+        Toast.makeText(this, getString(R.string.toast_config), Toast.LENGTH_SHORT).show();
+        return;
+      }
+      device.name = name;
+      device.address = device.isLinkDevice() ? device.uuid + (address.contains("#") ? ("#" + address.split("#")[1]) : "") : address;
       // 自定义分辨率
       String width = String.valueOf(activityDeviceDetailBinding.customResolutionWidth.getText());
       String height = String.valueOf(activityDeviceDetailBinding.customResolutionHeight.getText());

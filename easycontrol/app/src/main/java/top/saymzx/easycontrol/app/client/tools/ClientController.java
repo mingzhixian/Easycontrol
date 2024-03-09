@@ -246,7 +246,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   // 检查画面是否超出
   private void checkSizeAndSite() {
     // 碎碎念，感谢 波瑠卡 的关爱，今天一家四口一起去医院进年货去了，每人提了一袋子(´；ω；`)
-    AppData.uiHandler.post(smallView::checkSizeAndSite);
+    if (smallView != null) AppData.uiHandler.post(smallView::checkSizeAndSite);
   }
 
   // 设置视频区域触摸监听

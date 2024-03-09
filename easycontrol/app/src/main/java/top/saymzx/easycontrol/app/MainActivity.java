@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
   @SuppressLint("SourceLockedOrientationActivity")
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     AppData.init(this);
     ViewTools.setStatusAndNavBar(this);
     ViewTools.setLocale(this);
@@ -45,7 +46,6 @@ public class MainActivity extends Activity {
     // 检测权限
     if (!checkPermission()) createAlert();
     else startApp();
-    super.onCreate(savedInstanceState);
   }
 
   @Override

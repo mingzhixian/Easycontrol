@@ -65,6 +65,7 @@ public final class DisplayManager {
     }
   }
 
+  // 此处大量借鉴了 群友 @○_○ 所编写的易控车机版本相应功能
   public static VirtualDisplay createVirtualDisplay() throws Exception {
     DisplayInfo realDisplayinfo = getDisplayInfo(Display.DEFAULT_DISPLAY);
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {

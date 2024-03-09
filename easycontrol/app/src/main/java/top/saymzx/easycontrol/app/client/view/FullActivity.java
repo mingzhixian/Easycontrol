@@ -34,6 +34,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     ViewTools.setFullScreen(this);
     activityFullBinding = ActivityFullBinding.inflate(this.getLayoutInflater());
     setContentView(activityFullBinding.getRoot());
@@ -61,7 +62,6 @@ public class FullActivity extends Activity implements SensorEventListener {
     activityFullBinding.textureViewLayout.post(this::updateMaxSize);
     // 页面自动旋转
     AppData.sensorManager.registerListener(this, AppData.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-    super.onCreate(savedInstanceState);
   }
 
   @Override
@@ -105,24 +105,32 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   // 设置按钮监听
   private void setButtonListener() {
-    activityFullBinding.buttonRotate.setOnClickListener(v -> clientController.handleAction("buttonRotate", null, 0));
     activityFullBinding.buttonBack.setOnClickListener(v -> clientController.handleAction("buttonBack", null, 0));
     activityFullBinding.buttonHome.setOnClickListener(v -> clientController.handleAction("buttonHome", null, 0));
     activityFullBinding.buttonSwitch.setOnClickListener(v -> clientController.handleAction("buttonSwitch", null, 0));
-    activityFullBinding.buttonNavBar.setOnClickListener(v -> {
-      setNavBarHide(activityFullBinding.navBar.getVisibility() == View.GONE);
+    activityFullBinding.buttonApp.setOnClickListener(v -> {
+      clientController.handleAction("changeToApp", null, 0);
       changeBarView();
     });
     activityFullBinding.buttonMini.setOnClickListener(v -> clientController.handleAction("changeToMini", null, 0));
     activityFullBinding.buttonSmall.setOnClickListener(v -> clientController.handleAction("changeToSmall", null, 0));
     activityFullBinding.buttonClose.setOnClickListener(v -> Client.sendAction(device.uuid, "close", null, 0));
+    activityFullBinding.buttonRotate.setOnClickListener(v -> {
+      clientController.handleAction("buttonRotate", null, 0);
+      changeBarView();
+    });
+    activityFullBinding.buttonNavBar.setOnClickListener(v -> {
+      setNavBarHide(activityFullBinding.navBar.getVisibility() == View.GONE);
+      changeBarView();
+    });
+    activityFullBinding.buttonPower.setOnClickListener(v -> {
+      clientController.handleAction("buttonPower", null, 0);
+      changeBarView();
+    });
     activityFullBinding.buttonLight.setOnClickListener(v -> {
       light = !light;
       activityFullBinding.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
       clientController.handleAction(light ? "buttonLight" : "buttonLightOff", null, 0);
-    });
-    activityFullBinding.buttonPower.setOnClickListener(v -> {
-      clientController.handleAction("buttonPower", null, 0);
       changeBarView();
     });
     activityFullBinding.bar.setOnClickListener(v -> changeBarView());
@@ -130,11 +138,6 @@ public class FullActivity extends Activity implements SensorEventListener {
       autoRotate = !autoRotate;
       AppData.setting.setAutoRotate(autoRotate);
       activityFullBinding.buttonAutoRotate.setImageResource(autoRotate ? R.drawable.un_auto : R.drawable.auto);
-      changeBarView();
-    });
-    activityFullBinding.buttonApp.setOnClickListener(v -> {
-      clientController.handleAction("changeToApp", null, 0);
-      changeBarView();
     });
   }
 
@@ -147,7 +150,7 @@ public class FullActivity extends Activity implements SensorEventListener {
 
   private void changeBarView() {
     boolean toShowView = activityFullBinding.barView.getVisibility() == View.GONE;
-    ViewTools.viewAnim(activityFullBinding.barView, toShowView, 0, PublicTools.dp2px(-40f), (isStart -> {
+    ViewTools.viewAnim(activityFullBinding.barView, toShowView, PublicTools.dp2px(40f), 0, (isStart -> {
       if (isStart && toShowView) activityFullBinding.barView.setVisibility(View.VISIBLE);
       else if (!isStart && !toShowView) activityFullBinding.barView.setVisibility(View.GONE);
     }));

@@ -90,10 +90,10 @@ public class Adb {
     bufferStream.write(ByteBuffer.wrap(bytes));
     // 发送文件
     byte[] byteArray = new byte[10240 - 8];
-    int len = file.read(byteArray, 0, byteArray.length);
     int hasSendLen = 0;
     int allNeedSendLen = file.available();
     int lastProcess = 0;
+    int len = file.read(byteArray, 0, byteArray.length);
     do {
       bufferStream.write(AdbProtocol.generateSyncHeader("DATA", len));
       bufferStream.write(ByteBuffer.wrap(byteArray, 0, len));

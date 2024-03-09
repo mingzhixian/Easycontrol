@@ -162,28 +162,32 @@ public class SmallView extends ViewOutlineProvider {
 
   // 设置按钮监听
   private void setButtonListener() {
-    smallView.buttonRotate.setOnClickListener(v -> clientController.handleAction("buttonRotate", null, 0));
     smallView.buttonBack.setOnClickListener(v -> clientController.handleAction("buttonBack", null, 0));
     smallView.buttonHome.setOnClickListener(v -> clientController.handleAction("buttonHome", null, 0));
     smallView.buttonSwitch.setOnClickListener(v -> clientController.handleAction("buttonSwitch", null, 0));
-    smallView.buttonNavBar.setOnClickListener(v -> {
-      setNavBarHide(smallView.navBar.getVisibility() == View.GONE);
+    smallView.buttonApp.setOnClickListener(v -> {
+      clientController.handleAction("changeToApp", null, 0);
       changeBarView();
     });
     smallView.buttonMini.setOnClickListener(v -> clientController.handleAction("changeToMini", null, 0));
     smallView.buttonFull.setOnClickListener(v -> clientController.handleAction("changeToFull", null, 0));
     smallView.buttonClose.setOnClickListener(v -> Client.sendAction(device.uuid, "close", null, 0));
-    smallView.buttonLight.setOnClickListener(v -> {
-      light = !light;
-      smallView.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
-      clientController.handleAction(light ? "buttonLight" : "buttonLightOff", null, 0);
+    smallView.buttonRotate.setOnClickListener(v -> {
+      clientController.handleAction("buttonRotate", null, 0);
+      changeBarView();
+    });
+    smallView.buttonNavBar.setOnClickListener(v -> {
+      setNavBarHide(smallView.navBar.getVisibility() == View.GONE);
+      changeBarView();
     });
     smallView.buttonPower.setOnClickListener(v -> {
       clientController.handleAction("buttonPower", null, 0);
       changeBarView();
     });
-    smallView.buttonApp.setOnClickListener(v -> {
-      clientController.handleAction("changeToApp", null, 0);
+    smallView.buttonLight.setOnClickListener(v -> {
+      light = !light;
+      smallView.buttonLight.setImageResource(light ? R.drawable.lightbulb_off : R.drawable.lightbulb);
+      clientController.handleAction(light ? "buttonLight" : "buttonLightOff", null, 0);
       changeBarView();
     });
   }

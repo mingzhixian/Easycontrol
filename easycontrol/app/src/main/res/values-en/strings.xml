@@ -115,6 +115,7 @@
   <string name="toast_copy">Copied</string>
   <string name="toast_success">Success</string>
   <string name="toast_fail">Fail</string>
+  <string name="toast_config">Fill in the mismatch</string>
   <string name="toast_no_browser">No default browser</string>
   <string name="toast_address_error">Address format error</string>
   <string name="toast_timeout">Timeout</string>

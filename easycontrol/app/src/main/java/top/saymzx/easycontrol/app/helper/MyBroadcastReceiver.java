@@ -85,9 +85,9 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
         Device device = AppData.dbHelper.getByUUID(uuid);
         if (device == null) {
           device = new Device(uuid, Device.TYPE_LINK);
+          device.address = uuid;
           AppData.dbHelper.insert(device);
         }
-        device.address = uuid + (device.address.contains("#") ? device.address.split("#")[1] : "");
         AdbTools.usbDevicesList.put(uuid, usbDevice);
         break;
       }
