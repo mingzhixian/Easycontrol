@@ -40,16 +40,19 @@ public final class SurfaceControl {
 
   // 安卓14之后部分函数转移到了DisplayControl
   @SuppressLint({"PrivateApi", "SoonBlockedPrivateApi", "BlockedPrivateApi"})
-  private static void getMethodAndroid14() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Method createClassLoaderMethod = Class.forName("com.android.internal.os.ClassLoaderFactory").getDeclaredMethod("createClassLoader", String.class, String.class, String.class, ClassLoader.class, int.class, boolean.class, String.class);
-    ClassLoader classLoader = (ClassLoader) createClassLoaderMethod.invoke(null, "/system/framework/services.jar", null, null, ClassLoader.getSystemClassLoader(), 0, true, null);
-    Class<?> displayControlClass = classLoader.loadClass("com.android.server.display.DisplayControl");
-    Method loadMethod = Runtime.class.getDeclaredMethod("loadLibrary0", Class.class, String.class);
-    loadMethod.setAccessible(true);
+  private static void getMethodAndroid14() throws Exception {
+    Class<?> displayControlClass = null;
     try {
+      Method createClassLoaderMethod = Class.forName("com.android.internal.os.ClassLoaderFactory").getDeclaredMethod("createClassLoader", String.class, String.class, String.class, ClassLoader.class, int.class, boolean.class, String.class);
+      ClassLoader classLoader = (ClassLoader) createClassLoaderMethod.invoke(null, "/system/framework/services.jar", null, null, ClassLoader.getSystemClassLoader(), 0, true, null);
+      displayControlClass = classLoader.loadClass("com.android.server.display.DisplayControl");
+      Method loadMethod = Runtime.class.getDeclaredMethod("loadLibrary0", Class.class, String.class);
+      loadMethod.setAccessible(true);
+      if ((Build.BRAND.toLowerCase() + Build.MANUFACTURER.toLowerCase()).contains("honor")) throw new Exception("Honor device");
       loadMethod.invoke(Runtime.getRuntime(), displayControlClass, "android_servers");
     } catch (Throwable ignored) {
     }
+    if (displayControlClass == null) throw new Exception("Failed to load DisplayControl class");
     getPhysicalDisplayIdsMethod = displayControlClass.getMethod("getPhysicalDisplayIds");
     getPhysicalDisplayTokenMethod = displayControlClass.getMethod("getPhysicalDisplayToken", long.class);
   }
