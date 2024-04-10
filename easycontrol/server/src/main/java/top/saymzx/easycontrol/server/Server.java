@@ -119,7 +119,7 @@ public final class Server {
   }
 
   private static void connectClient() throws IOException {
-    try (ServerSocket serverSocket = new ServerSocket(25166)) {
+    try (ServerSocket serverSocket = new ServerSocket(Options.serverPort)) {
       mainSocket = serverSocket.accept();
       videoSocket = serverSocket.accept();
       mainOutputStream = mainSocket.getOutputStream();

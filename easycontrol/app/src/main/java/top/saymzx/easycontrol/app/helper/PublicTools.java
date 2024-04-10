@@ -38,51 +38,17 @@ public class PublicTools {
     return (int) (dp * getScreenSize().density);
   }
 
-  // 分离地址和端口号
-  public static Pair<String, Integer> getIpAndPort(String address) throws IOException {
-    // 如果包含应用名，则需要要分割出地址
-    if (address.contains("#")) address = address.split("#")[0];
-    String pattern;
-    int type;
-    // 特殊格式
+  // 解析地址
+  public static String getIp(String address) throws IOException {
     if (address.contains("*")) {
-      type = 2;
-      pattern = "(\\*.*?\\*.*):(\\d+)";
-    }
-    // IPv6
-    else if (address.contains("[")) {
-      type = 6;
-      pattern = "(\\[.*?]):(\\d+)";
-    }
-    // 域名
-    else if (Pattern.matches(".*[a-zA-Z].*", address)) {
-      type = 1;
-      pattern = "(.*?):(\\d+)";
-    }
-    // IPv4
-    else {
-      type = 4;
-      pattern = "(.*?):(\\d+)";
-    }
-    Matcher matcher = Pattern.compile(pattern).matcher(address);
-    if (!matcher.find()) throw new IOException(AppData.applicationContext.getString(R.string.toast_address_error));
-    String ip = matcher.group(1);
-    String port = matcher.group(2);
-    if (ip == null || port == null) throw new IOException(AppData.applicationContext.getString(R.string.toast_address_error));
-    // 特殊格式
-    if (type == 2) {
-      if (ip.equals("*gateway*")) ip = getGateway();
-      if (ip.contains("*netAddress*")) ip = ip.replace("*netAddress*", getNetAddress());
-    }
-    // 域名解析
-    else if (type == 1) {
-      ip = InetAddress.getByName(ip).getHostAddress();
-    }
-    return new Pair<>(ip, Integer.parseInt(port));
+      if (address.equals("*gateway*")) address = getGateway();
+      if (address.contains("*netAddress*")) address = address.replace("*netAddress*", getNetAddress());
+    } else address = InetAddress.getByName(address).getHostAddress();
+    return address;
   }
 
   // 获取IP地址
-  public static Pair<ArrayList<String>, ArrayList<String>> getIp() {
+  public static Pair<ArrayList<String>, ArrayList<String>> getLocalIp() {
     ArrayList<String> ipv4Addresses = new ArrayList<>();
     ArrayList<String> ipv6Addresses = new ArrayList<>();
     try {
@@ -209,7 +175,7 @@ public class PublicTools {
   public static ArrayList<String> scanAddress() {
     ArrayList<String> scannedAddresses = new ArrayList<>();
     ExecutorService executor = Executors.newFixedThreadPool(256);
-    ArrayList<String> ipv4List = getIp().first;
+    ArrayList<String> ipv4List = getLocalIp().first;
     for (String ipv4 : ipv4List) {
       Matcher matcher = Pattern.compile("(\\d+\\.\\d+\\.\\d+)").matcher(ipv4);
       if (matcher.find()) {
@@ -222,7 +188,7 @@ public class PublicTools {
               socket.connect(new InetSocketAddress(host, 5555), 800);
               socket.close();
               // 标注本机
-              scannedAddresses.add(host + ":5555" + (host.equals(ipv4) ? " (" + AppData.applicationContext.getString(R.string.main_scan_device_local) + ")" : ""));
+              scannedAddresses.add(host + (host.equals(ipv4) ? " (" + AppData.applicationContext.getString(R.string.main_scan_device_local) + ")" : ""));
             } catch (Exception ignored) {
             }
           });

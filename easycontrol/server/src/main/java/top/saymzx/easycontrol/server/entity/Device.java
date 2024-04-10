@@ -53,7 +53,7 @@ public final class Device {
     // 旋转监听
     setRotationListener();
     // 剪切板监听
-    setClipBoardListener();
+    if (Options.listenerClip) setClipBoardListener();
     // 设置不息屏
     if (Options.keepAwake) setKeepScreenLight();
   }
@@ -173,7 +173,7 @@ public final class Device {
 
   private static String nowClipboardText = "";
 
-  private static void setClipBoardListener() {
+  public static void setClipBoardListener() {
     ClipboardManager.addPrimaryClipChangedListener(new IOnPrimaryClipChangedListener.Stub() {
       public void dispatchPrimaryClipChanged() {
         String newClipboardText = ClipboardManager.getText();
@@ -272,7 +272,7 @@ public final class Device {
 
   public static void rotateDevice() {
     boolean accelerometerRotation = !WindowManager.isRotationFrozen(displayId);
-    WindowManager.freezeRotation((displayInfo.rotation == 0 || displayInfo.rotation == 3 )? 1 : 0, displayId);
+    WindowManager.freezeRotation((displayInfo.rotation == 0 || displayInfo.rotation == 3) ? 1 : 0, displayId);
     if (accelerometerRotation) WindowManager.thawRotation(displayId);
   }
 

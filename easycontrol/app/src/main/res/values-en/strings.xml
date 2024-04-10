@@ -47,9 +47,13 @@
   <string name="device_uuid">Touch to copy ID</string>
   <string name="device_name">Name</string>
   <string name="device_name_hint">Can NOT be empty</string>
-  <string name="device_address">Address:Port</string>
+  <string name="device_address">Address</string>
   <string name="device_scan_device_list">Find the following address (click to populate)</string>
   <string name="device_address_hint">IPv4/v6 addresses or domain</string>
+  <string name="device_start_app">Just One App</string>
+  <string name="device_start_app_hint">If empty, will cast a screen.</string>
+  <string name="device_adb_port">ADB Port</string>
+  <string name="device_server_port">Server Port</string>
 
   <string name="device_on_connect">Set action on connect</string>
   <string name="device_custom_resolution_on_connect">Change the resolution on connect</string>
@@ -74,6 +78,8 @@
   <string name="device_full_to_mini_on_running_detail">When fullscreen not manually exits,auto minimize it. Default behavour is switching to floating window mode.</string>
   <string name="device_mini_timeout_on_running">Auto reset mode when hanged</string>
   <string name="device_mini_timeout_on_running_detail">When auto hang is triggered, if users are not responding with in 5 secs, reset control mode.</string>
+  <string name="device_listen_clip_on_running">Listen clipboard</string>
+  <string name="device_listen_clip_on_running_detail">Listen and sync clipboard</string>
 
   <string name="device_on_close">Set action on close</string>
   <string name="device_lock_on_close">Lock</string>
@@ -121,5 +127,6 @@
   <string name="toast_timeout">Timeout</string>
   <string name="toast_connect_server">Failed to connect</string>
   <string name="toast_stream_closed">Disconnected</string>
+  <string name="toast_float_per">Need floating window permission</string>
 
 </resources>

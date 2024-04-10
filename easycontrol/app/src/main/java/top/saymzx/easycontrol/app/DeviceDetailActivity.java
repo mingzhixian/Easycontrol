@@ -62,6 +62,9 @@ public class DeviceDetailActivity extends Activity {
     // 预填写参数
     activityDeviceDetailBinding.name.setText(device.name);
     activityDeviceDetailBinding.address.setText(device.address);
+    activityDeviceDetailBinding.startApp.setText(device.startApp);
+    activityDeviceDetailBinding.adbPort.setText(String.valueOf(device.adbPort));
+    activityDeviceDetailBinding.serverPort.setText(String.valueOf(device.serverPort));
     activityDeviceDetailBinding.customResolution.setVisibility(device.customResolutionOnConnect ? View.VISIBLE : View.GONE);
     activityDeviceDetailBinding.customResolutionWidth.setText(String.valueOf(device.customResolutionWidth));
     activityDeviceDetailBinding.customResolutionHeight.setText(String.valueOf(device.customResolutionHeight));
@@ -74,6 +77,7 @@ public class DeviceDetailActivity extends Activity {
     activityDeviceDetailBinding.layoutOnConnectSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_change_to_full_on_connect), getString(R.string.device_change_to_full_on_connect_detail), device.changeToFullOnConnect, isChecked -> device.changeToFullOnConnect = isChecked).getRoot());
     // 运行时操作
     activityDeviceDetailBinding.layoutOnRunning.setOnClickListener(v -> activityDeviceDetailBinding.layoutOnRunningSub.setVisibility(activityDeviceDetailBinding.layoutOnRunningSub.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
+    activityDeviceDetailBinding.layoutOnRunningSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_listen_clip_on_running), getString(R.string.device_listen_clip_on_running_detail), device.listenClip, isChecked -> device.listenClip = isChecked).getRoot());
     activityDeviceDetailBinding.layoutOnRunningSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_keep_wake_on_running), getString(R.string.device_keep_wake_on_running_detail), device.keepWakeOnRunning, isChecked -> device.keepWakeOnRunning = isChecked).getRoot());
     activityDeviceDetailBinding.layoutOnRunningSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_change_resolution_on_running), getString(R.string.device_change_resolution_on_running_detail), device.changeResolutionOnRunning, isChecked -> device.changeResolutionOnRunning = isChecked).getRoot());
     activityDeviceDetailBinding.layoutOnRunningSub.addView(ViewTools.createSwitchCard(this, getString(R.string.device_small_to_mini_on_running), getString(R.string.device_small_to_mini_on_running_detail), device.smallToMiniOnRunning, isChecked -> device.smallToMiniOnRunning = isChecked).getRoot());
@@ -110,7 +114,10 @@ public class DeviceDetailActivity extends Activity {
         return;
       }
       device.name = name;
-      device.address = device.isLinkDevice() ? device.uuid + (address.contains("#") ? ("#" + address.split("#")[1]) : "") : address;
+      device.address = device.isLinkDevice() ? device.uuid : address;
+      device.startApp = String.valueOf(activityDeviceDetailBinding.startApp.getText());
+      device.adbPort = Integer.parseInt(String.valueOf(activityDeviceDetailBinding.adbPort.getText()));
+      device.serverPort = Integer.parseInt(String.valueOf(activityDeviceDetailBinding.serverPort.getText()));
       // 自定义分辨率
       String width = String.valueOf(activityDeviceDetailBinding.customResolutionWidth.getText());
       String height = String.valueOf(activityDeviceDetailBinding.customResolutionHeight.getText());

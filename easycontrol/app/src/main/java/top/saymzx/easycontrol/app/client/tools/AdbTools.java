@@ -1,7 +1,6 @@
 package top.saymzx.easycontrol.app.client.tools;
 
 import android.hardware.usb.UsbDevice;
-import android.util.Log;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -22,14 +21,12 @@ public class AdbTools {
 
   // 连接ADB
   public static Adb connectADB(Device device) throws Exception {
-    String address = device.address;
-    // 如果包含应用名，则需要要分割出地址
-    if (address.contains("#")) address = address.split("#")[0];
-    Adb adb = allAdbConnect.get(address);
+    String addressId = device.isLinkDevice() ? device.uuid : device.address + ":" + device.adbPort;
+    Adb adb = allAdbConnect.get(addressId);
     if (adb == null || adb.isClosed()) {
-      if (device.isLinkDevice()) adb = new Adb(usbDevicesList.get(address), AppData.keyPair);
-      else adb = new Adb(PublicTools.getIpAndPort(address), AppData.keyPair);
-      allAdbConnect.put(address, adb);
+      if (device.isLinkDevice()) adb = new Adb(usbDevicesList.get(addressId), AppData.keyPair);
+      else adb = new Adb(PublicTools.getIp(device.address), device.adbPort, AppData.keyPair);
+      allAdbConnect.put(addressId, adb);
     }
     return adb;
   }

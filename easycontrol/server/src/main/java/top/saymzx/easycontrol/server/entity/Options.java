@@ -4,6 +4,8 @@
 package top.saymzx.easycontrol.server.entity;
 
 public final class Options {
+  public static int serverPort=25166;
+  public static boolean listenerClip=true;
   public static boolean isAudio = true;
   public static int maxSize = 1600;
   public static int maxVideoBit = 4000000;
@@ -20,6 +22,12 @@ public final class Options {
       String key = arg.substring(0, equalIndex);
       String value = arg.substring(equalIndex + 1);
       switch (key) {
+        case "serverPort":
+          serverPort = Integer.parseInt(value);
+          break;
+        case "listenerClip":
+          listenerClip = Integer.parseInt(value) == 1;
+          break;
         case "isAudio":
           isAudio = Integer.parseInt(value) == 1;
           break;

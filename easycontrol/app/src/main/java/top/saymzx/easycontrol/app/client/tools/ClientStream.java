@@ -70,8 +70,9 @@ public class ClientStream {
       adb.pushFile(AppData.applicationContext.getResources().openRawResource(R.raw.easycontrol_server), serverName, null);
     }
     shell = adb.getShell();
-    String startApp = device.address.contains("#") ? device.address.split("#")[1] : "";
     shell.write(ByteBuffer.wrap(("app_process -Djava.class.path=" + serverName + " / top.saymzx.easycontrol.server.Server"
+      + " serverPort=" + device.serverPort
+      + " listenClip=" + (device.listenClip ? 1 : 0)
       + " isAudio=" + (device.isAudio ? 1 : 0)
       + " maxSize=" + device.maxSize
       + " maxFps=" + device.maxFps
@@ -79,7 +80,7 @@ public class ClientStream {
       + " keepAwake=" + (device.keepWakeOnRunning ? 1 : 0)
       + " supportH265=" + ((device.useH265 && supportH265) ? 1 : 0)
       + " supportOpus=" + (supportOpus ? 1 : 0)
-      + " startApp=" + startApp + " \n").getBytes()));
+      + " startApp=" + device.startApp + " \n").getBytes()));
   }
 
   // 连接Server
@@ -89,19 +90,16 @@ public class ClientStream {
     if (!device.isLinkDevice()) {
       long startTime = System.currentTimeMillis();
       boolean mainConn = false;
-      String address = device.address;
-      // 如果包含应用名，则需要要分割出地址
-      if (address.contains("#")) address = address.split("#")[0];
-      InetSocketAddress inetSocketAddress = new InetSocketAddress(PublicTools.getIpAndPort(address).first, 25166);
+      InetSocketAddress inetSocketAddress = new InetSocketAddress(PublicTools.getIp(device.address), device.serverPort);
       for (int i = 0; i < reTry; i++) {
         try {
           if (!mainConn) {
             mainSocket = new Socket();
-            mainSocket.connect(inetSocketAddress, 1000);
+            mainSocket.connect(inetSocketAddress, 5000);
             mainConn = true;
           }
           videoSocket = new Socket();
-          videoSocket.connect(inetSocketAddress, 1000);
+          videoSocket.connect(inetSocketAddress, 3000);
           mainOutputStream = mainSocket.getOutputStream();
           mainDataInputStream = new DataInputStream(mainSocket.getInputStream());
           videoDataInputStream = new DataInputStream(videoSocket.getInputStream());
@@ -111,7 +109,7 @@ public class ClientStream {
           if (mainSocket != null) mainSocket.close();
           if (videoSocket != null) videoSocket.close();
           // 如果超时，直接跳出循环
-          if (System.currentTimeMillis() - startTime >= 5000) i = reTry;
+          if (System.currentTimeMillis() - startTime >= 4000) i = reTry;
           else Thread.sleep(50);
         }
       }
@@ -119,9 +117,9 @@ public class ClientStream {
     // 直连失败尝试ADB中转
     for (int i = 0; i < reTry; i++) {
       try {
-        if (mainBufferStream == null) mainBufferStream = adb.tcpForward(25166);
+        if (mainBufferStream == null) mainBufferStream = adb.tcpForward(device.serverPort);
         // 为了减少adb同步阻塞的问题，此处分开音视频流
-        if (videoBufferStream == null) videoBufferStream = adb.tcpForward(25166);
+        if (videoBufferStream == null) videoBufferStream = adb.tcpForward(device.serverPort);
         return;
       } catch (Exception ignored) {
         Thread.sleep(50);

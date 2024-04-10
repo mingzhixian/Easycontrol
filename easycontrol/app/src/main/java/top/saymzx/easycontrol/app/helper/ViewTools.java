@@ -41,12 +41,6 @@ public class ViewTools {
         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    // 设置异形屏
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      WindowManager.LayoutParams lp = context.getWindow().getAttributes();
-      lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-      context.getWindow().setAttributes(lp);
-    }
   }
 
   // 设置语言
@@ -70,6 +64,12 @@ public class ViewTools {
     context.getWindow().setStatusBarColor(context.getResources().getColor(R.color.background));
     if ((context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES)
       context.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    // 设置异形屏
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      WindowManager.LayoutParams lp = context.getWindow().getAttributes();
+      lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+      context.getWindow().setAttributes(lp);
+    }
   }
 
   // 创建弹窗

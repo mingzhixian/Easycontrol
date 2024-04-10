@@ -1,6 +1,7 @@
 package top.saymzx.easycontrol.app.helper;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
+import android.util.Log;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -22,6 +24,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class MyBroadcastReceiver extends BroadcastReceiver {
 
   public static final String ACTION_UPDATE_USB = "top.saymzx.easycontrol.app.UPDATE_USB";
+  private static final String ACTION_USB_PERMISSION = "top.saymzx.easycontrol.app.USB_PERMISSION";
   public static final String ACTION_UPDATE_DEVICE_LIST = "top.saymzx.easycontrol.app.UPDATE_DEVICE_LIST";
   public static final String ACTION_CONTROL = "top.saymzx.easycontrol.app.CONTROL";
   private static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
@@ -32,7 +35,9 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   @SuppressLint("UnspecifiedRegisterReceiverFlag")
   public void register(Context context) {
     IntentFilter filter = new IntentFilter();
+    filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
     filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+    filter.addAction(ACTION_USB_PERMISSION);
     filter.addAction(ACTION_UPDATE_USB);
     filter.addAction(ACTION_UPDATE_DEVICE_LIST);
     filter.addAction(ACTION_CONTROL);
@@ -48,11 +53,13 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
-    if (ACTION_UPDATE_USB.equals(action) || UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) updateUSB();
+    if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) onConnectUsb(context, intent);
+    else if (ACTION_UPDATE_USB.equals(action) || ACTION_USB_PERMISSION.equals(action) || UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) updateUSB();
     else if (ACTION_SCREEN_OFF.equals(action)) handleScreenOff();
     else if (ACTION_UPDATE_DEVICE_LIST.equals(action)) deviceListAdapter.update();
     else if (ACTION_CONTROL.equals(action)) handleControl(intent);
   }
+
 
   public void setDeviceListAdapter(DeviceListAdapter deviceListAdapter) {
     this.deviceListAdapter = deviceListAdapter;
@@ -73,6 +80,14 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     } else Client.sendAction(uuid, action, null, 0);
   }
 
+  // 请求USB设备权限
+  private void onConnectUsb(Context context, Intent intent) {
+    UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+    if (usbDevice == null || AppData.usbManager == null) return;
+    @SuppressLint("MutableImplicitPendingIntent") PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
+    AppData.usbManager.requestPermission(usbDevice, permissionIntent);
+  }
+
   public synchronized void updateUSB() {
     if (AppData.usbManager == null) return;
     AdbTools.usbDevicesList.clear();
@@ -89,7 +104,6 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
           AppData.dbHelper.insert(device);
         }
         AdbTools.usbDevicesList.put(uuid, usbDevice);
-        break;
       }
     }
     deviceListAdapter.update();

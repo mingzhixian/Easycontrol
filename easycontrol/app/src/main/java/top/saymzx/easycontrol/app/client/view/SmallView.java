@@ -16,6 +16,7 @@ import android.view.ViewOutlineProvider;
 import android.view.WindowManager;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -74,7 +75,7 @@ public class SmallView extends ViewOutlineProvider {
     smallViewParams.x = device.smallX;
     smallViewParams.y = device.smallY;
     updateMaxSize(device.smallLength, device.smallLength);
-    if (device.address.contains("#")) {
+    if (!Objects.equals(device.startApp, "")) {
       smallView.buttonHome.setVisibility(View.GONE);
       smallView.buttonSwitch.setVisibility(View.GONE);
       smallView.buttonApp.setVisibility(View.GONE);

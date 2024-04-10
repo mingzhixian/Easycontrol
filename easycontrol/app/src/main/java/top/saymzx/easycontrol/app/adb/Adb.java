@@ -23,8 +23,8 @@ public class Adb {
 
   private final Thread handleInThread = new Thread(this::handleIn);
 
-  public Adb(Pair<String, Integer> address, AdbKeyPair keyPair) throws Exception {
-    channel = new TcpChannel(address.first, address.second);
+  public Adb(String address,int port, AdbKeyPair keyPair) throws Exception {
+    channel = new TcpChannel(address, port);
     connect(keyPair);
   }
 

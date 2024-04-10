@@ -14,7 +14,7 @@ import top.saymzx.easycontrol.app.entity.Device;
 public class DbHelper extends SQLiteOpenHelper {
 
   private static final String dataBaseName = "app.db";
-  private static final int version = 17;
+  private static final int version = 19;
   private final String tableName = "DevicesDb";
 
   public DbHelper(Context context) {
@@ -29,6 +29,10 @@ public class DbHelper extends SQLiteOpenHelper {
     stringBuilder.append("type integer,");
     stringBuilder.append("name text,");
     stringBuilder.append("address text,");
+    stringBuilder.append("startApp text,");
+    stringBuilder.append("adbPort integer,");
+    stringBuilder.append("serverPort integer,");
+    stringBuilder.append("listenClip integer,");
     stringBuilder.append("isAudio integer,");
     stringBuilder.append("maxSize integer,");
     stringBuilder.append("maxFps integer,");
@@ -119,7 +123,11 @@ public class DbHelper extends SQLiteOpenHelper {
     values.put("type", device.type);
     values.put("name", device.name);
     values.put("address", device.address);
-    values.put("isAudio", device.isAudio);
+    values.put("startApp", device.startApp);
+    values.put("adbPort", device.adbPort);
+    values.put("serverPort", device.serverPort);
+    values.put("listenClip", device.listenClip ? 1 : 0);
+    values.put("isAudio", device.isAudio ? 1 : 0);
     values.put("maxSize", device.maxSize);
     values.put("maxFps", device.maxFps);
     values.put("maxVideoBit", device.maxVideoBit);
@@ -158,6 +166,22 @@ public class DbHelper extends SQLiteOpenHelper {
         }
         case "address": {
           device.address = cursor.getString(i);
+          break;
+        }
+        case "startApp": {
+          device.startApp = cursor.getString(i);
+          break;
+        }
+        case "adbPort": {
+          device.adbPort = cursor.getInt(i);
+          break;
+        }
+        case "serverPort": {
+          device.serverPort = cursor.getInt(i);
+          break;
+        }
+        case "listenClip": {
+          device.listenClip = cursor.getInt(i) == 1;
           break;
         }
         case "isAudio": {

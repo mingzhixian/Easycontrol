@@ -46,7 +46,10 @@ public final class SurfaceControl {
     Class<?> displayControlClass = classLoader.loadClass("com.android.server.display.DisplayControl");
     Method loadMethod = Runtime.class.getDeclaredMethod("loadLibrary0", Class.class, String.class);
     loadMethod.setAccessible(true);
-    loadMethod.invoke(Runtime.getRuntime(), displayControlClass, "android_servers");
+    try {
+      loadMethod.invoke(Runtime.getRuntime(), displayControlClass, "android_servers");
+    } catch (Throwable ignored) {
+    }
     getPhysicalDisplayIdsMethod = displayControlClass.getMethod("getPhysicalDisplayIds");
     getPhysicalDisplayTokenMethod = displayControlClass.getMethod("getPhysicalDisplayToken", long.class);
   }

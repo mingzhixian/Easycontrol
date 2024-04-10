@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@color/background">
 
-  <ImageView
-    android:layout_width="match_parent"
+  <FrameLayout
+    android:layout_width="0dp"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:alpha="0.5"
-    android:padding="15dp"
-    android:scaleType="fitEnd"
-    android:src="@drawable/main_background" />
+    android:layout_weight="4">
 
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    <ImageView
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_gravity="center"
+      android:alpha="0.5"
+      android:padding="15dp"
+      android:scaleType="fitEnd"
+      android:src="@drawable/main_background" />
 
     <LinearLayout
       android:layout_width="match_parent"
@@ -63,28 +63,33 @@
 
     </LinearLayout>
 
+    <ImageView
+      android:id="@+id/button_add"
+      android:layout_width="60dp"
+      android:layout_height="60dp"
+      android:layout_gravity="center_horizontal|bottom"
+      android:layout_marginBottom="40dp"
+      android:background="@drawable/background_round"
+      android:backgroundTint="@color/button"
+      android:elevation="8dp"
+      android:padding="18dp"
+      android:src="@drawable/plus"
+      android:tint="@color/onButton" />
+  </FrameLayout>
+
+  <FrameLayout
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="5">
+
     <ListView
       android:id="@+id/devices_list"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout_marginTop="6dp"
       android:divider="#00000000"
       android:dividerHeight="14dp"
-      android:padding="15dp"
+      android:padding="10dp"
       tools:listitem="@layout/item_devices_item" />
+  </FrameLayout>
 
-  </LinearLayout>
-
-  <ImageView
-    android:id="@+id/button_add"
-    android:layout_width="60dp"
-    android:layout_height="60dp"
-    android:layout_gravity="center_horizontal|bottom"
-    android:layout_marginBottom="40dp"
-    android:background="@drawable/background_round"
-    android:backgroundTint="@color/button"
-    android:elevation="8dp"
-    android:padding="18dp"
-    android:src="@drawable/plus"
-    android:tint="@color/onButton" />
-</FrameLayout>
+</LinearLayout>

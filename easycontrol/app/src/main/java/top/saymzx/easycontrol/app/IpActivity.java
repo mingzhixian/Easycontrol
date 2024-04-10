@@ -32,7 +32,7 @@ public class IpActivity extends Activity {
 
   private void drawUi() {
     // 添加IP
-    Pair<ArrayList<String>, ArrayList<String>> listPair = PublicTools.getIp();
+    Pair<ArrayList<String>, ArrayList<String>> listPair = PublicTools.getLocalIp();
     for (String i : listPair.first) {
       ItemTextBinding text = ViewTools.createTextCard(this, i, () -> {
         AppData.clipBoard.setPrimaryClip(ClipData.newPlainText(ClipDescription.MIMETYPE_TEXT_PLAIN, i));

@@ -19,6 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -66,7 +67,6 @@
           android:textColorHint="@color/onCardBackgroundSecond"
           android:textSize="@dimen/smallFont" />
 
-
         <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
@@ -110,11 +110,83 @@
           android:id="@+id/address"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]-.:*#"
+          android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]-.:*"
           android:hint="@string/device_address_hint"
           android:textColor="@color/onCardBackground"
           android:textColorHint="@color/onCardBackgroundSecond"
           android:textSize="@dimen/smallFont" />
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/device_start_app"
+          android:textColor="@color/onCardBackground"
+          android:textSize="@dimen/middleFont" />
+
+        <EditText
+          android:id="@+id/start_app"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/device_start_app_hint"
+          android:textColor="@color/onCardBackground"
+          android:textColorHint="@color/onCardBackgroundSecond"
+          android:textSize="@dimen/smallFont" />
+
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:orientation="horizontal">
+
+          <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text="@string/device_adb_port"
+              android:textColor="@color/onCardBackground"
+              android:textSize="@dimen/middleFont" />
+
+            <EditText
+              android:id="@+id/adb_port"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:digits="0123456789"
+              android:text="5555"
+              android:textColor="@color/onCardBackground"
+              android:textColorHint="@color/onCardBackgroundSecond"
+              android:textSize="@dimen/smallFont" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text="@string/device_server_port"
+              android:textColor="@color/onCardBackground"
+              android:textSize="@dimen/middleFont" />
+
+            <EditText
+              android:id="@+id/server_port"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:digits="0123456789"
+              android:text="25166"
+              android:textColor="@color/onCardBackground"
+              android:textColorHint="@color/onCardBackgroundSecond"
+              android:textSize="@dimen/smallFont" />
+          </LinearLayout>
+        </LinearLayout>
+
       </LinearLayout>
 
       <LinearLayout

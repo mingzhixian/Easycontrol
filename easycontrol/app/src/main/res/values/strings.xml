@@ -48,9 +48,13 @@
   <string name="device_uuid">点击复制设备ID</string>
   <string name="device_name">设备名称</string>
   <string name="device_name_hint">不可为空</string>
-  <string name="device_address">地址:端口号</string>
+  <string name="device_address">地址</string>
   <string name="device_scan_device_list">找到以下地址(点击填充)</string>
   <string name="device_address_hint">支持IPv4/v6地址、域名</string>
+  <string name="device_start_app">单应用投屏</string>
+  <string name="device_start_app_hint">为空则镜像投屏</string>
+  <string name="device_adb_port">ADB 端口</string>
+  <string name="device_server_port">服务端口</string>
 
   <string name="device_on_connect">连接时操作</string>
   <string name="device_custom_resolution_on_connect">连接时修改分辨率</string>
@@ -75,6 +79,8 @@
   <string name="device_full_to_mini_on_running_detail">非手动操作退出全屏时，挂起为Mini栏，默认为挂起为小窗</string>
   <string name="device_mini_timeout_on_running">挂起后自动恢复</string>
   <string name="device_mini_timeout_on_running_detail">在触发自动挂起后5秒内无操作自动恢复为原模式</string>
+  <string name="device_listen_clip_on_running">监听剪切板</string>
+  <string name="device_listen_clip_on_running_detail">运行时同步剪切板</string>
 
   <string name="device_on_close">断开时操作</string>
   <string name="device_lock_on_close">断开时锁定</string>
@@ -122,5 +128,6 @@
   <string name="toast_timeout">超时</string>
   <string name="toast_connect_server">连接被控端失败</string>
   <string name="toast_stream_closed">连接断开</string>
+  <string name="toast_float_per">需要悬浮窗权限</string>
 
 </resources>
