@@ -48,7 +48,7 @@ public final class SurfaceControl {
       displayControlClass = classLoader.loadClass("com.android.server.display.DisplayControl");
       Method loadMethod = Runtime.class.getDeclaredMethod("loadLibrary0", Class.class, String.class);
       loadMethod.setAccessible(true);
-      if ((Build.BRAND.toLowerCase() + Build.MANUFACTURER.toLowerCase()).contains("honor")) throw new Exception("Honor device");
+//      if ((Build.BRAND.toLowerCase() + Build.MANUFACTURER.toLowerCase()).contains("honor")) throw new Exception("Honor device");
       loadMethod.invoke(Runtime.getRuntime(), displayControlClass, "android_servers");
     } catch (Throwable ignored) {
     }
