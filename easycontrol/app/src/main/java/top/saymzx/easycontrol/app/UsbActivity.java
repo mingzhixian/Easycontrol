@@ -16,10 +16,12 @@ public class UsbActivity extends Activity {
     super.onCreate(savedInstanceState);
     SharedPreferences sharedPreferences = this.getSharedPreferences("setting", Context.MODE_PRIVATE);
     if (sharedPreferences.getBoolean("isActive", false)) {
-      Intent intent = new Intent();
-      intent.setAction(MyBroadcastReceiver.ACTION_UPDATE_USB);
-      sendBroadcast(intent);
       if (AppData.mainActivity == null) startActivity(new Intent(this, MainActivity.class));
+      else {
+        Intent intent = new Intent();
+        intent.setAction(MyBroadcastReceiver.ACTION_UPDATE_USB);
+        sendBroadcast(intent);
+      }
     }
     finish();
   }

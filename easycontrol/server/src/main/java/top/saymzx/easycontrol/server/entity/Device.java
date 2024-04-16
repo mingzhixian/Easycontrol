@@ -237,8 +237,7 @@ public final class Device {
     try {
       if (displayId != Display.DEFAULT_DISPLAY) InputManager.setDisplayId(inputEvent, displayId);
       InputManager.injectInputEvent(inputEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    } catch (Exception e) {
-      System.out.println(e.toString());
+    } catch (Exception ignored) {
     }
   }
 
@@ -272,7 +271,7 @@ public final class Device {
 
   public static void rotateDevice() {
     boolean accelerometerRotation = !WindowManager.isRotationFrozen(displayId);
-    WindowManager.freezeRotation((displayInfo.rotation == 0 || displayInfo.rotation == 3) ? 1 : 0, displayId);
+    WindowManager.freezeRotation(displayId, (displayInfo.rotation == 0 || displayInfo.rotation == 3) ? 1 : 0);
     if (accelerometerRotation) WindowManager.thawRotation(displayId);
   }
 

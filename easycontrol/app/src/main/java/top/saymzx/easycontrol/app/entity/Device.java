@@ -37,6 +37,9 @@ public class Device {
   public int smallX = 200;
   public int smallY = 200;
   public int smallLength = 800;
+  public int smallXLan = 200;
+  public int smallYLan = 200;
+  public int smallLengthLan = 800;
   public int miniY = 200;
 
   public Device(String uuid, int type) {
@@ -90,6 +93,9 @@ public class Device {
     newDevice.smallX = smallX;
     newDevice.smallY = smallY;
     newDevice.smallLength = smallLength;
+    newDevice.smallXLan = smallXLan;
+    newDevice.smallYLan = smallYLan;
+    newDevice.smallLengthLan = smallLengthLan;
     newDevice.miniY = miniY;
     return newDevice;
   }

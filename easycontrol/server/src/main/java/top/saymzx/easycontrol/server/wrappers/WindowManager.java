@@ -4,6 +4,7 @@
 package top.saymzx.easycontrol.server.wrappers;
 
 import android.os.IInterface;
+import android.view.Display;
 import android.view.IRotationWatcher;
 
 import java.lang.reflect.Method;
@@ -40,27 +41,39 @@ public final class WindowManager {
 
   public static void freezeRotation(int displayId, int rotation) {
     try {
-      if (freezeDisplayRotationMethod != null) freezeDisplayRotationMethod.invoke(manager, displayId, rotation);
-      else if (freezeRotationMethod != null) freezeRotationMethod.invoke(manager, rotation);
+      if (freezeDisplayRotationMethod == null) throw new Exception("no display");
+      freezeDisplayRotationMethod.invoke(manager, displayId, rotation);
     } catch (Exception ignored) {
+      try {
+        if (freezeRotationMethod != null && displayId == Display.DEFAULT_DISPLAY) freezeRotationMethod.invoke(manager, rotation);
+      } catch (Exception ignored1) {
+      }
     }
   }
 
   public static boolean isRotationFrozen(int displayId) {
     try {
-      if (isDisplayRotationFrozenMethod != null) return (boolean) isDisplayRotationFrozenMethod.invoke(manager, displayId);
-      else if (isRotationFrozenMethod != null) return (boolean) isRotationFrozenMethod.invoke(manager);
-      return false;
+      if (isDisplayRotationFrozenMethod != null) throw new Exception("no display");
+      return (boolean) isDisplayRotationFrozenMethod.invoke(manager, displayId);
     } catch (Exception ignored) {
-      return false;
+      try {
+        if (isRotationFrozenMethod != null && displayId == Display.DEFAULT_DISPLAY) return (boolean) isRotationFrozenMethod.invoke(manager);
+        return false;
+      } catch (Exception ignored1) {
+        return false;
+      }
     }
   }
 
   public static void thawRotation(int displayId) {
     try {
-      if (thawDisplayRotationMethod != null) thawDisplayRotationMethod.invoke(manager, displayId);
-      else if (thawRotationMethod != null) thawRotationMethod.invoke(manager);
+      if (thawDisplayRotationMethod != null) throw new Exception("no display");
+      thawDisplayRotationMethod.invoke(manager, displayId);
     } catch (Exception ignored) {
+      try {
+        if (thawRotationMethod != null && displayId == Display.DEFAULT_DISPLAY) thawRotationMethod.invoke(manager);
+      } catch (Exception ignored1) {
+      }
     }
   }
 

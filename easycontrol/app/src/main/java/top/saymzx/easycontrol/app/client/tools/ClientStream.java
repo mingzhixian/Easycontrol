@@ -34,11 +34,13 @@ public class ClientStream {
   private static final boolean supportH265 = DecodecTools.isSupportH265();
   private static final boolean supportOpus = DecodecTools.isSupportOpus();
 
+  private static final int timeoutDelay = 1000 * 15;
+
   public ClientStream(Device device, MyInterface.MyFunctionBoolean handle) {
     // 超时
     Thread timeOutThread = new Thread(() -> {
       try {
-        Thread.sleep(5 * 1000);
+        Thread.sleep(timeoutDelay);
         PublicTools.logToast("stream", AppData.applicationContext.getString(R.string.toast_timeout), true);
         handle.run(false);
         if (connectThread != null) connectThread.interrupt();
@@ -87,6 +89,7 @@ public class ClientStream {
   private void connectServer(Device device) throws Exception {
     Thread.sleep(50);
     int reTry = 40;
+    int reTryTime = timeoutDelay / reTry;
     if (!device.isLinkDevice()) {
       long startTime = System.currentTimeMillis();
       boolean mainConn = false;
@@ -95,11 +98,11 @@ public class ClientStream {
         try {
           if (!mainConn) {
             mainSocket = new Socket();
-            mainSocket.connect(inetSocketAddress, 5000);
+            mainSocket.connect(inetSocketAddress, timeoutDelay / 2);
             mainConn = true;
           }
           videoSocket = new Socket();
-          videoSocket.connect(inetSocketAddress, 3000);
+          videoSocket.connect(inetSocketAddress, timeoutDelay / 2);
           mainOutputStream = mainSocket.getOutputStream();
           mainDataInputStream = new DataInputStream(mainSocket.getInputStream());
           videoDataInputStream = new DataInputStream(videoSocket.getInputStream());
@@ -109,8 +112,8 @@ public class ClientStream {
           if (mainSocket != null) mainSocket.close();
           if (videoSocket != null) videoSocket.close();
           // 如果超时，直接跳出循环
-          if (System.currentTimeMillis() - startTime >= 4000) i = reTry;
-          else Thread.sleep(50);
+          if (System.currentTimeMillis() - startTime >= timeoutDelay / 2 - 1000) i = reTry;
+          else Thread.sleep(reTryTime);
         }
       }
     }
@@ -122,7 +125,7 @@ public class ClientStream {
         if (videoBufferStream == null) videoBufferStream = adb.tcpForward(device.serverPort);
         return;
       } catch (Exception ignored) {
-        Thread.sleep(50);
+        Thread.sleep(reTryTime);
       }
     }
     throw new Exception(AppData.applicationContext.getString(R.string.toast_connect_server));

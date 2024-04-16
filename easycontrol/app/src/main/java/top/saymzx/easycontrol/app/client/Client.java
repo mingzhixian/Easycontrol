@@ -15,6 +15,7 @@ import top.saymzx.easycontrol.app.client.tools.ControlPacket;
 import top.saymzx.easycontrol.app.databinding.ItemLoadingBinding;
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.entity.Device;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 import top.saymzx.easycontrol.app.helper.ViewTools;
 
 public class Client {
@@ -89,6 +90,9 @@ public class Client {
     isClosed = true;
     // 临时设备
     boolean isTempDevice = device.isTempDevice();
+    // 更新数据库
+    if (!isTempDevice) AppData.dbHelper.update(device);
+    allClient.remove(device.uuid);
     // 运行断开时操作
     if (!isTempDevice && device.lockOnClose) clientController.handleAction("buttonLock", null, 0);
     else if (!isTempDevice && device.lightOnClose) clientController.handleAction("buttonLight", null, 0);
@@ -96,11 +100,11 @@ public class Client {
     if (clientPlayer != null) clientPlayer.close();
     if (clientController != null) clientController.close();
     if (clientStream != null) clientStream.close();
-    // 更新数据库
-    if (!isTempDevice) AppData.dbHelper.update(device);
-    allClient.remove(device.uuid);
     // 如果设置了自动重连
-    if (byteBuffer != null && device.reconnectOnClose) startDevice(device);
+    if (byteBuffer != null) {
+      PublicTools.logToast("Client", new String(byteBuffer.array()), true);
+      if (device.reconnectOnClose) startDevice(device);
+    }
   }
 
 }

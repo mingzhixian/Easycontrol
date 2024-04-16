@@ -3,8 +3,6 @@
  */
 package top.saymzx.easycontrol.server.helper;
 
-import android.system.ErrnoException;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +14,7 @@ public final class ControlPacket {
 
   public static void sendVideoEvent(long pts, ByteBuffer data) throws IOException {
     int size = data.remaining() + 8;
+    if (size < 8) return;
     ByteBuffer byteBuffer = ByteBuffer.allocate(4 + size);
     byteBuffer.putInt(size);
     byteBuffer.putLong(pts);
@@ -26,6 +25,7 @@ public final class ControlPacket {
 
   public static void sendAudioEvent(ByteBuffer data) throws IOException {
     int size = data.remaining();
+    if (size < 0) return;
     ByteBuffer byteBuffer = ByteBuffer.allocate(5 + size);
     byteBuffer.put((byte) 1);
     byteBuffer.putInt(size);

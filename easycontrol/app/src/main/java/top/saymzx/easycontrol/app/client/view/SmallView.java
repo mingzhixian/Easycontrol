@@ -74,7 +74,7 @@ public class SmallView extends ViewOutlineProvider {
     smallView.barView.setVisibility(View.GONE);
     smallViewParams.x = device.smallX;
     smallViewParams.y = device.smallY;
-    updateMaxSize(device.smallLength, device.smallLength);
+    updateMaxSize();
     if (!Objects.equals(device.startApp, "")) {
       smallView.buttonHome.setVisibility(View.GONE);
       smallView.buttonSwitch.setVisibility(View.GONE);
@@ -214,26 +214,38 @@ public class SmallView extends ViewOutlineProvider {
       int sizeX = (int) (event.getRawX() - smallViewParams.x);
       int sizeY = (int) (event.getRawY() - smallViewParams.y);
       int length = Math.max(sizeX, sizeY);
-      updateMaxSize(length, length);
+      ViewGroup.LayoutParams textureViewLayoutParams = clientController.getTextureView().getLayoutParams();
+      if (textureViewLayoutParams.width < textureViewLayoutParams.height) device.smallLength = length;
+      else device.smallLengthLan = length;
+      updateMaxSize();
       return true;
     });
   }
 
   private void updateSite(int x, int y) {
-    device.smallX = x;
-    device.smallY = y;
+    ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+    byteBuffer.putInt(x);
+    byteBuffer.putInt(y);
+    byteBuffer.flip();
+    clientController.handleAction("updateSite", byteBuffer, 0);
+  }
+
+  public void updateView(int x, int y) {
     smallViewParams.x = x;
     smallViewParams.y = y;
     AppData.windowManager.updateViewLayout(smallView.getRoot(), smallViewParams);
   }
 
-  private void updateMaxSize(int w, int h) {
-    device.smallLength = w;
+  private void updateMaxSize() {
     ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-    byteBuffer.putInt(w);
-    byteBuffer.putInt(h);
+    byteBuffer.putInt(device.smallLength);
+    byteBuffer.putInt(device.smallLengthLan);
     byteBuffer.flip();
     clientController.handleAction("updateMaxSize", byteBuffer, 0);
+  }
+
+  public boolean isShow() {
+    return isShow;
   }
 
   // 设置键盘监听
@@ -262,7 +274,9 @@ public class SmallView extends ViewOutlineProvider {
     // 检测到大小超出
     if (width > screenMaxWidth + 200 || height > screenMaxHeight + 200) {
       int maxLength = Math.min(screenMaxWidth, screenMaxHeight);
-      updateMaxSize(maxLength, maxLength);
+      if (width < height) device.smallLength = maxLength;
+      else device.smallLengthLan = maxLength;
+      updateMaxSize();
       updateSite(0, statusBarHeight);
       return;
     }

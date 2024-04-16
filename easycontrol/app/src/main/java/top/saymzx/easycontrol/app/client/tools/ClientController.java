@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -122,6 +123,9 @@ public class ClientController implements TextureView.SurfaceTextureListener {
         case "checkClipBoard":
           checkClipBoard();
           break;
+        case "updateSite":
+          updateSite(byteBuffer);
+          break;
         default:
           if (byteBuffer == null) break;
         case "writeByteBuffer":
@@ -141,8 +145,8 @@ public class ClientController implements TextureView.SurfaceTextureListener {
           break;
       }
     } catch (Exception ignored) {
-      PublicTools.logToast("controller", AppData.applicationContext.getString(R.string.toast_stream_closed) + action, true);
-      Client.sendAction(device.uuid, "close", ByteBuffer.allocate(1), 0);
+      byte[] err = ("controller" + AppData.applicationContext.getString(R.string.toast_stream_closed) + action).getBytes(StandardCharsets.UTF_8);
+      Client.sendAction(device.uuid, "close", ByteBuffer.wrap(err), 0);
     }
   }
 
@@ -176,6 +180,7 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     } else {
       if (smallView == null) smallView = new SmallView(device.uuid);
       AppData.uiHandler.post(smallView::show);
+      updateSite(null);
     }
   }
 
@@ -246,12 +251,37 @@ public class ClientController implements TextureView.SurfaceTextureListener {
     int height = byteBuffer.getInt();
     if (width <= 100 || height <= 100) return;
     this.videoSize = new Pair<>(width, height);
+    updateSite(null);
     AppData.uiHandler.post(this::reCalculateTextureViewSize);
+  }
+
+  private void updateSite(ByteBuffer byteBuffer) {
+    if (smallView == null || videoSize == null || !smallView.isShow()) return;
+    int x;
+    int y;
+    boolean isAuto = byteBuffer == null;
+    if (videoSize.first < videoSize.second) {
+      x = isAuto ? device.smallX : byteBuffer.getInt();
+      y = isAuto ? device.smallY : byteBuffer.getInt();
+      device.smallX = x;
+      device.smallY = y;
+    } else {
+      x = isAuto ? device.smallXLan : byteBuffer.getInt();
+      y = isAuto ? device.smallYLan : byteBuffer.getInt();
+      device.smallXLan = x;
+      device.smallYLan = y;
+    }
+    AppData.uiHandler.post(() -> smallView.updateView(x, y));
   }
 
   // 重新计算TextureView大小
   private void reCalculateTextureViewSize() {
     if (maxSize == null || videoSize == null) return;
+    Pair<Integer, Integer> maxSize = this.maxSize;
+    if (smallView != null && smallView.isShow()) {
+      if (videoSize.first < videoSize.second) maxSize = new Pair<>(this.maxSize.first, this.maxSize.first);
+      else maxSize = new Pair<>(this.maxSize.second, this.maxSize.second);
+    }
     // 根据原画面大小videoSize计算在maxSize空间内的最大缩放大小
     int tmp1 = videoSize.second * maxSize.first / videoSize.first;
     // 横向最大不会超出

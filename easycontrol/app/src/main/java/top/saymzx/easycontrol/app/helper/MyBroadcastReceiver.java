@@ -9,9 +9,7 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
-import android.util.Log;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -84,8 +82,10 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   private void onConnectUsb(Context context, Intent intent) {
     UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
     if (usbDevice == null || AppData.usbManager == null) return;
-    @SuppressLint("MutableImplicitPendingIntent") PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
-    AppData.usbManager.requestPermission(usbDevice, permissionIntent);
+    if (!AppData.usbManager.hasPermission(usbDevice)) {
+      @SuppressLint("MutableImplicitPendingIntent") PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
+      AppData.usbManager.requestPermission(usbDevice, permissionIntent);
+    }
   }
 
   public synchronized void updateUSB() {
@@ -93,9 +93,11 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     AdbTools.usbDevicesList.clear();
     for (Map.Entry<String, UsbDevice> entry : AppData.usbManager.getDeviceList().entrySet()) {
       UsbDevice usbDevice = entry.getValue();
+      if (usbDevice == null) return;
       if (AppData.usbManager.hasPermission(usbDevice)) {
         // 有线设备使用序列号作为唯一标识符
         String uuid = usbDevice.getSerialNumber();
+        if (uuid == null) return;
         // 若没有该设备，则新建设备
         Device device = AppData.dbHelper.getByUUID(uuid);
         if (device == null) {
@@ -111,14 +113,13 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 
   public synchronized void resetUSB() {
     if (AppData.usbManager == null) return;
-    for (Map.Entry<String, UsbDevice> entry : AppData.usbManager.getDeviceList().entrySet()) {
-      UsbDevice usbDevice = entry.getValue();
-      if (AppData.usbManager.hasPermission(usbDevice)) {
-        try {
-          new UsbChannel(usbDevice).close();
-        } catch (IOException ignored) {
-        }
+    try {
+      for (Map.Entry<String, UsbDevice> entry : AppData.usbManager.getDeviceList().entrySet()) {
+        UsbDevice usbDevice = entry.getValue();
+        if (usbDevice == null) return;
+        if (AppData.usbManager.hasPermission(usbDevice)) new UsbChannel(usbDevice).close();
       }
+    } catch (Exception ignored) {
     }
   }
 
