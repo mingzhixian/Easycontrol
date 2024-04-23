@@ -206,6 +206,10 @@ public class ClientController implements TextureView.SurfaceTextureListener {
   }
 
   private synchronized void changeToApp() throws Exception {
+    if (noFloatPermission()) {
+      PublicTools.logToast("controller", AppData.applicationContext.getString(R.string.toast_float_per), true);
+      return;
+    }
     // 获取当前APP
     String output = clientStream.runShell("dumpsys window | grep mCurrentFocus=Window");
     // 创建匹配器

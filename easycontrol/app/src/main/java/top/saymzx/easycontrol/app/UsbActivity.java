@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import top.saymzx.easycontrol.app.entity.AppData;
 import top.saymzx.easycontrol.app.helper.MyBroadcastReceiver;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 public class UsbActivity extends Activity {
 

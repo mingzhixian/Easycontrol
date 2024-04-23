@@ -126,7 +126,7 @@ public class DeviceListAdapter extends BaseAdapter {
     ArrayList<Device> tmp1 = new ArrayList<>();
     ArrayList<Device> tmp2 = new ArrayList<>();
     for (Device device : rawDevices) {
-      if (device.isLinkDevice() && AdbTools.usbDevicesList.containsKey(device.uuid)) tmp1.add(device);
+      if (device.isLinkDevice() && AdbTools.usbDevicesList.containsKey(device.address)) tmp1.add(device);
       else if (device.isNetworkDevice()) tmp2.add(device);
     }
     AdbTools.devicesList.clear();

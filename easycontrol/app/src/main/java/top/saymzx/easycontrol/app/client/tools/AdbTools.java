@@ -21,7 +21,7 @@ public class AdbTools {
 
   // 连接ADB
   public static Adb connectADB(Device device) throws Exception {
-    String addressId = device.isLinkDevice() ? device.uuid : device.address + ":" + device.adbPort;
+    String addressId = device.isLinkDevice() ? device.address : device.address + ":" + device.adbPort;
     Adb adb = allAdbConnect.get(addressId);
     if (adb == null || adb.isClosed()) {
       if (device.isLinkDevice()) adb = new Adb(usbDevicesList.get(addressId), AppData.keyPair);

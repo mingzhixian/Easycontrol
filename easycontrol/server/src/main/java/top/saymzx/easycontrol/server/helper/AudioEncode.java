@@ -44,7 +44,7 @@ public final class AudioEncode {
     String codecMime = useOpus ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     encedec = MediaCodec.createEncoderByType(codecMime);
     MediaFormat encodecFormat = MediaFormat.createAudioFormat(codecMime, AudioCapture.SAMPLE_RATE, AudioCapture.CHANNELS);
-    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
+    encodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, 128000);
     encodecFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, AudioCapture.AUDIO_PACKET_SIZE);
     if (!useOpus) encodecFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);

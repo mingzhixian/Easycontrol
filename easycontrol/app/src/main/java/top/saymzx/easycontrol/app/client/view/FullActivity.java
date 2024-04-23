@@ -2,6 +2,7 @@ package top.saymzx.easycontrol.app.client.view;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -54,7 +55,6 @@ public class FullActivity extends Activity implements SensorEventListener {
       activityFullBinding.buttonHome.setVisibility(View.GONE);
       activityFullBinding.buttonSwitch.setVisibility(View.GONE);
       activityFullBinding.buttonApp.setVisibility(View.GONE);
-      activityFullBinding.textureViewLayout.setPadding(0, PublicTools.dp2px(20f), 0, 0);
     }
     // 按键监听
     setButtonListener();
@@ -148,6 +148,7 @@ public class FullActivity extends Activity implements SensorEventListener {
     activityFullBinding.navBar.setVisibility(isShow ? View.VISIBLE : View.GONE);
     activityFullBinding.buttonNavBar.setImageResource(isShow ? R.drawable.not_equal : R.drawable.equals);
     activityFullBinding.textureViewLayout.post(this::updateMaxSize);
+    activityFullBinding.buttonMore.setImageTintList(ColorStateList.valueOf(getResources().getColor(isShow ? R.color.onCardBackground : R.color.onBlackBacnground)));
   }
 
   private void changeBarView() {

@@ -79,7 +79,7 @@ public class SmallView extends ViewOutlineProvider {
       smallView.buttonHome.setVisibility(View.GONE);
       smallView.buttonSwitch.setVisibility(View.GONE);
       smallView.buttonApp.setVisibility(View.GONE);
-      smallView.textureViewLayout.setPadding(0, PublicTools.dp2px(15f), 0, 0);
+      smallView.textureViewLayout.setPadding(0, PublicTools.dp2px(25f), 0, 0);
     }
     // 自定义分辨率(2:1)
     if (!device.customResolutionOnConnect && device.changeResolutionOnRunning) clientController.handleAction("writeByteBuffer", ControlPacket.createChangeResolutionEvent(0.5f), 0);

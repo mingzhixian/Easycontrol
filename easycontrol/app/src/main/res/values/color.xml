@@ -16,6 +16,8 @@
 
   <!-- 客户端界面色彩 -->
   <color name="clientBar">#828282</color>
+  <color name="blackBacnground">#000000</color>
+  <color name="onBlackBacnground">#FFFFFF</color>
 
   <!-- 彩色 -->
   <color name="color1">#EBF7FF</color>

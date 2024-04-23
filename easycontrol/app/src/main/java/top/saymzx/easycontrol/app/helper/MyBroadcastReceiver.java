@@ -51,7 +51,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     String action = intent.getAction();
-    if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) onConnectUsb(context, intent);
+    if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) AppData.uiHandler.postDelayed(() -> onConnectUsb(context, intent), 1000);
     else if (ACTION_UPDATE_USB.equals(action) || ACTION_USB_PERMISSION.equals(action) || UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) updateUSB();
     else if (ACTION_SCREEN_OFF.equals(action)) handleScreenOff();
     else if (ACTION_UPDATE_DEVICE_LIST.equals(action)) deviceListAdapter.update();
@@ -79,11 +79,14 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
   }
 
   // 请求USB设备权限
+  @SuppressLint({"MutableImplicitPendingIntent", "UnspecifiedImmutableFlag"})
   private void onConnectUsb(Context context, Intent intent) {
     UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
     if (usbDevice == null || AppData.usbManager == null) return;
     if (!AppData.usbManager.hasPermission(usbDevice)) {
-      @SuppressLint("MutableImplicitPendingIntent") PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_MUTABLE);
+      Intent usbPermissionIntent = new Intent(ACTION_USB_PERMISSION);
+      usbPermissionIntent.setPackage(AppData.applicationContext.getPackageName());
+      PendingIntent permissionIntent = PendingIntent.getBroadcast(context, 1, usbPermissionIntent, Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0);
       AppData.usbManager.requestPermission(usbDevice, permissionIntent);
     }
   }

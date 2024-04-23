@@ -5,7 +5,7 @@
   <string name="app_name_dev">易控•远程控制Beta</string>
 
   <!-- 主页 -->
-  <string name="main_poem">慈恩塔下题名处，十七人中最少年</string>
+  <string name="main_poem">春色三分，二分尘土，一分流水</string>
   <string name="main_float_permission">请授予悬浮窗权限，否则软件无法使用</string>
   <string name="main_float_permission_button">前往设置</string>
   <string name="main_scan_device_local">本机</string>

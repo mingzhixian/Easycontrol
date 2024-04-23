@@ -3,7 +3,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@color/background"
+  android:background="@color/blackBacnground"
   android:keepScreenOn="true"
   tools:context=".client.view.FullActivity">
 
@@ -24,6 +24,7 @@
       android:layout_width="40dp"
       android:layout_height="match_parent"
       android:layout_gravity="end"
+      android:background="@color/background"
       android:gravity="center"
       android:orientation="vertical"
       android:paddingTop="60dp"
@@ -86,9 +87,10 @@
     android:layout_height="60dp"
     android:layout_gravity="top|start"
     android:focusable="false"
-    android:padding="4dp"
+    android:padding="2dp"
+    android:rotation="90"
     android:paddingTop="20dp"
-    android:src="@drawable/bars"
+    android:src="@drawable/more"
     android:tint="@color/onCardBackground" />
 
   <LinearLayout

@@ -87,7 +87,7 @@ public class AudioDecode {
     String codecMime = useOpus ? MediaFormat.MIMETYPE_AUDIO_OPUS : MediaFormat.MIMETYPE_AUDIO_AAC;
     decodec = MediaCodec.createDecoderByType(codecMime);
     // 音频参数
-    int bitRate = 96000;
+    int bitRate = 128000;
     MediaFormat decodecFormat = MediaFormat.createAudioFormat(codecMime, SAMPLE_RATE, CHANNELS);
     decodecFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
     decodecFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, AUDIO_PACKET_SIZE);
