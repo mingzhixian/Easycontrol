@@ -136,7 +136,7 @@ public class AudioDecode {
   // 创建音频放大器
   private void setLoudnessEnhancer() {
     loudnessEnhancer = new LoudnessEnhancer(audioTrack.getAudioSessionId());
-    loudnessEnhancer.setTargetGain(2800);
+    loudnessEnhancer.setTargetGain(3000);
     loudnessEnhancer.setEnabled(true);
   }
 }
